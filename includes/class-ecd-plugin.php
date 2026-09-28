@@ -3,7 +3,7 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.2.0';
+    private const VERSION = '12.3.0';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
         add_action('admin_menu', [$this, 'registerAdminMenu']);
@@ -41,6 +41,7 @@ class Email_Countdown_Timer_Plugin {
         if ($delete) unset($timers[$id]);
         else {
             $input = wp_unslash($_POST);
+            if (!array_key_exists('alt', $input) && isset($timers[$id]['alt'])) $input['alt'] = $timers[$id]['alt'];
             $input['hide_days'] = isset($_POST['hide_days']) ? 1 : 0;
             try { $timers[$id] = Email_Countdown_Timer_Config::normalize($input); }
             catch (InvalidArgumentException $e) { wp_die(esc_html($e->getMessage()), '', ['response'=>400]); return; }
@@ -58,10 +59,12 @@ class Email_Countdown_Timer_Plugin {
         $a = shortcode_atts(['id'=>''], is_array($atts) ? $atts : []);
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
         if ($id === '') return '';
+        $timers = $this->getTimers();
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'email-countdown-timer'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
-        return sprintf('<img id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
-            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr__('Countdown', 'email-countdown-timer'));
+        return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
+            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr($alt));
     }
     public function listenForImageRequest(): void {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
@@ -103,7 +106,9 @@ class Email_Countdown_Timer_Plugin {
         $now = $now ?? time();
         $bucket = intdiv($now, 15);
         $font = Email_Countdown_Timer_Config::fontPath($config['font']);
-        $signature = hash('sha256', serialize([$config, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
+        $imageConfig = $config;
+        unset($imageConfig['alt']);
+        $signature = hash('sha256', serialize([$imageConfig, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
         $key = $this->cacheKey($id, $fmt);
         $cache = get_transient($key);
         if (is_array($cache) && ($cache['signature'] ?? '') === $signature && ($cache['bucket'] ?? -1) === $bucket && is_string($cache['data'] ?? null)) {
@@ -134,7 +139,7 @@ class Email_Countdown_Timer_Plugin {
     private function outputHeaders(string $ext): void {
         $types = ['webp'=>'image/webp', 'gif'=>'image/gif', 'png'=>'image/png'];
         header('Content-Type: '.$types[$ext]);
-        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Cache-Control: no-cache, no-store, must-revalidate, no-transform');
         header('X-Content-Type-Options: nosniff');
         header('Vary: Accept', false);
     }

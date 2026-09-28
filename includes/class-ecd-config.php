@@ -48,7 +48,19 @@ final class Email_Countdown_Timer_Config {
             !preg_match('/\.(ttf|otf)$/i', $c['font']))) {
             self::invalid(__('Invalid font filename.', 'email-countdown-timer'));
         }
+        // Alternative text is HTML metadata, never a renderer parameter. Preserve
+        // absence in legacy records and distinguish it from an explicitly empty value.
+        if (array_key_exists('alt', $input)) {
+            if (!is_string($input['alt']) || strlen($input['alt']) > 1000) {
+                self::invalid(__('Use plain alternative text (maximum 1000 bytes).', 'email-countdown-timer'));
+            }
+            $c['alt'] = sanitize_text_field($input['alt']);
+        }
         return $c;
+    }
+    public static function alt(array $config, string $fallback): string {
+        return array_key_exists('alt', $config) && is_string($config['alt'])
+            ? sanitize_text_field($config['alt']) : $fallback;
     }
     public static function deadline(array $c): int {
         $text = self::text($c, 'deadline');
