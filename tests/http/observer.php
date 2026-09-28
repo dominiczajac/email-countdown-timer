@@ -15,3 +15,12 @@ add_filter('pre_http_request', static function ($pre, $args, $url) use ($ect_tes
     file_put_contents($ect_test_dir.'/outbound.jsonl', json_encode(['host'=>wp_parse_url($url,PHP_URL_HOST)])."\n",FILE_APPEND|LOCK_EX);
     return new WP_Error('ect_test_network_blocked','External HTTP is blocked in this disposable test.');
 }, 1, 3);
+
+// Explicit, test-only backend-failure injection. No runtime switch is shipped.
+if (is_file($ect_test_dir.'/unsupported-lock') && !defined('DB_ENGINE')) define('DB_ENGINE','sqlite');
+add_filter('query', static function ($sql) use ($ect_test_dir) {
+    if (is_file($ect_test_dir.'/lock-error') && str_contains($sql,'GET_LOCK(') && str_contains($sql,'AS acquired')) {
+        return 'SELECT email_countdown_timer_ci_nonexistent_function() AS acquired, CONNECTION_ID() AS connection_id';
+    }
+    return $sql;
+});

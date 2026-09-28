@@ -130,8 +130,12 @@ class Email_Countdown_Timer_Plugin {
         $blob = $this->cachedImage($key, $signature, $bucket);
         if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
         require_once __DIR__.'/class-email-countdown-timer-render-lock.php';
-        $lock = Email_Countdown_Timer_Render_Lock::acquire($key);
-        if ($lock === null) { $this->pixel(503, false); return; }
+        $attempt = Email_Countdown_Timer_Render_Lock::attempt($key, 1);
+        $lock = $attempt['lock'];
+        if ($lock === null) {
+            $this->staticFallback($config, $deadline, $fixedTime ?? time(), $fmt, $attempt['state']);
+            return;
+        }
         try {
             // Another process may have filled the slot while this request waited.
             $renderNow = $fixedTime ?? time();
@@ -139,9 +143,13 @@ class Email_Countdown_Timer_Plugin {
             $blob = $this->cachedImage($key, $signature, $bucket, true);
             if ($blob === null) {
                 $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $renderNow, $fmt);
-                if ($blob === '' || !$lock->owns()) {
+                if ($blob === '') {
                     // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Internal fixed error; the public controller returns only a fixed PNG with status 503.
                     throw new RuntimeException('Image generation or lock ownership failed.');
+                }
+                if (!$lock->owns()) {
+                    $this->staticFallback($config, $deadline, $fixedTime ?? time(), $fmt, 'error');
+                    return;
                 }
                 set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
             }
@@ -149,6 +157,14 @@ class Email_Countdown_Timer_Plugin {
         } finally {
             $lock->release();
         }
+    }
+    private function staticFallback(array $config, int $deadline, int $now, string $format, string $reason): void {
+        // One current frame, never a stale animation or an unprotected 60-frame job.
+        // Do not cache it in the animated slot or change the requested MIME type.
+        $blob = (new Email_Countdown_Timer_Renderer())->render_static($config, $deadline, $now, $format);
+        $reason = in_array($reason, ['busy','unsupported','error'], true) ? $reason : 'error';
+        header('X-Email-Countdown-Mode: static-'.$reason);
+        $this->outputImage($blob, $format);
     }
     private function cachedImage(string $key, string $signature, int $bucket, bool $fresh = false): ?string {
         if ($fresh && wp_using_ext_object_cache()) {

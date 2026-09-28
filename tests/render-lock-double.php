@@ -7,12 +7,21 @@ final class Email_Countdown_Timer_Lock_DB_Double {
     public string $options = 'test_options';
     public int $connection = 77;
     public bool $allow = true;
+    public string $failure = '';
+    public string $last_error = '';
+    public bool $suppressed = false;
+    public function suppress_errors($value = true) { $old = $this->suppressed; $this->suppressed = (bool)$value; return $old; }
     public ?int $owner = null;
     public array $names = [];
     public function prepare($sql, ...$args) { return json_encode([$sql, $args]); }
     public function get_row($prepared, $format) {
         [$sql, $args] = json_decode($prepared, true);
         $this->names[] = $args[0];
+        $this->last_error = '';
+        if ($this->failure === 'exception') throw new RuntimeException('Simulated database error');
+        if ($this->failure === 'query') { $this->last_error = 'Test database unavailable'; return null; }
+        if ($this->failure === 'null') return ['acquired'=>null,'connection_id'=>$this->connection];
+        if ($this->failure === 'malformed') return ['unexpected'=>true];
         if (!$this->allow) return ['acquired'=>'0', 'connection_id'=>$this->connection];
         $this->owner=$this->connection;
         return ['acquired'=>'1','connection_id'=>$this->connection];

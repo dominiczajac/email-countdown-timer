@@ -7,6 +7,13 @@ $key='ecd_v1211_'.hash('sha256','http-timer|gif');
 $name='ect:'.substr(hash('sha256',DB_NAME.'|'.$wpdb->options.'|'.$key),0,60);
 if ($task==='seed') {
     update_option('easy_countdown_timers',['http-timer'=>Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','fixed_width'=>600,'font'=>'fixture.ttf','alt'=>'Synthetic countdown'])],false);
+} elseif ($task==='expire') {
+    $timers=get_option('easy_countdown_timers');
+    $timers['http-timer']['deadline']='2000-01-01T00:00:00';$timers['http-timer']['tz']='UTC';
+    update_option('easy_countdown_timers',$timers,false);
+    foreach(['gif','png','webp'] as $fmt) delete_transient('ecd_v1211_'.hash('sha256','http-timer|'.$fmt));
+    $c=Email_Countdown_Timer_Config::normalize($timers['http-timer']);
+    echo hash('sha256',(new Email_Countdown_Timer_Renderer())->render_static($c,Email_Countdown_Timer_Config::deadline($c),time(),'gif'));
 } elseif ($task==='reset') {
     foreach(['gif','png','webp'] as $fmt) delete_transient('ecd_v1211_'.hash('sha256','http-timer|'.$fmt));
 } elseif ($task==='stale') {

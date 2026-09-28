@@ -27,7 +27,12 @@ def request(mode='email', method='GET', timer='http-timer', barrier=None, canary
     start=time.perf_counter(); conn=http.client.HTTPConnection('127.0.0.1',8082,timeout=12)
     try:
         conn.request(method,path,headers=headers); response=conn.getresponse(); body=response.read()
-        return {'ms':(time.perf_counter()-start)*1000,'status':response.status,'headers':dict((k.lower(),v) for k,v in response.getheaders()),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest(),'magic':body[:6].hex()}
+        result = {'ms':(time.perf_counter()-start)*1000,'status':response.status,'headers':dict((k.lower(),v) for k,v in response.getheaders()),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest(),'magic':body[:6].hex()}
+        if 'x-email-countdown-mode' in result['headers']:
+            # Decode after latency was recorded; the extra process is not part of HTTP timing.
+            decoded=subprocess.check_output(['php','-r','$a=new Imagick();$a->readImageBlob(stream_get_contents(STDIN));echo json_encode([$a->getNumberImages(),$a->getImageWidth(),$a->getImageHeight()]);'],input=body)
+            result['frames'],result['width'],result['height']=json.loads(decoded)
+        return result
     finally: conn.close()
 def burst(n=8):
     barrier=threading.Barrier(n)
@@ -64,6 +69,7 @@ try:
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         rows=list(executor.map(lambda _:request(),range(40)))
     check(all(x['status']==200 for x in rows),'Warm HTTP requests succeed')
+    check(not publications(),'Warm HTTP phase does not regenerate an image')
     results['warm_gif_c8']=summary(rows);results['warm_gif_c8']['publications']=len(publications())
     for phase in ['cold_burst','expired_bucket_burst']:
         align();fixture('reset')
@@ -77,15 +83,31 @@ try:
     holder=subprocess.Popen(WP+['hold'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
     try:
         check(holder.stdout.readline().strip()=='LOCK_HELD','Separate database session owns test lock')
-        row=request();check(row['status']==503 and row['headers'].get('retry-after')=='15','Contended render returns bounded 503 / Retry-After')
-        check(1700<=row['ms']<4500,'Lock wait is approximately two seconds, not unbounded')
-        check(not publications(),'Timed-out follower did not render/publish an image')
+        row=request()
+        check(row['status']==200 and row['headers'].get('x-email-countdown-mode')=='static-busy','Contended render returns a useful static image')
+        check(row.get('frames')==1 and row.get('width',0)>1 and row['headers'].get('content-type')=='image/gif','Fallback is one valid GIF frame, not an invisible error pixel')
+        check(850<=row['ms']<3500,'Lock wait is approximately one second, not unbounded')
+        check(not publications(),'Static follower did not publish to animation cache')
+        expected=fixture('expire');expired=request()
+        check(expired['status']==200 and expired.get('frames')==1 and expired['sha256']==expected,'Fallback after deadline matches current zero countdown, never stale pre-deadline image')
+        check(not publications(),'Expired static fallback does not poison animation cache')
         check(request(method='HEAD')['status']==200,'HEAD remains cheap while generator lock is held')
         check(request(timer='unknown')['status']==404,'Unknown timer remains 404 while lock is held')
         results['held_lock']=summary([row])
     finally:
         holder.terminate();holder.communicate(timeout=5)
+    fixture('seed')
     check(request()['status']==200,'Terminated lock owner releases lock on database disconnect')
+    for marker,reason in [('lock-error','error'),('unsupported-lock','unsupported')]:
+        fixture('reset');clear_publications();(OUT/marker).touch()
+        try:
+            row=request()
+            check(row['status']==200 and row['headers'].get('x-email-countdown-mode')=='static-'+reason and row.get('frames')==1,reason+': backend failure produces valid current static GIF')
+            check(not publications(),reason+': no animation cache publication without lock')
+            results['fallback_'+reason]=summary([row])
+        finally: (OUT/marker).unlink()
+    fixture('reset')
+    check(request()['status']==200,'Normal rendering resumes after backend recovery')
     fixture('reset');(OUT/'fail-publication').touch()
     try: check(request()['status']==503,'Injected cache-publication exception returns sanitized 503')
     finally: (OUT/'fail-publication').unlink()

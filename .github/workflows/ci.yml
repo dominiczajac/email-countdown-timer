@@ -50,6 +50,8 @@ jobs:
           node tests/countdown.test.cjs
       - name: Persistent fonts and layout preflight
         run: php tests/font-storage.php
+      - name: Lock outcome and current static fallback
+        run: php tests/lock-outcomes.php
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail
