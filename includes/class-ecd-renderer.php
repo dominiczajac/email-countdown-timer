@@ -49,6 +49,14 @@ final class Email_Countdown_Timer_Renderer {
             $animation->clear();
         }
     }
+    /** Bounded current-time fallback: one frame in the requested image format. */
+    public function render_static(array $c, int $deadline, int $now, string $format): string {
+        $this->boxes = [];
+        $image = $this->drawFrame(max(0, $deadline - $now), $c['bg'], $c['dc'], $c['lc'], $c['font'],
+            $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
+            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+        return $this->encode($image, $format);
+    }
     private function encode($image, string $format): string {
         ob_start();
         try {

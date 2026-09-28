@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Email Countdown Timer
  * Description: Countdown timers for WordPress pages and email campaigns.
- * Version: 12.4.0
+ * Version: 12.4.1
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Dominic Zajac
@@ -18,7 +18,7 @@ if (isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) && $_GET['ecd_a
     // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard cache-plugin interoperability flag, not a plugin-owned global.
     define('DONOTCACHEPAGE', true);
 }
-define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.4.0');
+define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.4.1');
 define('EMAIL_COUNTDOWN_TIMER_FILE', __FILE__);
 define('EMAIL_COUNTDOWN_TIMER_DIR', __DIR__.'/');
 require_once __DIR__.'/includes/class-email-countdown-timer-fonts.php';

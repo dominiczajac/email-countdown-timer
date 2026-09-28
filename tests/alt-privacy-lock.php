@@ -49,7 +49,7 @@ if (function_exists('imagecreatetruecolor')) {
     $options['easy_countdown_timers']['alt-case']['alt']='Metadata only';ob_start();$method->invoke($plugin,false,1790596800);$second=ob_get_clean();
     ok($first===$second && $writes===1,'alt is excluded from image-cache signature');
     $transients=[];$wpdb->allow=false;ob_start();$method->invoke($plugin,false,1790596800);$busy=ob_get_clean();
-    ok($statusCode===503 && $writes===1 && str_starts_with($busy,"\x89PNG"),'busy lock returns cheap 503 without rendering/writing');$wpdb->allow=true;
+    ok($writes===1 && str_starts_with($busy,'GIF'),'busy lock returns a static GIF without publishing to the animation cache');$wpdb->allow=true;
     $ect_ext_cache=true;ob_start();$method->invoke($plugin,false,1790596800);ob_end_clean();
     ok($ect_force_read===true,'shared cache read bypasses request-local miss');$ect_ext_cache=false;
 }

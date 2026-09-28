@@ -81,6 +81,32 @@ final class Email_Countdown_Timer_Data_Settings {
                 </fieldset>
                 <?php submit_button( __( 'Save Data Settings', 'email-countdown-timer' ) ); ?>
             </form>
+            <section class="ect-card" aria-labelledby="email-countdown-render-title">
+                <h2 id="email-countdown-render-title"><?php echo esc_html__( 'Rendering Diagnostics', 'email-countdown-timer' ); ?></h2>
+                <?php
+                require_once __DIR__ . '/class-email-countdown-timer-render-lock.php';
+                $email_countdown_timer_probe = Email_Countdown_Timer_Render_Lock::attempt( 'admin-capability-probe', 0 );
+                if ( $email_countdown_timer_probe['lock'] ) {
+                    $email_countdown_timer_probe['lock']->release();
+                }
+                ?>
+                <p><?php
+                    switch ( $email_countdown_timer_probe['state'] ) {
+                        case 'acquired':
+                            echo esc_html__( 'Database locking is available.', 'email-countdown-timer' );
+                            break;
+                        case 'busy':
+                            echo esc_html__( 'The diagnostic lock is currently busy. Refresh this screen to check again.', 'email-countdown-timer' );
+                            break;
+                        case 'unsupported':
+                            echo esc_html__( 'This database interface does not support the configured session-lock mechanism. Uncached images use static output.', 'email-countdown-timer' );
+                            break;
+                        default:
+                            echo esc_html__( 'The database lock check failed. Ask your host to check advisory-lock support and connectivity. Uncached images use static output.', 'email-countdown-timer' );
+                    }
+                ?></p>
+                <p><?php echo esc_html__( 'On a cache miss, image requests wait at most one second for a generation lock. If it is busy or unavailable, a current single-frame image is generated without replacing the animation cache. This avoids stale countdowns, but does not replace hosting rate limits. This probe is not a full database-proxy compatibility test.', 'email-countdown-timer' ); ?></p>
+            </section>
             <section class="ect-card" aria-labelledby="email-countdown-fonts-title">
                 <h2 id="email-countdown-fonts-title"><?php echo esc_html__( 'Local Fonts', 'email-countdown-timer' ); ?></h2>
                 <p><?php echo esc_html__( 'Use a persistent uploads directory for trusted static TTF/OTF files. No Google connection or browser upload is provided.', 'email-countdown-timer' ); ?></p>
