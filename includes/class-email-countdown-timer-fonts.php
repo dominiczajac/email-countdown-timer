@@ -141,7 +141,7 @@ final class Email_Countdown_Timer_Fonts {
                     ++$skipped;
                     continue;
                 }
-                $temporary = wp_tempnam( $name, $target );
+                $temporary = wp_tempnam( $name, $target . DIRECTORY_SEPARATOR );
                 if ( ! $temporary || dirname( realpath( $temporary ) ?: '' ) !== $target ) {
                     if ( $temporary ) {
                         wp_delete_file( $temporary );

@@ -5,7 +5,7 @@ ob_start();
 require __DIR__ . '/run.php';
 function wp_get_upload_dir() { return array( 'basedir' => $GLOBALS['font_test_root'] ?? '', 'error' => false ); }
 function wp_mkdir_p( $dir ) { return is_dir( $dir ) || mkdir( $dir, 0755, true ); }
-function wp_tempnam( $name, $dir ) { return tempnam( $dir, '.ect-test-' ); }
+function wp_tempnam( $name, $dir ) { if (!str_ends_with($dir, DIRECTORY_SEPARATOR)) throw new RuntimeException('WordPress temp directory requires trailing separator'); return tempnam( $dir, '.ect-test-' ); }
 function wp_delete_file( $path ) { return unlink( $path ); }
 function delete_option( $key ) { unset( $GLOBALS['options'][ $key ] ); return true; }
 function is_multisite() { return $GLOBALS['font_multisite'] ?? false; }
