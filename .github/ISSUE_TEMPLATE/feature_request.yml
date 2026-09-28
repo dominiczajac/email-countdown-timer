@@ -1,0 +1,23 @@
+name: Feature or UX proposal
+description: Describe a user problem and a proposed improvement.
+title: "[Proposal]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who needs this, what are they trying to do, and what gets in their way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest useful improvement, including empty and error states if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Alternatives and compatibility
+      description: Consider existing campaigns, accessibility, server load, dependencies, and simpler alternatives.
