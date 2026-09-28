@@ -1,5 +1,14 @@
 # Changelog
 
+## 12.3.0
+
+- Add optional plain-text alternative text to each timer, with safe shortcode/preview/Email HTML output, automatic fallbacks and preservation by older forms.
+- Keep alt out of image rendering/cache signatures; preserve image parameters, pixels and GIF timing.
+- Add image-only page-cache safeguards and targeted LazyLoad/referrer attributes without disabling ordinary page optimization.
+- Make the shared visibility refresh script idempotent and resilient to malformed image URLs; no polling or tracking is added.
+- Add alt/security/privacy regression contracts, real WordPress browser checks and English optimizer/font/privacy documentation.
+- Automatic Google Fonts import is still not implemented. Third-party paid optimizer matrices, hosting logs and full security/legal compliance are not certified.
+
 ## 12.2.0 — 2026-09-28
 
 Implemented the approved lightweight admin design: a searchable list with 25 timers per page, a separate Create/Edit screen, native local-font controls, responsive sections and scoped CSS/JavaScript. Rendering code and public data contracts are unchanged; changing the version invalidates older image-cache signatures once.
@@ -22,7 +31,7 @@ Updated numeric stable-tag metadata and `Tested up to: 7.1`, based on actual Wor
 
 ## 12.1.2 — 2026-09-28
 
-Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.
+Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.
 
 The renderer, time-zone default, option name, shortcode, image URLs, safety limits, and 60-frame timing are unchanged. Added regression tests for English UI text, validation errors, new-timer creation, saved-label preservation, and English GIF frames; the frozen legacy renderer and historical image fixtures remain intact. Updated the current documentation without rewriting the historical 12.1.1 audit.
 

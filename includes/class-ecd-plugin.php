@@ -8,6 +8,7 @@ class Email_Countdown_Timer_Plugin {
     public function __construct() {
         if ($this->isImageRequest()) {
             // Runs at plugin bootstrap. An earlier cache drop-in/CDN can still need a query-based bypass.
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Shared cache-plugin interoperability constant; renaming it would disable the opt-out.
             if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
             add_filter('flying_press_is_cacheable', '__return_false');
         }

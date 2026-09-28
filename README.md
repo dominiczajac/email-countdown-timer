@@ -2,7 +2,7 @@
 
 A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
 
-**Source version:** 12.2.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.3.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -53,6 +53,22 @@ In an HTML email, replace the domain and ID with the URL copied from your panel:
 
 Do not paste the shortcode or JavaScript into email. Attaching a downloaded GIF, or importing it into an editor's image library, may replace dynamic fetching with a fixed copy. See [Embedding](docs/wiki/Embedding.md).
 
+## Alternative text
+
+Open **Easy Countdown > Edit (or Create Timer) > Accessibility > Alternative Text (alt)**. Enter a concise purpose or deadline, not a snapshot of changing digits. This plain-text field (maximum 1024 bytes) is escaped in the website shortcode, saved preview and newly copied Email HTML. No HTML is accepted. It works without JavaScript and remains filled after validation errors.
+
+Blank/missing text preserves automatic descriptions; it does **not** request decorative `alt=""`. Existing timers need no migration. Older open forms that omit the new field do not erase it. Keep the absolute deadline visible as text.
+
+An image URL/GIF has no HTML `alt` attribute. When using just the URL in an email or image block, set its alt in that editor. Changing a timer cannot rewrite previously copied markup or sent email; purge cached **page HTML** to update a cached shortcode. Alt is excluded from the image signature, although saving a timer still invalidates its image cache as before.
+
+## Optimization compatibility and privacy
+
+Keep ordinary page caching enabled. The dynamic image query `ecd_action=render` must bypass stale page/CDN caches and preserve animation. In case of display problems, exclude `email-countdown-timer-image` from image LazyLoad, and `/email-countdown-timer/assets/countdown.js` from script delay only when needed. Do not blanket-exclude jQuery, all JavaScript or the home page. [FlyingPress/WP Rocket instructions and limitations](docs/OPTIMIZATION-COMPATIBILITY.md).
+
+The plugin has no visitor analytics, email-open tracking, telemetry, tracking cookies, persistent browser storage or runtime Google Fonts requests. It stores administrator-authored timer settings, an uninstall preference and temporary generated-image cache. Hosting, WordPress, other plugins, CDNs and email proxies still process requests and may log network identifiers. No claim of zero infrastructure processing or complete GDPR/security certification is made. [Privacy and exact storage/retention](docs/PRIVACY.md).
+
+For fonts, [manual local installation](docs/wiki/Fonts.md) is available now; **automatic Google Fonts import remains a proposal**, not a feature of 12.3.0.
+
 ## Behavior and limitations
 
 The English interface and validation messages are translation-ready. New timer labels remain stable data: `Days`, `Hours`, `Minutes`, `Seconds`. Changing the administrator's locale does not rewrite labels in campaigns. Existing labels, including custom and empty values, are preserved; edit the **Labels** fields to change them.
@@ -72,7 +88,7 @@ Unknown orphaned entries existing only in an external cache expire at their orig
 ## Verification
 
 ```sh
-php tests/run.php
+php tests/alt-run.php
 php tests/uninstall.php
 python3 tests/test-pcp-gate.py
 node --check assets/countdown.js
@@ -85,7 +101,7 @@ CI also runs **Plugin Check 2.1.0 with runtime checks** against the distribution
 
 The current CI also exercises the actual admin in a Chromium browser, with and without JavaScript, and records a synthetic renderer/cache benchmark. These measurements exclude complete HTTP/WordPress startup and concurrent requests.
 
-See [current verification and performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
+See [12.3.0 verification scope](docs/VERIFICATION-12.3.0.md), [UI verification and performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
 
 ## Documentation and contribution
 
