@@ -52,8 +52,9 @@ function ok($value, $message) { $GLOBALS['checks']++; if (!$value) throw new Run
 function rejects(callable $fn) { try { $fn(); } catch (InvalidArgumentException|RuntimeException $e) { return true; } return false; }
 require __DIR__.'/../email-countdown-timer.php';
 $plugin=new ECD_Plugin_Colons_Fix();
-$base=ECD_Config::normalize(['deadline'=>'2027-12-31T23:59:59']);
-ok($base['label_d']==='Dni' && $base['label_h']==='Godz' && $base['tz']==='Europe/Warsaw', 'legacy defaults');
+// Explicitly preserve the saved v12.1 labels in the legacy rendering fixture.
+$base=ECD_Config::normalize(['deadline'=>'2027-12-31T23:59:59', 'label_d'=>'Dni', 'label_h'=>'Godz', 'label_m'=>'Min', 'label_s'=>'Sek']);
+ok($base['label_d']==='Dni' && $base['label_h']==='Godz' && $base['tz']==='Europe/Warsaw', 'saved legacy labels and time zone preserved');
 ok(ECD_Config::deadline($base)===(new DateTimeImmutable($base['deadline'], new DateTimeZone('Europe/Warsaw')))->getTimestamp(), 'timezone preserved');
 foreach (['2027-02-30T12:00', '+1 hour', '', '2027-12-31T99:00'] as $date) ok(rejects(fn()=>ECD_Config::normalize(['deadline'=>$date])), 'invalid date');
 foreach (['font'=>'../outside.ttf', 'fixed_width'=>1000000, 'size_digit'=>[], 'lc'=>'red', 'label_s'=>str_repeat('x',257), 'tz'=>'not/a-zone'] as $key=>$value) {
@@ -157,5 +158,6 @@ if (function_exists('imagecreatetruecolor')) {
     $skip='; SKIP native image tests (GD not installed)';
     if (getenv('ECD_REQUIRE_GD')==='1') throw new RuntimeException('GD required in CI');
 }
+require __DIR__.'/english-ui.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;

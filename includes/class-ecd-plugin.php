@@ -3,7 +3,7 @@
 if (!defined('ABSPATH')) exit;
 class ECD_Plugin_Colons_Fix {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.1.1';
+    private const VERSION = '12.1.2';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
         add_action('admin_menu', [$this, 'registerAdminMenu']);
@@ -22,7 +22,7 @@ class ECD_Plugin_Colons_Fix {
         if (ECD_Config::text($_POST, 'ecd_action') !== 'save_timer' || !current_user_can('manage_options')) return;
         check_admin_referer('ecd_save_timer_nonce');
         $id = ECD_Config::id(wp_unslash(ECD_Config::text($_POST, 'timer_id')));
-        if ($id === '') { wp_die('Nieprawidłowe ID licznika.', '', ['response'=>400]); return; }
+        if ($id === '') { wp_die('Invalid timer ID.', '', ['response'=>400]); return; }
         $timers = $this->getTimers();
         $delete = ECD_Config::text($_POST, 'delete_timer') === '1';
         if ($delete) unset($timers[$id]);

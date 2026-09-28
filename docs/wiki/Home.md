@@ -1,6 +1,8 @@
 # Email Countdown Timer Documentation
 
-This documentation covers version **12.1.1**, based on the supplied Easy Countdown v12.1 renderer. The plugin creates countdown images using a deadline saved by a WordPress administrator. It is not an email delivery system or a mechanism for enforcing the end of a promotion.
+This documentation covers version **12.1.2**, based on the supplied Easy Countdown v12.1 renderer. The plugin creates countdown images using a deadline saved by a WordPress administrator. It is not an email delivery system or a mechanism for enforcing the end of a promotion.
+
+The admin interface and default labels for new timers are in English. Updating does not overwrite labels already saved for existing timers.
 
 | Task | Page |
 |---|---|

@@ -2,7 +2,7 @@
 
 A WordPress plugin that generates images counting down to a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server; the plugin does not send email and does not require an external SaaS service or API key.
 
-**Version:** 12.1.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Version:** 12.1.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -45,7 +45,7 @@ Do not paste the shortcode into an email or attach a downloaded GIF as a file wh
 
 ## Preserved features and important limitations
 
-Configuration includes the deadline and time zone, three colors, four labels, font, text sizes, width, and the option to hide days when fewer than 24 hours remain. The Polish admin interface and default values, shortcode, image URLs, and v12.1 renderer layout are preserved.
+Configuration includes the deadline and time zone, three colors, four labels, font, text sizes, width, and the option to hide days when fewer than 24 hours remain. The admin interface, help text, and validation messages are in English. New timers default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels (including custom or empty values), the time-zone default, shortcode, image URLs, and v12.1 renderer layout are preserved. To translate an existing timer, edit its four **Labels** fields and save it.
 
 A GIF contains **60 frames, one second each**. It is a finite image sequence, not a live connection to the server. The shortcode fetches a new image when the browser tab becomes visible again; it does not poll every minute. The built-in cache shares images within 15-second buckets, so the first frame may not match the exact time of the request.
 
@@ -66,7 +66,7 @@ php tests/run.php
 node --check assets/countdown.js
 ```
 
-CI checks syntax and runs tests on PHP 8.1–8.5 with GD/Imagick, plus a separate PHP 8.4 configuration without Imagick. Tests cover validation, saves with capability and nonce checks, caching, 60-frame GIFs, and pixel comparisons against the original renderer. These tests use WordPress API stubs; they are **not full WordPress integration tests**. Missing GD is explicitly reported as skipped image tests locally and as an error in CI.
+CI checks syntax and runs tests on PHP 8.1–8.5 with GD/Imagick, plus a separate PHP 8.4 configuration without Imagick. Tests cover English interface and validation text, new and existing timer labels, saves with capability and nonce checks, caching, 60-frame GIFs, and pixel comparisons against the original renderer. These tests use WordPress API stubs; they are **not full WordPress integration tests**. Missing GD is explicitly reported as skipped image tests locally and as an error in CI.
 
 The [audit report](docs/SECURITY-PERFORMANCE-AUDIT.md) records results, scope, and remaining risks. We do not claim a measured percentage speedup or full WPCS compliance. Contribution guidelines: [CONTRIBUTING.md](CONTRIBUTING.md); security reports: [SECURITY.md](SECURITY.md).
 

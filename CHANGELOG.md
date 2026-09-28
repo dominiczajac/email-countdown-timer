@@ -1,5 +1,11 @@
 # Changelog
 
+## 12.1.2 — 2026-09-28
+
+Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.
+
+The renderer, time-zone default, option name, shortcode, image URLs, safety limits, and 60-frame timing are unchanged. Added regression tests for English UI text, validation errors, new-timer creation, saved-label preservation, and English GIF frames; the frozen legacy renderer and historical image fixtures remain intact. Updated the current documentation without rewriting the historical 12.1.1 audit.
+
 ## 12.1.1 — 2026-09-28
 
 The first structured repository version based on the supplied Easy Countdown v12.1 code.

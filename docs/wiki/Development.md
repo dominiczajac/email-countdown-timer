@@ -2,11 +2,13 @@
 
 ## Structure
 
-`email-countdown-timer.php` loads the configuration, renderer, and controller. `includes/admin-view.php` contains the inherited Polish admin panel. `assets/countdown.js` refreshes images when the tab becomes visible again. `tests/legacy-frame.php` is an isolated, CLI-only geometry reference from v12.1, not a second active plugin.
+`email-countdown-timer.php` loads the configuration, renderer, and controller. `includes/admin-view.php` contains the English admin panel. `assets/countdown.js` refreshes images when the tab becomes visible again. `tests/legacy-frame.php` is an isolated, CLI-only geometry reference from v12.1, not a second active plugin.
 
 Do not change option names, shortcodes, URL parameters, or the way blocks are calculated and laid out without an explicit compatibility decision. Changing the test reference to hide a difference in the new renderer is not a regression fix.
 
 ## Tests
+
+`tests/english-ui.php`, loaded by `tests/run.php`, checks English interface and validation text, new-timer defaults, preservation of saved labels, and English GIF frames. The historical pixel comparisons continue to use explicitly supplied legacy labels.
 
 ```sh
 php tests/run.php
@@ -27,6 +29,8 @@ git archive --format=zip --prefix=email-countdown-timer/ \
 ```
 
 `.gitattributes` excludes tests, scripts, and CI configuration from `git archive`. Runtime files, documentation, `readme.txt`, and the license remain in the package. Do not include `.git/`, environment files, or private fonts in the distribution. An archive of a working branch is not automatically a stable release.
+
+A minimal WordPress installation ZIP can include only `email-countdown-timer.php`, `includes/`, `assets/countdown.js`, `readme.txt`, and `LICENSE`. The readme links to the complete online documentation.
 
 ## Native GitHub Wiki
 
