@@ -1,0 +1,3 @@
+# Ownership and review routing only; this file is not branch protection.
+# Do not require CODEOWNER approval while the owner is also the only PR author.
+* @dominiczajac
