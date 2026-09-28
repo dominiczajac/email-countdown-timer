@@ -1,5 +1,13 @@
 # Changelog
 
+## 12.3.0 — 2026-09-28
+
+Added per-timer alternative text with safe HTML escaping, explicit empty values, legacy fallbacks and editor/email/shortcode coverage. Alt never changes rendered pixels. Added narrow lazy-load interoperability markers, no-referrer hints, an idempotent tab refresher, no-transform image headers and best-effort dynamic-route page-cache bypass.
+
+Serialized cold image generation using a bounded MySQL/MariaDB session lock, followed by a shared-cache recheck and ownership verification. Contention/lock-service failure returns 503 with Retry-After rather than unbounded duplicate work. No persistent lock options or cron were added. Renderer geometry and 60-frame timing remain unchanged.
+
+Added full HTTP concurrency tests, privacy-sensitive API guardrails and English optimizer/privacy/manual-font guidance. Commercial optimizer combinations, all hosting topologies and GDPR/security certification are not claimed. Automatic Google Fonts importing is not implemented.
+
 ## 12.2.0 — 2026-09-28
 
 Implemented the approved lightweight admin design: a searchable list with 25 timers per page, a separate Create/Edit screen, native local-font controls, responsive sections and scoped CSS/JavaScript. Rendering code and public data contracts are unchanged; changing the version invalidates older image-cache signatures once.
