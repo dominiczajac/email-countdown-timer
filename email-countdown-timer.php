@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Email Countdown Timer
  * Description: Countdown timers for WordPress pages and email campaigns.
- * Version: 12.2.0
+ * Version: 12.3.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Dominic Zajac

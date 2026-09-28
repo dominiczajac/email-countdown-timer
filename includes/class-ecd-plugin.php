@@ -3,9 +3,14 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.2.0';
+    private const VERSION = '12.3.0';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
+        if ($this->isImageRequest()) {
+            // Runs at plugin bootstrap. An earlier cache drop-in/CDN can still need a query-based bypass.
+            if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+            add_filter('flying_press_is_cacheable', '__return_false');
+        }
         add_action('admin_menu', [$this, 'registerAdminMenu']);
         add_action('admin_init', [$this, 'handleFormSave']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
@@ -41,6 +46,10 @@ class Email_Countdown_Timer_Plugin {
         if ($delete) unset($timers[$id]);
         else {
             $input = wp_unslash($_POST);
+            // Preserve metadata when saving a form opened before the alt field was introduced.
+            if (!array_key_exists('alt', $input) && isset($timers[$id])) {
+                $input['alt'] = Email_Countdown_Timer_Config::text($timers[$id], 'alt');
+            }
             $input['hide_days'] = isset($_POST['hide_days']) ? 1 : 0;
             try { $timers[$id] = Email_Countdown_Timer_Config::normalize($input); }
             catch (InvalidArgumentException $e) { wp_die(esc_html($e->getMessage()), '', ['response'=>400]); return; }
@@ -60,12 +69,17 @@ class Email_Countdown_Timer_Plugin {
         if ($id === '') return '';
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
-        return sprintf('<img id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
-            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr__('Countdown', 'email-countdown-timer'));
+        $timers = $this->getTimers();
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'email-countdown-timer'));
+        return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
+            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr($alt));
+    }
+    private function isImageRequest(): bool {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check, no mutation or request value is output.
+        return Email_Countdown_Timer_Config::text($_GET, 'ecd_action') === 'render';
     }
     public function listenForImageRequest(): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
-        if (Email_Countdown_Timer_Config::text($_GET, 'ecd_action') !== 'render') return;
+        if (!$this->isImageRequest()) return;
         // Do not spin forever on a non-removable output buffer.
         while (ob_get_level() > 0) {
             $status = ob_get_status();
@@ -91,7 +105,10 @@ class Email_Countdown_Timer_Plugin {
         $id = Email_Countdown_Timer_Config::id(wp_unslash(Email_Countdown_Timer_Config::text($_GET, 'ecd')));
         $timers = $this->getTimers();
         if ($id === '' || !isset($timers[$id])) { $this->pixel(404, $head); return; }
-        try { $config = Email_Countdown_Timer_Config::normalize($timers[$id]); }
+        $imageConfig = $timers[$id];
+        // Alt is HTML metadata: it cannot affect image bytes or split the public image cache.
+        unset($imageConfig['alt']);
+        try { $config = Email_Countdown_Timer_Config::normalize($imageConfig); }
         catch (InvalidArgumentException $e) { $this->pixel(422, $head); return; }
         if (!function_exists('imagecreatetruecolor')) { $this->pixel(503, $head); return; }
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
@@ -102,6 +119,7 @@ class Email_Countdown_Timer_Plugin {
         $deadline = Email_Countdown_Timer_Config::deadline($config);
         $now = $now ?? time();
         $bucket = intdiv($now, 15);
+        unset($config['alt']);
         $font = Email_Countdown_Timer_Config::fontPath($config['font']);
         $signature = hash('sha256', serialize([$config, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
         $key = $this->cacheKey($id, $fmt);
