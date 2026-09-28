@@ -32,7 +32,7 @@ final class Email_Countdown_Timer_Admin {
         return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => 'Europe/Warsaw',
             'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => '',
             'size_digit' => 40, 'size_label' => 12, 'fixed_width' => 0, 'hide_days' => 0,
-            'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => '' );
+            'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown' );
     }
 
     private static function timers(): array {
@@ -73,12 +73,15 @@ final class Email_Countdown_Timer_Admin {
             }
             $data[ $key ] = self::posted( $key, 'deadline' === $key ? '' : (string) $default );
         }
-        // An old open form must not silently erase newly saved alternative text.
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Capability, POST and nonce checked above.
-        if ( ! array_key_exists( 'alt', $_POST ) && '' !== $original && $original === $id && isset( $timers[ $id ] ) && is_array( $timers[ $id ] ) ) {
-            $data['alt'] = Email_Countdown_Timer_Config::text( $timers[ $id ], 'alt' );
-        }
         $data['hide_days'] = '1' === self::posted( 'hide_days' ) ? 1 : 0;
+        // Preserve old forms and existing metadata when the field is absent.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+        if ( ! array_key_exists( 'alt', $_POST ) ) {
+            unset( $data['alt'] );
+            if ( isset( $timers[ $original ]['alt'] ) ) {
+                $data['alt'] = $timers[ $original ]['alt'];
+            }
+        }
 
         if ( 'email_countdown_timer_delete' === $action ) {
             if ( '' === $id || ! isset( $timers[ $id ] ) || '1' !== self::posted( 'confirm_delete' ) ) {
@@ -111,8 +114,8 @@ final class Email_Countdown_Timer_Admin {
                     $errors[ $key ] = __( 'Use at most 256 bytes for this label.', 'email-countdown-timer' );
                 }
             }
-            if ( strlen( $data['alt'] ) > 1024 ) {
-                $errors['alt'] = __( 'Use at most 1024 bytes for alternative text.', 'email-countdown-timer' );
+            if ( isset( $data['alt'] ) && strlen( $data['alt'] ) > 1000 ) {
+                $errors['alt'] = __( 'Use at most 1000 bytes for alternative text.', 'email-countdown-timer' );
             }
             try {
                 new DateTimeZone( '' === $data['tz'] ? 'Europe/Warsaw' : $data['tz'] );

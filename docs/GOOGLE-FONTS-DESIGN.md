@@ -1,5 +1,8 @@
 # Proposed Google Fonts Importer
 
+**Status: deferred by the maintainer on 2026-09-28; not implemented.** No importer, external font connection or API-key setting is included in 12.3.1.
+
+
 Status: design proposal, **not implemented in 12.2.0**. The approved admin refresh includes the existing installed-font selector only. This document distinguishes that selector from a remote font downloader.
 
 ## Current architecture

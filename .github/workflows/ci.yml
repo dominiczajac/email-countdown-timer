@@ -39,16 +39,21 @@ jobs:
         env:
           ECD_REQUIRE_GD: '1'
           ECD_REQUIRE_IMAGICK: ${{ matrix.backend == 'imagick' && '1' || '0' }}
-        run: php tests/alt-run.php
-      - name: Alt, cache compatibility and privacy contracts
+        run: php tests/run.php
+      - name: Reconciled alt, privacy and image-only cache contracts
         run: |
-          node tests/countdown.test.cjs
+          php tests/alt-run.php
           php tests/cache-bootstrap.php normal
           php tests/cache-bootstrap.php image
           php tests/cache-bootstrap.php array
           python3 tests/privacy-contracts.py
+          node tests/countdown.test.cjs
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
+      - name: Privacy-sensitive API guardrail
+        run: php tests/privacy-audit.php
+      - name: Optimizer timing simulation
+        run: node tests/frontend-compat.js
       - name: JavaScript syntax
         run: node --check assets/countdown.js && node --check assets/admin.js
   plugin-check:

@@ -2,7 +2,7 @@
 
 A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
 
-**Source version:** 12.3.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.3.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -13,6 +13,7 @@ A WordPress plugin that generates countdown images for a fixed deadline: animate
 | GD | Required with PNG/GIF support; WebP depends on the GD build |
 | Imagick | Required for animation; GIF responses are static without it |
 | FreeType | Required for custom TTF/OTF fonts |
+| Database | MySQL/MariaDB session advisory locking on one consistent primary; see [concurrency requirements](docs/RENDER-CONCURRENCY.md) |
 | Network | A publicly accessible WordPress HTTPS URL for email images |
 
 No Composer/npm dependencies are required at runtime. Font files are not bundled. Test your actual hosting and email clients before a campaign.
@@ -53,21 +54,15 @@ In an HTML email, replace the domain and ID with the URL copied from your panel:
 
 Do not paste the shortcode or JavaScript into email. Attaching a downloaded GIF, or importing it into an editor's image library, may replace dynamic fetching with a fixed copy. See [Embedding](docs/wiki/Embedding.md).
 
-## Alternative text
+## Alternative text, optimizers and privacy
 
-Open **Easy Countdown > Edit (or Create Timer) > Accessibility > Alternative Text (alt)**. Enter a concise purpose or deadline, not a snapshot of changing digits. This plain-text field (maximum 1024 bytes) is escaped in the website shortcode, saved preview and newly copied Email HTML. No HTML is accepted. It works without JavaScript and remains filled after validation errors.
+Set **Image alternative text (alt)** in the timer editor and save. The value is used in the website shortcode and newly copied Email HTML. An explicitly empty value stays `alt=""`; use that only when adjacent text already conveys the same information. Older records retain their contextual fallback until edited. Alt is HTML metadata, not part of the GIF or its URL. Copy email HTML again after changing it; already-sent emails cannot be rewritten. Purge affected HTML page caches to refresh shortcode markup.
 
-Blank/missing text preserves automatic descriptions; it does **not** request decorative `alt=""`. Existing timers need no migration. Older open forms that omit the new field do not erase it. Keep the absolute deadline visible as text.
+See [FlyingPress / WP Rocket exclusions](docs/wiki/Optimization-Compatibility.md) for precise, symptom-based asset and image-cache guidance. Compatibility with every commercial version/settings combination is not claimed. Keep ordinary page caching; bypass only dynamic image requests when necessary.
 
-An image URL/GIF has no HTML `alt` attribute. When using just the URL in an email or image block, set its alt in that editor. Changing a timer cannot rewrite previously copied markup or sent email; purge cached **page HTML** to update a cached shortcode. Alt is excluded from the image signature, although saving a timer still invalidates its image cache as before.
+[Privacy and local fonts](docs/wiki/Privacy-and-Local-Fonts.md) documents the absence of plugin visitor tracking/cookies/telemetry, actual stored campaign data, and the separate hosting/CDN/WordPress privacy boundary. Manual licensed TTF/OTF installation works now; automatic Google Fonts importing is still a proposal, not a shipped feature.
 
-## Optimization compatibility and privacy
-
-Keep ordinary page caching enabled. The dynamic image query `ecd_action=render` must bypass stale page/CDN caches and preserve animation. In case of display problems, exclude `email-countdown-timer-image` from image LazyLoad, and `/email-countdown-timer/assets/countdown.js` from script delay only when needed. Do not blanket-exclude jQuery, all JavaScript or the home page. [FlyingPress/WP Rocket instructions and limitations](docs/OPTIMIZATION-COMPATIBILITY.md).
-
-The plugin has no visitor analytics, email-open tracking, telemetry, tracking cookies, persistent browser storage or runtime Google Fonts requests. It stores administrator-authored timer settings, an uninstall preference and temporary generated-image cache. Hosting, WordPress, other plugins, CDNs and email proxies still process requests and may log network identifiers. No claim of zero infrastructure processing or complete GDPR/security certification is made. [Privacy and exact storage/retention](docs/PRIVACY.md).
-
-For fonts, [manual local installation](docs/wiki/Fonts.md) is available now; **automatic Google Fonts import remains a proposal**, not a feature of 12.3.0.
+[Render concurrency](docs/RENDER-CONCURRENCY.md) explains the two-second session lock, cache recheck and safe 503 behavior under contention. It does not replace capacity planning.
 
 ## Behavior and limitations
 
@@ -88,7 +83,7 @@ Unknown orphaned entries existing only in an external cache expire at their orig
 ## Verification
 
 ```sh
-php tests/alt-run.php
+php tests/run.php
 php tests/uninstall.php
 python3 tests/test-pcp-gate.py
 node --check assets/countdown.js
@@ -99,9 +94,9 @@ The isolated tests use WordPress API doubles and cover validation, permissions, 
 
 CI also runs **Plugin Check 2.1.0 with runtime checks** against the distribution files. `required-checks` requires unit tests, WordPress integration and Plugin Check to pass. The PCP gate reads reported findings, not just the command's exit status, and fails on errors or warnings. Narrow, documented code-local annotations remain for context-sensitive cases such as binary image output; there are no global check exclusions. [Preflight review](docs/PLUGIN-CHECK-REVIEW.md).
 
-The current CI also exercises the actual admin in a Chromium browser, with and without JavaScript, and records a synthetic renderer/cache benchmark. These measurements exclude complete HTTP/WordPress startup and concurrent requests.
+CI also exercises the actual admin in Chromium, with and without JavaScript. The renderer microbenchmark excludes WordPress startup; the new loopback HTTP suite includes it and drives concurrent clients against database and Redis caches. Neither is a production-host capacity test.
 
-See [12.3.0 verification scope](docs/VERIFICATION-12.3.0.md), [UI verification and performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
+See [12.3.0 verification and HTTP results](docs/VERIFICATION-12.3.0.md), [previous UI/performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
 
 ## Documentation and contribution
 
@@ -114,3 +109,7 @@ Use focused pull requests and check the latest CI. [Contributing](CONTRIBUTING.m
 ## License
 
 GNU GPL v3.0 (`GPL-3.0-only`); see [LICENSE](LICENSE). Check the separate license of any custom fonts. Source publication does not imply a tagged release or acceptance into the WordPress.org directory.
+
+## Integration of the 12.3.x branches
+
+Version 12.3.1 reconciles PR #6 with the serialized rendering and HTTP tests from PR #5. Missing legacy alt values retain automatic descriptions; an explicitly saved empty value remains `alt=""` and requires equivalent nearby text. The limit is 1000 bytes. Google Fonts automatic import is deferred. See [integration decisions](docs/PR-INTEGRATION-12.3.1.md), [optimizer exclusions](docs/OPTIMIZATION-COMPATIBILITY.md) and [privacy](docs/PRIVACY.md).

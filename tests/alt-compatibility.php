@@ -7,11 +7,11 @@ $reset_admin();
 $alt_config = Email_Countdown_Timer_Config::normalize( array( 'deadline' => '2030-12-31T23:59:59', 'alt' => 'Sale "summer" & deadline' ) );
 ok( $alt_config['alt'] === 'Sale "summer" & deadline', 'alt preserves plain quotes and ampersands' );
 ok( Email_Countdown_Timer_Config::normalize( array_replace( $alt_config, array( 'alt' => '<b>Sale</b>' ) ) )['alt'] === 'Sale', 'alt strips HTML on save' );
-foreach ( array( array( 'attack' ), str_repeat( 'x', 1025 ) ) as $bad_alt ) {
+foreach ( array( array( 'attack' ), str_repeat( 'x', 1001 ) ) as $bad_alt ) {
     ok( rejects( fn() => Email_Countdown_Timer_Config::normalize( array_replace( $alt_config, array( 'alt' => $bad_alt ) ) ) ), 'malformed or oversized alt rejected' );
 }
 ok( Email_Countdown_Timer_Config::alt( array(), 'Default' ) === 'Default', 'missing alt uses fallback' );
-ok( Email_Countdown_Timer_Config::alt( array( 'alt' => '' ), 'Default' ) === 'Default', 'blank alt requests automatic text' );
+ok( Email_Countdown_Timer_Config::alt( array( 'alt' => '' ), 'Default' ) === '', 'explicit empty alt remains empty (PR #5 semantics)' );
 ok( Email_Countdown_Timer_Config::alt( array( 'alt' => array( 'x' ) ), 'Default' ) === 'Default', 'corrupt stored alt cannot break shortcode' );
 $options['easy_countdown_timers'] = array( 'alt-test' => $alt_config );
 $post_alt = array_merge( array_map( 'strval', $alt_config ), array( 'ecd_action' => 'email_countdown_timer_save', 'original_id' => 'alt-test', 'timer_id' => 'alt-test' ) );
@@ -39,7 +39,7 @@ $options['easy_countdown_timers']['alt-test'] = $alt_config;
 $before_alt = $options;
 $submit_admin( array_replace( $post_alt, array( 'alt' => array( 'x' ) ) ) );
 ok( isset( Email_Countdown_Timer_Admin::state()['errors']['alt'] ) && $options === $before_alt, 'array alt cannot cause a write' );
-$submit_admin( array_replace( $post_alt, array( 'alt' => str_repeat( 'x', 1025 ) ) ) );
+$submit_admin( array_replace( $post_alt, array( 'alt' => str_repeat( 'x', 1001 ) ) ) );
 ok( isset( Email_Countdown_Timer_Admin::state()['errors']['alt'] ) && $options === $before_alt, 'oversized alt has field error and no write' );
 $submit_admin( array_replace( $post_alt, array( 'tz' => 'invalid/time-zone', 'alt' => 'Retain alternative text' ) ) );
 ok( Email_Countdown_Timer_Admin::state()['data']['alt'] === 'Retain alternative text', 'alt survives unrelated validation failure' );
@@ -51,7 +51,7 @@ $_POST = $old_form;
 try { $plugin->handleFormSave(); } catch ( ECD_Test_Stop $e ) {}
 ok( $options['easy_countdown_timers']['alt-test']['alt'] === $alt_config['alt'], 'legacy save also preserves omitted alt' );
 $submit_admin( array_replace( $post_alt, array( 'alt' => '' ) ) );
-ok( str_contains( $plugin->renderShortcode( array( 'id' => 'alt-test' ) ), 'alt="Countdown"' ), 'clearing field restores website fallback' );
+ok( str_contains( $plugin->renderShortcode( array( 'id' => 'alt-test' ) ), 'alt=""' ), 'clearing field preserves intentional empty alternative text' );
 // Alt never changes image pixels or partitions the public transient cache.
 if ( function_exists( 'imagecreatetruecolor' ) ) {
     $options['easy_countdown_timers']['alt-test'] = $alt_config;
@@ -63,6 +63,9 @@ if ( function_exists( 'imagecreatetruecolor' ) ) {
     $options['easy_countdown_timers']['alt-test']['alt'] = 'A different description';
     ob_start(); $image_method->invoke( $plugin, false, $fixed_now ); $bytes_after = ob_get_clean();
     ok( $bytes_before === $bytes_after && $writes === 1, 'alt change leaves cached image signature and pixels identical' );
+    $options['easy_countdown_timers']['alt-test']['alt'] = array( 'corrupt HTML metadata' );
+    ob_start(); $image_method->invoke( $plugin, false, $fixed_now ); $metadata_only = ob_get_clean();
+    ok( $metadata_only === $bytes_before && $writes === 1, 'corrupt HTML-only metadata does not affect binary validation/cache' );
     $_SERVER['REMOTE_ADDR'] = '192.0.2.99'; $_SERVER['HTTP_USER_AGENT'] = 'SYNTHETIC-PRIVATE-MARKER';
     $_COOKIE = array( 'visitor' => 'SYNTHETIC-PRIVATE-MARKER' ); $_GET['recipient'] = 'SYNTHETIC-PRIVATE-MARKER';
     ob_start(); $image_method->invoke( $plugin, false, $fixed_now ); $anonymous = ob_get_clean();

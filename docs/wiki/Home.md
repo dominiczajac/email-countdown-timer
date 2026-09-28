@@ -1,15 +1,12 @@
 # Email Countdown Timer Documentation
 
-This documentation covers source version **12.3.0**, retaining the Easy Countdown v12.1 image geometry. The plugin creates countdown images from deadlines saved by WordPress administrators. It is not an email delivery system or a mechanism for enforcing promotion deadlines.
+This documentation covers source version **12.2.0**, retaining the Easy Countdown v12.1 image geometry. The plugin creates countdown images from deadlines saved by WordPress administrators. It is not an email delivery system or a mechanism for enforcing promotion deadlines.
 
 The English interface is translation-ready. New timer labels use English defaults; changing the admin locale or updating the plugin does not overwrite existing campaign labels.
 
 | Task | Page |
 |---|---|
 | Installation and keeping existing timers | [Installation](Installation.md) |
-| Manual font installation and planned Google import | [Fonts](Fonts.md) |
-| Optimization exclusions | [Optimization and Caching](Optimization-and-Caching.md) |
-| Plugin data versus hosting logs | [Privacy](Privacy.md) |
 | Fields, fonts, dates and limits | [Configuration](Configuration.md) |
 | Shortcodes, email HTML and image URLs | [Embedding](Embedding.md) |
 | Retention and optional uninstall cleanup | [Data removal](Data-Removal.md) |

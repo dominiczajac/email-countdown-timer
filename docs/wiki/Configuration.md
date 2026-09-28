@@ -36,3 +36,9 @@ After the deadline, the remaining time is clamped to zero. Whether the days bloc
 Font files are not bundled with the plugin. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a GD bitmap font with limited Unicode support. The font list excludes symlinks pointing outside the fonts directory. There is no public font upload endpoint.
 
 Source for size units and FreeType requirements: [PHP — imagettftext](https://www.php.net/manual/en/function.imagettftext.php).
+
+## Alternative text (12.3.0)
+
+Use **Image alternative text (alt)** for a short description such as “Registration closes Friday at 18:00”. Save explicitly. It changes shortcode HTML and new Email HTML, not pixels or URL parameters. Empty alt is valid only with equivalent adjacent content. Legacy records use their former fallback until edited; no bulk rewrite occurs. Purge affected page HTML caches and recopy email code after an edit. Already-sent email markup cannot be updated remotely.
+
+[Optimizer exclusions](Optimization-Compatibility.md) · [Privacy and manual local fonts](Privacy-and-Local-Fonts.md).

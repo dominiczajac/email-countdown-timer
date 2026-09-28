@@ -15,7 +15,7 @@ final class Email_Countdown_Timer_Config {
     public static function normalize(array $input): array {
         $defaults = ['deadline'=>'', 'tz'=>'Europe/Warsaw', 'bg'=>'#FFFFFF', 'dc'=>'#000000', 'lc'=>'#666666',
             'font'=>'', 'size_digit'=>40, 'size_label'=>12, 'hide_days'=>0, 'label_d'=>'Days', 'label_h'=>'Hours',
-            'label_m'=>'Minutes', 'label_s'=>'Seconds', 'fixed_width'=>0, 'alt'=>''];
+            'label_m'=>'Minutes', 'label_s'=>'Seconds', 'fixed_width'=>0];
         $c = [];
         foreach ($defaults as $key=>$default) {
             $value = $input[$key] ?? $default;
@@ -41,7 +41,6 @@ final class Email_Countdown_Timer_Config {
         foreach (['label_d','label_h','label_m','label_s'] as $key) {
             if (strlen($c[$key]) > 256) self::invalid(__('Label is too long (maximum 256 bytes).', 'email-countdown-timer'));
         }
-        if (strlen($c['alt']) > 1024) self::invalid(__('Alternative text is too long (maximum 1024 bytes).', 'email-countdown-timer'));
         if ($c['tz'] === '') $c['tz'] = 'Europe/Warsaw';
         self::deadline($c);
         // Reject traversal, including a symlink escaping the font directory. Missing fonts retain the legacy fallback.
@@ -49,14 +48,19 @@ final class Email_Countdown_Timer_Config {
             !preg_match('/\.(ttf|otf)$/i', $c['font']))) {
             self::invalid(__('Invalid font filename.', 'email-countdown-timer'));
         }
+        // Alternative text is HTML metadata, never a renderer parameter. Preserve
+        // absence in legacy records and distinguish it from an explicitly empty value.
+        if (array_key_exists('alt', $input)) {
+            if (!is_string($input['alt']) || strlen($input['alt']) > 1000) {
+                self::invalid(__('Use plain alternative text (maximum 1000 bytes).', 'email-countdown-timer'));
+            }
+            $c['alt'] = sanitize_text_field($input['alt']);
+        }
         return $c;
     }
-    /** Plain text only; escape for the actual HTML context at the call site. */
-    public static function alt(array $c, string $fallback): string {
-        $value = $c['alt'] ?? '';
-        if (!is_string($value) || strlen($value) > 1024) return $fallback;
-        $value = sanitize_text_field($value);
-        return $value !== '' ? $value : $fallback;
+    public static function alt(array $config, string $fallback): string {
+        return array_key_exists('alt', $config) && is_string($config['alt']) && strlen($config['alt']) <= 1000
+            ? sanitize_text_field($config['alt']) : $fallback;
     }
     public static function deadline(array $c): int {
         $text = self::text($c, 'deadline');

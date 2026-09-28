@@ -12,7 +12,7 @@ const document = {
     addEventListener: (name, fn) => { assert.equal(name, 'visibilitychange'); listeners.push(fn); },
     querySelectorAll: selector => { assert.equal(selector, 'img[data-ecd-src]'); return images; }
 };
-const context = vm.createContext({ document, URL, Date });
+const context = vm.createContext({ window: {}, document, URL, Date });
 vm.runInContext(source, context);
 assert.equal(images[4].src, 'unchanged', 'loading/deferred execution performs no extra request');
 vm.runInContext(source, context);

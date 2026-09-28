@@ -1,13 +1,20 @@
 # Changelog
 
-## 12.3.0
+## 12.3.1 — 2026-09-28
 
-- Add optional plain-text alternative text to each timer, with safe shortcode/preview/Email HTML output, automatic fallbacks and preservation by older forms.
-- Keep alt out of image rendering/cache signatures; preserve image parameters, pixels and GIF timing.
-- Add image-only page-cache safeguards and targeted LazyLoad/referrer attributes without disabling ordinary page optimization.
-- Make the shared visibility refresh script idempotent and resilient to malformed image URLs; no polling or tracking is added.
-- Add alt/security/privacy regression contracts, real WordPress browser checks and English optimizer/font/privacy documentation.
-- Automatic Google Fonts import is still not implemented. Third-party paid optimizer matrices, hosting logs and full security/legal compliance are not certified.
+- Reconcile overlapping PRs #5 and #6 without removing session-owned render locks or HTTP tests.
+- Keep PR #5's absent-versus-explicit-empty alternative text behavior and 1000-byte limit; do not duplicate fields or migrate saved data.
+- Add the image-only FlyingPress cache filter, stricter source validation in the tab refresher, and independent binary validation of HTML-only alternative text.
+- Retain both branches' non-conflicting tests; update duplicate alt assertions to the documented PR #5 semantics.
+- Consolidate English optimizer/privacy/font instructions through stable documentation links. Google Fonts automatic import is deferred, not implemented.
+
+## 12.3.0 — 2026-09-28
+
+Added per-timer alternative text with safe HTML escaping, explicit empty values, legacy fallbacks and editor/email/shortcode coverage. Alt never changes rendered pixels. Added narrow lazy-load interoperability markers, no-referrer hints, an idempotent tab refresher, no-transform image headers and best-effort dynamic-route page-cache bypass.
+
+Serialized cold image generation using a bounded MySQL/MariaDB session lock, followed by a shared-cache recheck and ownership verification. Contention/lock-service failure returns 503 with Retry-After rather than unbounded duplicate work. No persistent lock options or cron were added. Renderer geometry and 60-frame timing remain unchanged.
+
+Added full HTTP concurrency tests, privacy-sensitive API guardrails and English optimizer/privacy/manual-font guidance. Commercial optimizer combinations, all hosting topologies and GDPR/security certification are not claimed. Automatic Google Fonts importing is not implemented.
 
 ## 12.2.0 — 2026-09-28
 
@@ -31,7 +38,7 @@ Updated numeric stable-tag metadata and `Tested up to: 7.1`, based on actual Wor
 
 ## 12.1.2 — 2026-09-28
 
-Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.
+Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.
 
 The renderer, time-zone default, option name, shortcode, image URLs, safety limits, and 60-frame timing are unchanged. Added regression tests for English UI text, validation errors, new-timer creation, saved-label preservation, and English GIF frames; the frozen legacy renderer and historical image fixtures remain intact. Updated the current documentation without rewriting the historical 12.1.1 audit.
 

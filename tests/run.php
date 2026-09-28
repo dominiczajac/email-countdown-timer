@@ -55,6 +55,7 @@ function wp_safe_redirect($url) { throw new ECD_Test_Stop('redirect:'.$url); }
 function status_header($code) { $GLOBALS['statusCode']=$code; }
 function ok($value, $message) { $GLOBALS['checks']++; if (!$value) throw new RuntimeException('FAIL: '.$message); }
 function rejects(callable $fn) { try { $fn(); } catch (InvalidArgumentException|RuntimeException $e) { return true; } return false; }
+require __DIR__.'/render-lock-double.php';
 require __DIR__.'/../email-countdown-timer.php';
 // CLI-only adapters keep the historical regression tests and frozen oracle unchanged.
 class_alias('Email_Countdown_Timer_Config', 'ECD_Config');
@@ -171,5 +172,6 @@ if (function_exists('imagecreatetruecolor')) {
 require __DIR__.'/english-ui.php';
 require __DIR__.'/internationalization.php';
 require __DIR__.'/admin-ui.php';
+require __DIR__.'/alt-privacy-lock.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;

@@ -10,7 +10,7 @@ The shortcode creates a responsive `img` element and loads one shared script. Wh
 
 ## Email HTML
 
-In **Edit Timer > Embed Codes**, choose **Email HTML** to copy markup with the saved alternative text and visible deadline. Choose **Image URL** when your email editor requires only the image's `src`. Example using a placeholder domain:
+Copy **Link do mailingu (GIF)** (the email GIF link) from the admin panel and use it as the image's `src`. Example using a placeholder domain:
 
 ```html
 <p>The promotion ends on December 31, 2027, at 23:59:59 in the Europe/Warsaw time zone.</p>
@@ -20,14 +20,6 @@ In **Edit Timer > Embed Codes**, choose **Email HTML** to copy markup with the s
 ```
 
 Your email editor must preserve the external URL. Importing the image into the editor's media library, attaching a file, or embedding it as an attachment may replace dynamic fetching with a previously generated copy. Do not paste a shortcode or JavaScript into an email.
-
-## Alternative text (12.3.0)
-
-Set **Accessibility > Alternative Text (alt)** in the timer editor. The plain-text field is used by the shortcode, saved preview and newly copied Email HTML. Blank/missing input keeps automatic descriptions, not decorative empty alt. It does not affect pixels or the image URL. Use a concise purpose or absolute deadline; do not enter customer details or other private data.
-
-After saving, clear cached page HTML containing the shortcode. Previously pasted HTML, image blocks and sent emails cannot be updated by changing the image itself: edit their `alt` separately or re-copy the markup. Keep the absolute deadline visible as text even when a custom alt is supplied.
-
-For specific optimizer exclusions, see [Optimization and Caching](Optimization-and-Caching.md). For request-processing boundaries, see [Privacy](Privacy.md).
 
 ## Image URL contract
 

@@ -48,6 +48,20 @@ jobs:
           ECD_TOPOLOGY: ${{ matrix.topology }}
           ECD_CACHE: ${{ matrix.cache }}
         run: bash scripts/test-wordpress.sh
+      - name: Concurrent full HTTP and privacy regression tests
+        if: matrix.wordpress == 'latest' && matrix.topology == 'single'
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_CACHE: ${{ matrix.cache }}
+        run: bash scripts/test-http.sh
+      - name: Preserve HTTP evidence
+        if: always() && matrix.wordpress == 'latest' && matrix.topology == 'single'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: http-evidence-${{ matrix.cache }}
+          path: ${{ runner.temp }}/http-evidence/
+          retention-days: 14
+          if-no-files-found: error
       - name: Install isolated browser-test tooling
         if: matrix.wordpress == 'latest' && matrix.topology == 'single' && matrix.cache == 'database'
         run: |
