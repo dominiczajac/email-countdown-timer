@@ -46,6 +46,9 @@ function add_submenu_page( ...$args ) {}
 function current_user_can( $cap ) { return $GLOBALS['admin'] && 'manage_options' === $cap; }
 function check_admin_referer( $action ) { if ( ! $GLOBALS['nonce'] ) { throw new Test_Stop( 'nonce' ); } }
 function __( $text, $domain ) { return $text; }
+// Minimal WordPress API doubles for the read-only admin status notice.
+function sanitize_text_field( $text ) { return trim( strip_tags( $text ) ); }
+function wp_unslash( $text ) { return stripslashes( $text ); }
 function esc_html__( $text, $domain ) { return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
 function esc_url( $text ) { return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
 function admin_url( $path ) { return 'https://example.test/wp-admin/' . $path; }
@@ -82,6 +85,7 @@ class Database_Double {
     }
 }
 $wpdb = new Database_Double();
+require __DIR__ . '/../includes/class-ecd-config.php';
 require __DIR__ . '/../includes/class-email-countdown-timer-data-settings.php';
 require __DIR__ . '/../includes/class-email-countdown-timer-uninstaller.php';
 $policy = Email_Countdown_Timer_Data_Settings::OPTION;
@@ -123,6 +127,15 @@ expect( str_starts_with( save_result(), 'redirect:' ) && ! Email_Countdown_Timer
 $_GET = array(); ob_start(); Email_Countdown_Timer_Data_Settings::render(); $html = ob_get_clean();
 expect( str_contains( $html, 'Delete all plugin data when uninstalling' ) && ! str_contains( $html, 'checked="checked"' ), 'English opt-in starts unchecked' );
 expect( str_contains( $html, 'aria-describedby=' ) && str_contains( $html, '_wpnonce' ), 'accessible field and nonce' );
+// Status is read-only and exact-allowlisted, not evidence of HTTP enforcement.
+$status_before = $db;
+foreach ( array( 'written', 'incomplete', 'unknown', '<script>alert(1)</script>', array( 'written' ) ) as $status ) {
+    $_GET = array( 'font_rules' => $status );
+    ob_start(); Email_Countdown_Timer_Data_Settings::render(); $notice_html = ob_get_clean();
+    expect( str_contains( $notice_html, 'HTTP protection is not verified.' ) === in_array( $status, array( 'written', 'incomplete' ), true ), 'only allowed rule-status labels display the fixed notice' );
+    expect( $db === $status_before && ! str_contains( $notice_html, '<script>alert(1)</script>' ), 'read-only notice neither mutates options nor outputs raw query content' );
+}
+$_GET = array();
 // Both WordPress DB-backed and external-cache paths must remove owned DB rows.
 foreach ( array( false, true ) as $cache_backend ) {
     $site = 1; $db = array(); $objects = array(); $external = $cache_backend;
