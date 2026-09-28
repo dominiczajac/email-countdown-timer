@@ -1,0 +1,50 @@
+name: WordPress lifecycle integration
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        wordpress: ['6.4', 'latest']
+        topology: [single, multisite]
+        cache: [database, redis]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ecd-ci-only
+          MYSQL_DATABASE: ecd_ci
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pecd-ci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.wordpress == '6.4' && '8.1' || '8.4' }}
+          extensions: mysqli, gd, imagick, redis
+          coverage: none
+          tools: wp-cli
+      - name: Real WordPress retention, cleanup, multisite and cache isolation
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_WORDPRESS_VERSION: ${{ matrix.wordpress }}
+          ECD_TOPOLOGY: ${{ matrix.topology }}
+          ECD_CACHE: ${{ matrix.cache }}
+        run: bash scripts/test-wordpress.sh

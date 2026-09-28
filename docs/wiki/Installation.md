@@ -18,6 +18,8 @@ Copy your own TTF/OTF files into `fonts/` next to the main PHP file. There is no
 
 ## Updates and uninstallation
 
-The repository does not include an automatic GitHub updater. Deploy subsequent versions deliberately, after reviewing the changes and creating a backup. Deactivation or file removal does not delete the option containing your timers. To permanently delete a particular timer, use its form in the admin panel.
+The repository does not include an automatic GitHub updater. Deploy subsequent versions deliberately, after reviewing the changes and creating a backup. Deactivation and manual file removal do not delete the option containing your timers. To permanently delete a particular timer, use its form in the admin panel.
+
+The proposed uninstall feature adds **Easy Countdown > Data Settings > Delete all plugin data when uninstalling**. It is off by default. When enabled, uninstalling through WordPress removes this site's timer options and owned database image cache. It never deletes another site's data without that site's consent. See [Data Retention and Uninstall](Data-Removal.md) for scope, external-cache limitations, and the pre-release test requirements. This feature is a PR proposal, not part of the already-published 12.1.2 ZIP.
 
 Before launching a campaign, test saving, editing, and deleting timers; every font you use; the 24-hour threshold; behavior after the deadline; and rendering in the target email applications. Rolling back a deployment should not mean returning to a known vulnerable version on a public server.
