@@ -18,8 +18,7 @@ if [[ "${ECD_TOPOLOGY:?}" == multisite ]]; then
   "${wp[@]}" core multisite-convert --title='Disposable network'
 fi
 install_dir="$wpdir/wp-content/plugins/email-countdown-timer"
-mkdir -p "$install_dir" "$wpdir/wp-content/mu-plugins"
-cp "$root/tests/integration/trace-cron.php" "$wpdir/wp-content/mu-plugins/ecd-ci-trace.php"
+mkdir -p "$install_dir"
 cp "$root/email-countdown-timer.php" "$root/uninstall.php" "$root/readme.txt" "$root/LICENSE" "$install_dir/"
 cp -R "$root/includes" "$root/assets" "$install_dir/"
 if [[ "${ECD_CACHE:?}" == redis ]]; then
@@ -39,7 +38,7 @@ network=()
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 php -S 127.0.0.1:8080 -t "$wpdir" > "$RUNNER_TEMP/ecd-http.log" 2>&1 &
 server=$!
-trap 'kill "$server" 2>/dev/null || true; cat "$RUNNER_TEMP/ecd-http.log"' EXIT
+trap 'kill "$server" 2>/dev/null || true' EXIT
 for i in {1..20}; do
   if curl -fsS 'http://localhost:8080/?ecd_action=render&ecd=integration-timer&mode=email' -o "$RUNNER_TEMP/ecd-fixture.gif"; then break; fi
   sleep 1
