@@ -34,6 +34,7 @@ function esc_textarea($text) { return htmlspecialchars((string)$text, ENT_QUOTES
 function wp_enqueue_style($handle, ...$args) { $GLOBALS['styles'][$handle]=$args; }
 function esc_url($text) { return esc_attr($text); }
 function wp_date($format) { return date($format); }
+function wp_timezone_string() { return $GLOBALS['ect_site_tz'] ?? 'Europe/Warsaw'; }
 function admin_url($path) { return 'https://example.test/wp-admin/'.$path; }
 function home_url($path) { return 'https://example.test'.$path; }
 function plugins_url($path, $file) { return 'https://example.test/wp-content/plugins/email-countdown-timer/'.$path; }
@@ -80,7 +81,8 @@ $before=$options; $admin=false; $plugin->handleFormSave(); ok($options===$before
 $admin=true; $nonce=false;
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok($e->getMessage()==='nonce', 'nonce required'); }
 ok($options===$before, 'invalid nonce unchanged'); $nonce=true;
-$_POST=array_merge($base, ['ecd_action'=>'save_timer', 'timer_id'=>'sale', 'label_d'=>"D\\'ni"]);
+$_SERVER['REQUEST_METHOD']='POST';
+$_POST=array_merge(array_map('strval',$base), ['ecd_action'=>'email_countdown_timer_save', 'timer_id'=>'sale', 'original_id'=>'sale', 'label_d'=>"D\\'ni"]);
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(),'redirect:'), 'save redirects'); }
 ok($options['easy_countdown_timers']['sale']['label_d']==="D'ni", 'unslash once');
 $_GET=['edit'=>'sale']; ob_start(); $plugin->renderAdminPage(); $html=ob_get_clean();
@@ -91,7 +93,7 @@ $short=$plugin->renderShortcode(['id'=>'sale']); $short2=$plugin->renderShortcod
 ok(strpos($short,'data-ecd-src=')!==false && strpos($short,'mode=anim')!==false && strpos($short,'<script')===false, 'safe shortcode');
 ok($short!==$short2 && count($scripts)===1, 'unique IDs, single script handle');
 ok($plugin->renderShortcode(['id'=>['x']])==='', 'array shortcode input');
-$_POST=['ecd_action'=>'save_timer','timer_id'=>'sale','delete_timer'=>'1'];
+$_POST=['ecd_action'=>'email_countdown_timer_delete','timer_id'=>'sale','confirm_delete'=>'1'];
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) {}
 ok(!isset($options['easy_countdown_timers']['sale']), 'delete');
 $method=new ReflectionMethod($plugin, 'generateImage'); $method->setAccessible(true);

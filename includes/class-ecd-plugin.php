@@ -38,28 +38,10 @@ class Email_Countdown_Timer_Plugin {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- This only identifies the form; nonce is verified before any write below.
         if (Email_Countdown_Timer_Config::text($_POST, 'ecd_action') !== 'save_timer' || !current_user_can('manage_options')) return;
         check_admin_referer('ecd_save_timer_nonce');
-        $id = Email_Countdown_Timer_Config::id(wp_unslash(Email_Countdown_Timer_Config::text($_POST, 'timer_id')));
-        if ($id === '') { wp_die(esc_html__('Invalid timer ID.', 'email-countdown-timer'), '', ['response'=>400]); return; }
-        $timers = $this->getTimers();
-        $delete = Email_Countdown_Timer_Config::text($_POST, 'delete_timer') === '1';
-        if ($delete) unset($timers[$id]);
-        else {
-            $input = wp_unslash($_POST);
-            if (!array_key_exists('alt', $input) && isset($timers[$id]['alt'])) $input['alt'] = $timers[$id]['alt'];
-            $input['hide_days'] = isset($_POST['hide_days']) ? 1 : 0;
-            try {
-                $normalized = Email_Countdown_Timer_Config::normalize($input);
-                require_once __DIR__.'/class-email-countdown-timer-admin.php';
-                $errors = Email_Countdown_Timer_Admin::preflight($normalized);
-                if ($errors) { wp_die(esc_html(implode(' ', $errors)), '', ['response'=>400]); return; }
-                $timers[$id] = $normalized;
-            }
-            catch (InvalidArgumentException $e) { wp_die(esc_html($e->getMessage()), '', ['response'=>400]); return; }
-        }
-        update_option(self::OPTION_KEY, $timers, false);
-        foreach (['png','gif','webp'] as $format) delete_transient($this->cacheKey($id, $format));
-        wp_safe_redirect(add_query_arg(['page'=>'ecd-timers', 'status'=>'saved', 'edit'=>$delete ? false : $id], admin_url('admin.php')));
-        exit;
+        // Old forms cannot bypass the current editor's validation and delete confirmation.
+        // Keep the old nonce/capability gate, but perform no legacy mutation or redirect.
+        wp_die(esc_html__('This form version is no longer supported. Reload Easy Countdown and use the current editor. No timer data was changed.', 'email-countdown-timer'), '', ['response'=>409]);
+        return;
     }
     public function renderAdminPage(): void {
         require_once __DIR__.'/class-email-countdown-timer-admin.php';
@@ -148,7 +130,15 @@ class Email_Countdown_Timer_Plugin {
                     throw new RuntimeException('Image generation or lock ownership failed.');
                 }
                 if (!$lock->owns()) {
-                    $this->staticFallback($config, $deadline, $fixedTime ?? time(), $fmt, 'error');
+                    $responseNow = $fixedTime ?? time();
+                    // Ownership gates shared publication, not delivery of this request's
+                    // already completed image. Never reuse a previous request's stale GIF.
+                    if (self::completed_image_is_fresh($renderNow, $responseNow, $deadline)) {
+                        header('X-Email-Countdown-Mode: uncached-lock-lost');
+                        $this->outputImage($blob, $fmt);
+                    } else {
+                        $this->staticFallback($config, $deadline, $responseNow, $fmt, 'error');
+                    }
                     return;
                 }
                 set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
@@ -157,6 +147,11 @@ class Email_Countdown_Timer_Plugin {
         } finally {
             $lock->release();
         }
+    }
+    private static function completed_image_is_fresh(int $started, int $now, int $deadline): bool {
+        // Same freshness interval, no clock rollback, and no crossed campaign deadline.
+        return $now >= $started && intdiv($now, 15) === intdiv($started, 15)
+            && !($started < $deadline && $now >= $deadline);
     }
     private function staticFallback(array $config, int $deadline, int $now, string $format, string $reason): void {
         // One current frame, never a stale animation or an unprotected 60-frame job.

@@ -12,6 +12,7 @@ final class Email_Countdown_Timer_Lock_DB_Double {
     public bool $suppressed = false;
     public function suppress_errors($value = true) { $old = $this->suppressed; $this->suppressed = (bool)$value; return $old; }
     public ?int $owner = null;
+    public bool $lose_on_check = false;
     public array $names = [];
     public function prepare($sql, ...$args) { return json_encode([$sql, $args]); }
     public function get_row($prepared, $format) {
@@ -28,6 +29,7 @@ final class Email_Countdown_Timer_Lock_DB_Double {
     }
     public function get_var($prepared) {
         [$sql, $args] = json_decode($prepared, true);
+        if ($this->lose_on_check && str_contains($sql,'IS_USED_LOCK')) ++$this->connection;
         $owns=$this->owner===$this->connection && $args[0]===$this->connection;
         if (str_contains($sql,'RELEASE_LOCK') && $owns) $this->owner=null;
         return $owns ? '1' : '0';

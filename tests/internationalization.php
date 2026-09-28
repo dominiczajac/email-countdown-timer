@@ -15,9 +15,11 @@ ok(!str_contains($translated, '<strong>Translated heading'), 'translation cannot
 ok(Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59'])['label_d'] === 'Days', 'locale does not change new campaign data');
 $short = $plugin->renderShortcode(['id'=>'example']);
 ok(str_contains($short, 'Timer&quot; onerror=&quot;bad'), 'translated alt escaped as an attribute');
-$_POST = ['ecd_action'=>'save_timer','timer_id'=>'test','deadline'=>'2030-12-31T23:59:59','font'=>'../bad.ttf'];
+$_POST = ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'test','original_id'=>'','deadline'=>'2030-12-31T23:59:59','font'=>'../bad.ttf'];
 $message = '';
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { $message=$e->getMessage(); }
-ok($message === 'die:&lt;script&gt;not executable&lt;/script&gt;', 'translated error escaped exactly once at HTML sink');
+ob_start(); $plugin->renderAdminPage(); $error_html=ob_get_clean();
+ok(str_contains($error_html,'&lt;script&gt;not executable&lt;/script&gt;') && !str_contains($error_html,'<script>not executable'), 'translated error escaped exactly once at HTML sink');
+(new ReflectionProperty(Email_Countdown_Timer_Admin::class,'pending'))->setValue(null,null);
 ok(!isset($options['easy_countdown_timers']['test']), 'invalid translated form does not write data');
 $test_translations = [];

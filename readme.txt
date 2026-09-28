@@ -3,7 +3,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.4.2
+Stable tag: 12.4.3
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,7 +21,7 @@ Email Countdown Timer generates images counting down to a fixed date and time on
 * Persistent local font storage and an explicit, non-destructive tool for copying legacy fonts.
 * Optional removal of owned plugin data on uninstall, disabled by default. Deactivation keeps your settings.
 
-GD is required to render images. Imagick enables animation, and FreeType enables custom fonts. Shared image caching and database session locks reduce duplicate GIF generation. If the generation lock is busy or unavailable, a current single-frame image is returned instead of a stale animation. Rendering errors can still prevent an image; test your hosting before a campaign.
+GD is required to render images. Imagick enables animation, and FreeType enables custom fonts. Animated generation requires both Imagick and working MySQL/MariaDB advisory locks on a consistent session/primary. Without usable locking, cache misses produce uncached single-frame images, not animation. Shared caching and locks reduce duplicate GIF generation. If the generation lock is busy or unavailable, a current single-frame image is returned instead of a stale animation. Rendering errors can still prevent an image; test your hosting before a campaign.
 
 A countdown image is not a promise of exact live delivery: email services may prefetch, cache or block remote images, and some clients show only the first GIF frame. Always include the actual deadline as visible text. Keep the image URL available for the lifetime of the campaign.
 
@@ -32,14 +32,14 @@ A countdown image is not a promise of exact live delivery: email services may pr
 3. Use Embed Codes to copy email HTML, an image URL or the website shortcode.
 4. Send a test message through your actual email platform and check the page while logged out.
 
-When updating, replace the installed plugin rather than uninstalling it. Back up your database and custom fonts first. Before the first update from 12.3.1 or older, copy fonts out of the plugin directory: WordPress can remove that directory before the new version runs. Disable any older duplicate snippet or implementation, not unrelated plugins.
+When updating, replace rather than uninstall the plugin. Back up your database/fonts, disable duplicate older snippets, and reload open timer forms. For updates from 12.3.1 or older, first copy plugin-local fonts out of the directory WordPress replaces; migration details: https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md
 
 == Frequently Asked Questions ==
 
 = Where should I put custom fonts? =
 Use trusted, licensed static TTF/OTF files in the persistent directory under your site's uploads base: normally wp-content/uploads/email-countdown-timer/fonts/. Multisite adds a site-ID subdirectory; custom upload locations can differ. Data Settings shows the available location. Create it through your hosting file manager if necessary and preserve filenames and license notices.
 
-If legacy plugin-local fonts still exist after installation, Data Settings > Copy Legacy Fonts to Persistent Storage copies them without deleting originals or overwriting a conflicting file. A same-named legacy file takes precedence while it remains. Copy license notices manually. See the repository Local Font Storage guide for migration and retention details.
+Protect font files against direct HTTP downloads before using them. Data Settings > Font File Access can install Apache deny rules without overwriting existing files. nginx needs host-managed rules; a local file write is not verification. Blocking downloads does not grant permission for server-side use. Instructions: https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md
 
 = Are Google Fonts imported automatically? =
 No. Automatic importing is deferred. You may obtain a licensed TTF/OTF yourself and upload it through SFTP or your hosting file manager. There is no browser font-upload endpoint, Google request or API-key field. Fonts are read on the server to draw the image, not downloaded by email recipients.
@@ -54,15 +54,30 @@ Yes. Set Image alternative text (alt) in the editor. Saved empty text produces a
 Only when needed, exclude email-countdown-timer/assets/countdown.js from delayed execution and email-countdown-timer-image from image lazy loading. Requests with ecd_action=render must bypass page caching and image conversion. Do not disable optimization globally. FlyingPress without CDN still needs correct local cache settings. See the repository Optimization and Caching guide; not every proprietary plugin version or settings combination has been tested.
 
 = Why is a GIF static? =
-Imagick may be unavailable, or a generation lock may be busy or unsupported. Data Settings > Rendering Diagnostics checks locking. A fallback uses the current time and does not replace the cached animation. The hosting still needs adequate CPU, memory and native libraries.
+Imagick may be unavailable, or a generation lock may be busy or unsupported. If a large animation takes longer than the one-second lock wait, some simultaneous requests may receive a current static frame while its owner finishes. With persistently unavailable locking, cache misses remain static and uncached. Data Settings > Rendering Diagnostics checks locking. Static fallback does not replace the animation cache. The hosting still needs adequate CPU, memory and native libraries.
 
 = Does the plugin track visitors or email opens? =
 The plugin adds no visitor analytics, open counters, tracking cookies, browser storage or developer telemetry. It stores campaign configuration, an uninstall preference, copied-font ownership hashes and temporary shared images locally. Hosting, WordPress, other plugins and email-image proxies may separately process request data. Suggested wording is available in WordPress's Privacy Policy Guide; adapt it to your providers. Do not add recipient IDs, email addresses or secrets to image URLs or public timer fields.
 
 = What happens when I uninstall? =
-Data is retained unless you first enable Delete all plugin data when uninstalling in Data Settings. Opt-in uninstall removes owned database data and unchanged files owned by the font-copy tool. Manually uploaded or replaced fonts are not deleted. The choice is per site on multisite. Shared caches, other plugins' cron jobs and backups are not erased. The plugin schedules no cron jobs.
+Data is retained unless you first enable Delete all plugin data when uninstalling in Data Settings. Opt-in uninstall removes owned database data and unchanged files owned by the font-copy tool. Manually uploaded or replaced fonts are not deleted. The choice is per site on multisite. Font access rule/index files are also retained so remaining manual fonts do not lose protection. Shared caches, other plugins' cron jobs and backups are not erased. The plugin schedules no cron jobs.
+
+= Which time zone is used? =
+New timers start with the WordPress site time zone (including a configured UTC offset). Existing timers keep their saved zone. Old records without a zone retain Europe/Warsaw for compatibility; changing the site setting does not move their deadlines.
+
+== Upgrade Notice ==
+
+= 12.4.3 =
+Reload old timer editor tabs after updating: obsolete save_timer forms are rejected without changing data. Review font HTTP protection with your host. Back up fonts and your database; do not uninstall to update.
 
 == Changelog ==
+
+= 12.4.3 =
+* Add explicit administrator-controlled font HTTP access rules and host-specific instructions.
+* Return a fresh completed image without caching after lock loss; crossed deadlines still use a current frame.
+* Use the site time zone for new timers while preserving existing deadlines.
+* Retire obsolete form writes safely; clarify animation requirements and local-font protection.
+
 
 = 12.4.2 =
 * One verified distribution ZIP is used for packaging and installation tests.

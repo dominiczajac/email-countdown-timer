@@ -20,6 +20,9 @@ $previous = get_option(Email_Countdown_Timer_Fonts::OPTION, null);
 try {
     copy($source, $original);
     $copied = Email_Countdown_Timer_Fonts::copy_legacy();
+    require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-font-access.php';
+    $rules = Email_Countdown_Timer_Font_Access::install();
+    $assert($rules['failed'] === 0, 'Font access rules created without modifying fonts');
     $directory = Email_Countdown_Timer_Fonts::persistent_directory();
     $assert(is_string($directory), 'Persistent directory exists');
     $destination = $directory . '/' . $name;
@@ -42,6 +45,7 @@ try {
     copy($source, $manual);
     Email_Countdown_Timer_Fonts::delete_owned();
     $assert(!is_file($destination) && is_file($manual), 'Owned cleanup retains manual file');
+    $assert(is_file($directory . '/.htaccess'), 'Uninstall retains protection for manual fonts');
     $assert(get_option(Email_Countdown_Timer_Fonts::OPTION, null) === null, 'Ownership option removed');
     if (is_multisite()) $assert(str_ends_with($directory, 'site-' . get_current_blog_id()), 'Multisite directory explicitly site-scoped');
 } finally {

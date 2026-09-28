@@ -6,10 +6,10 @@ The **Easy Countdown** admin panel is available to users with the `manage_option
 |---|---|
 | Timer ID | Identifier used in the shortcode and URL; normalized by `sanitize_title`, with a maximum input length of 200 bytes. Lowercase ASCII letters, digits, and hyphens are the simplest choice. During editing, the field remains `readonly`, not `disabled` |
 | Deadline | A specific date and time, with optional seconds; stored as `YYYY-MM-DDTHH:MM[:SS]` or the equivalent with a space |
-| Time zone | An identifier supported by PHP, such as `Europe/Warsaw`; an empty field uses that value |
+| Time zone | A PHP-supported zone or UTC offset. New timers inherit the WordPress site zone; existing and legacy missing-zone behavior is preserved as described below |
 | Colors | Background `bg`, digits `dc`, and labels `lc`; hex values in `#RGB` or `#RRGGBB` format |
 | Labels | New-timer defaults: `Days`, `Hours`, `Minutes`, `Seconds`; each may contain up to 256 UTF-8 bytes, not necessarily 256 characters |
-| Font | A local TTF/OTF file in `fonts/`; paths outside that directory are not allowed |
+| Font | A contained local TTF/OTF in the dedicated persistent uploads root or the legacy plugin `fonts/` root; saved filename precedence is preserved |
 | Digit size | 1–200; default 40; the value passed to FreeType |
 | Label size | 1–100; default 12; the value passed to FreeType |
 | Width | 0–4000 px; `0` means automatic, and a positive number sets the minimum width without scaling the content |
@@ -33,7 +33,7 @@ After the deadline, the remaining time is clamped to zero. Whether the days bloc
 
 ## Fonts and Unicode characters
 
-Font files are not bundled with the plugin. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a GD bitmap font with limited Unicode support. The font list excludes symlinks pointing outside the fonts directory. There is no public font upload endpoint.
+Font files are not bundled with the plugin. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a fixed-size GD bitmap font. New saves then require printable ASCII labels; arbitrary UTF-8 is not supported by that fallback. The font list excludes symlinks. Protect direct HTTP downloads separately; see [font file access](Font-HTTP-Access.md). There is no public font upload endpoint.
 
 Source for size units and FreeType requirements: [PHP — imagettftext](https://www.php.net/manual/en/function.imagettftext.php).
 
@@ -42,3 +42,7 @@ Source for size units and FreeType requirements: [PHP — imagettftext](https://
 Use **Image alternative text (alt)** for a short description such as “Registration closes Friday at 18:00”. Save explicitly. It changes shortcode HTML and new Email HTML, not pixels or URL parameters. Empty alt is valid only with equivalent adjacent content. Legacy records use their former fallback until edited; no bulk rewrite occurs. Purge affected page HTML caches and recopy email code after an edit. Already-sent email markup cannot be updated remotely.
 
 [Optimizer exclusions](Optimization-Compatibility.md) · [Privacy and manual local fonts](Privacy-and-Local-Fonts.md).
+
+## New timer time zone (12.4.3)
+
+New timers start with the site time zone returned by WordPress, including a configured UTC offset. Editing never inherits a later site-zone change: a stored zone is preserved, while legacy records without a zone continue to mean `Europe/Warsaw`. No saved deadline is migrated. Reload old editor tabs after upgrading; obsolete `save_timer` submissions return 409 and cannot change data.
