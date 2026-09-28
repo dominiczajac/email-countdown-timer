@@ -114,8 +114,7 @@ final class Email_Countdown_Timer_Data_Settings {
                 <p><?php echo esc_html__( 'Rules are retained on uninstall because manually managed fonts may remain. Blocking downloads does not grant a font license; verify permission for server-side rendering.', 'email-countdown-timer' ); ?></p>
                 <?php
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status label; no data or file mutation. Action is POST/capability/nonce protected.
-                $email_countdown_timer_rules_status = isset( $_GET['font_rules'] ) && is_string( $_GET['font_rules'] )
-                    ? sanitize_text_field( wp_unslash( $_GET['font_rules'] ) ) : '';
+                $email_countdown_timer_rules_status = sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_GET, 'font_rules' ) ) );
                 if ( in_array( $email_countdown_timer_rules_status, array( 'written', 'incomplete' ), true ) ) : ?>
                     <p role="status"><?php echo esc_html__( 'Rule installation was attempted without overwriting existing files. Check directory permissions and existing rules with your host; HTTP protection is not verified.', 'email-countdown-timer' ); ?></p>
                 <?php endif; ?>
