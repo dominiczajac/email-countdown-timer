@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+require_once __DIR__ . '/class-email-countdown-timer-fonts.php';
+
 final class Email_Countdown_Timer_Data_Settings {
     public const OPTION = 'email_countdown_timer_delete_data_on_uninstall';
 
@@ -79,6 +81,27 @@ final class Email_Countdown_Timer_Data_Settings {
                 </fieldset>
                 <?php submit_button( __( 'Save Data Settings', 'email-countdown-timer' ) ); ?>
             </form>
+            <section class="ect-card" aria-labelledby="email-countdown-fonts-title">
+                <h2 id="email-countdown-fonts-title"><?php echo esc_html__( 'Local Fonts', 'email-countdown-timer' ); ?></h2>
+                <p><?php echo esc_html__( 'Use a persistent uploads directory for trusted static TTF/OTF files. No Google connection or browser upload is provided.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Persistent location: the uploads base directory, then email-countdown-timer/fonts/. Multisite adds site-ID/ inside fonts/. The directory is created only when copying fonts, or manually through your hosting tools.', 'email-countdown-timer' ); ?></p>
+                <?php $email_countdown_timer_font_directory = Email_Countdown_Timer_Fonts::persistent_directory(); ?>
+                <?php if ( $email_countdown_timer_font_directory ) : ?><p><code><?php echo esc_html( $email_countdown_timer_font_directory ); ?></code></p><?php endif; ?>
+                <p><?php echo esc_html__( 'Copying preserves original files and timer names, never overwrites a different file, and processes at most 50 new files per request (5 MiB each). A same-name legacy file takes precedence until the old plugin directory is replaced. Copy font license notices manually.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Before the first upgrade from an older version, back up or copy plugin-local fonts manually: this version cannot recover files already deleted by an earlier updater. On multisite, prepare each site before a network update.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'With uninstall cleanup enabled, only unchanged files created by this copy tool are removed. Manually uploaded or subsequently replaced files remain; shared directories are never recursively deleted.', 'email-countdown-timer' ); ?></p>
+                <?php
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only counts; numeric bounds and output escaping below. The copying action itself requires POST, capability and nonce.
+                $email_countdown_timer_copy_query = array_intersect_key( $_GET, array_flip( array( 'fonts_copied', 'fonts_skipped' ) ) );
+                if ( isset( $email_countdown_timer_copy_query['fonts_copied'] ) ) : ?>
+                    <p role="status"><?php echo esc_html( sprintf( /* translators: 1: copied files, 2: skipped files. */ __( 'Copied: %1$d. Skipped or conflicting: %2$d. Original files are unchanged.', 'email-countdown-timer' ), max( 0, min( 50, (int) Email_Countdown_Timer_Config::text( $email_countdown_timer_copy_query, 'fonts_copied' ) ) ), max( 0, (int) Email_Countdown_Timer_Config::text( $email_countdown_timer_copy_query, 'fonts_skipped' ) ) ) ); ?></p>
+                <?php endif; ?>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <input type="hidden" name="action" value="email_countdown_timer_copy_fonts">
+                    <?php wp_nonce_field( 'email_countdown_timer_copy_fonts' ); ?>
+                    <?php submit_button( __( 'Copy Legacy Fonts to Persistent Storage', 'email-countdown-timer' ) ); ?>
+                </form>
+            </section>
         </div>
         <?php
     }

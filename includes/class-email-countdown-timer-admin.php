@@ -19,8 +19,8 @@ final class Email_Countdown_Timer_Admin {
         if ( ! in_array( $hook, self::$screens, true ) ) {
             return;
         }
-        wp_enqueue_style( 'email-countdown-timer-admin', plugins_url( 'assets/admin.css', EMAIL_COUNTDOWN_TIMER_FILE ), array(), '12.3.0' );
-        wp_enqueue_script( 'email-countdown-timer-admin', plugins_url( 'assets/admin.js', EMAIL_COUNTDOWN_TIMER_FILE ), array( 'wp-a11y' ), '12.3.0', true );
+        wp_enqueue_style( 'email-countdown-timer-admin', plugins_url( 'assets/admin.css', EMAIL_COUNTDOWN_TIMER_FILE ), array(), EMAIL_COUNTDOWN_TIMER_VERSION );
+        wp_enqueue_script( 'email-countdown-timer-admin', plugins_url( 'assets/admin.js', EMAIL_COUNTDOWN_TIMER_FILE ), array( 'wp-a11y' ), EMAIL_COUNTDOWN_TIMER_VERSION, true );
     }
 
     public static function url( array $args = array() ): string {
@@ -136,6 +136,9 @@ final class Email_Countdown_Timer_Admin {
                     $errors['font'] = $exception->getMessage();
                 }
             }
+            if ( empty( $errors ) ) {
+                $errors = self::preflight( $normalized );
+            }
             if ( ! empty( $errors ) ) {
                 self::$pending = array( 'id' => self::posted( 'timer_id' ), 'original' => $original, 'data' => $data, 'errors' => $errors );
                 return;
@@ -155,6 +158,31 @@ final class Email_Countdown_Timer_Admin {
             ? array( 'status' => 'deleted' ) : array( 'edit' => $id, 'status' => 'saved' );
         wp_safe_redirect( self::url( $args ) );
         exit;
+    }
+
+    /** Only save-time checks: do not retroactively invalidate existing public images. */
+    public static function preflight( array $config ): array {
+        // Missing GD is surfaced in the panel. Settings remain editable on a temporarily
+        // unavailable backend; never claim that geometry was verified in that case.
+        if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+            return array();
+        }
+        $font = Email_Countdown_Timer_Config::fontPath( $config['font'] );
+        $ttf = null !== $font && function_exists( 'imagettfbbox' ) && function_exists( 'imagettftext' );
+        $errors = array();
+        if ( ! $ttf ) {
+            foreach ( array( 'label_d', 'label_h', 'label_m', 'label_s' ) as $field ) {
+                if ( preg_match( '/[^\x20-\x7e]/', $config[ $field ] ) ) {
+                    $errors[ $field ] = __( 'The active bitmap fallback supports printable ASCII labels only. Select an available TTF/OTF with the required characters.', 'email-countdown-timer' );
+                }
+            }
+        }
+        try {
+            ( new Email_Countdown_Timer_Renderer() )->measure( $config, Email_Countdown_Timer_Config::deadline( $config ), time() );
+        } catch ( Throwable $error ) {
+            $errors['font'] = __( 'This font, text and size combination cannot be rendered. Check the font and reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels total.', 'email-countdown-timer' );
+        }
+        return $errors;
     }
 
     public static function render(): void {

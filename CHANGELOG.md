@@ -1,5 +1,13 @@
 # Changelog
 
+## 12.4.0
+
+- Add persistent per-site local font lookup, explicit non-destructive copying and hash-scoped uninstall cleanup. Manual/replaced files remain. Legacy name precedence preserves existing rendering.
+- Reuse the exact layout calculation for save-time geometry validation without allocating/encoding an image; reject unsupported bitmap labels only on save. Existing public image interpretation is retained.
+- Surface unavailable GD and bitmap fallback in the admin panel; centralize versioned asset metadata.
+- The first upgrade cannot rescue old plugin-local fonts already removed by WordPress. Copy/backup before replacement. No Google Fonts import.
+
+
 ## 12.3.1 — 2026-09-28
 
 - Reconcile overlapping PRs #5 and #6 without removing session-owned render locks or HTTP tests.

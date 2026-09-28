@@ -6,7 +6,7 @@ final class Email_Countdown_Timer_Renderer {
     private function bbox($size, $angle, $font, $text): array {
         $key = $font . "|" . $size . "|" . $text;
         if (!isset($this->boxes[$key])) {
-            $box = imagettfbbox($size, $angle, $font, $text);
+            $box = @imagettfbbox($size, $angle, $font, $text);
             if ($box === false) throw new RuntimeException('Font metrics unavailable.');
             $this->boxes[$key] = $box;
         }
@@ -60,7 +60,14 @@ final class Email_Countdown_Timer_Renderer {
             return $blob;
         } finally { ob_end_clean(); }
     }
-    public function drawFrame($remain, $bgHex, $dcHex, $lcHex, $fontFile, $sizeDigit, $sizeLabel, $hideDays, $labels, $forceW = 0, $forceH = null) {
+    /** Measure the exact renderer layout without allocating or encoding an image. */
+    public function measure(array $c, int $deadline, int $now): array {
+        $layout = $this->layout(max(0, $deadline - $now), $c['bg'], $c['dc'], $c['lc'], $c['font'],
+            $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
+            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+        return ['width'=>(int)$layout['finalW'], 'height'=>(int)$layout['finalH'], 'font'=>$layout['fontPath']];
+    }
+    private function layout($remain, $bgHex, $dcHex, $lcHex, $fontFile, $sizeDigit, $sizeLabel, $hideDays, $labels, $forceW = 0, $forceH = null) {
         $d = intdiv($remain, 86400);
         $hr = intdiv($remain % 86400, 3600);
         $m = intdiv($remain % 3600, 60);
@@ -155,6 +162,11 @@ final class Email_Countdown_Timer_Renderer {
         $finalH = $forceH ?? $calculatedH;
 
         Email_Countdown_Timer_Config::checkCanvas((int)$finalW, (int)$finalH);
+        return compact('fontPath', 'gapX', 'gapY', 'padding', 'digitAscent', 'digitHeight', 'labelAscent', 'colonW', 'finalW', 'finalH', 'totalContentW', 'meta');
+    }
+    public function drawFrame($remain, $bgHex, $dcHex, $lcHex, $fontFile, $sizeDigit, $sizeLabel, $hideDays, $labels, $forceW = 0, $forceH = null) {
+        $layout = $this->layout($remain, $bgHex, $dcHex, $lcHex, $fontFile, $sizeDigit, $sizeLabel, $hideDays, $labels, $forceW, $forceH);
+        ['fontPath'=>$fontPath, 'gapX'=>$gapX, 'gapY'=>$gapY, 'padding'=>$padding, 'digitAscent'=>$digitAscent, 'digitHeight'=>$digitHeight, 'labelAscent'=>$labelAscent, 'colonW'=>$colonW, 'finalW'=>$finalW, 'finalH'=>$finalH, 'totalContentW'=>$totalContentW, 'meta'=>$meta] = $layout;
         $im = imagecreatetruecolor((int)$finalW, (int)$finalH);
         $bg = $this->allocHex($im, $bgHex);
         imagefill($im, 0, 0, $bg);

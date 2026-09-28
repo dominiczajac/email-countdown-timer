@@ -3,7 +3,7 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.3.1';
+    private const VERSION = EMAIL_COUNTDOWN_TIMER_VERSION;
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
         if ($this->isImageRequest()) {
@@ -47,7 +47,13 @@ class Email_Countdown_Timer_Plugin {
             $input = wp_unslash($_POST);
             if (!array_key_exists('alt', $input) && isset($timers[$id]['alt'])) $input['alt'] = $timers[$id]['alt'];
             $input['hide_days'] = isset($_POST['hide_days']) ? 1 : 0;
-            try { $timers[$id] = Email_Countdown_Timer_Config::normalize($input); }
+            try {
+                $normalized = Email_Countdown_Timer_Config::normalize($input);
+                require_once __DIR__.'/class-email-countdown-timer-admin.php';
+                $errors = Email_Countdown_Timer_Admin::preflight($normalized);
+                if ($errors) { wp_die(esc_html(implode(' ', $errors)), '', ['response'=>400]); return; }
+                $timers[$id] = $normalized;
+            }
             catch (InvalidArgumentException $e) { wp_die(esc_html($e->getMessage()), '', ['response'=>400]); return; }
         }
         update_option(self::OPTION_KEY, $timers, false);
