@@ -103,6 +103,7 @@ class Email_Countdown_Timer_Plugin {
         if ($fmt === 'png' && function_exists('imagewebp') && strpos(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'), 'image/webp') !== false) $fmt = 'webp';
         if ($head) { $this->outputHeaders($fmt); return; }
         $deadline = Email_Countdown_Timer_Config::deadline($config);
+        $fixedTime = $now;
         $now = $now ?? time();
         $bucket = intdiv($now, 15);
         $font = Email_Countdown_Timer_Config::fontPath($config['font']);
@@ -110,21 +111,52 @@ class Email_Countdown_Timer_Plugin {
         unset($imageConfig['alt']);
         $signature = hash('sha256', serialize([$imageConfig, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
         $key = $this->cacheKey($id, $fmt);
-        $cache = get_transient($key);
+        $blob = $this->cachedImage($key, $signature, $bucket);
+        if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
+        require_once __DIR__.'/class-email-countdown-timer-render-lock.php';
+        $lock = Email_Countdown_Timer_Render_Lock::acquire($key);
+        if ($lock === null) { $this->pixel(503, false); return; }
+        try {
+            // Another process may have filled the slot while this request waited.
+            $renderNow = $fixedTime ?? time();
+            $bucket = intdiv($renderNow, 15);
+            $blob = $this->cachedImage($key, $signature, $bucket, true);
+            if ($blob === null) {
+                $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $renderNow, $fmt);
+                if ($blob === '' || !$lock->owns()) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Internal fixed error; the public controller returns only a fixed PNG with status 503.
+                    throw new RuntimeException('Image generation or lock ownership failed.');
+                }
+                set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
+            }
+            $this->outputImage($blob, $fmt);
+        } finally {
+            $lock->release();
+        }
+    }
+    private function cachedImage(string $key, string $signature, int $bucket, bool $fresh = false): ?string {
+        if ($fresh && wp_using_ext_object_cache()) {
+            // Force a backend read rather than reuse this request's earlier miss.
+            $cache = wp_cache_get($key, 'transient', true);
+        } else {
+            if ($fresh) {
+                // TTL transients are non-autoloaded. Invalidate only Options API
+                // lookup caches; never delete another process's persistent image.
+                wp_cache_delete('_transient_'.$key, 'options');
+                wp_cache_delete('_transient_timeout_'.$key, 'options');
+                wp_cache_delete('notoptions', 'options');
+            }
+            $cache = get_transient($key);
+        }
         if (is_array($cache) && ($cache['signature'] ?? '') === $signature && ($cache['bucket'] ?? -1) === $bucket && is_string($cache['data'] ?? null)) {
             $blob = base64_decode($cache['data'], true);
-            if ($blob !== false && $blob !== '') {
-                $this->outputHeaders($fmt);
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary encoder output cached by this plugin; HTML escaping corrupts the image.
-                echo $blob;
-                return;
-            }
+            if ($blob !== false && $blob !== '') return $blob;
         }
-        $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $now, $fmt);
-        if ($blob === '') throw new RuntimeException('Empty image.');
-        set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
-        $this->outputHeaders($fmt);
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary GD/Imagick output with an image Content-Type and nosniff, not HTML.
+        return null;
+    }
+    private function outputImage(string $blob, string $format): void {
+        $this->outputHeaders($format);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary encoder output only; HTML escaping corrupts images. The response has an image MIME type and nosniff.
         echo $blob;
     }
     private function pixel(int $status, bool $head): void {

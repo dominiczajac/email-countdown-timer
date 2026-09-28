@@ -3,7 +3,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.2.0
+Stable tag: 12.3.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -11,7 +11,7 @@ Images counting down to a fixed deadline, generated on your own WordPress server
 
 == Description ==
 
-Code version: 12.2.0. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
+Code version: 12.3.0. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
 
 The admin interface, help text, and validation messages are in English and translation-ready. New timers default to Days, Hours, Minutes, and Seconds. Existing saved labels are preserved; edit their Labels fields to translate them.
 
@@ -23,6 +23,20 @@ Full instructions are available in the repository README.md and docs/wiki/: http
 
 The presence of this file does not mean the plugin has been accepted into the WordPress.org directory. WordPress 7.1.2 has been exercised in disposable single-site integration tests; verify your hosting configuration before deployment.
 
+== Frequently Asked Questions ==
+
+= Can I set image alternative text? =
+Yes. Save Image alternative text (alt) in the editor and copy new Email HTML. Website shortcodes use the saved value; purge affected HTML page caches after editing. Empty alt is allowed when surrounding text already provides the same information. Alt cannot be changed inside a previously sent email by changing the image.
+
+= What should I exclude in FlyingPress or WP Rocket? =
+If needed, exclude email-countdown-timer/assets/countdown.js from delayed execution and email-countdown-timer-image from image lazy loading. Dynamic requests with ecd_action=render must not be page/edge cached or converted to static images. Do not disable optimization globally. See the repository compatibility guide; proprietary plugin versions are not integration-tested by our CI.
+
+= Are fonts downloaded from Google? =
+No automatic importer is included. Upload a licensed static TTF/OTF file manually to this plugin's fonts/ folder and choose it in Typography and Size. Font files stay on the server. Back them up before plugin updates. A future opt-in importer to persistent storage is only a design proposal.
+
+= Does the plugin track visitors? =
+The code adds no tracking cookies, visitor identifiers, impression counters or telemetry. It stores administrator-entered timer settings and short-lived shared image caches locally. Hosting/CDN/WordPress/other plugins can separately process connection data. This is not a site-wide GDPR certification. See the privacy guide.
+
 == Installation ==
 
 1. Copy the plugin to wp-content/plugins/email-countdown-timer/.
@@ -31,6 +45,9 @@ The presence of this file does not mean the plugin has been accepted into the Wo
 4. Copy the shortcode for your WordPress page or the image URL for your email template.
 
 == Changelog ==
+
+= 12.3.0 =
+Alternative text for shortcode/email images, narrowly scoped optimizer compatibility, session-owned image-generation locks, privacy guidance and full HTTP tests. Requires MySQL/MariaDB advisory locks on a consistent session. Busy generators return 503 with Retry-After. No visitor telemetry or automatic Google font downloads.
 
 = 12.2.0 =
 Lightweight accessible admin refresh: separate timer list/editor, retained invalid inputs, saved static preview, explicit animation, copy helpers and confirmed deletion. System fonts and scoped assets; no remote font downloader.
