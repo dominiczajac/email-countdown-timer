@@ -1,7 +1,7 @@
 === Email Countdown Timer ===
 Tags: countdown, email, timer, gif
 Requires at least: 6.4
-Tested up to: 7.1.2
+Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 12.1.3
 License: GPL-3.0-only
