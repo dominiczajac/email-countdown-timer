@@ -2,7 +2,7 @@
 
 A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
 
-**Source version:** 12.2.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.3.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -13,6 +13,7 @@ A WordPress plugin that generates countdown images for a fixed deadline: animate
 | GD | Required with PNG/GIF support; WebP depends on the GD build |
 | Imagick | Required for animation; GIF responses are static without it |
 | FreeType | Required for custom TTF/OTF fonts |
+| Database | MySQL/MariaDB session advisory locking on one consistent primary; see [concurrency requirements](docs/RENDER-CONCURRENCY.md) |
 | Network | A publicly accessible WordPress HTTPS URL for email images |
 
 No Composer/npm dependencies are required at runtime. Font files are not bundled. Test your actual hosting and email clients before a campaign.
@@ -53,6 +54,16 @@ In an HTML email, replace the domain and ID with the URL copied from your panel:
 
 Do not paste the shortcode or JavaScript into email. Attaching a downloaded GIF, or importing it into an editor's image library, may replace dynamic fetching with a fixed copy. See [Embedding](docs/wiki/Embedding.md).
 
+## Alternative text, optimizers and privacy
+
+Set **Image alternative text (alt)** in the timer editor and save. The value is used in the website shortcode and newly copied Email HTML. An explicitly empty value stays `alt=""`; use that only when adjacent text already conveys the same information. Older records retain their contextual fallback until edited. Alt is HTML metadata, not part of the GIF or its URL. Copy email HTML again after changing it; already-sent emails cannot be rewritten. Purge affected HTML page caches to refresh shortcode markup.
+
+See [FlyingPress / WP Rocket exclusions](docs/wiki/Optimization-Compatibility.md) for precise, symptom-based asset and image-cache guidance. Compatibility with every commercial version/settings combination is not claimed. Keep ordinary page caching; bypass only dynamic image requests when necessary.
+
+[Privacy and local fonts](docs/wiki/Privacy-and-Local-Fonts.md) documents the absence of plugin visitor tracking/cookies/telemetry, actual stored campaign data, and the separate hosting/CDN/WordPress privacy boundary. Manual licensed TTF/OTF installation works now; automatic Google Fonts importing is still a proposal, not a shipped feature.
+
+[Render concurrency](docs/RENDER-CONCURRENCY.md) explains the two-second session lock, cache recheck and safe 503 behavior under contention. It does not replace capacity planning.
+
 ## Behavior and limitations
 
 The English interface and validation messages are translation-ready. New timer labels remain stable data: `Days`, `Hours`, `Minutes`, `Seconds`. Changing the administrator's locale does not rewrite labels in campaigns. Existing labels, including custom and empty values, are preserved; edit the **Labels** fields to change them.
@@ -83,9 +94,9 @@ The isolated tests use WordPress API doubles and cover validation, permissions, 
 
 CI also runs **Plugin Check 2.1.0 with runtime checks** against the distribution files. `required-checks` requires unit tests, WordPress integration and Plugin Check to pass. The PCP gate reads reported findings, not just the command's exit status, and fails on errors or warnings. Narrow, documented code-local annotations remain for context-sensitive cases such as binary image output; there are no global check exclusions. [Preflight review](docs/PLUGIN-CHECK-REVIEW.md).
 
-The current CI also exercises the actual admin in a Chromium browser, with and without JavaScript, and records a synthetic renderer/cache benchmark. These measurements exclude complete HTTP/WordPress startup and concurrent requests.
+CI also exercises the actual admin in Chromium, with and without JavaScript. The renderer microbenchmark excludes WordPress startup; the new loopback HTTP suite includes it and drives concurrent clients against database and Redis caches. Neither is a production-host capacity test.
 
-See [current verification and performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
+See [12.3.0 verification and HTTP results](docs/VERIFICATION-12.3.0.md), [previous UI/performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
 
 ## Documentation and contribution
 

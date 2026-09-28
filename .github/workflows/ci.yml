@@ -42,6 +42,10 @@ jobs:
         run: php tests/run.php
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
+      - name: Privacy-sensitive API guardrail
+        run: php tests/privacy-audit.php
+      - name: Optimizer timing simulation
+        run: node tests/frontend-compat.js
       - name: JavaScript syntax
         run: node --check assets/countdown.js && node --check assets/admin.js
   plugin-check:

@@ -3,7 +3,7 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.2.0';
+    private const VERSION = '12.3.0';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
         add_action('admin_menu', [$this, 'registerAdminMenu']);
@@ -41,6 +41,7 @@ class Email_Countdown_Timer_Plugin {
         if ($delete) unset($timers[$id]);
         else {
             $input = wp_unslash($_POST);
+            if (!array_key_exists('alt', $input) && isset($timers[$id]['alt'])) $input['alt'] = $timers[$id]['alt'];
             $input['hide_days'] = isset($_POST['hide_days']) ? 1 : 0;
             try { $timers[$id] = Email_Countdown_Timer_Config::normalize($input); }
             catch (InvalidArgumentException $e) { wp_die(esc_html($e->getMessage()), '', ['response'=>400]); return; }
@@ -58,10 +59,12 @@ class Email_Countdown_Timer_Plugin {
         $a = shortcode_atts(['id'=>''], is_array($atts) ? $atts : []);
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
         if ($id === '') return '';
+        $timers = $this->getTimers();
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'email-countdown-timer'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
-        return sprintf('<img id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
-            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr__('Countdown', 'email-countdown-timer'));
+        return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
+            esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr($alt));
     }
     public function listenForImageRequest(): void {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
@@ -100,26 +103,60 @@ class Email_Countdown_Timer_Plugin {
         if ($fmt === 'png' && function_exists('imagewebp') && strpos(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'), 'image/webp') !== false) $fmt = 'webp';
         if ($head) { $this->outputHeaders($fmt); return; }
         $deadline = Email_Countdown_Timer_Config::deadline($config);
+        $fixedTime = $now;
         $now = $now ?? time();
         $bucket = intdiv($now, 15);
         $font = Email_Countdown_Timer_Config::fontPath($config['font']);
-        $signature = hash('sha256', serialize([$config, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
+        $imageConfig = $config;
+        unset($imageConfig['alt']);
+        $signature = hash('sha256', serialize([$imageConfig, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
         $key = $this->cacheKey($id, $fmt);
-        $cache = get_transient($key);
+        $blob = $this->cachedImage($key, $signature, $bucket);
+        if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
+        require_once __DIR__.'/class-email-countdown-timer-render-lock.php';
+        $lock = Email_Countdown_Timer_Render_Lock::acquire($key);
+        if ($lock === null) { $this->pixel(503, false); return; }
+        try {
+            // Another process may have filled the slot while this request waited.
+            $renderNow = $fixedTime ?? time();
+            $bucket = intdiv($renderNow, 15);
+            $blob = $this->cachedImage($key, $signature, $bucket, true);
+            if ($blob === null) {
+                $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $renderNow, $fmt);
+                if ($blob === '' || !$lock->owns()) {
+                    // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Internal fixed error; the public controller returns only a fixed PNG with status 503.
+                    throw new RuntimeException('Image generation or lock ownership failed.');
+                }
+                set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
+            }
+            $this->outputImage($blob, $fmt);
+        } finally {
+            $lock->release();
+        }
+    }
+    private function cachedImage(string $key, string $signature, int $bucket, bool $fresh = false): ?string {
+        if ($fresh && wp_using_ext_object_cache()) {
+            // Force a backend read rather than reuse this request's earlier miss.
+            $cache = wp_cache_get($key, 'transient', true);
+        } else {
+            if ($fresh) {
+                // TTL transients are non-autoloaded. Invalidate only Options API
+                // lookup caches; never delete another process's persistent image.
+                wp_cache_delete('_transient_'.$key, 'options');
+                wp_cache_delete('_transient_timeout_'.$key, 'options');
+                wp_cache_delete('notoptions', 'options');
+            }
+            $cache = get_transient($key);
+        }
         if (is_array($cache) && ($cache['signature'] ?? '') === $signature && ($cache['bucket'] ?? -1) === $bucket && is_string($cache['data'] ?? null)) {
             $blob = base64_decode($cache['data'], true);
-            if ($blob !== false && $blob !== '') {
-                $this->outputHeaders($fmt);
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary encoder output cached by this plugin; HTML escaping corrupts the image.
-                echo $blob;
-                return;
-            }
+            if ($blob !== false && $blob !== '') return $blob;
         }
-        $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $now, $fmt);
-        if ($blob === '') throw new RuntimeException('Empty image.');
-        set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
-        $this->outputHeaders($fmt);
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary GD/Imagick output with an image Content-Type and nosniff, not HTML.
+        return null;
+    }
+    private function outputImage(string $blob, string $format): void {
+        $this->outputHeaders($format);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary encoder output only; HTML escaping corrupts images. The response has an image MIME type and nosniff.
         echo $blob;
     }
     private function pixel(int $status, bool $head): void {
@@ -134,7 +171,7 @@ class Email_Countdown_Timer_Plugin {
     private function outputHeaders(string $ext): void {
         $types = ['webp'=>'image/webp', 'gif'=>'image/gif', 'png'=>'image/png'];
         header('Content-Type: '.$types[$ext]);
-        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Cache-Control: no-cache, no-store, must-revalidate, no-transform');
         header('X-Content-Type-Options: nosniff');
         header('Vary: Accept', false);
     }
