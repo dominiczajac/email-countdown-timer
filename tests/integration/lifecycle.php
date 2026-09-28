@@ -18,7 +18,7 @@ $expect = static function ($condition, string $message) use (&$checks): void {
         WP_CLI::error($message);
     }
 };
-$expect(wp_using_ext_object_cache() === (getenv('ECD_CACHE') === 'redis'), 'Expected cache backend.');
+$expect((bool)wp_using_ext_object_cache() === (getenv('ECD_CACHE') === 'redis'), 'Expected cache backend.');
 if ($phase === 'seed' && is_multisite()) {
     foreach (['retained', 'consented'] as $path) {
         $site = wpmu_create_blog('localhost', '/' . $path . '/', 'Synthetic fixture', 1);
@@ -30,7 +30,18 @@ $expect(count($sites) === (is_multisite() ? 3 : 1), 'Expected isolated site coun
 $original = get_current_blog_id();
 if ($phase === 'invoke-uninstall') {
     require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    $cron_before = [];
+    foreach ($sites as $site_id) {
+        if (is_multisite()) switch_to_blog($site_id);
+        try { $cron_before[$site_id] = get_option('cron'); }
+        finally { if (is_multisite()) restore_current_blog(); }
+    }
     $expect(uninstall_plugin($plugin) === true, 'WordPress invoked guarded uninstall.php.');
+    foreach ($sites as $site_id) {
+        if (is_multisite()) switch_to_blog($site_id);
+        try { $expect(get_option('cron') === $cron_before[$site_id], 'Uninstall leaves complete cron unchanged.'); }
+        finally { if (is_multisite()) restore_current_blog(); }
+    }
     $expect(get_current_blog_id() === $original, 'Uninstaller restores blog context.');
     WP_CLI::success('LIFECYCLE ' . $phase . ': ' . $checks . ' assertions.');
     return;
@@ -73,7 +84,7 @@ foreach ($sites as $site_id) {
             set_transient('other_plugin_transient', 'keep', 600);
             wp_cache_set('ecd-ci-sentinel', 'keep', 'other_plugin', 600);
             wp_schedule_single_event(time()+86400, 'other_plugin_ci_event');
-            update_option('ecd_ci_cron_snapshot', get_option('cron'));
+            update_option('ecd_ci_event_timestamp', wp_next_scheduled('other_plugin_ci_event'));
         } elseif ($phase === 'optin') {
             if ($delete_this_site) {
                 update_option($policy, '1', false);
@@ -101,7 +112,7 @@ foreach ($sites as $site_id) {
             if (wp_using_ext_object_cache()) {
                 $expect(wp_cache_get('ecd-ci-sentinel', 'other_plugin') === 'keep', 'Shared cache not flushed.');
             }
-            $expect(get_option('cron') === get_option('ecd_ci_cron_snapshot'), 'Shared cron unchanged.');
+            $expect(wp_next_scheduled('other_plugin_ci_event') === (int)get_option('ecd_ci_event_timestamp'), 'Unrelated scheduled event retained.');
         } else {
             WP_CLI::error('Unknown lifecycle phase.');
         }
