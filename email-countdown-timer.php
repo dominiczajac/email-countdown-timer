@@ -17,3 +17,5 @@ require_once __DIR__.'/includes/class-ecd-config.php';
 require_once __DIR__.'/includes/class-ecd-renderer.php';
 require_once __DIR__.'/includes/class-ecd-plugin.php';
 new ECD_Plugin_Colons_Fix();
+require_once __DIR__.'/includes/class-email-countdown-timer-data-settings.php';
+Email_Countdown_Timer_Data_Settings::register();

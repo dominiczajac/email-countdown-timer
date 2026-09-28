@@ -36,5 +36,7 @@ jobs:
           ECD_REQUIRE_GD: '1'
           ECD_REQUIRE_IMAGICK: ${{ matrix.backend == 'imagick' && '1' || '0' }}
         run: php tests/run.php
+      - name: Uninstall safety regression tests
+        run: php tests/uninstall.php
       - name: JavaScript syntax
         run: node --check assets/countdown.js
