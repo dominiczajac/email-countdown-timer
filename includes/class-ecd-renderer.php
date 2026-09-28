@@ -1,7 +1,7 @@
 <?php
 /** Image renderer. The v12.1 geometry is intentionally retained. */
 if (!defined('ABSPATH')) exit;
-final class ECD_Renderer {
+final class Email_Countdown_Timer_Renderer {
     private array $boxes = [];
     private function bbox($size, $angle, $font, $text): array {
         $key = $font . "|" . $size . "|" . $text;
@@ -66,7 +66,7 @@ final class ECD_Renderer {
         $m = intdiv($remain % 3600, 60);
         $s = $remain % 60;
 
-        $fontPath = ECD_Config::fontPath($fontFile);
+        $fontPath = Email_Countdown_Timer_Config::fontPath($fontFile);
         if (!function_exists('imagettfbbox') || !function_exists('imagettftext')) $fontPath = null;
 
         $gapX = 10; 
@@ -154,7 +154,7 @@ final class ECD_Renderer {
         $calculatedH = $contentH + ($padding * 2);
         $finalH = $forceH ?? $calculatedH;
 
-        ECD_Config::checkCanvas((int)$finalW, (int)$finalH);
+        Email_Countdown_Timer_Config::checkCanvas((int)$finalW, (int)$finalH);
         $im = imagecreatetruecolor((int)$finalW, (int)$finalH);
         $bg = $this->allocHex($im, $bgHex);
         imagefill($im, 0, 0, $bg);

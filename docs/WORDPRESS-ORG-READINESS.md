@@ -1,38 +1,34 @@
 # WordPress.org Submission Readiness
 
-Reviewed 2026-09-28. This is a preparation checklist, not approval by WordPress or evidence that a submission has been made.
+Updated 2026-09-28. This is a preparation record, not WordPress.org approval or evidence of a submitted plugin.
 
-## WordPress.org versus WordPress.com
+## Completed technical work
 
-The public free-plugin submission process is the WordPress.org Plugin Directory. WordPress.com is a hosting service whose supported plans can install plugins from that directory or uploaded ZIPs. Directory approval is not proof of compatibility with every WordPress.com hosting configuration or eligibility for a separate commercial marketplace.
+- Protected PR workflow with active owner-installed main ruleset and a fail-closed `required-checks` job.
+- Opt-in uninstall cleanup, including ownership-scoped cache deletion, per-site multisite consent and foreign cron/cache preservation.
+- Real WordPress 6.4/current-stable integration matrix using MySQL and Redis, plus the existing PHP/GD/Imagick regressions.
+- English UI and validation strings prepared for translation with the matching text domain. Campaign labels remain stable data.
+- Distinct internal class/constant prefixes without changing public options, shortcode or URLs.
+- Candidate 12.1.3 metadata with numeric stable tag and `Tested up to: 7.1`, grounded in actual WordPress 7.1.2 integration runs.
+- Official Plugin Check 2.1.0 with runtime checks. The reviewed report for head `89db910` has no reported errors or warnings. Later revisions must pass independently; see [verification evidence](VERIFICATION-12.1.3.md) and [annotated static-analysis cases](PLUGIN-CHECK-REVIEW.md).
 
-## Submission and release requirements
+## Remaining before submission
 
-- Use a WordPress.org account with two-factor authentication and an actively monitored email address. Submit a complete installable ZIP, not a GitHub repository URL alone.
-- Run the official **Plugin Check (PCP)** and resolve findings. It is part of the submission pre-check and does not replace manual review. Existing PHP tests are not PCP.
-- Keep the plugin header and `readme.txt` complete and consistent: slug, text domain, required PHP/WordPress versions, plugin version, license, and stable version tag. Populate `Tested up to` only after testing that actual WordPress version; verify the real WordPress.org contributor login rather than copying a GitHub login by assumption.
-- Keep all distributed material GPL-compatible, including fonts and third-party libraries. The repository currently declares `GPL-3.0-only`; WordPress strongly recommends GPLv2-or-later but permits GPL-compatible licenses. Do not change licensing silently.
-- Preserve capability and nonce checks, validate inputs, escape outputs, guard executable PHP files, and prepare SQL. Use WordPress APIs and bundled libraries where applicable. English text alone is not internationalization: user-facing strings need WordPress translation functions and the matching text domain.
-- Describe behavior and external services honestly. Do not add undisclosed tracking, remote executable code, unapproved front-end attribution, or artificial restrictions on built-in functionality. Resource-safety limits must not be presented as paid usage gates.
-- After approval, publish releases through the assigned WordPress.org SVN repository. GitHub remains the development/review repository; it does not replace SVN distribution. Increment the plugin version for each release and keep the matching stable tag updated.
+1. Confirm the owner's **WordPress.org** username, two-factor authentication and monitored contact email. Do not assume a GitHub login is the same account. Confirm the requested slug before submitting.
+2. Select the final reviewed commit, build the minimal installable ZIP, rerun PCP on those exact distribution bytes and verify installation/update on the intended hosting. The automation tests defined scenarios, not every host or all browser interactions.
+3. Review the admin UI and accessibility, then capture genuine screenshots. UI modernization is a separate task; cosmetic work is not a substitute for security or functional testing.
+4. Run a separate complete PHPCS/WPCS quality pass and production-representative load tests. A clean PCP report is not proof of full WPCS compliance or protection against cache stampedes.
+5. Review any later-added fonts/libraries and their licenses. None are bundled now. Keep GPL-compatible licensing, disclosure of services and no unapproved tracking or remote executable code.
+6. Submit the complete ZIP through the WordPress.org Plugin Directory. Wait for the human review and address findings; a local pass does not guarantee acceptance. After approval, publish through the assigned SVN repository with matching version/tag metadata.
 
-## Gaps in the current plugin
-
-The current repository has isolated PHP/GD/Imagick tests, not full WordPress integration tests or a verified PCP pass. The supplied ZIP has no bundled fonts. Before submitting:
-
-1. Run PCP against the actual distribution ZIP and review security/readme/internationalization findings. Run PHPCS with WordPress standards as a separate quality check; do not describe formatting alone as proof of security.
-2. Review legacy three-letter `ECD_` global symbols: the review team's guidance discourages two-/three-letter prefixes. Prefer a distinctive namespace for internals while preserving existing public shortcode/URL and saved-data contracts deliberately.
-3. Internationalize the legacy admin UI and validation messages; new data-settings UI uses translation helpers, but that does not translate or audit the rest of the plugin.
-4. Replace `Stable tag: trunk` with the final released version, complete validated metadata, and test both minimum-supported and current WordPress versions. Do not fabricate compatibility claims.
-5. Test GD/Imagick/FreeType availability and clear failure messaging on real hosting. Run an authenticated admin and anonymous image test, plus concurrent image requests, not only isolated render tests.
-6. Review and integrate opt-in uninstall cleanup, then test retention/deletion on real single-site and multisite installations with and without persistent cache. The cleanup PR does not change the public endpoint or create cron jobs.
-7. Package runtime files, license, and the useful readme only; keep tests, CI, private files, and build caches out. A clear native admin UI and screenshots are useful, but a decorative redesign is not a substitute for passing review.
+The existing GPL-3.0-only license is retained. GitHub remains the development repository. WordPress.com hosting supports plugin installation under its own plan and platform rules; WordPress.org approval does not establish compatibility with every WordPress.com configuration or eligibility for a separate commercial marketplace.
 
 ## Sources
 
-- [Developer information and submission workflow](https://wordpress.org/plugins/developers/)
+- [Developer submission workflow](https://wordpress.org/plugins/developers/)
 - [Submit a plugin](https://wordpress.org/plugins/developers/add/)
 - [Detailed Plugin Guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/)
 - [Common review issues](https://developer.wordpress.org/plugins/wordpress-org/common-issues/)
-- [Plugin Check and 2FA requirements](https://make.wordpress.org/plugins/2024/10/01/plugin-check-and-2fa-now-mandatory-for-new-plugin-submissions/)
+- [Plugin Check and 2FA](https://make.wordpress.org/plugins/2024/10/01/plugin-check-and-2fa-now-mandatory-for-new-plugin-submissions/)
+- [Readme metadata](https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/)
 - [WordPress.com plugin support](https://wordpress.com/support/plugins/)

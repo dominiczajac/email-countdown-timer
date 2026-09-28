@@ -1,0 +1,85 @@
+name: Plugin Check
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  plugin-check:
+    name: plugin-check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: pcp-ci-only
+          MYSQL_DATABASE: pcp_ci
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppcp-ci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, gd, imagick
+          tools: wp-cli
+          coverage: none
+      - name: Provision disposable WordPress and exact distribution files
+        shell: bash
+        run: |
+          set -euo pipefail
+          wpdir="$(mktemp -d "$RUNNER_TEMP/ecd-pcp.XXXXXX")"
+          echo "PCP_WP_PATH=$wpdir" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/pcp-evidence"
+          wp --path="$wpdir" core download --locale=en_US
+          wp --path="$wpdir" config create --dbname=pcp_ci --dbuser=root --dbpass=pcp-ci-only --dbhost=127.0.0.1:3307 --dbprefix=pcpci_
+          wp --path="$wpdir" config set WP_ENVIRONMENT_TYPE local
+          wp --path="$wpdir" config set DISABLE_WP_CRON true --raw
+          wp --path="$wpdir" core install --url=http://localhost:8080 --title='Disposable PCP' --admin_user=ci-admin --admin_password="$(openssl rand -hex 20)" --admin_email=ci@example.invalid --skip-email
+          target="$wpdir/wp-content/plugins/email-countdown-timer"
+          mkdir -p "$target"
+          cp email-countdown-timer.php readme.txt LICENSE "$target/"
+          test ! -f uninstall.php || cp uninstall.php "$target/"
+          cp -R includes assets "$target/"
+          wp --path="$wpdir" plugin install plugin-check --version=2.1.0 --activate
+          {
+            git rev-parse HEAD
+            php --version
+            wp cli version
+            wp --path="$wpdir" core version --extra
+            wp --path="$wpdir" plugin get plugin-check --field=version
+            find "$target" -type f -exec sha256sum {} \;
+          } > "$RUNNER_TEMP/pcp-evidence/versions-and-hashes.txt"
+          python3 - <<'PY'
+          import os, pathlib, subprocess, zipfile
+          paths = subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          with zipfile.ZipFile(os.environ['RUNNER_TEMP']+'/pcp-evidence/source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for path in paths:
+                  if path and pathlib.Path(path).is_file() and not pathlib.Path(path).is_symlink():
+                      z.write(path,path)
+          PY
+      - name: Plugin Check 2.1.0 including runtime checks (no exclusions)
+        shell: bash
+        run: |
+          set +e
+          wp --path="$PCP_WP_PATH" --require="$PCP_WP_PATH/wp-content/plugins/plugin-check/cli.php" --no-color plugin check email-countdown-timer --format=strict-json > "$RUNNER_TEMP/pcp-evidence/plugin-check.json" 2> "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr"
+          result=$?
+          cat "$RUNNER_TEMP/pcp-evidence/plugin-check.json"
+          cat "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr" >&2
+          printf '%s\n' "$result" > "$RUNNER_TEMP/pcp-evidence/exit-code.txt"
+          exit "$result"
+      - name: Fail on reported findings, not only the CLI exit status
+        run: python3 scripts/check-pcp-report.py "$RUNNER_TEMP/pcp-evidence"
+      - name: Preserve complete report and tested source
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: plugin-check-evidence
+          path: ${{ runner.temp }}/pcp-evidence/
+          retention-days: 14
+          if-no-files-found: error

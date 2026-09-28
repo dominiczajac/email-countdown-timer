@@ -1,7 +1,11 @@
 <?php
 /** Validation shared by admin writes and public rendering. */
 if (!defined('ABSPATH')) exit;
-final class ECD_Config {
+final class Email_Countdown_Timer_Config {
+    private static function invalid(string $message): never {
+        // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain internal exception; the controller escapes messages once at wp_die, while image requests return only a fixed error PNG.
+        throw new InvalidArgumentException($message);
+    }
     public static function text(array $input, string $key, string $default = ''): string {
         return isset($input[$key]) && is_scalar($input[$key]) ? (string)$input[$key] : $default;
     }
@@ -15,37 +19,41 @@ final class ECD_Config {
         $c = [];
         foreach ($defaults as $key=>$default) {
             $value = $input[$key] ?? $default;
-            if (!is_scalar($value)) throw new InvalidArgumentException('Invalid field type: '.$key);
+            if (!is_scalar($value)) {
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid field type: %s', 'email-countdown-timer'), $key));
+            }
             $c[$key] = is_string($default) ? sanitize_text_field((string)$value) : $value;
         }
         foreach (['size_digit'=>[1,200], 'size_label'=>[1,100], 'fixed_width'=>[0,4000]] as $key=>$range) {
             $value = filter_var($c[$key], FILTER_VALIDATE_INT);
             if ($value === false || $value < $range[0] || $value > $range[1]) {
-                throw new InvalidArgumentException('Value outside the safe range: '.$key);
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Value outside the safe range: %s', 'email-countdown-timer'), $key));
             }
             $c[$key] = $value;
         }
         $c['hide_days'] = empty($c['hide_days']) ? 0 : 1;
         foreach (['bg','dc','lc'] as $key) {
             $c[$key] = sanitize_hex_color($c[$key]);
-            if (!$c[$key]) throw new InvalidArgumentException('Invalid color: '.$key);
+            if (!$c[$key]) {
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid color: %s', 'email-countdown-timer'), $key));
+            }
         }
         foreach (['label_d','label_h','label_m','label_s'] as $key) {
-            if (strlen($c[$key]) > 256) throw new InvalidArgumentException('Label is too long (maximum 256 bytes).');
+            if (strlen($c[$key]) > 256) self::invalid(__('Label is too long (maximum 256 bytes).', 'email-countdown-timer'));
         }
         if ($c['tz'] === '') $c['tz'] = 'Europe/Warsaw';
         self::deadline($c);
         // Reject traversal, including a symlink escaping the font directory. Missing fonts retain the legacy fallback.
         if ($c['font'] !== '' && (basename($c['font']) !== $c['font'] || strpos($c['font'], '\\') !== false ||
             !preg_match('/\.(ttf|otf)$/i', $c['font']))) {
-            throw new InvalidArgumentException('Invalid font filename.');
+            self::invalid(__('Invalid font filename.', 'email-countdown-timer'));
         }
         return $c;
     }
     public static function deadline(array $c): int {
         $text = self::text($c, 'deadline');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?$/D', $text)) {
-            throw new InvalidArgumentException('Enter a specific deadline date and time.');
+            self::invalid(__('Enter a specific deadline date and time.', 'email-countdown-timer'));
         }
         try {
             $tz = new DateTimeZone(self::text($c, 'tz', 'Europe/Warsaw'));
@@ -53,22 +61,22 @@ final class ECD_Config {
             $dt = DateTimeImmutable::createFromFormat($format, str_replace('T', ' ', $text), $tz);
             $errors = DateTimeImmutable::getLastErrors();
             if ($dt === false || ($errors !== false && ($errors['warning_count'] || $errors['error_count']))) {
-                throw new InvalidArgumentException('Invalid date.');
+                self::invalid(__('Invalid date.', 'email-countdown-timer'));
             }
             return $dt->getTimestamp();
         } catch (Exception $e) {
-            throw new InvalidArgumentException('Invalid date or time zone.');
+            self::invalid(__('Invalid date or time zone.', 'email-countdown-timer'));
         }
     }
     public static function fontPath(string $font): ?string {
         if ($font === '' || basename($font) !== $font || strpos($font, '\\') !== false || !preg_match('/\.(ttf|otf)$/i', $font)) return null;
-        $dir = realpath(ECD_PLUGIN_DIR.'fonts');
+        $dir = realpath(EMAIL_COUNTDOWN_TIMER_DIR.'fonts');
         if ($dir === false) return null;
         $path = realpath($dir.DIRECTORY_SEPARATOR.$font);
         return $path !== false && dirname($path) === $dir && is_file($path) && is_readable($path) ? $path : null;
     }
     public static function fonts(): array {
-        $files = is_dir(ECD_PLUGIN_DIR.'fonts') ? scandir(ECD_PLUGIN_DIR.'fonts') : [];
+        $files = is_dir(EMAIL_COUNTDOWN_TIMER_DIR.'fonts') ? scandir(EMAIL_COUNTDOWN_TIMER_DIR.'fonts') : [];
         return array_values(array_filter($files ?: [], static fn($f) => self::fontPath($f) !== null));
     }
     public static function checkCanvas(int $width, int $height): void {

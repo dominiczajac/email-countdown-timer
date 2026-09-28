@@ -38,6 +38,7 @@ final class Email_Countdown_Timer_Data_Settings {
         }
         check_admin_referer( 'email_countdown_timer_data_settings' );
         // Check only this field. Missing means unchecked; malformed values never enable deletion.
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Strict string allowlist immediately below validates exact '0'/'1'; no escaped value can become consent.
         $raw = $_POST['delete_data_on_uninstall'] ?? '0';
         if ( ! is_string( $raw ) || ! in_array( $raw, array( '0', '1' ), true ) ) {
             wp_die( esc_html__( 'Invalid data retention setting.', 'email-countdown-timer' ), '', array( 'response' => 400 ) );
@@ -55,7 +56,8 @@ final class Email_Countdown_Timer_Data_Settings {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__( 'Email Countdown Timer: Data Settings', 'email-countdown-timer' ); ?></h1>
-            <?php if ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) : ?>
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice controlled by an exact constant; contains no query-supplied content.
+            if ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html__( 'Data settings saved. No timer data has been deleted.', 'email-countdown-timer' ); ?></p></div>
             <?php endif; ?>
             <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
