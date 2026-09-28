@@ -47,6 +47,8 @@ final class Email_Countdown_Timer_Uninstaller {
         }
         // Also catch orphaned and legacy cache entries, including expired timeout-only rows.
         self::clean_database_cache();
+        require_once __DIR__ . '/class-email-countdown-timer-fonts.php';
+        Email_Countdown_Timer_Fonts::delete_owned();
         delete_option( self::TIMERS_OPTION );
         delete_option( self::POLICY_OPTION );
         // The plugin schedules no cron hooks and creates no custom tables or metadata.

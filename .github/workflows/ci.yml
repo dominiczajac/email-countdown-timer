@@ -48,6 +48,8 @@ jobs:
           php tests/cache-bootstrap.php array
           python3 tests/privacy-contracts.py
           node tests/countdown.test.cjs
+      - name: Persistent fonts and layout preflight
+        run: php tests/font-storage.php
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail

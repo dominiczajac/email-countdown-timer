@@ -46,3 +46,6 @@ wp-config.php
 # Note: If you wish to whitelist themes,
 # uncomment the next line
 #/wp-content/themes
+# Local Python test bytecode
+__pycache__/
+*.py[cod]

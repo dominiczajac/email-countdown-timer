@@ -3,7 +3,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.3.1
+Stable tag: 12.4.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -11,7 +11,7 @@ Images counting down to a fixed deadline, generated on your own WordPress server
 
 == Description ==
 
-Code version: 12.3.1. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
+Code version: 12.4.0. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
 
 The admin interface, help text, and validation messages are in English and translation-ready. New timers default to Days, Hours, Minutes, and Seconds. Existing saved labels are preserved; edit their Labels fields to translate them.
 
@@ -32,7 +32,7 @@ Yes. Save Image alternative text (alt) in the editor and copy new Email HTML. We
 If needed, exclude email-countdown-timer/assets/countdown.js from delayed execution and email-countdown-timer-image from image lazy loading. Dynamic requests with ecd_action=render must not be page/edge cached or converted to static images. Do not disable optimization globally. See the repository compatibility guide; proprietary plugin versions are not integration-tested by our CI.
 
 = Are fonts downloaded from Google? =
-No automatic importer is included. Upload a licensed static TTF/OTF file manually to this plugin's fonts/ folder and choose it in Typography and Size. Font files stay on the server. Back them up before plugin updates. A future opt-in importer to persistent storage is only a design proposal.
+No automatic importer is included. Upload a licensed static TTF/OTF to uploads/email-countdown-timer/fonts/ and choose it in Typography and Size. Multisite adds site-ID/ inside fonts/. Data Settings can copy existing plugin-local fonts without deleting originals. Before the first update from 12.3.1 or older, copy/backup those fonts manually. With uninstall cleanup enabled, only unchanged files created by the copy tool are removed; manual files are retained. A future opt-in importer to persistent storage is only a design proposal.
 
 = Does the plugin track visitors? =
 The code adds no tracking cookies, visitor identifiers, impression counters or telemetry. It stores administrator-entered timer settings and short-lived shared image caches locally. Hosting/CDN/WordPress/other plugins can separately process connection data. This is not a site-wide GDPR certification. See the privacy guide.
@@ -45,6 +45,13 @@ The code adds no tracking cookies, visitor identifiers, impression counters or t
 4. Copy the shortcode for your WordPress page or the image URL for your email template.
 
 == Changelog ==
+
+= 12.4.0 =
+* Persistent per-site local fonts and an explicit non-destructive legacy copy tool.
+* Exact renderer geometry validation before saving, without encoding a preview.
+* Clear bitmap character/font warnings and ownership-scoped font cleanup.
+* Back up legacy plugin-local fonts before upgrading from an older version.
+
 
 = 12.3.1 =
 * Reconcile alt/privacy changes with serialized rendering and HTTP coverage.

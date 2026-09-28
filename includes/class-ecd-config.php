@@ -81,15 +81,10 @@ final class Email_Countdown_Timer_Config {
         }
     }
     public static function fontPath(string $font): ?string {
-        if ($font === '' || basename($font) !== $font || strpos($font, '\\') !== false || !preg_match('/\.(ttf|otf)$/i', $font)) return null;
-        $dir = realpath(EMAIL_COUNTDOWN_TIMER_DIR.'fonts');
-        if ($dir === false) return null;
-        $path = realpath($dir.DIRECTORY_SEPARATOR.$font);
-        return $path !== false && dirname($path) === $dir && is_file($path) && is_readable($path) ? $path : null;
+        return Email_Countdown_Timer_Fonts::path($font);
     }
     public static function fonts(): array {
-        $files = is_dir(EMAIL_COUNTDOWN_TIMER_DIR.'fonts') ? scandir(EMAIL_COUNTDOWN_TIMER_DIR.'fonts') : [];
-        return array_values(array_filter($files ?: [], static fn($f) => self::fontPath($f) !== null));
+        return Email_Countdown_Timer_Fonts::names();
     }
     public static function checkCanvas(int $width, int $height): void {
         if ($width < 1 || $height < 1 || $width > 4000 || $height > 1000 || $width*$height > 400000) {
