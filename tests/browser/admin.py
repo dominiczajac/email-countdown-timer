@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import shutil
+from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
@@ -143,7 +144,7 @@ with sync_playwright() as p:
     check(page.locator('[href*="assets/admin.css"]').count() == 1, 'Data Settings shares scoped styling')
     check(not page.locator('[name=delete_data_on_uninstall]').is_checked(), 'uninstall opt-in remains off')
     check(not errors, 'no browser JavaScript exceptions')
-    check(not any('fonts.googleapis.com' in u or 'fonts.gstatic.com' in u for u in requests), 'zero Google Fonts requests')
+    check(not any(urlsplit(u).hostname in {'fonts.googleapis.com', 'fonts.gstatic.com'} for u in requests), 'zero Google Fonts requests')
     report = {'checks': checks, 'count': len(checks), 'browser': browser.version, 'wordpress_site': 'disposable localhost only', 'js_errors': errors, 'limits': 'Custom browser checks; not a screen-reader audit, full axe scan or WCAG certification.'}
     (evidence / 'browser-checks.json').write_text(json.dumps(report, indent=2) + '\n')
     browser.close()
