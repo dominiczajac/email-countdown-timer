@@ -1,5 +1,15 @@
 # Changelog
 
+## 12.2.0 — 2026-09-28
+
+Implemented the approved lightweight admin design: a searchable list with 25 timers per page, a separate Create/Edit screen, native local-font controls, responsive sections and scoped CSS/JavaScript. Rendering code and public data contracts are unchanged; changing the version invalidates older image-cache signatures once.
+
+Added explicit labels, field errors and error-summary focus; invalid values and intentionally empty labels survive validation. Duplicate IDs cannot overwrite a timer through the new creation form, and edited IDs are checked server-side. Saving and deletion retain capability, POST and nonce checks. Deletion has a distinct confirmation form, with an optional native dialog and Cancel-first focus.
+
+The editor shows the saved static image, with animation only on demand. Copy tools supply image URLs, unchanged shortcodes and email HTML including an absolute deadline. Clipboard failure has a manual-selection fallback. Without JavaScript, field sections and manual formats remain expanded; saving still uses native server forms. No remote font downloader, background polling or automatic animated table previews were added.
+
+Added real WordPress/Chromium browser checks, no-JS saves, constrained-width checks and a synthetic renderer/cache benchmark. These supplement, rather than replace, the existing PHP, image, uninstall, MySQL/Redis and Plugin Check gates. See the 12.2.0 verification record for measured results and limits; no full WCAG/WPCS certification or production-throughput claim is made.
+
 ## 12.1.3 — 2026-09-28
 
 Added explicit, default-off data removal during WordPress uninstall. Saving the policy or deactivation never removes timers. Cleanup is ownership-scoped, handles legacy/orphaned database cache and per-site multisite consent, and preserves unrelated options, cron and caches. No cron hooks are created.

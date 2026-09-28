@@ -7,7 +7,7 @@ $test_translations = [
     'Countdown' => 'Timer" onerror="bad',
     'Days' => 'Translated day data must not leak',
 ];
-$admin = true; $nonce = true; $_GET = []; $_POST = [];
+$admin = true; $nonce = true; $_GET = ['view'=>'new']; $_POST = [];
 $options['easy_countdown_timers'] = [];
 ob_start(); $plugin->renderAdminPage(); $translated = ob_get_clean();
 ok(str_contains($translated, '&lt;strong&gt;Translated heading&lt;/strong&gt;'), 'translated heading escaped');

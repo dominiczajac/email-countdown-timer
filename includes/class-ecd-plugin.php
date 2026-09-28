@@ -3,22 +3,34 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.1.3';
+    private const VERSION = '12.2.0';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
         add_action('admin_menu', [$this, 'registerAdminMenu']);
         add_action('admin_init', [$this, 'handleFormSave']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('init', [$this, 'listenForImageRequest']);
         add_shortcode('ecd_timer', [$this, 'renderShortcode']);
     }
     public function registerAdminMenu(): void {
-        add_menu_page(__('Easy Countdown', 'email-countdown-timer'), __('Easy Countdown', 'email-countdown-timer'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
+        require_once __DIR__.'/class-email-countdown-timer-admin.php';
+        $hook = add_menu_page(__('Easy Countdown', 'email-countdown-timer'), __('Easy Countdown', 'email-countdown-timer'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
+        Email_Countdown_Timer_Admin::add_screen($hook);
+    }
+    public function enqueueAdminAssets(string $hook): void {
+        if (class_exists('Email_Countdown_Timer_Admin', false)) Email_Countdown_Timer_Admin::enqueue($hook);
     }
     private function getTimers(): array {
         $timers = get_option(self::OPTION_KEY, []);
         return is_array($timers) ? array_filter($timers, 'is_array') : [];
     }
     public function handleFormSave(): void {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Routing only; the admin controller verifies capability, POST and nonce before reading form data.
+        if (in_array(Email_Countdown_Timer_Config::text($_POST, 'ecd_action'), ['email_countdown_timer_save', 'email_countdown_timer_delete'], true)) {
+            require_once __DIR__.'/class-email-countdown-timer-admin.php';
+            Email_Countdown_Timer_Admin::handle_post();
+            return;
+        }
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- This only identifies the form; nonce is verified before any write below.
         if (Email_Countdown_Timer_Config::text($_POST, 'ecd_action') !== 'save_timer' || !current_user_can('manage_options')) return;
         check_admin_referer('ecd_save_timer_nonce');
@@ -38,7 +50,10 @@ class Email_Countdown_Timer_Plugin {
         wp_safe_redirect(add_query_arg(['page'=>'ecd-timers', 'status'=>'saved', 'edit'=>$delete ? false : $id], admin_url('admin.php')));
         exit;
     }
-    public function renderAdminPage(): void { require __DIR__.'/admin-view.php'; }
+    public function renderAdminPage(): void {
+        require_once __DIR__.'/class-email-countdown-timer-admin.php';
+        Email_Countdown_Timer_Admin::render();
+    }
     public function renderShortcode($atts): string {
         $a = shortcode_atts(['id'=>''], is_array($atts) ? $atts : []);
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
