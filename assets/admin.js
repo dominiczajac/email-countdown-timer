@@ -3,6 +3,7 @@
     'use strict';
     const root = document.querySelector('[data-ect-admin]');
     if (!root) return;
+    root.querySelectorAll('[data-ect-disclosure]').forEach(section => { if (!section.querySelector('[aria-invalid="true"]')) section.open = false; });
     const form = root.querySelector('#ect-editor');
     const summary = root.querySelector('#ect-errors');
     let allowNavigation = false;
@@ -29,7 +30,7 @@
 
         const dirty = () => serialize() !== initial;
         const state = root.querySelector('#ect-save-state');
-        const initialState = state ? state.textContent : ''; 
+        const initialState = state ? state.textContent : '';
         form.addEventListener('input', () => { if (state) state.textContent = dirty() ? state.dataset.dirty : initialState; });
         window.addEventListener('beforeunload', event => { if (!allowNavigation && dirty()) { event.preventDefault(); event.returnValue = ''; } });
         form.noValidate = true;
@@ -90,6 +91,7 @@
     }
     const code = root.querySelector('#ect-embed-code');
     if (code) {
+        root.querySelector('[data-ect-manual]').open = false;
         const formats = { url: code.value, html: root.querySelector('#ect-manual-html').value, shortcode: root.querySelector('#ect-manual-shortcode').value };
         const select = root.querySelector('#ect-embed-format'); const button = root.querySelector('#ect-copy'); const result = root.querySelector('#ect-copy-result');
         root.querySelector('[data-ect-embed-tools]').hidden = false; button.hidden = false;

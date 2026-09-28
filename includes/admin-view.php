@@ -1,7 +1,10 @@
 <?php
 /** Accessible server-rendered admin view; included by Email_Countdown_Timer_Admin. */
-if ( ! defined( 'ABSPATH' ) || ! current_user_can( 'manage_options' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
+}
+if ( ! current_user_can( 'manage_options' ) ) {
+    return;
 }
 ?>
 <div class="wrap email-countdown-admin" data-ect-admin>
@@ -75,7 +78,8 @@ if ( ! defined( 'ABSPATH' ) || ! current_user_can( 'manage_options' ) ) {
                         <?php $email_countdown_timer_ui['data']['deadline'] = str_replace( ' ', 'T', Email_Countdown_Timer_Admin::value( $email_countdown_timer_ui, 'deadline' ) ); ?>
                         <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'deadline', __( 'Deadline', 'email-countdown-timer' ), isset( $email_countdown_timer_ui['errors']['deadline'] ) ? 'text' : 'datetime-local', __( 'Date and time in the time zone below, including seconds.', 'email-countdown-timer' ), array( 'required' => 'required', 'step' => '1' ) ); ?>
                         <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'tz', __( 'Time Zone', 'email-countdown-timer' ), 'text', __( 'For example Europe/Warsaw, UTC or America/New_York. Existing values are preserved.', 'email-countdown-timer' ) ); ?>
-                        <label class="ect-check"><input type="checkbox" name="hide_days" value="1" <?php checked( ! empty( $email_countdown_timer_ui['data']['hide_days'] ) ); ?>><?php echo esc_html__( 'Hide days when fewer than 24 hours remain', 'email-countdown-timer' ); ?></label>
+                        <label class="ect-check"><input id="ect-hide_days" aria-describedby="ect-error-hide_days" type="checkbox" name="hide_days" value="1" <?php checked( ! empty( $email_countdown_timer_ui['data']['hide_days'] ) ); ?>><?php echo esc_html__( 'Hide days when fewer than 24 hours remain', 'email-countdown-timer' ); ?></label>
+                        <p class="ect-error" id="ect-error-hide_days"><?php echo esc_html( $email_countdown_timer_ui['errors']['hide_days'] ?? '' ); ?></p>
                     </section>
                     <section class="ect-card" aria-labelledby="ect-appearance-title"><h3 id="ect-appearance-title"><?php echo esc_html__( 'Appearance', 'email-countdown-timer' ); ?></h3>
                         <fieldset><legend><?php echo esc_html__( 'Colors', 'email-countdown-timer' ); ?></legend><div class="ect-colors">
@@ -85,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) || ! current_user_can( 'manage_options' ) ) {
                         <?php endforeach; ?>
                         </div></fieldset>
                         <p id="ect-contrast" class="description" hidden data-template="<?php echo esc_attr__( 'Contrast on background: digits {digits}:1; labels {labels}:1. Aim for at least 4.5:1. Colors are not changed automatically.', 'email-countdown-timer' ); ?>"></p>
-                        <details class="ect-disclosure" <?php if ( array_intersect( array_keys( $email_countdown_timer_ui['errors'] ), array( 'font', 'size_digit', 'size_label', 'fixed_width' ) ) ) : ?>open<?php endif; ?>><summary><?php echo esc_html__( 'Typography and Size', 'email-countdown-timer' ); ?></summary><div>
+                        <details class="ect-disclosure" data-ect-disclosure open><summary><?php echo esc_html__( 'Typography and Size', 'email-countdown-timer' ); ?></summary><div>
                             <div class="ect-field"><label for="ect-font"><?php echo esc_html__( 'Font', 'email-countdown-timer' ); ?></label>
                                 <?php $email_countdown_timer_fonts = Email_Countdown_Timer_Config::fonts(); $email_countdown_timer_font = Email_Countdown_Timer_Admin::value( $email_countdown_timer_ui, 'font' ); ?>
                                 <select id="ect-font" name="font" aria-describedby="ect-help-font ect-error-font" <?php if ( isset( $email_countdown_timer_ui['errors']['font'] ) ) : ?>aria-invalid="true"<?php endif; ?>><option value=""><?php echo esc_html__( 'Default bitmap font', 'email-countdown-timer' ); ?></option>
@@ -98,7 +102,7 @@ if ( ! defined( 'ABSPATH' ) || ! current_user_can( 'manage_options' ) ) {
                             </div>
                             <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'fixed_width', __( 'Minimum Image Width (px)', 'email-countdown-timer' ), 'number', __( '0 means automatic. This sets a minimum width, not image scaling. Height follows content with padding.', 'email-countdown-timer' ), array( 'min' => '0', 'max' => '4000', 'required' => 'required' ) ); ?>
                         </div></details>
-                        <details class="ect-disclosure" <?php if ( array_intersect( array_keys( $email_countdown_timer_ui['errors'] ), array( 'label_d', 'label_h', 'label_m', 'label_s' ) ) ) : ?>open<?php endif; ?>><summary><?php echo esc_html__( 'Custom Labels', 'email-countdown-timer' ); ?></summary><div class="ect-two-fields">
+                        <details class="ect-disclosure" data-ect-disclosure open><summary><?php echo esc_html__( 'Custom Labels', 'email-countdown-timer' ); ?></summary><div class="ect-two-fields">
                             <?php foreach ( array( 'label_d' => __( 'Days', 'email-countdown-timer' ), 'label_h' => __( 'Hours', 'email-countdown-timer' ), 'label_m' => __( 'Minutes', 'email-countdown-timer' ), 'label_s' => __( 'Seconds', 'email-countdown-timer' ) ) as $email_countdown_timer_key => $email_countdown_timer_label ) : ?>
                                 <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, $email_countdown_timer_key, $email_countdown_timer_label, 'text', __( 'An empty label is allowed. Maximum 256 bytes.', 'email-countdown-timer' ) ); ?>
                             <?php endforeach; ?>
@@ -139,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) || ! current_user_can( 'manage_options' ) ) {
                         <label for="ect-embed-code" id="ect-embed-label"><?php echo esc_html__( 'Image URL', 'email-countdown-timer' ); ?></label>
                         <textarea id="ect-embed-code" rows="4" readonly spellcheck="false"><?php echo esc_textarea( $email_countdown_timer_image_url ); ?></textarea>
                         <button type="button" class="button" id="ect-copy" hidden data-success="<?php echo esc_attr__( 'Copied to clipboard.', 'email-countdown-timer' ); ?>" data-fallback="<?php echo esc_attr__( 'Copy was unavailable. The code is selected; use your keyboard or device copy command.', 'email-countdown-timer' ); ?>"><?php echo esc_html__( 'Copy Code', 'email-countdown-timer' ); ?></button><p id="ect-copy-result" class="description"></p>
-                        <details><summary><?php echo esc_html__( 'All formats (manual copy)', 'email-countdown-timer' ); ?></summary>
+                        <details data-ect-manual open><summary><?php echo esc_html__( 'All formats (manual copy)', 'email-countdown-timer' ); ?></summary>
                             <label for="ect-manual-html"><?php echo esc_html__( 'Email HTML', 'email-countdown-timer' ); ?></label><textarea id="ect-manual-html" rows="6" readonly><?php echo esc_textarea( $email_countdown_timer_email_html ); ?></textarea>
                             <label for="ect-manual-shortcode"><?php echo esc_html__( 'Website Shortcode', 'email-countdown-timer' ); ?></label><textarea id="ect-manual-shortcode" rows="2" readonly><?php echo esc_textarea( $email_countdown_timer_shortcode ); ?></textarea>
                         </details>

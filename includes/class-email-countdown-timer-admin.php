@@ -50,7 +50,7 @@ final class Email_Countdown_Timer_Admin {
             wp_die( esc_html__( 'You are not allowed to manage timers.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
             return;
         }
-        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
             wp_die( esc_html__( 'Use the timer form to make this change.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
             return;
         }
@@ -194,6 +194,10 @@ final class Email_Countdown_Timer_Admin {
 
     public static function input( array $ui, string $key, string $label, string $type = 'text', string $help = '', array $attributes = array() ): void {
         $value = 'timer_id' === $key ? $ui['id'] : self::value( $ui, $key );
+        // Native number inputs discard malformed text; retain it after a server error.
+        if ( 'number' === $type && isset( $ui['errors'][ $key ] ) && false === filter_var( $value, FILTER_VALIDATE_INT ) ) {
+            $type = 'text';
+        }
         ?>
         <div class="ect-field">
             <label for="ect-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label>
