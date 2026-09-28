@@ -1,0 +1,18 @@
+# Explicit shipped sources. Font binaries and development files are never bundled.
+LICENSE
+assets/admin.css
+assets/admin.js
+assets/countdown.js
+email-countdown-timer.php
+includes/admin-view.php
+includes/class-ecd-config.php
+includes/class-ecd-plugin.php
+includes/class-ecd-renderer.php
+includes/class-email-countdown-timer-admin.php
+includes/class-email-countdown-timer-data-settings.php
+includes/class-email-countdown-timer-fonts.php
+includes/class-email-countdown-timer-privacy.php
+includes/class-email-countdown-timer-render-lock.php
+includes/class-email-countdown-timer-uninstaller.php
+readme.txt
+uninstall.php

@@ -18,9 +18,10 @@ if [[ "${ECD_TOPOLOGY:?}" == multisite ]]; then
   "${wp[@]}" core multisite-convert --title='Disposable network'
 fi
 install_dir="$wpdir/wp-content/plugins/email-countdown-timer"
-mkdir -p "$install_dir"
-cp "$root/email-countdown-timer.php" "$root/uninstall.php" "$root/readme.txt" "$root/LICENSE" "$install_dir/"
-cp -R "$root/includes" "$root/assets" "$install_dir/"
+archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
+bash "$root/scripts/build-zip.sh" --output "$archive"
+"${wp[@]}" plugin install "$archive"
+rm -f "$archive"
 if [[ "${ECD_CACHE:?}" == redis ]]; then
   "${wp[@]}" plugin install redis-cache --version=3.0.0 --activate
   "${wp[@]}" config set WP_REDIS_HOST 127.0.0.1

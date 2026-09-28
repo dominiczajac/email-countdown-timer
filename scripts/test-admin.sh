@@ -13,10 +13,13 @@ export ECD_BROWSER_PASSWORD="$(openssl rand -hex 20)"
 "${wp[@]}" config set DISABLE_WP_CRON true --raw
 "${wp[@]}" core install --url=http://localhost:8081 --title='Disposable Admin UI' --admin_user=ci-admin --admin_password="$ECD_BROWSER_PASSWORD" --admin_email=ci@example.invalid --skip-email
 install_dir="$wpdir/wp-content/plugins/email-countdown-timer"
-mkdir -p "$install_dir"
-cp "$root/email-countdown-timer.php" "$root/uninstall.php" "$root/readme.txt" "$root/LICENSE" "$install_dir/"
-cp -R "$root/includes" "$root/assets" "$install_dir/"
+archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
+bash "$root/scripts/build-zip.sh" --output "$archive"
+"${wp[@]}" plugin install "$archive"
+rm -f "$archive"
 "${wp[@]}" plugin activate email-countdown-timer
+policy_id="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Privacy fixture' --post_content='ECT privacy sentinel' --porcelain)"
+"${wp[@]}" option update wp_page_for_privacy_policy "$policy_id"
 export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[ecd_timer id="alt-browser-test"]' --porcelain)"
 php -S 127.0.0.1:8081 -t "$wpdir" > "$RUNNER_TEMP/admin-evidence/http.log" 2>&1 &
 server=$!
@@ -27,6 +30,9 @@ browser_result=0
 "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/admin.py" || browser_result=$?
 alt_result=0
 "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/alt.py" || alt_result=$?
+privacy_result=0
+"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/privacy.py" || privacy_result=$?
+test "$("${wp[@]}" post get "$policy_id" --field=post_content)" = 'ECT privacy sentinel'
 performance_result=0
 "${wp[@]}" eval-file "$root/tests/integration/performance.php" > "$RUNNER_TEMP/admin-evidence/performance.json" || performance_result=$?
 python3 - <<'PY'
@@ -41,3 +47,5 @@ PY
 test "$browser_result" -eq 0
 test "$performance_result" -eq 0
 test "$alt_result" -eq 0
+
+test "$privacy_result" -eq 0

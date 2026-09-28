@@ -49,3 +49,6 @@ wp-config.php
 # Local Python test bytecode
 __pycache__/
 *.py[cod]
+
+# Reproducible local distribution output
+/dist/

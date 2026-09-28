@@ -1,10 +1,10 @@
 # Privacy and local fonts
 
-Scope: plugin source 12.3.0, not the entire WordPress installation. This describes technical behavior; it is not a GDPR/ePrivacy certification or an assertion that no personal data can ever be processed by the site.
+Scope: plugin source 12.4.2, not the entire WordPress installation. This describes technical behavior; it is not a GDPR/ePrivacy certification or an assertion that no personal data can ever be processed by the site.
 
 ## What this plugin stores
 
-The local `easy_countdown_timers` option contains administrator-entered timer IDs, deadlines, time zones, colors, label text, alternative text, image dimensions and font filenames. A separate existing option records per-site consent to data removal during uninstall. Short-lived transients store shared rendered image bytes and configuration/cache signatures. They are not visitor profiles and are not keyed by recipients or IP addresses.
+The local `easy_countdown_timers` option contains administrator-entered timer IDs, deadlines, time zones, colors, label text, alternative text, image dimensions and font filenames. Separate options record per-site consent to data removal during uninstall and the filenames/content hashes of fonts created by the explicit copy tool. Short-lived transients store shared rendered image bytes and configuration/cache signatures. They are not visitor profiles and are not keyed by recipients or IP addresses.
 
 The rendering lock stores no options, files or scheduled jobs. Its name derives from the database/site table and timer/format cache key; it exists only for the database session holding it.
 
@@ -28,22 +28,18 @@ Suggested site-policy wording, only after checking the complete deployment:
 
 Uninstall with the existing opt-in removes plugin-owned data; it does not erase backups, cached email copies, other plugins' data or infrastructure logs. See [Data removal](Data-Removal.md).
 
-## Manual fonts available now
+## Manual fonts and persistent storage
 
-Obtain a licensed **static TTF or OTF** variant from a trusted publisher (Google Fonts is one possible source). Keep the font's license notice and comply with its terms. Upload it by SFTP or the hosting file manager into:
+Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint or font binaries are provided.
 
-```text
-wp-content/plugins/email-countdown-timer/fonts/
-```
+Opt-in uninstall removes only unchanged files recorded as owned by the copy tool. Manually uploaded/replaced files and empty directories may remain; a retained file is not visitor tracking.
 
-Create that directory when missing, refresh the timer editor, open Typography and Size, choose the filename and save. Preserve the original filename for existing timers. Do not upload PHP, archives, CSS or WOFF/WOFF2 and expect the server renderer to use them. There is no browser upload endpoint in this version. The renderer enforces path containment; install only trusted font binaries and keep PHP/GD/FreeType patched.
+## Privacy Policy Guide
 
-No font files are distributed with the plugin. Custom files inside the plugin directory can disappear during a WordPress plugin update; back them up and restore them under the same names. Update rather than uninstall when the data-removal option is enabled.
+On `admin_init`, the plugin registers suggested text through `wp_add_privacy_policy_content()`. It appears in WordPress's Privacy Policy Guide, with supplementary administrator instructions marked `privacy-policy-tutorial`. This does not edit, publish or replace a privacy-policy page. The suggestion explicitly separates plugin behavior from hosting/email/optimizer processing; operators must add their own accurate provider/logging/retention information.
 
-## Automatic Google Fonts import: proposed, NOT implemented
+## Automatic Google Fonts import: deferred, NOT implemented
 
-Do not look for a working Google picker or API-key field in 12.3.0. The proposed importer is described in [Google Fonts design](../GOOGLE-FONTS-DESIGN.md). Its intended flow is an explicit administrator action, one server-side download of a selected licensed variant, then exclusively local rendering. It should use a persistent per-site directory such as `wp-content/uploads/email-countdown-timer/fonts/`, not replace the current legacy directory silently.
-
-The full Google Fonts Developer API requires an API key; a curated, versioned catalog is an alternative. A future download necessarily discloses the server IP and selected font to its source. That connection needs advance disclosure/appropriate authorization even though public image rendering would remain local. No consent, key or network request for that proposed feature is silently enabled here.
+There is no working Google picker or API-key field. The [design proposal](../GOOGLE-FONTS-DESIGN.md) remains deferred. A future import would require explicit authorization and updated disclosure; no external request is silently enabled.
 
 References: [WordPress plugin privacy](https://developer.wordpress.org/plugins/privacy/), [WordPress update behavior](https://developer.wordpress.org/reference/classes/plugin_upgrader/upgrade/), [Google Fonts API](https://developers.google.com/fonts/docs/developer_api).

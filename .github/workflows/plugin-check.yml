@@ -42,10 +42,9 @@ jobs:
           wp --path="$wpdir" config set DISABLE_WP_CRON true --raw
           wp --path="$wpdir" core install --url=http://localhost:8080 --title='Disposable PCP' --admin_user=ci-admin --admin_password="$(openssl rand -hex 20)" --admin_email=ci@example.invalid --skip-email
           target="$wpdir/wp-content/plugins/email-countdown-timer"
-          mkdir -p "$target"
-          cp email-countdown-timer.php readme.txt LICENSE "$target/"
-          test ! -f uninstall.php || cp uninstall.php "$target/"
-          cp -R includes assets "$target/"
+          bash scripts/build-zip.sh --output "$RUNNER_TEMP/pcp-evidence/email-countdown-timer.zip" --report "$RUNNER_TEMP/pcp-evidence/distribution.json"
+          wp --path="$wpdir" plugin install "$RUNNER_TEMP/pcp-evidence/email-countdown-timer.zip"
+          python3 scripts/verify-distribution.py "$RUNNER_TEMP/pcp-evidence/distribution.json" "$target"
           wp --path="$wpdir" plugin install plugin-check --version=2.1.0 --activate
           {
             git rev-parse HEAD

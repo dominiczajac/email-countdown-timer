@@ -33,6 +33,11 @@ jobs:
           tools: none
       - name: Plugin Check gate negative tests
         run: python3 tests/test-pcp-gate.py
+      - name: Distribution build negative tests and privacy guide
+        run: |
+          python3 tests/test-build.py
+          php tests/privacy-policy.php
+          php tests/privacy-policy.php missing
       - name: PHP syntax
         run: find . -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Security and rendering regression tests
