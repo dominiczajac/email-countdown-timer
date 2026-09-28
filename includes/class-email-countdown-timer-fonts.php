@@ -99,7 +99,7 @@ final class Email_Countdown_Timer_Fonts {
     public static function copy_legacy(): array {
         $source = self::legacy_directory();
         $target = self::persistent_directory( true );
-        if ( null === $source || null === $target || ! is_writable( $target ) ) {
+        if ( null === $source || null === $target ) {
             throw new RuntimeException( 'Local font directories are unavailable or not writable.' );
         }
         require_once __DIR__ . '/class-email-countdown-timer-render-lock.php';
@@ -181,7 +181,7 @@ final class Email_Countdown_Timer_Fonts {
             wp_die( esc_html__( 'You are not allowed to manage fonts.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
             return;
         }
-        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
             wp_die( esc_html__( 'Use the font copy form.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
             return;
         }
