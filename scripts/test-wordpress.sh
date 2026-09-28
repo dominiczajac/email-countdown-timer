@@ -36,6 +36,7 @@ network=()
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version
 "${wp[@]}" eval-file "$root/tests/integration/fonts.php"
+"${wp[@]}" eval-file "$root/tests/integration/maintenance.php"
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" seed
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 php -S 127.0.0.1:8080 -t "$wpdir" > "$RUNNER_TEMP/ecd-http.log" 2>&1 &

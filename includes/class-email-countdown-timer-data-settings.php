@@ -107,10 +107,27 @@ final class Email_Countdown_Timer_Data_Settings {
                 ?></p>
                 <p><?php echo esc_html__( 'On a cache miss, image requests wait at most one second for a generation lock. If it is busy or unavailable, a current single-frame image is generated without replacing the animation cache. This avoids stale countdowns, but does not replace hosting rate limits. This probe is not a full database-proxy compatibility test.', 'email-countdown-timer' ); ?></p>
             </section>
+            <section class="ect-card" aria-labelledby="email-countdown-font-access-title">
+                <h2 id="email-countdown-font-access-title"><?php echo esc_html__( 'Font File Access', 'email-countdown-timer' ); ?></h2>
+                <p><?php echo esc_html__( 'Local fonts may be publicly downloadable unless your host blocks HTTP access. This tool creates an Apache 2.4 deny rule and a blank index in this site\'s persistent and existing legacy font directories only. Existing rules and symlinks are never replaced.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Apache must allow the Require directive in .htaccess. nginx ignores .htaccess and needs a host-managed location rule. Writing these files does not verify protection: ask your host to check that direct GET and HEAD font requests are denied while timer images still work. No remote probe is performed.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Rules are retained on uninstall because manually managed fonts may remain. Blocking downloads does not grant a font license; verify permission for server-side rendering.', 'email-countdown-timer' ); ?></p>
+                <?php
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status label; no data or file mutation. Action is POST/capability/nonce protected.
+                $email_countdown_timer_rules_status = isset( $_GET['font_rules'] ) && is_string( $_GET['font_rules'] ) ? $_GET['font_rules'] : '';
+                if ( in_array( $email_countdown_timer_rules_status, array( 'written', 'incomplete' ), true ) ) : ?>
+                    <p role="status"><?php echo esc_html__( 'Rule installation was attempted without overwriting existing files. Check directory permissions and existing rules with your host; HTTP protection is not verified.', 'email-countdown-timer' ); ?></p>
+                <?php endif; ?>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <input type="hidden" name="action" value="email_countdown_timer_font_access">
+                    <?php wp_nonce_field( 'email_countdown_timer_font_access' ); ?>
+                    <?php submit_button( __( 'Install Font Access Rules (Apache)', 'email-countdown-timer' ) ); ?>
+                </form>
+            </section>
             <section class="ect-card" aria-labelledby="email-countdown-fonts-title">
                 <h2 id="email-countdown-fonts-title"><?php echo esc_html__( 'Local Fonts', 'email-countdown-timer' ); ?></h2>
                 <p><?php echo esc_html__( 'Use a persistent uploads directory for trusted static TTF/OTF files. No Google connection or browser upload is provided.', 'email-countdown-timer' ); ?></p>
-                <p><?php echo esc_html__( 'Persistent location: the uploads base directory, then email-countdown-timer/fonts/. Multisite adds site-ID/ inside fonts/. The directory is created only when copying fonts, or manually through your hosting tools.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Persistent location: the uploads base directory, then email-countdown-timer/fonts/. Multisite adds site-ID/ inside fonts/. The directory is created only when copying fonts, installing access rules, or manually through your hosting tools.', 'email-countdown-timer' ); ?></p>
                 <?php $email_countdown_timer_font_directory = Email_Countdown_Timer_Fonts::persistent_directory(); ?>
                 <?php if ( $email_countdown_timer_font_directory ) : ?><p><code><?php echo esc_html( $email_countdown_timer_font_directory ); ?></code></p><?php endif; ?>
                 <p><?php echo esc_html__( 'Copying preserves original files and timer names, never overwrites a different file, and processes at most 50 new files per request (5 MiB each). A same-name legacy file takes precedence until the old plugin directory is replaced. Copy font license notices manually.', 'email-countdown-timer' ); ?></p>

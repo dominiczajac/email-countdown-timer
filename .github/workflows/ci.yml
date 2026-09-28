@@ -57,6 +57,10 @@ jobs:
         run: php tests/font-storage.php
       - name: Lock outcome and current static fallback
         run: php tests/lock-outcomes.php
+      - name: Font access and approved maintenance contracts
+        run: |
+          php tests/font-access.php
+          php tests/maintenance.php
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail
@@ -65,6 +69,25 @@ jobs:
         run: node tests/frontend-compat.js
       - name: JavaScript syntax
         run: node --check assets/countdown.js && node --check assets/admin.js
+  font-http:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install test servers
+        run: sudo apt-get update -qq && sudo apt-get install -y apache2 nginx php-cli
+      - name: Isolated Apache and nginx font access tests
+        run: sudo python3 tests/font-http.py --report "$RUNNER_TEMP/font-http.json"
+      - name: Preserve font HTTP evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: font-http-evidence
+          path: ${{ runner.temp }}/font-http.json
+          retention-days: 14
+          if-no-files-found: error
   plugin-check:
     uses: ./.github/workflows/plugin-check.yml
   wordpress:
@@ -73,16 +96,18 @@ jobs:
   required-checks:
     name: required-checks
     if: ${{ always() }}
-    needs: [test, wordpress, plugin-check]
+    needs: [test, wordpress, plugin-check, font-http]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Require unit and real WordPress matrices to pass
         env:
+          FONT_HTTP_RESULT: ${{ needs.font-http.result }}
           TEST_RESULT: ${{ needs.test.result }}
           PCP_RESULT: ${{ needs.plugin-check.result }}
           WORDPRESS_RESULT: ${{ needs.wordpress.result }}
         run: |
+          test "$FONT_HTTP_RESULT" = success
           test "$TEST_RESULT" = success
           test "$WORDPRESS_RESULT" = success
           test "$PCP_RESULT" = success

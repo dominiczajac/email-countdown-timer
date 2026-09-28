@@ -11,6 +11,7 @@ includes/class-ecd-renderer.php
 includes/class-email-countdown-timer-admin.php
 includes/class-email-countdown-timer-data-settings.php
 includes/class-email-countdown-timer-fonts.php
+includes/class-email-countdown-timer-font-access.php
 includes/class-email-countdown-timer-privacy.php
 includes/class-email-countdown-timer-render-lock.php
 includes/class-email-countdown-timer-uninstaller.php

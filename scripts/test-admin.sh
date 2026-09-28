@@ -18,6 +18,8 @@ bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
 rm -f "$archive"
 "${wp[@]}" plugin activate email-countdown-timer
+# Existing browser fixtures explicitly use Warsaw; new tests also exercise changed zones.
+"${wp[@]}" option update timezone_string Europe/Warsaw
 policy_id="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Privacy fixture' --post_content='ECT privacy sentinel' --porcelain)"
 "${wp[@]}" option update wp_page_for_privacy_policy "$policy_id"
 export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[ecd_timer id="alt-browser-test"]' --porcelain)"
@@ -49,3 +51,6 @@ test "$performance_result" -eq 0
 test "$alt_result" -eq 0
 
 test "$privacy_result" -eq 0
+"${wp[@]}" option update timezone_string Pacific/Chatham
+"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/maintenance.py"
+"${wp[@]}" option update timezone_string Europe/Warsaw

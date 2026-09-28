@@ -14,6 +14,13 @@ if ($task==='seed') {
     foreach(['gif','png','webp'] as $fmt) delete_transient('ecd_v1211_'.hash('sha256','http-timer|'.$fmt));
     $c=Email_Countdown_Timer_Config::normalize($timers['http-timer']);
     echo hash('sha256',(new Email_Countdown_Timer_Renderer())->render_static($c,Email_Countdown_Timer_Config::deadline($c),time(),'gif'));
+} elseif ($task==='near-expiry') {
+    $timers=get_option('easy_countdown_timers');
+    $timers['http-timer']['deadline']=gmdate('Y-m-d\\TH:i:s',time()+2);$timers['http-timer']['tz']='UTC';
+    update_option('easy_countdown_timers',$timers,false);
+    foreach(['gif','png','webp'] as $fmt) delete_transient('ecd_v1211_'.hash('sha256','http-timer|'.$fmt));
+    $c=Email_Countdown_Timer_Config::normalize($timers['http-timer']);$deadline=Email_Countdown_Timer_Config::deadline($c);
+    echo hash('sha256',(new Email_Countdown_Timer_Renderer())->render_static($c,$deadline,$deadline+1,'gif'));
 } elseif ($task==='reset') {
     foreach(['gif','png','webp'] as $fmt) delete_transient('ecd_v1211_'.hash('sha256','http-timer|'.$fmt));
 } elseif ($task==='stale') {

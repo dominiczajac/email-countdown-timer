@@ -22,5 +22,9 @@ add_filter('query', static function ($sql) use ($ect_test_dir) {
     if (is_file($ect_test_dir.'/lock-error') && str_contains($sql,'GET_LOCK(') && str_contains($sql,'AS acquired')) {
         return 'SELECT email_countdown_timer_ci_nonexistent_function() AS acquired, CONNECTION_ID() AS connection_id';
     }
+    if (str_contains($sql,'IS_USED_LOCK(')) {
+        if (is_file($ect_test_dir.'/lost-after-deadline')) { sleep(3); return 'SELECT 0'; }
+        if (is_file($ect_test_dir.'/lost-lock')) return 'SELECT 0';
+    }
     return $sql;
 });

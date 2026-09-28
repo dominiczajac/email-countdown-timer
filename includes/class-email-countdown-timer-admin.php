@@ -27,9 +27,9 @@ final class Email_Countdown_Timer_Admin {
         return add_query_arg( array_merge( array( 'page' => 'ecd-timers' ), $args ), admin_url( 'admin.php' ) );
     }
 
-    public static function defaults(): array {
+    public static function defaults( bool $new_timer = true ): array {
         // Campaign labels are saved data, deliberately independent of the admin locale.
-        return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => 'Europe/Warsaw',
+        return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => $new_timer ? wp_timezone_string() : 'Europe/Warsaw',
             'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => '',
             'size_digit' => 40, 'size_label' => 12, 'fixed_width' => 0, 'hide_days' => 0,
             'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown' );
@@ -66,7 +66,12 @@ final class Email_Countdown_Timer_Admin {
         $action = self::posted( 'ecd_action' );
         $errors = array();
         $data = array();
-        foreach ( self::defaults() as $key => $default ) {
+        $defaults = self::defaults( '' === $original );
+        // Missing fields in old edit forms keep that campaign's interpretation.
+        if ( '' !== $original ) {
+            $defaults['tz'] = Email_Countdown_Timer_Config::text( $timers[ $original ] ?? array(), 'tz', 'Europe/Warsaw' );
+        }
+        foreach ( $defaults as $key => $default ) {
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above; reject malformed typed input before normalization.
             if ( isset( $_POST[ $key ] ) && ! is_string( $_POST[ $key ] ) ) {
                 $errors[ $key ] = __( 'Enter a single value for this field.', 'email-countdown-timer' );
@@ -74,6 +79,9 @@ final class Email_Countdown_Timer_Admin {
             $data[ $key ] = self::posted( $key, 'deadline' === $key ? '' : (string) $default );
         }
         $data['hide_days'] = '1' === self::posted( 'hide_days' ) ? 1 : 0;
+        if ( '' === $original && '' === trim( $data['tz'] ) ) {
+            $data['tz'] = $defaults['tz'];
+        }
         // Preserve old forms and existing metadata when the field is absent.
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
         if ( ! array_key_exists( 'alt', $_POST ) ) {
@@ -202,7 +210,7 @@ final class Email_Countdown_Timer_Admin {
         $view = $pending || '' !== $edit || 'new' === Email_Countdown_Timer_Config::text( $query, 'view' ) ? 'editor' : 'list';
         $original = $pending ? $pending['original'] : $edit;
         $saved = '' !== $original && isset( $timers[ $original ] ) ? $timers[ $original ] : null;
-        $data = array_replace( self::defaults(), $saved ?? array() );
+        $data = array_replace( self::defaults( null === $saved ), $saved ?? array() );
         $errors = $pending['errors'] ?? array();
         if ( '' !== $original && null === $saved ) {
             $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'email-countdown-timer' );

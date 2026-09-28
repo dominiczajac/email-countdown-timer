@@ -31,7 +31,7 @@ final class Email_Countdown_Timer_Render_Lock {
         $can_suppress = is_callable( array( $wpdb, 'suppress_errors' ) );
         $previous = $can_suppress ? $wpdb->suppress_errors( true ) : null;
         try {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic session lock; prepared code-owned name and bounded wait, never an options-based pseudo-lock.
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic session lock; prepared code-owned name and bounded wait, session-owned and released only by its original owner.
             $row = $wpdb->get_row( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d) AS acquired, CONNECTION_ID() AS connection_id', $name, $wait ), ARRAY_A );
             if ( ! is_array( $row ) || ! empty( $wpdb->last_error ) || ! isset( $row['acquired'] ) ) {
                 return array( 'state' => 'error', 'lock' => null );

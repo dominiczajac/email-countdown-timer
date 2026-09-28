@@ -35,19 +35,20 @@ foreach (['label_d'=>'Dni','label_h'=>'Godz','label_m'=>'Min','label_s'=>'Sek'] 
     ok((bool)preg_match('/name="'.preg_quote($field, '/').'" value="'.preg_quote($label, '/').'"/', $editHtml), 'saved label visible unchanged '.$field);
 }
 ok($options === $beforeOptions, 'viewing the translated admin does not write timer data');
-$_POST = array_merge($stored, ['ecd_action'=>'save_timer','timer_id'=>'legacy']);
+$_POST = array_merge(array_map('strval',$stored), ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'legacy','original_id'=>'legacy']);
 unset($_POST['hide_days']); // An unchecked checkbox is omitted by the browser.
-try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(), 'redirect:'), 'legacy save redirects'); }
+try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(), 'redirect:'), 'current form saves legacy campaign data'); }
 ok($options['easy_countdown_timers']['legacy'] === $stored, 'saving existing timer preserves its labels');
 
 // Exercise the actual create path when no label overrides are supplied.
-$_POST = ['ecd_action'=>'save_timer','timer_id'=>'english','deadline'=>'2027-12-31T23:59:59'];
+$_POST = ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'english','original_id'=>'','deadline'=>'2027-12-31T23:59:59'];
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(), 'redirect:'), 'English create redirects'); }
 ok($options['easy_countdown_timers']['english'] === $english, 'new saved timer uses English defaults');
-$_POST = ['ecd_action'=>'save_timer','timer_id'=>''];
+$_POST = ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'','original_id'=>''];
 $message = '';
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { $message = $e->getMessage(); }
-ok($message === 'die:Invalid timer ID.', 'English invalid ID error');
+ok(Email_Countdown_Timer_Admin::state()['errors']['timer_id'] === 'Enter a valid timer ID (maximum 200 bytes).', 'English invalid ID error');
+(new ReflectionProperty(Email_Countdown_Timer_Admin::class,'pending'))->setValue(null,null);
 
 foreach ([
     [['size_digit'=>[]], 'Invalid field type: size_digit'],
