@@ -59,7 +59,7 @@ final class Email_Countdown_Timer_Config {
         return $c;
     }
     public static function alt(array $config, string $fallback): string {
-        return array_key_exists('alt', $config) && is_string($config['alt'])
+        return array_key_exists('alt', $config) && is_string($config['alt']) && strlen($config['alt']) <= 1000
             ? sanitize_text_field($config['alt']) : $fallback;
     }
     public static function deadline(array $c): int {

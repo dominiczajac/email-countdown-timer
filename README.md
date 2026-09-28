@@ -2,7 +2,7 @@
 
 A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
 
-**Source version:** 12.3.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.3.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -109,3 +109,7 @@ Use focused pull requests and check the latest CI. [Contributing](CONTRIBUTING.m
 ## License
 
 GNU GPL v3.0 (`GPL-3.0-only`); see [LICENSE](LICENSE). Check the separate license of any custom fonts. Source publication does not imply a tagged release or acceptance into the WordPress.org directory.
+
+## Integration of the 12.3.x branches
+
+Version 12.3.1 reconciles PR #6 with the serialized rendering and HTTP tests from PR #5. Missing legacy alt values retain automatic descriptions; an explicitly saved empty value remains `alt=""` and requires equivalent nearby text. The limit is 1000 bytes. Google Fonts automatic import is deferred. See [integration decisions](docs/PR-INTEGRATION-12.3.1.md), [optimizer exclusions](docs/OPTIMIZATION-COMPATIBILITY.md) and [privacy](docs/PRIVACY.md).

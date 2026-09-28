@@ -1,6 +1,6 @@
 # FlyingPress, WP Rocket and other optimizers
 
-Applies to source version 12.3.0. Guidance was checked against the vendors' official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries.
+Applies to source versions 12.3.0 and 12.3.1. Guidance was checked against the vendors' official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries.
 
 ## Exclude narrowly, only where needed
 
@@ -62,3 +62,9 @@ After changing a timer's alt, purge the **HTML page** cache of pages containing 
 - FlyingPress query caching: https://docs.flyingpress.com/en/articles/11406502-separate-cache-for-query-parameters
 - FlyingPress ignored parameters: https://docs.flyingpress.com/en/articles/11406543-ignored-query-parameters
 - FlyingPress minifier exclusions: https://docs.flyingpress.com/en/articles/11405981-exclude-files-from-javascript-minification
+
+## FlyingPress without a CDN
+
+Version 12.3.1 sets the `flying_press_is_cacheable` filter to false only for `ecd_action=render`; the early `DONOTCACHEPAGE` flag and `no-store, no-transform` response remain. Pages containing the shortcode remain cacheable. Without a CDN there are no CDN settings to change, but a hosting/page-cache layer can still run before this plugin. Clear the affected page HTML cache after changing alt text. Apply the narrow script or LazyLoad exclusions above only if an actual display/refresh issue occurs.
+
+No commercial FlyingPress binary or production site configuration was tested by this reconciliation; this is not a compatibility certificate for an unspecified vendor version.

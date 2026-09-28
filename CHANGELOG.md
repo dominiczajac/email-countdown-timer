@@ -1,5 +1,13 @@
 # Changelog
 
+## 12.3.1 — 2026-09-28
+
+- Reconcile overlapping PRs #5 and #6 without removing session-owned render locks or HTTP tests.
+- Keep PR #5's absent-versus-explicit-empty alternative text behavior and 1000-byte limit; do not duplicate fields or migrate saved data.
+- Add the image-only FlyingPress cache filter, stricter source validation in the tab refresher, and independent binary validation of HTML-only alternative text.
+- Retain both branches' non-conflicting tests; update duplicate alt assertions to the documented PR #5 semantics.
+- Consolidate English optimizer/privacy/font instructions through stable documentation links. Google Fonts automatic import is deferred, not implemented.
+
 ## 12.3.0 — 2026-09-28
 
 Added per-timer alternative text with safe HTML escaping, explicit empty values, legacy fallbacks and editor/email/shortcode coverage. Alt never changes rendered pixels. Added narrow lazy-load interoperability markers, no-referrer hints, an idempotent tab refresher, no-transform image headers and best-effort dynamic-route page-cache bypass.

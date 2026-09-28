@@ -3,9 +3,13 @@
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
     private const OPTION_KEY = 'easy_countdown_timers';
-    private const VERSION = '12.3.0';
+    private const VERSION = '12.3.1';
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
+        if ($this->isImageRequest()) {
+            // Dynamic images only; the bootstrap also sets DONOTCACHEPAGE.
+            add_filter('flying_press_is_cacheable', '__return_false');
+        }
         add_action('admin_menu', [$this, 'registerAdminMenu']);
         add_action('admin_init', [$this, 'handleFormSave']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
@@ -66,9 +70,12 @@ class Email_Countdown_Timer_Plugin {
         return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
             esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr($alt));
     }
+    private function isImageRequest(): bool {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check; no mutation or request value is output.
+        return Email_Countdown_Timer_Config::text($_GET, 'ecd_action') === 'render';
+    }
     public function listenForImageRequest(): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
-        if (Email_Countdown_Timer_Config::text($_GET, 'ecd_action') !== 'render') return;
+        if (!$this->isImageRequest()) return;
         // Do not spin forever on a non-removable output buffer.
         while (ob_get_level() > 0) {
             $status = ob_get_status();
@@ -94,7 +101,10 @@ class Email_Countdown_Timer_Plugin {
         $id = Email_Countdown_Timer_Config::id(wp_unslash(Email_Countdown_Timer_Config::text($_GET, 'ecd')));
         $timers = $this->getTimers();
         if ($id === '' || !isset($timers[$id])) { $this->pixel(404, $head); return; }
-        try { $config = Email_Countdown_Timer_Config::normalize($timers[$id]); }
+        $imageInput = $timers[$id];
+        // HTML-only metadata must not break binary validation or partition image caches.
+        unset($imageInput['alt']);
+        try { $config = Email_Countdown_Timer_Config::normalize($imageInput); }
         catch (InvalidArgumentException $e) { $this->pixel(422, $head); return; }
         if (!function_exists('imagecreatetruecolor')) { $this->pixel(503, $head); return; }
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
