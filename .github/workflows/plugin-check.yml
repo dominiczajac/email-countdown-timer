@@ -1,14 +1,8 @@
 name: Plugin Check
 on:
-  pull_request:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
-concurrency:
-  group: pcp-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   plugin-check:
     name: plugin-check
@@ -73,12 +67,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          wp --path="$PCP_WP_PATH" --require="$PCP_WP_PATH/wp-content/plugins/plugin-check/cli.php" --no-color plugin check email-countdown-timer --format=json > "$RUNNER_TEMP/pcp-evidence/plugin-check.json" 2> "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr"
+          wp --path="$PCP_WP_PATH" --require="$PCP_WP_PATH/wp-content/plugins/plugin-check/cli.php" --no-color plugin check email-countdown-timer --format=strict-json > "$RUNNER_TEMP/pcp-evidence/plugin-check.json" 2> "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr"
           result=$?
           cat "$RUNNER_TEMP/pcp-evidence/plugin-check.json"
           cat "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr" >&2
           printf '%s\n' "$result" > "$RUNNER_TEMP/pcp-evidence/exit-code.txt"
           exit "$result"
+      - name: Fail on reported findings, not only the CLI exit status
+        run: python3 scripts/check-pcp-report.py "$RUNNER_TEMP/pcp-evidence"
       - name: Preserve complete report and tested source
         if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

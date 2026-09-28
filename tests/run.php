@@ -25,6 +25,9 @@ function sanitize_title($text) { return trim(preg_replace('/[^a-z0-9_%\-]+/', '-
 function sanitize_text_field($text) { return trim(strip_tags($text)); }
 function sanitize_hex_color($text) { return preg_match('/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/iD', $text) ? $text : null; }
 function wp_unslash($text) { return is_array($text) ? array_map('wp_unslash', $text) : (is_string($text) ? stripslashes($text) : $text); }
+function __($text, $domain) { return $GLOBALS['test_translations'][$text] ?? $text; }
+function esc_html__($text, $domain) { return esc_html(__($text, $domain)); }
+function esc_attr__($text, $domain) { return esc_attr(__($text, $domain)); }
 function esc_html($text) { return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8'); }
 function esc_attr($text) { return esc_html($text); }
 function esc_url($text) { return esc_attr($text); }
@@ -51,6 +54,11 @@ function status_header($code) { $GLOBALS['statusCode']=$code; }
 function ok($value, $message) { $GLOBALS['checks']++; if (!$value) throw new RuntimeException('FAIL: '.$message); }
 function rejects(callable $fn) { try { $fn(); } catch (InvalidArgumentException|RuntimeException $e) { return true; } return false; }
 require __DIR__.'/../email-countdown-timer.php';
+// CLI-only adapters keep the historical regression tests and frozen oracle unchanged.
+class_alias('Email_Countdown_Timer_Config', 'ECD_Config');
+class_alias('Email_Countdown_Timer_Renderer', 'ECD_Renderer');
+class_alias('Email_Countdown_Timer_Plugin', 'ECD_Plugin_Colons_Fix');
+define('ECD_PLUGIN_DIR', EMAIL_COUNTDOWN_TIMER_DIR);
 $plugin=new ECD_Plugin_Colons_Fix();
 // Explicitly preserve the saved v12.1 labels in the legacy rendering fixture.
 $base=ECD_Config::normalize(['deadline'=>'2027-12-31T23:59:59', 'label_d'=>'Dni', 'label_h'=>'Godz', 'label_m'=>'Min', 'label_s'=>'Sek']);
@@ -159,5 +167,6 @@ if (function_exists('imagecreatetruecolor')) {
     if (getenv('ECD_REQUIRE_GD')==='1') throw new RuntimeException('GD required in CI');
 }
 require __DIR__.'/english-ui.php';
+require __DIR__.'/internationalization.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;

@@ -1,6 +1,9 @@
 <?php
 /** Uninstall-only cleanup of explicitly owned data, with per-site consent. */
-if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     exit;
 }
 
@@ -56,7 +59,8 @@ final class Email_Countdown_Timer_Uninstaller {
         do {
             // Read only known prefixes; exact hash-shaped names are verified again below.
             // The table name is supplied by WordPress. No request values enter this query.
-            $query = $wpdb->prepare(
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall-only keyset enumeration of owned options; no API enumerates them and cached results would be stale during deletion.
+            $rows = $wpdb->get_results( $wpdb->prepare(
                 "SELECT option_id, option_name FROM {$wpdb->options}
                  WHERE option_id > %d AND (option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s)
                  ORDER BY option_id ASC LIMIT %d",
@@ -66,9 +70,7 @@ final class Email_Countdown_Timer_Uninstaller {
                 $wpdb->esc_like( '_transient_ecd_img_' ) . '%',
                 $wpdb->esc_like( '_transient_timeout_ecd_img_' ) . '%',
                 self::BATCH_SIZE
-            );
-            // Uninstall-only enumeration cannot be served from an application cache.
-            $rows = $wpdb->get_results( $query, ARRAY_A );
+            ), ARRAY_A );
             if ( ! is_array( $rows ) || '' !== $wpdb->last_error ) {
                 throw new RuntimeException( 'Email Countdown Timer could not enumerate its database cache for uninstall.' );
             }
