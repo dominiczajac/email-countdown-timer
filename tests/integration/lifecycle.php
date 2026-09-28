@@ -83,8 +83,10 @@ foreach ($sites as $site_id) {
             update_option('other_plugin_option', ['keep'=>true]);
             set_transient('other_plugin_transient', 'keep', 600);
             wp_cache_set('ecd-ci-sentinel', 'keep', 'other_plugin', 600);
-            wp_schedule_single_event(time()+86400, 'other_plugin_ci_event');
-            update_option('ecd_ci_event_timestamp', wp_next_scheduled('other_plugin_ci_event'));
+            $scheduled = wp_schedule_single_event(time()+86400, 'other_plugin_ci_event', [], true);
+            $event_time = wp_next_scheduled('other_plugin_ci_event');
+            $expect($scheduled === true && is_int($event_time), 'Fixture event scheduled: site=' . $site_id . ' value=' . wp_json_encode([$scheduled, $event_time]));
+            update_option('ecd_ci_event_timestamp', $event_time);
         } elseif ($phase === 'optin') {
             if ($delete_this_site) {
                 update_option($policy, '1', false);
@@ -112,7 +114,7 @@ foreach ($sites as $site_id) {
             if (wp_using_ext_object_cache()) {
                 $expect(wp_cache_get('ecd-ci-sentinel', 'other_plugin') === 'keep', 'Shared cache not flushed.');
             }
-            $expect(wp_next_scheduled('other_plugin_ci_event') === (int)get_option('ecd_ci_event_timestamp'), 'Unrelated scheduled event retained.');
+            $expect(wp_next_scheduled('other_plugin_ci_event') === (int)get_option('ecd_ci_event_timestamp'), 'Unrelated scheduled event retained: site=' . $site_id . ' actual=' . wp_json_encode(wp_next_scheduled('other_plugin_ci_event')) . ' expected=' . wp_json_encode(get_option('ecd_ci_event_timestamp')) . ' cron=' . wp_json_encode(get_option('cron')));
         } else {
             WP_CLI::error('Unknown lifecycle phase.');
         }
