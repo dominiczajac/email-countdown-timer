@@ -1,0 +1,84 @@
+{
+    "php": "8.4.26",
+    "wordpress": "7.1.2",
+    "imagick": "3.8.1",
+    "results": {
+        "bitmap_png_renderer": {
+            "samples": 9,
+            "median_ms": 1.095,
+            "p95_ms": 1.52,
+            "output_bytes": 957
+        },
+        "bitmap_gif_renderer": {
+            "samples": 9,
+            "median_ms": 259.904,
+            "p95_ms": 270.141,
+            "output_bytes": 4774
+        },
+        "bitmap_gif_cold_1_timers": {
+            "samples": 9,
+            "median_ms": 264.289,
+            "p95_ms": 279.166,
+            "output_bytes": 4774
+        },
+        "bitmap_gif_warm_1_timers": {
+            "samples": 31,
+            "median_ms": 0.03,
+            "p95_ms": 0.051,
+            "output_bytes": 4774
+        },
+        "bitmap_stored_base64_bytes": 6368,
+        "bitmap_gif_cold_250_timers": {
+            "samples": 9,
+            "median_ms": 264.916,
+            "p95_ms": 279.184,
+            "output_bytes": 4774
+        },
+        "bitmap_gif_warm_250_timers": {
+            "samples": 31,
+            "median_ms": 0.21,
+            "p95_ms": 0.243,
+            "output_bytes": 4774
+        },
+        "ttf_png_renderer": {
+            "samples": 9,
+            "median_ms": 4.658,
+            "p95_ms": 6.155,
+            "output_bytes": 6141
+        },
+        "ttf_gif_renderer": {
+            "samples": 9,
+            "median_ms": 506.363,
+            "p95_ms": 513.535,
+            "output_bytes": 50681
+        },
+        "ttf_gif_cold_1_timers": {
+            "samples": 9,
+            "median_ms": 514.251,
+            "p95_ms": 523.53,
+            "output_bytes": 50681
+        },
+        "ttf_gif_warm_1_timers": {
+            "samples": 31,
+            "median_ms": 0.043,
+            "p95_ms": 0.068,
+            "output_bytes": 50681
+        },
+        "ttf_stored_base64_bytes": 67576,
+        "ttf_gif_cold_250_timers": {
+            "samples": 9,
+            "median_ms": 514.738,
+            "p95_ms": 528.901,
+            "output_bytes": 50681
+        },
+        "ttf_gif_warm_250_timers": {
+            "samples": 31,
+            "median_ms": 0.227,
+            "p95_ms": 0.274,
+            "output_bytes": 50681
+        }
+    },
+    "php_process_peak_bytes": 55902208,
+    "process_peak_rss_kib_linux": 149744,
+    "scope": "Sequential synthetic local PHP calls in one bootstrapped WordPress process; fixed time and warm Options API cache. Cold means image transient invalidated. Excludes full HTTP\/WordPress bootstrap, concurrency and client delivery. Native image memory is not fully captured by PHP allocation counters."
+}

@@ -16,4 +16,4 @@ Keep all existing rendering, lifecycle, real WordPress and Plugin Check gates. A
 
 Measure custom CSS/JS gzip size against the approved 15 KiB budget, confirm plugin-only asset loading and run a synthetic renderer/cache benchmark separately from production. No destructive operations or load tests against the maintainer's public site.
 
-This document is an implementation plan until the PR's verification record confirms completion. No release or deployment is implied by opening the PR.
+The implementation and recorded browser/performance results are described in [Verification 12.2.0](VERIFICATION-12.2.0.md). The complete current-head CI gate and explicit PR merge still determine integration; neither this scope document nor a source version implies a production deployment or tagged release.

@@ -21,6 +21,10 @@ The admin panel labels the size fields as “px”, but GD/FreeType functions in
 
 In addition to field limits, the entire image has a budget: maximum dimensions of 4000 × 1000 and a maximum area of **400,000 pixels**. Not every combination of allowed sizes and long labels fits within that budget. For 60 frames, the cumulative limit is 24 million pixels; this is an input limit, not a guarantee of a specific RAM footprint.
 
+## Admin workflow in 12.2.0
+
+The list searches IDs and displays 25 timers per page. Open **Create Timer** or **Edit**, then use **Typography and Size** and **Custom Labels** for optional settings. Preview and embed codes reflect saved values only. Deletion is a separate confirmed action, not a checkbox on Save Changes. See [Admin interface](Admin-Interface.md).
+
 ## Dates and expiration
 
 PHP interprets the date in the selected time zone. Relative deadlines such as `+1 hour` and nonexistent calendar dates are not accepted. PHP's daylight-saving-time rules are preserved; ambiguous times during daylight-saving transitions should be tested before a campaign.

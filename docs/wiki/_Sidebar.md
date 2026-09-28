@@ -2,6 +2,7 @@
 
 - [Home](Home.md)
 - [Installation](Installation.md)
+- [Admin interface](Admin-Interface.md)
 - [Configuration](Configuration.md)
 - [Embedding](Embedding.md)
 - [Data removal](Data-Removal.md)
