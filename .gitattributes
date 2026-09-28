@@ -6,3 +6,4 @@
 /.gitignore export-ignore
 /.editorconfig export-ignore
 /AGENTS.md export-ignore
+/dist export-ignore

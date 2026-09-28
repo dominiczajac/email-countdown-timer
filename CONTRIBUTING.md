@@ -24,3 +24,7 @@ UI changes also require real browser checks: labels, keyboard/focus, narrow layo
 Keep README, Wiki sources and verification records current. Historical audits stay historical. Distinguish a source ZIP, a release and WordPress.org acceptance. Native Wiki publication is separate from `docs/wiki/` commits.
 
 CODEOWNERS routes review; it is not independent approval. Do not approve your own PR under the author's account or misrepresent automated checks as an independent human audit. Repository protection is enforced by actual settings, not documentation. [Maintainer guide](docs/REPOSITORY-MAINTENANCE.md) and [verified protection state](docs/VERIFICATION-12.1.3.md).
+
+## Installation artifact
+
+Use `bash scripts/build-zip.sh --output dist/email-countdown-timer.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Never add font binaries or site data to runtime directories. See [build instructions](docs/DISTRIBUTION-BUILD.md).

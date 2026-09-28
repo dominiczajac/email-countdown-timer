@@ -1,5 +1,19 @@
 # Changelog
 
+## 12.4.2
+
+- One explicit, verified installation ZIP is now used by packaging, Plugin Check and real WordPress lifecycle/browser/HTTP tests. Negative build tests reject unsafe paths, source symlinks, missing or unlisted runtime files and inconsistent metadata.
+- Suggested, translatable privacy wording is registered on admin_init for the WordPress Privacy Policy Guide. Published policies are never edited automatically; no tracking or remote service is added.
+- Refresh user-facing readme and canonical instructions for persistent fonts, current static fallback, FlyingPress and safe upgrades. WordPress.org contributor identity remains to be confirmed.
+- Renderer, saved campaign data, public URLs and generation locking are unchanged.
+
+
+## 12.4.1
+
+- Distinguish acquired, busy, unsupported and failed advisory-lock attempts. Preserve real ownership checks.
+- Use a current single-frame image after a one-second busy/unavailable lock wait; never reuse stale animated output or populate the animation cache with fallback frames.
+- Add administrator-only lock diagnostics and real HTTP tests for error, busy and expired-deadline fallback paths.
+
 ## 12.4.0
 
 - Add persistent per-site local font lookup, explicit non-destructive copying and hash-scoped uninstall cleanup. Manual/replaced files remain. Legacy name precedence preserves existing rendering.

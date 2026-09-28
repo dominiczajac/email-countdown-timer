@@ -1,115 +1,84 @@
 # Email Countdown Timer
 
-A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
+Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.3.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.4.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
 | Component | Requirement |
 |---|---|
-| WordPress | Minimum 6.4; CI exercises 6.4 and current stable (7.1.2 in the recorded runs) |
-| PHP | Minimum 8.1; isolated regression CI covers 8.1–8.5 |
-| GD | Required with PNG/GIF support; WebP depends on the GD build |
-| Imagick | Required for animation; GIF responses are static without it |
+| WordPress | 6.4 or later; CI tests the minimum and current stable |
+| PHP | Compatibility minimum 8.1; use an upstream-supported PHP version for production |
+| GD | Required with PNG/GIF support; WebP is used when available |
+| Imagick | Required for animated GIFs; GD alone produces static images |
 | FreeType | Required for custom TTF/OTF fonts |
-| Database | MySQL/MariaDB session advisory locking on one consistent primary; see [concurrency requirements](docs/RENDER-CONCURRENCY.md) |
-| Network | A publicly accessible WordPress HTTPS URL for email images |
+| Database | Consistent MySQL/MariaDB session/primary for serialized animation generation; unavailable locking uses current static fallback |
+| Network | A publicly reachable HTTPS image URL for email recipients |
 
-No Composer/npm dependencies are required at runtime. Font files are not bundled. Test your actual hosting and email clients before a campaign.
+There are no bundled runtime Composer/npm dependencies or font binaries. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
 
-## Installation and first timer
+## Install or update
 
-1. Place the files in `wp-content/plugins/email-countdown-timer/`, with `email-countdown-timer.php` directly inside that directory. Activate **Email Countdown Timer**.
-2. Open **Easy Countdown > Create Timer**, set an ID such as `promotion`, the deadline, time zone, colors and labels, and save.
-3. In the editor, use **Embed Codes** to copy the image URL, email HTML or website shortcode. The list's **Get Embed Code** action opens this section.
+Use the installation ZIP, not a working directory containing developer/test files. In WordPress, open **Plugins > Add New > Upload Plugin** and install it. For an update, replace the installed plugin rather than uninstalling it; uninstall may remove data if you enabled that option. Back up your database and custom fonts first, and disable any older duplicate implementation or snippet.
 
-When replacing an older plugin or snippet, back up the database and custom fonts, then disable the old implementation. Running both can duplicate hooks and output. Version 12.1.3 uses distinct internal `Email_Countdown_Timer_` classes; these are not a compatibility API for custom integrations. The saved `easy_countdown_timers` option, shortcode and image URLs are preserved. See [Installation](docs/wiki/Installation.md).
+**Before the first update from 12.3.1 or older, copy/back up plugin-local fonts before WordPress replaces the old directory.** New code cannot recover files removed before it runs. Preserve font filenames and license notices. Persistent storage normally lives at `wp-content/uploads/email-countdown-timer/fonts/`; multisite adds `site-ID/`, and custom uploads paths can differ. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
 
-## Lightweight admin panel
+Open **Easy Countdown > Create Timer**, select a unique ID, set the deadline and time zone, and save. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
 
-Version 12.2.0 separates the searchable, paginated timer list from the editor. It uses system typography, native WordPress buttons, labeled controls, field-level errors, focus management and a separate confirmed delete action. The main form still works without JavaScript; manual copy formats and field sections are expanded in that mode.
+## Display and accessibility
 
-The saved preview is a static image. **Preview Animation** is an explicit action and **Stop Preview** returns to the static image. Unsaved inputs do not trigger rendering or overwrite campaign data. There is no autosave, polling or animated list thumbnail. The custom stylesheet and script load only on the plugin's screens.
+The editor supports colors, dimensions, custom labels, local fonts and **Image alternative text (alt)**. The combined geometry is validated before saving without encoding a preview. Native bitmap text has fixed sizes; new saves require printable ASCII labels when no usable FreeType font is present. A TTF/OTF file must contain the glyphs required by your labels.
 
-**Google Fonts import is not included.** The font selector lists local TTF/OTF files in the existing plugin `fonts/` directory. The [proposed persistent importer](docs/GOOGLE-FONTS-DESIGN.md) is separate work; backing up current custom fonts before an upgrade remains necessary.
+Saved `alt` is escaped in the website shortcode, preview and newly copied email HTML. Explicit empty text remains `alt=""`; use it only when surrounding content already conveys the information. Missing legacy metadata uses a contextual fallback. Editing a timer cannot change the HTML of an already sent email. Recopy email HTML, or set alt in your email editor when using only an image URL. Purge affected HTML page caches after a shortcode description changes.
 
-[Admin workflow](docs/wiki/Admin-Interface.md) explains copying, errors, accessibility and deletion. Automated browser checks are not a screen-reader audit or a WCAG certification.
+The admin interface is English and translation-ready. It uses native WordPress controls, visible labels, keyboard/focus handling, retained invalid input and confirmed deletion. Saving/manual copying remain available without JavaScript. Campaign labels are saved content, not automatically translated when the administrator's locale changes. Automated checks do not establish complete WCAG conformance.
 
 ## Embedding
-
-On a WordPress page:
 
 ```text
 [ecd_timer id="promotion"]
 ```
 
-In an HTML email, replace the domain and ID with the URL copied from your panel:
+Email HTML can be copied from the editor with an image description and visible absolute deadline. Images are generated from the current server time, with 15-second shared freshness buckets. Animated GIFs contain 60 one-second frames. A single downloaded GIF does not recalculate forever: email providers can prefetch, cache or block it, and some clients only display the first frame. **Always include the actual deadline as visible text.** Do not insert recipient IDs, email addresses or confidential information into public timer fields or URLs.
 
-```html
-<img src="https://example.com/?ecd_action=render&amp;ecd=promotion&amp;mode=email"
-     alt="Time remaining until the promotion ends"
-     style="display:block;max-width:100%;height:auto;border:0;">
-```
+The public query names, shortcode and `easy_countdown_timers` option remain compatible with previous releases. Do not change URLs already used in campaigns. [Embedding details](docs/wiki/Embedding.md).
 
-Do not paste the shortcode or JavaScript into email. Attaching a downloaded GIF, or importing it into an editor's image library, may replace dynamic fetching with a fixed copy. See [Embedding](docs/wiki/Embedding.md).
+## Local fonts
 
-## Alternative text, optimizers and privacy
+Persistent per-site storage is available independently of Google Fonts. Upload trusted, licensed static TTF/OTF files through SFTP or the hosting file manager. There is no browser upload endpoint. **Data Settings > Copy Legacy Fonts to Persistent Storage** performs a bounded, non-destructive local copy when original plugin-local files are still present. It never overwrites a conflict, and a remaining legacy file has precedence for the same filename. Copy license notices manually. [Storage, first-upgrade and uninstall boundaries](docs/LOCAL-FONT-STORAGE.md).
 
-Set **Image alternative text (alt)** in the timer editor and save. The value is used in the website shortcode and newly copied Email HTML. An explicitly empty value stays `alt=""`; use that only when adjacent text already conveys the same information. Older records retain their contextual fallback until edited. Alt is HTML metadata, not part of the GIF or its URL. Copy email HTML again after changing it; already-sent emails cannot be rewritten. Purge affected HTML page caches to refresh shortcode markup.
+**Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
-See [FlyingPress / WP Rocket exclusions](docs/wiki/Optimization-Compatibility.md) for precise, symptom-based asset and image-cache guidance. Compatibility with every commercial version/settings combination is not claimed. Keep ordinary page caching; bypass only dynamic image requests when necessary.
+## Performance and optimizer compatibility
 
-[Privacy and local fonts](docs/wiki/Privacy-and-Local-Fonts.md) documents the absence of plugin visitor tracking/cookies/telemetry, actual stored campaign data, and the separate hosting/CDN/WordPress privacy boundary. Manual licensed TTF/OTF installation works now; automatic Google Fonts importing is still a proposal, not a shipped feature.
+The panel uses a small scoped stylesheet/script, system typography, static saved previews and no background polling, per-keystroke rendering or animated list thumbnails. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
-[Render concurrency](docs/RENDER-CONCURRENCY.md) explains the two-second session lock, cache recheck and safe 503 behavior under contention. It does not replace capacity planning.
+After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline is clamped to zero. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
-## Behavior and limitations
+FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `email-countdown-timer/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
 
-The English interface and validation messages are translation-ready. New timer labels remain stable data: `Days`, `Hours`, `Minutes`, `Seconds`. Changing the administrator's locale does not rewrite labels in campaigns. Existing labels, including custom and empty values, are preserved; edit the **Labels** fields to change them.
+## Privacy and removal
 
-A GIF contains **60 frames, one second each**. It is a finite sequence, not a live server connection. A shortcode refreshes its image when the browser tab becomes visible again; there is no continuous polling. Images are shared within 15-second cache buckets, so the first frame need not match the exact request time.
+The shipped code adds no visitor cookies, persistent browser storage, individual impression/open counters, fingerprinting or developer telemetry. It stores administrator-authored campaign settings, uninstall preference, copied-font ownership hashes and short-lived shared image caches locally. No Google service is contacted. HTTP delivery still exposes connection data to infrastructure; WordPress, other plugins, hosting and mail-image proxies have their own processing and logs. [Technical privacy disclosure](docs/wiki/Privacy-and-Local-Fonts.md).
 
-**An email client may prefetch, cache or block the image.** Server headers cannot guarantee an up-to-date countdown on every opening. Always include the absolute deadline in plain text. [Email-client limitations and sources](docs/wiki/Embedding.md#email-client-limitations).
+The **WordPress Privacy Policy Guide** contains suggested wording and administrator guidance. The plugin does not edit or publish your privacy-policy page. Review providers, logs and retention before using the suggestion; this is not whole-site GDPR/ePrivacy certification.
 
-Width is a **minimum image width**, not scaling to an exact dimension; `0` means automatic. Without a custom font, GD uses fixed-size bitmap fonts. Digit and label size fields do not resize those bitmap fonts. [Configuration](docs/wiki/Configuration.md).
+**Data Settings > Delete all plugin data when uninstalling** is off by default and per site on multisite. Deactivation preserves data. Opt-in uninstall removes owned options/cache and unchanged font files recorded by the copy tool. Manual/replaced fonts, unrelated data, other plugins' cron jobs and backups remain. The plugin schedules no cron jobs. [Data removal](docs/wiki/Data-Removal.md).
 
-## Data retention
+## Development and packaging
 
-**Easy Countdown > Data Settings > Delete all plugin data when uninstalling** is off by default. Saving this setting or deactivating the plugin never deletes timers. When enabled, uninstall through WordPress removes that site's plugin options and owned database image cache. Multisite consent is per site. Shared cron, foreign options and other plugins' caches are preserved; this plugin schedules no cron events.
-
-Unknown orphaned entries existing only in an external cache expire at their original 60-second TTL rather than triggering a global cache flush. Uninstall cannot erase backups, hosting logs or email-client copies. [Data removal](docs/wiki/Data-Removal.md).
-
-## Verification
+Read [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Work through focused PRs and current-head checks; never bypass `main` protection or change the frozen renderer test oracle to hide a regression.
 
 ```sh
+bash scripts/build-zip.sh --output dist/email-countdown-timer.zip --report dist/distribution.json
+python3 tests/test-build.py
 php tests/run.php
 php tests/uninstall.php
-python3 tests/test-pcp-gate.py
-node --check assets/countdown.js
-node --check assets/admin.js
 ```
 
-The isolated tests use WordPress API doubles and cover validation, permissions, saved-label preservation, translated output, caching and pixel comparisons against the frozen v12.1 renderer. Separately, disposable real WordPress/MySQL integration jobs exercise single-site and multisite installations with database transients and Redis, HTTP images, retention and uninstall. Missing GD is an explicit local skip and a CI failure.
+The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Fonts, tests, CI and development docs are not bundled. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
 
-CI also runs **Plugin Check 2.1.0 with runtime checks** against the distribution files. `required-checks` requires unit tests, WordPress integration and Plugin Check to pass. The PCP gate reads reported findings, not just the command's exit status, and fails on errors or warnings. Narrow, documented code-local annotations remain for context-sensitive cases such as binary image output; there are no global check exclusions. [Preflight review](docs/PLUGIN-CHECK-REVIEW.md).
+[Wiki sources](docs/wiki/Home.md) · [Changelog](CHANGELOG.md) · [Directory readiness](docs/WORDPRESS-ORG-READINESS.md) · [Static fallback](docs/STATIC-FALLBACK.md)
 
-CI also exercises the actual admin in Chromium, with and without JavaScript. The renderer microbenchmark excludes WordPress startup; the new loopback HTTP suite includes it and drives concurrent clients against database and Redis caches. Neither is a production-host capacity test.
-
-See [12.3.0 verification and HTTP results](docs/VERIFICATION-12.3.0.md), [previous UI/performance evidence](docs/VERIFICATION-12.2.0.md), [previous preflight evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
-
-## Documentation and contribution
-
-[Wiki index](docs/wiki/Home.md) · [Admin interface](docs/wiki/Admin-Interface.md) · [Installation](docs/wiki/Installation.md) · [Configuration](docs/wiki/Configuration.md) · [Embedding](docs/wiki/Embedding.md) · [Data removal](docs/wiki/Data-Removal.md) · [Performance and security](docs/wiki/Performance-and-Security.md) · [Troubleshooting](docs/wiki/Troubleshooting.md) · [Development](docs/wiki/Development.md)
-
-`docs/wiki/` contains version-controlled documentation, not an automatically published native GitHub Wiki. `scripts/publish-wiki.sh` handles that separate operation with local Git authentication.
-
-Use focused pull requests and check the latest CI. [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md) · [WordPress.org readiness](docs/WORDPRESS-ORG-READINESS.md) · [Changelog](CHANGELOG.md).
-
-## License
-
-GNU GPL v3.0 (`GPL-3.0-only`); see [LICENSE](LICENSE). Check the separate license of any custom fonts. Source publication does not imply a tagged release or acceptance into the WordPress.org directory.
-
-## Integration of the 12.3.x branches
-
-Version 12.3.1 reconciles PR #6 with the serialized rendering and HTTP tests from PR #5. Missing legacy alt values retain automatic descriptions; an explicitly saved empty value remains `alt=""` and requires equivalent nearby text. The limit is 1000 bytes. Google Fonts automatic import is deferred. See [integration decisions](docs/PR-INTEGRATION-12.3.1.md), [optimizer exclusions](docs/OPTIMIZATION-COMPATIBILITY.md) and [privacy](docs/PRIVACY.md).
+GitHub is the development repository. This README is not a claim of WordPress.org acceptance, native GitHub Wiki publication or production deployment. Historical verification reports identify their actual revisions; do not treat their measurements as benchmarks of your host or of later code.

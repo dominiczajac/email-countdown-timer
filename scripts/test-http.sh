@@ -19,9 +19,11 @@ if [[ "${ECD_CACHE:-database}" == redis ]]; then
   "${wp[@]}" redis enable
 fi
 target="$wpdir/wp-content/plugins/email-countdown-timer"
+archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
+bash "$root/scripts/build-zip.sh" --output "$archive"
+"${wp[@]}" plugin install "$archive"
+rm -f "$archive"
 mkdir -p "$target/fonts" "$wpdir/wp-content/mu-plugins"
-cp "$root/email-countdown-timer.php" "$root/uninstall.php" "$root/readme.txt" "$root/LICENSE" "$target/"
-cp -R "$root/includes" "$root/assets" "$target/"
 # Test-only local runner font, never included in the ZIP or repository.
 cp /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf "$target/fonts/fixture.ttf"
 "${wp[@]}" plugin activate email-countdown-timer
