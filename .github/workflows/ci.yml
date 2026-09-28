@@ -42,20 +42,20 @@ jobs:
         run: php tests/uninstall.php
       - name: JavaScript syntax
         run: node --check assets/countdown.js
-  # Keep one stable required check even when the test matrix changes.
-  # Skipped, cancelled, or failed matrix jobs must not satisfy this gate.
+  wordpress:
+    uses: ./.github/workflows/wordpress.yml
+  # Fail closed on failed, skipped or cancelled unit/integration jobs.
   required-checks:
     name: required-checks
     if: ${{ always() }}
-    needs: [test]
+    needs: [test, wordpress]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Require the complete test matrix to pass
+      - name: Require unit and real WordPress matrices to pass
         env:
           TEST_RESULT: ${{ needs.test.result }}
+          WORDPRESS_RESULT: ${{ needs.wordpress.result }}
         run: |
-          if [ "$TEST_RESULT" != "success" ]; then
-            echo "The test matrix did not pass: $TEST_RESULT"
-            exit 1
-          fi
+          test "$TEST_RESULT" = success
+          test "$WORDPRESS_RESULT" = success
