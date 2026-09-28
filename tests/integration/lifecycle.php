@@ -20,11 +20,19 @@ $expect = static function ($condition, string $message) use (&$checks): void {
 };
 $expect((bool)wp_using_ext_object_cache() === (getenv('ECD_CACHE') === 'redis'), 'Expected cache backend.');
 if ($phase === 'seed' && is_multisite()) {
-    foreach (['retained', 'consented'] as $path) {
-        $site = wpmu_create_blog('localhost', '/' . $path . '/', 'Synthetic fixture', 1);
-        $expect(!is_wp_error($site), 'Create synthetic subsite.');
+    // wpmu_create_blog() sets installing mode but does not restore it. Fixtures
+    // must be written in normal mode; installing mode redirects transients to cache.
+    $was_installing = wp_installing();
+    try {
+        foreach (['retained', 'consented'] as $path) {
+            $site = wpmu_create_blog('localhost', '/' . $path . '/', 'Synthetic fixture', 1);
+            $expect(!is_wp_error($site), 'Create synthetic subsite.');
+        }
+    } finally {
+        wp_installing($was_installing);
     }
 }
+$expect(!wp_installing(), 'Normal WordPress mode before lifecycle fixtures and checks.');
 $sites = is_multisite() ? array_map('intval', get_sites(['fields'=>'ids', 'number'=>100, 'orderby'=>'id', 'order'=>'ASC', 'network_id'=>0])) : [get_current_blog_id()];
 $expect(count($sites) === (is_multisite() ? 3 : 1), 'Expected isolated site count.');
 $original = get_current_blog_id();
@@ -114,7 +122,7 @@ foreach ($sites as $site_id) {
             if (wp_using_ext_object_cache()) {
                 $expect(wp_cache_get('ecd-ci-sentinel', 'other_plugin') === 'keep', 'Shared cache not flushed.');
             }
-            $expect(wp_next_scheduled('other_plugin_ci_event') === (int)get_option('ecd_ci_event_timestamp'), 'Unrelated scheduled event retained: site=' . $site_id . ' actual=' . wp_json_encode(wp_next_scheduled('other_plugin_ci_event')) . ' expected=' . wp_json_encode(get_option('ecd_ci_event_timestamp')) . ' cron=' . wp_json_encode(get_option('cron')));
+            $expect(wp_next_scheduled('other_plugin_ci_event') === (int)get_option('ecd_ci_event_timestamp'), 'Unrelated scheduled event retained: site=' . $site_id . ' actual=' . wp_json_encode(wp_next_scheduled('other_plugin_ci_event')) . ' expected=' . wp_json_encode(get_option('ecd_ci_event_timestamp')));
         } else {
             WP_CLI::error('Unknown lifecycle phase.');
         }

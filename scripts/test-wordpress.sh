@@ -35,6 +35,7 @@ network=()
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" seed
+"${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 php -S 127.0.0.1:8080 -t "$wpdir" > "$RUNNER_TEMP/ecd-http.log" 2>&1 &
 server=$!
 trap 'kill "$server" 2>/dev/null || true' EXIT
@@ -45,6 +46,7 @@ done
 php -r '$a=new Imagick(); $a->readImageBlob(file_get_contents($argv[1])); if($a->getNumberImages()!==60){throw new RuntimeException("Expected 60 GIF frames");} echo "HTTP GIF: 60 frames PASS\n";' "$RUNNER_TEMP/ecd-fixture.gif"
 status="$(curl -sS -o /dev/null -w '%{http_code}' 'http://localhost:8080/?ecd_action=render&ecd=unknown-ci-timer&mode=email')"
 [[ "$status" == 404 ]]
+"${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" plugin deactivate email-countdown-timer "${network[@]}"
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" invoke-uninstall
