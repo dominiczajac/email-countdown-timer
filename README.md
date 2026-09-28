@@ -1,39 +1,39 @@
 # Email Countdown Timer
 
-A WordPress plugin that generates images counting down to a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server; the plugin does not send email and does not require an external SaaS service or API key.
+A WordPress plugin that generates countdown images for a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server. The plugin does not send email and requires no external SaaS service or API key.
 
-**Version:** 12.1.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.1.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
 | Component | Requirement |
 |---|---|
-| WordPress | The header declares a minimum of 6.4; test on your own installation before deploying |
-| PHP | Minimum 8.1; CI covers 8.1–8.5 |
-| GD | Required, with PNG/GIF support; WebP depends on the GD build |
-| Imagick | Required for animation. Without it, GIF responses are static |
+| WordPress | Minimum 6.4; CI exercises 6.4 and current stable (7.1.2 in the recorded runs) |
+| PHP | Minimum 8.1; isolated regression CI covers 8.1–8.5 |
+| GD | Required with PNG/GIF support; WebP depends on the GD build |
+| Imagick | Required for animation; GIF responses are static without it |
 | FreeType | Required for custom TTF/OTF fonts |
-| Network access | A publicly accessible WordPress HTTPS URL for images embedded in email |
+| Network | A publicly accessible WordPress HTTPS URL for email images |
 
-No Composer/npm dependencies are required at runtime. Font files are not bundled.
+No Composer/npm dependencies are required at runtime. Font files are not bundled. Test your actual hosting and email clients before a campaign.
 
-## Installation and your first timer
+## Installation and first timer
 
-1. Place the files in `wp-content/plugins/email-countdown-timer/`, with `email-countdown-timer.php` directly inside that directory. Activate **Email Countdown Timer** in WordPress.
-2. Open **Easy Countdown** and create a timer, such as `promotion`: set the deadline, time zone, colors, and labels. Save the form.
-3. Copy the shortcode or email image link from the timer list.
+1. Place the files in `wp-content/plugins/email-countdown-timer/`, with `email-countdown-timer.php` directly inside that directory. Activate **Email Countdown Timer**.
+2. Open **Easy Countdown**, create a timer such as `promotion`, set the deadline, time zone, colors and labels, and save.
+3. Copy its shortcode or email image URL from the timer list.
 
-**Upgrading from the earlier code:** first back up your database and files, then disable the previous plugin or snippet. Do not run both implementations at once: the `ECD_Plugin_Colons_Fix` class name has been preserved. Data remains in the `easy_countdown_timers` option; there is no migration or automatic timer deletion on deactivation. See [Installation and Upgrades](docs/wiki/Installation.md).
+When replacing an older plugin or snippet, back up the database and custom fonts, then disable the old implementation. Running both can duplicate hooks and output. Version 12.1.3 uses distinct internal `Email_Countdown_Timer_` classes; these are not a compatibility API for custom integrations. The saved `easy_countdown_timers` option, shortcode and image URLs are preserved. See [Installation](docs/wiki/Installation.md).
 
 ## Embedding
 
-Use a Shortcode block on a WordPress page:
+On a WordPress page:
 
 ```text
 [ecd_timer id="promotion"]
 ```
 
-In an HTML email, use the URL copied from the admin panel. Example — replace the domain and ID:
+In an HTML email, replace the domain and ID with the URL copied from your panel:
 
 ```html
 <img src="https://example.com/?ecd_action=render&amp;ecd=promotion&amp;mode=email"
@@ -41,35 +41,47 @@ In an HTML email, use the URL copied from the admin panel. Example — replace t
      style="display:block;max-width:100%;height:auto;border:0;">
 ```
 
-Do not paste the shortcode into an email or attach a downloaded GIF as a file when the timer needs to be calculated as the image is fetched from the server. See [Embedding](docs/wiki/Embedding.md).
+Do not paste the shortcode or JavaScript into email. Attaching a downloaded GIF, or importing it into an editor's image library, may replace dynamic fetching with a fixed copy. See [Embedding](docs/wiki/Embedding.md).
 
-## Preserved features and important limitations
+## Behavior and limitations
 
-Configuration includes the deadline and time zone, three colors, four labels, font, text sizes, width, and the option to hide days when fewer than 24 hours remain. The admin interface, help text, and validation messages are in English. New timers default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels (including custom or empty values), the time-zone default, shortcode, image URLs, and v12.1 renderer layout are preserved. To translate an existing timer, edit its four **Labels** fields and save it.
+The English interface and validation messages are translation-ready. New timer labels remain stable data: `Days`, `Hours`, `Minutes`, `Seconds`. Changing the administrator's locale does not rewrite labels in campaigns. Existing labels, including custom and empty values, are preserved; edit the **Labels** fields to change them.
 
-A GIF contains **60 frames, one second each**. It is a finite image sequence, not a live connection to the server. The shortcode fetches a new image when the browser tab becomes visible again; it does not poll every minute. The built-in cache shares images within 15-second buckets, so the first frame may not match the exact time of the request.
+A GIF contains **60 frames, one second each**. It is a finite sequence, not a live server connection. A shortcode refreshes its image when the browser tab becomes visible again; there is no continuous polling. Images are shared within 15-second cache buckets, so the first frame need not match the exact request time.
 
-**Email does not guarantee a countdown starting at the moment of opening.** A client may prefetch, cache, or block the image. Apple Mail Privacy Protection may fetch content in the background; Gmail uses an image proxy. Server headers do not provide control over the entire process. Include the absolute deadline as text in the message as well. See [Sources and limitations](docs/wiki/Embedding.md#email-client-limitations).
+**An email client may prefetch, cache or block the image.** Server headers cannot guarantee an up-to-date countdown on every opening. Always include the absolute deadline in plain text. [Email-client limitations and sources](docs/wiki/Embedding.md#email-client-limitations).
 
-The width field retains its original meaning: it sets the **minimum image width**, rather than scaling to an exact size; `0` means automatic. Without a custom font, fixed-size GD bitmap fonts are used. The digit and label size fields do not resize those bitmap fonts. See [Configuration and limits](docs/wiki/Configuration.md).
+Width is a **minimum image width**, not scaling to an exact dimension; `0` means automatic. Without a custom font, GD uses fixed-size bitmap fonts. Digit and label size fields do not resize those bitmap fonts. [Configuration](docs/wiki/Configuration.md).
 
-## Documentation
+## Data retention
 
-[Wiki index](docs/wiki/Home.md) · [Installation](docs/wiki/Installation.md) · [Configuration](docs/wiki/Configuration.md) · [Embedding](docs/wiki/Embedding.md) · [Performance and Security](docs/wiki/Performance-and-Security.md) · [Troubleshooting](docs/wiki/Troubleshooting.md) · [Development and Wiki publishing](docs/wiki/Development.md)
+**Easy Countdown > Data Settings > Delete all plugin data when uninstalling** is off by default. Saving this setting or deactivating the plugin never deletes timers. When enabled, uninstall through WordPress removes that site's plugin options and owned database image cache. Multisite consent is per site. Shared cron, foreign options and other plugins' caches are preserved; this plugin schedules no cron events.
 
-Wiki pages are version-controlled in `docs/wiki/`. This directory **is not automatically the native GitHub Wiki tab**. To publish to the separate Wiki repository, the owner runs `scripts/publish-wiki.sh` using local Git authentication.
+Unknown orphaned entries existing only in an external cache expire at their original 60-second TTL rather than triggering a global cache flush. Uninstall cannot erase backups, hosting logs or email-client copies. [Data removal](docs/wiki/Data-Removal.md).
 
-## Verification and development
+## Verification
 
 ```sh
 php tests/run.php
+php tests/uninstall.php
+python3 tests/test-pcp-gate.py
 node --check assets/countdown.js
 ```
 
-CI checks syntax and runs tests on PHP 8.1–8.5 with GD/Imagick, plus a separate PHP 8.4 configuration without Imagick. Tests cover English interface and validation text, new and existing timer labels, saves with capability and nonce checks, caching, 60-frame GIFs, and pixel comparisons against the original renderer. These tests use WordPress API stubs; they are **not full WordPress integration tests**. Missing GD is explicitly reported as skipped image tests locally and as an error in CI.
+The isolated tests use WordPress API doubles and cover validation, permissions, saved-label preservation, translated output, caching and pixel comparisons against the frozen v12.1 renderer. Separately, disposable real WordPress/MySQL integration jobs exercise single-site and multisite installations with database transients and Redis, HTTP images, retention and uninstall. Missing GD is an explicit local skip and a CI failure.
 
-The [audit report](docs/SECURITY-PERFORMANCE-AUDIT.md) records results, scope, and remaining risks. We do not claim a measured percentage speedup or full WPCS compliance. Contribution guidelines: [CONTRIBUTING.md](CONTRIBUTING.md); security reports: [SECURITY.md](SECURITY.md).
+CI also runs **Plugin Check 2.1.0 with runtime checks** against the distribution files. `required-checks` requires unit tests, WordPress integration and Plugin Check to pass. The PCP gate reads reported findings, not just the command's exit status, and fails on errors or warnings. Narrow, documented code-local annotations remain for context-sensitive cases such as binary image output; there are no global check exclusions. [Preflight review](docs/PLUGIN-CHECK-REVIEW.md).
+
+See [current verification evidence](docs/VERIFICATION-12.1.3.md) and the [historical 12.1.1 audit](docs/SECURITY-PERFORMANCE-AUDIT.md). Tests do not certify security, every hosting configuration, browser accessibility, production throughput or WordPress.org acceptance. No measured percentage speedup or full WPCS compliance is claimed.
+
+## Documentation and contribution
+
+[Wiki index](docs/wiki/Home.md) · [Installation](docs/wiki/Installation.md) · [Configuration](docs/wiki/Configuration.md) · [Embedding](docs/wiki/Embedding.md) · [Data removal](docs/wiki/Data-Removal.md) · [Performance and security](docs/wiki/Performance-and-Security.md) · [Troubleshooting](docs/wiki/Troubleshooting.md) · [Development](docs/wiki/Development.md)
+
+`docs/wiki/` contains version-controlled documentation, not an automatically published native GitHub Wiki. `scripts/publish-wiki.sh` handles that separate operation with local Git authentication.
+
+Use focused pull requests and check the latest CI. [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md) · [WordPress.org readiness](docs/WORDPRESS-ORG-READINESS.md) · [Changelog](CHANGELOG.md).
 
 ## License
 
-The code is distributed under GNU GPL v3.0 (`GPL-3.0-only`). The repository's existing [LICENSE](LICENSE) file has been preserved. Check the separate license of any custom fonts you add. See the [Changelog](CHANGELOG.md).
+GNU GPL v3.0 (`GPL-3.0-only`); see [LICENSE](LICENSE). Check the separate license of any custom fonts. Source publication does not imply a tagged release or acceptance into the WordPress.org directory.

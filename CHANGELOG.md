@@ -1,5 +1,15 @@
 # Changelog
 
+## 12.1.3 — 2026-09-28
+
+Added explicit, default-off data removal during WordPress uninstall. Saving the policy or deactivation never removes timers. Cleanup is ownership-scoped, handles legacy/orphaned database cache and per-site multisite consent, and preserves unrelated options, cron and caches. No cron hooks are created.
+
+Added real WordPress 6.4/current-stable lifecycle tests with MySQL and Redis, single-site/multisite coverage and anonymous HTTP rendering checks. Plugin Check 2.1.0 with runtime checks is now part of the fail-closed `required-checks` gate. Its report is parsed because exit zero alone can conceal findings. Verification evidence and narrow code-local static-analysis annotations are documented.
+
+Prepared English interface and validation strings for WordPress translation, escaped numeric output attributes and replaced short internal class/constant prefixes with `Email_Countdown_Timer_` / `EMAIL_COUNTDOWN_TIMER_`. Saved labels, option names, shortcode, URL parameters, timezone, geometry and GIF timing are unchanged. Old internal aliases exist only in the CLI test harness. Custom code calling undocumented internal classes needs review.
+
+Updated numeric stable-tag metadata and `Tested up to: 7.1`, based on actual WordPress 7.1.2 runs. No GitHub Release, tag or WordPress.org submission is implied by this source version. UI redesign and a full WPCS/load-testing pass remain separate work.
+
 ## 12.1.2 — 2026-09-28
 
 Translated the admin interface, buttons, help text, and validation messages into English. New timers and missing label values default to `Days`, `Hours`, `Minutes`, and `Seconds`. Existing saved labels, including custom or empty values, are not translated or migrated automatically.

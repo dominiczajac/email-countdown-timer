@@ -4,6 +4,7 @@
 - [Installation](Installation.md)
 - [Configuration](Configuration.md)
 - [Embedding](Embedding.md)
+- [Data removal](Data-Removal.md)
 - [Performance and Security](Performance-and-Security.md)
 - [Troubleshooting](Troubleshooting.md)
-- [Development and Publishing](Development.md)
+- [Development](Development.md)
