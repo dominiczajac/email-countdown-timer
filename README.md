@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.4.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.4.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -13,7 +13,7 @@ Locally generated countdown images for email campaigns and WordPress pages. Set 
 | GD | Required with PNG/GIF support; WebP is used when available |
 | Imagick | Required for animated GIFs; GD alone produces static images |
 | FreeType | Required for custom TTF/OTF fonts |
-| Database | Consistent MySQL/MariaDB session/primary for serialized animation generation; unavailable locking uses current static fallback |
+| Database | Consistent MySQL/MariaDB session/primary for serialized animation generation; unavailable locking means cache misses remain uncached static images, even with Imagick |
 | Network | A publicly reachable HTTPS image URL for email recipients |
 
 There are no bundled runtime Composer/npm dependencies or font binaries. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
@@ -24,7 +24,7 @@ Use the installation ZIP, not a working directory containing developer/test file
 
 **Before the first update from 12.3.1 or older, copy/back up plugin-local fonts before WordPress replaces the old directory.** New code cannot recover files removed before it runs. Preserve font filenames and license notices. Persistent storage normally lives at `wp-content/uploads/email-countdown-timer/fonts/`; multisite adds `site-ID/`, and custom uploads paths can differ. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
 
-Open **Easy Countdown > Create Timer**, select a unique ID, set the deadline and time zone, and save. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
+Open **Easy Countdown > Create Timer**, select a unique ID, set the deadline and time zone, and save. New timers inherit the WordPress site time zone, including UTC offsets; existing campaigns and legacy missing-zone records keep their original interpretation. Reload older editor tabs after updating: obsolete `save_timer` submissions are rejected without changing data. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
 
 ## Display and accessibility
 
@@ -46,7 +46,9 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 
 ## Local fonts
 
-Persistent per-site storage is available independently of Google Fonts. Upload trusted, licensed static TTF/OTF files through SFTP or the hosting file manager. There is no browser upload endpoint. **Data Settings > Copy Legacy Fonts to Persistent Storage** performs a bounded, non-destructive local copy when original plugin-local files are still present. It never overwrites a conflict, and a remaining legacy file has precedence for the same filename. Copy license notices manually. [Storage, first-upgrade and uninstall boundaries](docs/LOCAL-FONT-STORAGE.md).
+**Protect the font directory from direct HTTP downloads.** **Data Settings > Font File Access > Install Font Access Rules (Apache)** creates fixed deny rules without replacing existing files; it does not verify their enforcement. nginx requires host-managed configuration. Site administrators on multisite can protect their own font root; changing the shared legacy root requires network-administrator permission. [Host rules, GET/HEAD verification and licensing boundaries](docs/FONT-HTTP-ACCESS.md).
+
+Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
 
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
@@ -54,7 +56,7 @@ Persistent per-site storage is available independently of Google Fonts. Upload t
 
 The panel uses a small scoped stylesheet/script, system typography, static saved previews and no background polling, per-keystroke rendering or animated list thumbnails. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
-After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline is clamped to zero. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
+After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline is clamped to zero. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
 FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `email-countdown-timer/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
 
@@ -64,7 +66,7 @@ The shipped code adds no visitor cookies, persistent browser storage, individual
 
 The **WordPress Privacy Policy Guide** contains suggested wording and administrator guidance. The plugin does not edit or publish your privacy-policy page. Review providers, logs and retention before using the suggestion; this is not whole-site GDPR/ePrivacy certification.
 
-**Data Settings > Delete all plugin data when uninstalling** is off by default and per site on multisite. Deactivation preserves data. Opt-in uninstall removes owned options/cache and unchanged font files recorded by the copy tool. Manual/replaced fonts, unrelated data, other plugins' cron jobs and backups remain. The plugin schedules no cron jobs. [Data removal](docs/wiki/Data-Removal.md).
+**Data Settings > Delete all plugin data when uninstalling** is off by default and per site on multisite. Deactivation preserves data. Opt-in uninstall removes owned options/cache and unchanged font files recorded by the copy tool. Font-access rule/index files remain for manual fonts. Manual/replaced fonts, unrelated data, other plugins' cron jobs and backups remain. The plugin schedules no cron jobs. [Data removal](docs/wiki/Data-Removal.md).
 
 ## Development and packaging
 

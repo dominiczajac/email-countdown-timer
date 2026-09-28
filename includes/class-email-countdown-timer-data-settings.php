@@ -109,12 +109,13 @@ final class Email_Countdown_Timer_Data_Settings {
             </section>
             <section class="ect-card" aria-labelledby="email-countdown-font-access-title">
                 <h2 id="email-countdown-font-access-title"><?php echo esc_html__( 'Font File Access', 'email-countdown-timer' ); ?></h2>
-                <p><?php echo esc_html__( 'Local fonts may be publicly downloadable unless your host blocks HTTP access. This tool creates an Apache 2.4 deny rule and a blank index in this site\'s persistent and existing legacy font directories only. Existing rules and symlinks are never replaced.', 'email-countdown-timer' ); ?></p>
+                <p><?php echo esc_html__( 'Local fonts may be publicly downloadable unless your host blocks HTTP access. This tool creates an Apache 2.4 deny rule and a blank index in this site\'s persistent font directory. Existing legacy font directories are included only for single-site or network administrators. Existing rules and symlinks are never replaced.', 'email-countdown-timer' ); ?></p>
                 <p><?php echo esc_html__( 'Apache must allow the Require directive in .htaccess. nginx ignores .htaccess and needs a host-managed location rule. Writing these files does not verify protection: ask your host to check that direct GET and HEAD font requests are denied while timer images still work. No remote probe is performed.', 'email-countdown-timer' ); ?></p>
                 <p><?php echo esc_html__( 'Rules are retained on uninstall because manually managed fonts may remain. Blocking downloads does not grant a font license; verify permission for server-side rendering.', 'email-countdown-timer' ); ?></p>
                 <?php
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status label; no data or file mutation. Action is POST/capability/nonce protected.
-                $email_countdown_timer_rules_status = isset( $_GET['font_rules'] ) && is_string( $_GET['font_rules'] ) ? $_GET['font_rules'] : '';
+                $email_countdown_timer_rules_status = isset( $_GET['font_rules'] ) && is_string( $_GET['font_rules'] )
+                    ? sanitize_text_field( wp_unslash( $_GET['font_rules'] ) ) : '';
                 if ( in_array( $email_countdown_timer_rules_status, array( 'written', 'incomplete' ), true ) ) : ?>
                     <p role="status"><?php echo esc_html__( 'Rule installation was attempted without overwriting existing files. Check directory permissions and existing rules with your host; HTTP protection is not verified.', 'email-countdown-timer' ); ?></p>
                 <?php endif; ?>

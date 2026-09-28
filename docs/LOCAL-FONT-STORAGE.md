@@ -31,3 +31,7 @@ Stored campaigns and public URLs are not migrated. Existing public rendering kee
 Tests: `php tests/font-storage.php`, existing frozen pixel regressions, real WordPress lifecycle/browser/HTTP suites. Test results for a particular commit must be read from that commit's CI, not inferred from this list.
 
 References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and PHP `link()` documentation. No font binaries are distributed with the plugin.
+
+## Direct HTTP access
+
+Local storage alone does not make font binaries private. Configure denial for the dedicated font roots before storing files whose licenses restrict downloading. The explicit Font File Access action can create Apache rules, but does not verify enforcement and never overwrites existing files. nginx needs host-managed rules. Shared legacy roots on multisite require network-administrator permission; per-site uploads remain independently scoped. See [font HTTP protection](FONT-HTTP-ACCESS.md). Guard files remain on uninstall to protect manually managed fonts; they contain no campaign or visitor data.

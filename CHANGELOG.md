@@ -1,5 +1,13 @@
 # Changelog
 
+## 12.4.3
+
+- Add an explicit, nonce/capability-protected local font access-rule installer. Do not overwrite existing files or symlinks; shared legacy rules on multisite require network-administrator permission. Apache must honor its rules; nginx requires host configuration. New required CI checks test both server types and ignored-rule negative cases.
+- Deliver an already completed, still-fresh image after lock ownership loss without publishing it to shared cache. Clock rollback, a changed freshness interval or a crossed deadline selects a current static fallback instead.
+- New timers inherit the WordPress site timezone, including offsets. Existing saved/legacy zones retain their interpretation. Obsolete form saves/deletes now return 409 with no data mutation; reload old editor tabs.
+- Explain animation prerequisites, slow-render static responses, font HTTP protection and licensing, and shorten user-facing migration instructions. No Google Fonts importer, telemetry or alternative options-based lock is added.
+- Keep the frozen renderer oracle and canonical ZIP build. Validate font-rule request routing/status values.
+
 ## 12.4.2
 
 - One explicit, verified installation ZIP is now used by packaging, Plugin Check and real WordPress lifecycle/browser/HTTP tests. Negative build tests reject unsafe paths, source symlinks, missing or unlisted runtime files and inconsistent metadata.

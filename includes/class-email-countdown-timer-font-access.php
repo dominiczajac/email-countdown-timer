@@ -27,7 +27,11 @@ final class Email_Countdown_Timer_Font_Access {
         if ( null === $target ) {
             throw new RuntimeException( 'The persistent font directory is unavailable.' );
         }
-        $directories = array_unique( array_filter( array( $target, Email_Countdown_Timer_Fonts::legacy_directory() ) ) );
+        // Legacy files live in the shared plugin directory on multisite. A site
+        // administrator may protect their own uploads, not change shared server rules.
+        $legacy = ! is_multisite() || current_user_can( 'manage_network_options' )
+            ? Email_Countdown_Timer_Fonts::legacy_directory() : null;
+        $directories = array_unique( array_filter( array( $target, $legacy ) ) );
         $result = array( 'created' => 0, 'existing' => 0, 'failed' => 0 );
         foreach ( $directories as $directory ) {
             foreach ( self::templates() as $name => $content ) {
@@ -66,7 +70,9 @@ final class Email_Countdown_Timer_Font_Access {
             wp_die( esc_html__( 'You are not allowed to manage font access.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
             return;
         }
-        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        $method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
+            ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== $method ) {
             wp_die( esc_html__( 'Use the font access form.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
             return;
         }
