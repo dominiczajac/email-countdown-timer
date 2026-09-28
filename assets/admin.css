@@ -1,0 +1,69 @@
+/* Only plugin screens enqueue this stylesheet. Never reset the WordPress shell. */
+.email-countdown-admin { max-width:1320px; color:#1d2327; font-size:.9375rem; line-height:1.55; }
+.email-countdown-admin *, .email-countdown-admin *::before, .email-countdown-admin *::after { box-sizing:border-box; }
+.email-countdown-admin [hidden] { display:none !important; }
+.email-countdown-admin h1 { font-size:1.5rem; line-height:1.35; padding:0; }
+.email-countdown-admin h2 { font-size:1.25rem; line-height:1.4; margin:0 0 1rem; }
+.email-countdown-admin h3 { font-size:1.0625rem; line-height:1.4; margin:0 0 1rem; }
+.email-countdown-admin p { font-size:inherit; line-height:inherit; }
+.email-countdown-admin label, .email-countdown-admin legend { display:block; font-weight:600; margin-block-end:.375rem; }
+.email-countdown-admin .description { color:#50575e; font-size:.875rem; margin:.375rem 0; font-style:normal; }
+.email-countdown-admin a { text-underline-offset:.15em; }
+.email-countdown-admin .ect-header { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:1rem; margin-block:1.5rem; }
+.email-countdown-admin .ect-header p { color:#50575e; margin:.5rem 0 0; }
+.email-countdown-admin .ect-header nav { display:flex; flex-wrap:wrap; gap:1rem; }
+.email-countdown-admin nav a { display:inline-flex; align-items:center; min-height:44px; }
+.email-countdown-admin .ect-card { background:#fff; border:1px solid #c3c4c7; border-radius:6px; padding:1.5rem; margin-block-end:1.25rem; min-width:0; }
+.email-countdown-admin .ect-heading-row, .email-countdown-admin .ect-save-row, .email-countdown-admin .ect-inline, .email-countdown-admin .ect-pagination, .email-countdown-admin .ect-row-actions { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+.email-countdown-admin .ect-heading-row { justify-content:space-between; margin-block-end:1.25rem; }
+.email-countdown-admin .ect-heading-row h2 { margin:0; }
+.email-countdown-admin .ect-editor-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:1.5rem; align-items:start; }
+.email-countdown-admin .ect-editor-grid > *, .email-countdown-admin .ect-two-fields > *, .email-countdown-admin .ect-colors > * { min-width:0; }
+.email-countdown-admin .ect-two-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.email-countdown-admin .ect-colors { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+.email-countdown-admin .ect-colors label[data-ect-picker] { font-size:.8125rem; font-weight:400; }
+.email-countdown-admin .ect-field { margin-block-end:1rem; }
+.email-countdown-admin input:not([type=checkbox]):not([type=hidden]), .email-countdown-admin select, .email-countdown-admin textarea { font-size:1rem; width:100%; max-width:none; min-width:0; min-height:44px; border:1px solid #787c82; border-radius:4px; background:#fff; color:#1d2327; padding:.5rem .625rem; }
+.email-countdown-admin input[type=color] { cursor:pointer; padding:4px; }
+.email-countdown-admin textarea { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.875rem; resize:vertical; overflow-wrap:anywhere; margin-block:.375rem .75rem; }
+.email-countdown-admin input[readonly] { background:#f6f7f7; }
+.email-countdown-admin .button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.45rem 1rem; font-size:.9375rem; line-height:1.4; white-space:normal; text-align:center; }
+.email-countdown-admin .ect-delete-button { color:#b32d2e; border-color:#b32d2e; background:#fff; }
+.email-countdown-admin .ect-delete-button:hover { color:#8a2424; border-color:#8a2424; background:#fcf0f1; }
+.email-countdown-admin .ect-check { display:flex; align-items:flex-start; gap:.75rem; min-height:44px; padding-block:.5rem; font-weight:400; }
+.email-countdown-admin input[type=checkbox] { flex:0 0 auto; margin:.2rem 0 0; }
+.email-countdown-admin .ect-disclosure { border-block-start:1px solid #c3c4c7; margin-block-start:1rem; }
+.email-countdown-admin summary { cursor:pointer; min-height:44px; padding:.75rem 0; font-weight:600; }
+.email-countdown-admin .ect-disclosure > div { padding-block-start:.75rem; }
+.email-countdown-admin .ect-error { color:#b32d2e; margin:.25rem 0; font-weight:600; }
+.email-countdown-admin .ect-error:empty { display:none; }
+.email-countdown-admin [aria-invalid=true] { border-color:#b32d2e !important; box-shadow:0 0 0 1px #b32d2e; }
+.email-countdown-admin .ect-badge { display:inline-block; border:1px solid #c3c4c7; border-radius:4px; background:#f6f7f7; padding:.25rem .6rem; font-size:.8125rem; overflow-wrap:anywhere; }
+.email-countdown-admin .ect-preview { min-height:130px; display:flex; align-items:center; justify-content:center; border:1px solid #c3c4c7; border-radius:4px; padding:.75rem; background:#f6f7f7; }
+.email-countdown-admin .ect-preview img { display:block; max-width:100%; height:auto; }
+.email-countdown-admin .ect-empty { color:#50575e; padding-block:1.5rem; text-align:center; }
+.email-countdown-admin .ect-search { max-width:460px; margin-block-end:1.25rem; }
+.email-countdown-admin .ect-search input { flex:1; width:auto !important; }
+.email-countdown-admin .ect-table-wrap { overflow-x:auto; }
+.email-countdown-admin table { min-width:620px; }
+.email-countdown-admin th, .email-countdown-admin td { vertical-align:middle; padding:.875rem; overflow-wrap:anywhere; }
+.email-countdown-admin .ect-row-actions a { min-height:44px; display:inline-flex; align-items:center; }
+.email-countdown-admin .ect-pagination { justify-content:flex-end; margin-block-start:1rem; }
+.email-countdown-admin .ect-save-row { margin-block-end:1.5rem; }
+.email-countdown-admin .ect-danger { border-inline-start:4px solid #b32d2e; }
+.email-countdown-admin .notice { margin:1rem 0; }
+.email-countdown-admin #ect-errors { padding:1rem; }
+.email-countdown-admin #ect-errors ul { list-style:disc; margin-inline-start:1.5rem; }
+.email-countdown-admin #ect-errors a { min-height:24px; display:inline-block; }
+.email-countdown-admin dialog { border:1px solid #787c82; border-radius:6px; padding:1.5rem; width:min(32rem,calc(100% - 2rem)); max-height:calc(100% - 2rem); overflow:auto; color:#1d2327; background:white; }
+.email-countdown-admin dialog:not([open]) { display:none; }
+.email-countdown-admin dialog::backdrop { background:rgb(29 35 39 / .55); }
+.email-countdown-admin :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible { outline:3px solid #135e96; outline-offset:3px; }
+.email-countdown-admin :where(input,select,textarea):focus { border-color:#135e96; }
+.email-countdown-admin :target { scroll-margin-block-start:5rem; }
+.email-countdown-admin.ect-data { max-width:900px; }
+.email-countdown-admin.ect-data h1 { margin-block:1.5rem; }
+@media (max-width:1100px) { .email-countdown-admin .ect-editor-grid { grid-template-columns:minmax(0,1fr); } }
+@media (max-width:480px) { .email-countdown-admin .ect-card { padding:1rem; } .email-countdown-admin .ect-two-fields, .email-countdown-admin .ect-colors { grid-template-columns:minmax(0,1fr); } .email-countdown-admin .ect-header { margin-block:1rem; } }
+@media (forced-colors:active) { .email-countdown-admin .ect-card,.email-countdown-admin .ect-badge,.email-countdown-admin .ect-preview { border-color:CanvasText; } .email-countdown-admin :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible { outline-color:Highlight; } .email-countdown-admin .ect-error { color:CanvasText; } }
+@media (prefers-reduced-motion:reduce) { .email-countdown-admin *, .email-countdown-admin *::before, .email-countdown-admin *::after { scroll-behavior:auto !important; } }

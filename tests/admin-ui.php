@@ -1,0 +1,65 @@
+<?php
+/** Regression assertions for the approved UI; loaded by tests/run.php. */
+if ( PHP_SAPI !== 'cli' || ! defined( 'ABSPATH' ) || ! function_exists( 'ok' ) ) { exit( 1 ); }
+require_once __DIR__ . '/../includes/class-email-countdown-timer-admin.php';
+$admin = true; $nonce = true; $_SERVER['REQUEST_METHOD'] = 'POST';
+$reset_admin = static function () { $property = new ReflectionProperty( Email_Countdown_Timer_Admin::class, 'pending' ); $property->setValue( null, null ); };
+$submit_admin = static function ( array $post ) use ( $plugin, $reset_admin ) {
+    $reset_admin(); $_POST = $post;
+    try { $plugin->handleFormSave(); return ''; } catch ( ECD_Test_Stop $e ) { return $e->getMessage(); }
+};
+$ui_config = Email_Countdown_Timer_Config::normalize( array( 'deadline' => '2030-12-31T23:59:59', 'label_d' => 'Dni', 'label_h' => '', 'fixed_width' => 600 ) );
+$options['easy_countdown_timers'] = array( 'existing' => $ui_config );
+$valid_post = array_merge( array_map( 'strval', $ui_config ), array( 'ecd_action' => 'email_countdown_timer_save', 'timer_id' => 'existing', 'original_id' => 'existing' ) );
+$before = $options;
+$admin = false;
+ok( str_starts_with( $submit_admin( $valid_post ), 'die:' ) && $options === $before, 'UI unauthorized save rejected' );
+$admin = true; $nonce = false;
+ok( 'nonce' === $submit_admin( $valid_post ) && $options === $before, 'UI save requires nonce' );
+$nonce = true; $_SERVER['REQUEST_METHOD'] = 'GET';
+ok( str_starts_with( $submit_admin( $valid_post ), 'die:' ) && $options === $before, 'UI save requires POST' );
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$invalid = array_replace( $valid_post, array( 'size_digit' => '201', 'label_s' => 'KEEP THIS VALUE', 'bg' => 'invalid' ) );
+ok( '' === $submit_admin( $invalid ) && $options === $before, 'invalid UI request returns to form without writes' );
+$state = Email_Countdown_Timer_Admin::state();
+ok( isset( $state['errors']['size_digit'], $state['errors']['bg'] ), 'field-specific errors collected' );
+ok( 'KEEP THIS VALUE' === $state['data']['label_s'] && '' === $state['data']['label_h'], 'invalid POST retains custom and empty labels' );
+ob_start(); $plugin->renderAdminPage(); $markup = ob_get_clean();
+ok( str_contains( $markup, 'value="KEEP THIS VALUE"' ) && str_contains( $markup, 'aria-invalid="true"' ), 'invalid values and errors rendered' );
+$submit_admin( array_replace( $valid_post, array( 'bg' => array( 'attack' ) ) ) );
+ok( isset( Email_Countdown_Timer_Admin::state()['errors']['bg'] ) && $options === $before, 'array-typed input rejected, not converted to defaults' );
+$submit_admin( array_replace( $valid_post, array( 'original_id' => '' ) ) );
+ok( isset( Email_Countdown_Timer_Admin::state()['errors']['timer_id'] ) && $options === $before, 'duplicate create cannot overwrite existing timer' );
+$submit_admin( array_replace( $valid_post, array( 'timer_id' => 'renamed' ) ) );
+ok( isset( Email_Countdown_Timer_Admin::state()['errors']['timer_id'] ) && $options === $before, 'read-only ID enforced server-side' );
+ok( str_starts_with( $submit_admin( $valid_post ), 'redirect:' ), 'valid modern form redirects only after saving' );
+ok( $options['easy_countdown_timers']['existing'] === $ui_config, 'modern form preserves campaign configuration' );
+$delete_post = array( 'ecd_action' => 'email_countdown_timer_delete', 'timer_id' => 'existing' );
+ok( str_starts_with( $submit_admin( $delete_post ), 'die:' ) && isset( $options['easy_countdown_timers']['existing'] ), 'delete requires explicit confirmation' );
+$nonce = false;
+ok( 'nonce' === $submit_admin( $delete_post + array( 'confirm_delete' => '1' ) ), 'confirmed delete still requires nonce' );
+$nonce = true;
+ok( str_starts_with( $submit_admin( $delete_post + array( 'confirm_delete' => '1' ) ), 'redirect:' ) && ! isset( $options['easy_countdown_timers']['existing'] ), 'confirmed deletion follows separate action' );
+$reset_admin(); $_POST = array(); $_GET = array();
+$options['easy_countdown_timers'] = array();
+for ( $i = 0; $i < 61; ++$i ) $options['easy_countdown_timers'][ 'campaign-' . $i ] = $ui_config;
+$state = Email_Countdown_Timer_Admin::state();
+ok( 'list' === $state['view'] && 25 === count( $state['timers'] ) && 3 === $state['pages'], 'list is paginated at 25 without schema migration' );
+ob_start(); $plugin->renderAdminPage(); $markup = ob_get_clean();
+ok( ! str_contains( $markup, '<img' ), 'list generates no image previews' );
+$_GET = array( 's' => 'campaign-60' );
+ok( 1 === count( Email_Countdown_Timer_Admin::state()['timers'] ), 'server-side ID search works without JS' );
+$_GET = array( 'paged' => '3' );
+ok( 11 === count( Email_Countdown_Timer_Admin::state()['timers'] ), 'last page does not omit matching timers' );
+$_GET = array( 'edit' => 'campaign-0' );
+ob_start(); $plugin->renderAdminPage(); $markup = ob_get_clean();
+ok( str_contains( $markup, 'mode=static' ) && ! preg_match( '/src="[^"]*mode=email/', $markup ), 'editor initial image is static, not animated' );
+ok( str_contains( $markup, 'All formats (manual copy)' ) && str_contains( $markup, '[ecd_timer id=' ), 'all embed formats exist without JavaScript' );
+ok( str_contains( $markup, '2030-12-31' ) && str_contains( $markup, 'Europe/Warsaw' ), 'absolute deadline and zone accompany image' );
+$styles = $scripts = array();
+Email_Countdown_Timer_Admin::add_screen( 'toplevel_page_ecd-timers' );
+Email_Countdown_Timer_Admin::enqueue( 'dashboard' );
+ok( empty( $styles ) && empty( $scripts ), 'admin assets not enqueued on unrelated screens' );
+Email_Countdown_Timer_Admin::enqueue( 'toplevel_page_ecd-timers' );
+ok( count( $styles ) === 1 && count( $scripts ) === 1, 'only one custom stylesheet and script' );
+$reset_admin(); $_GET = $_POST = array();

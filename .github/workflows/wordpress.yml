@@ -48,3 +48,21 @@ jobs:
           ECD_TOPOLOGY: ${{ matrix.topology }}
           ECD_CACHE: ${{ matrix.cache }}
         run: bash scripts/test-wordpress.sh
+      - name: Install isolated browser-test tooling
+        if: matrix.wordpress == 'latest' && matrix.topology == 'single' && matrix.cache == 'database'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/ect-browser-venv"
+          "$RUNNER_TEMP/ect-browser-venv/bin/pip" install playwright==1.57.0
+      - name: Real admin browser checks and synthetic performance measurements
+        if: matrix.wordpress == 'latest' && matrix.topology == 'single' && matrix.cache == 'database'
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+        run: bash scripts/test-admin.sh
+      - name: Preserve admin verification evidence
+        if: always() && matrix.wordpress == 'latest' && matrix.topology == 'single' && matrix.cache == 'database'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: admin-ui-evidence
+          path: ${{ runner.temp }}/admin-evidence/
+          retention-days: 14
+          if-no-files-found: error

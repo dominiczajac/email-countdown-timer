@@ -13,7 +13,8 @@ final class Email_Countdown_Timer_Data_Settings {
     }
 
     public static function add_menu(): void {
-        add_submenu_page(
+        require_once __DIR__ . '/class-email-countdown-timer-admin.php';
+        $hook = add_submenu_page(
             'ecd-timers',
             __( 'Data Settings', 'email-countdown-timer' ),
             __( 'Data Settings', 'email-countdown-timer' ),
@@ -21,6 +22,7 @@ final class Email_Countdown_Timer_Data_Settings {
             'email-countdown-timer-data',
             array( self::class, 'render' )
         );
+        Email_Countdown_Timer_Admin::add_screen( $hook );
     }
 
     public static function enabled(): bool {
@@ -54,13 +56,13 @@ final class Email_Countdown_Timer_Data_Settings {
             return;
         }
         ?>
-        <div class="wrap">
+        <div class="wrap email-countdown-admin ect-data">
             <h1><?php echo esc_html__( 'Email Countdown Timer: Data Settings', 'email-countdown-timer' ); ?></h1>
             <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice controlled by an exact constant; contains no query-supplied content.
             if ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html__( 'Data settings saved. No timer data has been deleted.', 'email-countdown-timer' ); ?></p></div>
             <?php endif; ?>
-            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+            <form class="ect-card" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <input type="hidden" name="action" value="email_countdown_timer_save_data_settings">
                 <?php wp_nonce_field( 'email_countdown_timer_data_settings' ); ?>
                 <fieldset>

@@ -3,7 +3,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.1.3
+Stable tag: 12.2.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -11,7 +11,7 @@ Images counting down to a fixed deadline, generated on your own WordPress server
 
 == Description ==
 
-Code version: 12.1.3. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
+Code version: 12.2.0. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
 
 The admin interface, help text, and validation messages are in English and translation-ready. New timers default to Days, Hours, Minutes, and Seconds. Existing saved labels are preserved; edit their Labels fields to translate them.
 
@@ -31,6 +31,9 @@ The presence of this file does not mean the plugin has been accepted into the Wo
 4. Copy the shortcode for your WordPress page or the image URL for your email template.
 
 == Changelog ==
+
+= 12.2.0 =
+Lightweight accessible admin refresh: separate timer list/editor, retained invalid inputs, saved static preview, explicit animation, copy helpers and confirmed deletion. System fonts and scoped assets; no remote font downloader.
 
 = 12.1.3 =
 Optional data removal on uninstall, real WordPress/MySQL/Redis lifecycle tests, translatable English interface, distinct internal prefixes, and Plugin Check preflight. Saved timer labels, public URLs and GIF timing are unchanged.

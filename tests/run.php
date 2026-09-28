@@ -30,6 +30,8 @@ function esc_html__($text, $domain) { return esc_html(__($text, $domain)); }
 function esc_attr__($text, $domain) { return esc_attr(__($text, $domain)); }
 function esc_html($text) { return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8'); }
 function esc_attr($text) { return esc_html($text); }
+function esc_textarea($text) { return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8'); }
+function wp_enqueue_style($handle, ...$args) { $GLOBALS['styles'][$handle]=$args; }
 function esc_url($text) { return esc_attr($text); }
 function wp_date($format) { return date($format); }
 function admin_url($path) { return 'https://example.test/wp-admin/'.$path; }
@@ -44,7 +46,7 @@ function add_query_arg($args, $arg2=null, $arg3=null) {
 function shortcode_atts($defaults, $atts) { return array_merge($defaults, array_intersect_key($atts, $defaults)); }
 function wp_unique_id($prefix) { static $id=0; return $prefix.(++$id); }
 function wp_enqueue_script($handle, ...$args) { $GLOBALS['scripts'][$handle]=$args; }
-function wp_nonce_field($action) { echo '<input name="_wpnonce" value="test">'; }
+function wp_nonce_field($action) { echo '<input type="hidden" name="_wpnonce" value="test">'; }
 function selected($a, $b) { if ($a===$b) echo 'selected'; }
 function checked($value) { if ($value) echo 'checked'; }
 function submit_button($text) { echo '<button>'.esc_html($text).'</button>'; }
@@ -168,5 +170,6 @@ if (function_exists('imagecreatetruecolor')) {
 }
 require __DIR__.'/english-ui.php';
 require __DIR__.'/internationalization.php';
+require __DIR__.'/admin-ui.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;

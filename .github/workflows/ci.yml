@@ -43,7 +43,7 @@ jobs:
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: JavaScript syntax
-        run: node --check assets/countdown.js
+        run: node --check assets/countdown.js && node --check assets/admin.js
   plugin-check:
     uses: ./.github/workflows/plugin-check.yml
   wordpress:
