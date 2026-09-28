@@ -1,45 +1,46 @@
-# Osadzanie na stronie i w e-mailu
+# Embedding on Websites and in Email
 
 ## WordPress
 
 ```text
-[ecd_timer id="promocja"]
+[ecd_timer id="promotion"]
 ```
 
-Shortcode tworzy responsywny znacznik `img` i ładuje jeden wspólny skrypt. Po zmianie widoczności dokumentu na `visible` obrazy są pobierane ponownie z parametrem `_t`. Nie ma stałego odpytywania serwera ani nowego żądania po każdej klatce.
+The shortcode creates a responsive `img` element and loads one shared script. When document visibility changes to `visible`, the images are fetched again with the `_t` parameter. There is no continuous server polling or new request for each frame.
 
-## HTML wiadomości
+## Email HTML
 
-Skopiuj **Link do mailingu (GIF)** z panelu i użyj go jako `src` obrazu. Przykład z fikcyjną domeną:
+Copy **Link do mailingu (GIF)** (the email GIF link) from the admin panel and use it as the image's `src`. Example using a placeholder domain:
 
 ```html
-<p>Promocja trwa do 31 grudnia 2027 r., godz. 23:59:59 czasu Europe/Warsaw.</p>
-<img src="https://example.com/?ecd_action=render&amp;ecd=promocja&amp;mode=email"
-     alt="Odliczanie do zakończenia promocji"
+<p>The promotion ends on December 31, 2027, at 23:59:59 in the Europe/Warsaw time zone.</p>
+<img src="https://example.com/?ecd_action=render&amp;ecd=promotion&amp;mode=email"
+     alt="Countdown to the end of the promotion"
      style="display:block;max-width:100%;height:auto;border:0;">
 ```
 
-Edytor mailingowy musi zachować zewnętrzny URL. Import obrazu do biblioteki edytora, dołączenie pliku lub osadzenie go jako załącznika może zamienić dynamiczne pobieranie na wcześniej wygenerowaną kopię. Nie wklejaj shortcode ani JavaScript do maila.
+Your email editor must preserve the external URL. Importing the image into the editor's media library, attaching a file, or embedding it as an attachment may replace dynamic fetching with a previously generated copy. Do not paste a shortcode or JavaScript into an email.
 
-## Kontrakt adresu obrazu
+## Image URL contract
 
-| Parametr | Zachowanie |
+| Parameter | Behavior |
 |---|---|
-| `ecd_action=render` | Włącza endpoint obrazu |
-| `ecd=ID` | Wybiera istniejącą konfigurację |
-| `mode=email` lub `mode=anim` | GIF: 60 klatek z Imagick, statyczny GIF bez Imagick |
-| Inny lub brak `mode` | PNG; WebP, gdy obsługuje go GD i nagłówek `Accept` zawiera `image/webp` |
-| `_t` | Parametr odświeżania przeglądarki; nie tworzy osobnego cache po stronie wtyczki |
+| `ecd_action=render` | Activates the image endpoint |
+| `ecd=ID` | Selects an existing configuration |
+| `mode=email` or `mode=anim` | GIF: 60 frames with Imagick, a static GIF without Imagick |
+| Any other or missing `mode` | PNG; WebP when GD supports it and the `Accept` header contains `image/webp` |
+| `_t` | Browser refresh parameter; it does not create a separate plugin-side cache entry |
 
-Obsługiwane są GET i HEAD. HEAD nie generuje obrazu i nie daje pełnego testu działania kodeka. ID i konfiguracja nie stanowią tajemnicy: endpoint służy do publicznego osadzania. Nie przekazuj adresów e-mail ani tokenów odbiorców w URL.
+GET and HEAD are supported. HEAD does not generate an image and does not fully test codec functionality. The ID and configuration are not secrets: the endpoint is intended for public embedding. Do not put email addresses or recipient tokens in the URL.
 
-GIF jest skończoną sekwencją 60 sekund. Jego ponowne odtwarzanie przez aplikację nie pobiera automatycznie nowej wartości z serwera. Wspólny cache ma przedziały 15 sekund, więc pierwsza klatka może pochodzić z wcześniejszego żądania w tym samym przedziale.
+A GIF is a finite 60-second sequence. Replaying it in an application does not automatically fetch a new value from the server. The shared cache uses 15-second buckets, so the first frame may come from an earlier request in the same bucket.
 
 <a id="ograniczenia-klientow-pocztowych"></a>
-## Ograniczenia klientów pocztowych
+<a id="email-client-limitations"></a>
+## Email client limitations
 
-Nie można obiecać identycznego zachowania we wszystkich klientach ani świeżego odliczania przy każdym otwarciu. Apple opisuje automatyczne pobieranie zdalnej treści w tle przez Mail Privacy Protection, niezależnie od zaangażowania odbiorcy. Google dokumentuje serwowanie obrazów Gmaila przez bezpieczne proxy. Blokowanie obrazów, pobranie przed otwarciem oraz sposób obsługi animacji pozostają poza kontrolą tej wtyczki.
+Identical behavior across all clients or a fresh countdown on every opening cannot be guaranteed. Apple describes Mail Privacy Protection fetching remote content automatically in the background, regardless of recipient engagement. Google documents serving Gmail images through a secure proxy. Image blocking, prefetching, and animation handling remain outside the plugin's control.
 
-Nie traktuj licznika jako dowodu momentu otwarcia wiadomości ani elementu egzekwującego termin oferty. Umieść tekstową datę, przygotuj czytelną pierwszą klatkę i wykonaj testy w aplikacjach używanych przez odbiorców.
+Do not treat the timer as evidence of when a message was opened or as a mechanism for enforcing the offer deadline. Include a text deadline, make the first frame readable, and test the applications used by your recipients.
 
-Źródła: [Apple — Mail Privacy Protection](https://www.apple.com/legal/privacy/data/en/mail-privacy-protection/), [Google — image URL proxy](https://knowledge.workspace.google.com/admin/gmail/advanced/set-up-an-image-url-proxy-allowlist).
+Sources: [Apple — Mail Privacy Protection](https://www.apple.com/legal/privacy/data/en/mail-privacy-protection/), [Google — image URL proxy](https://knowledge.workspace.google.com/admin/gmail/advanced/set-up-an-image-url-proxy-allowlist).

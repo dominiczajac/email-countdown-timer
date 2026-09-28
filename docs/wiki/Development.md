@@ -1,47 +1,47 @@
-# Rozwój, testy i publikacja
+# Development, Testing, and Publishing
 
-## Struktura
+## Structure
 
-`email-countdown-timer.php` ładuje konfigurację, renderer i kontroler. `includes/admin-view.php` zawiera odziedziczony polski panel. `assets/countdown.js` odświeża obrazy po powrocie do karty. `tests/legacy-frame.php` jest izolowanym, dostępnym tylko w CLI wzorcem geometrii z v12.1, a nie drugą aktywną wtyczką.
+`email-countdown-timer.php` loads the configuration, renderer, and controller. `includes/admin-view.php` contains the inherited Polish admin panel. `assets/countdown.js` refreshes images when the tab becomes visible again. `tests/legacy-frame.php` is an isolated, CLI-only geometry reference from v12.1, not a second active plugin.
 
-Nie zmieniaj nazw opcji, shortcode, parametrów URL ani sposobu liczenia i rozmieszczenia bloków bez jawnej decyzji o kompatybilności. Zmiana testowego wzorca, aby ukryć różnicę nowego renderera, nie jest naprawą regresji.
+Do not change option names, shortcodes, URL parameters, or the way blocks are calculated and laid out without an explicit compatibility decision. Changing the test reference to hide a difference in the new renderer is not a regression fix.
 
-## Testy
+## Tests
 
 ```sh
 php tests/run.php
 node --check assets/countdown.js
 ```
 
-Pełny przebieg wymaga GD, Imagick i jednej z systemowych czcionek obsługiwanych przez test. Test chwilowo kopiuje czcionkę i usuwa ją po porównaniu; żadnego fontu nie należy dodawać do repozytorium bez odpowiedniej licencji. Testy są uruchamiane z atrapami API WordPressa, nie z jego pełną instalacją. Nie potwierdzają zgodności każdej wersji WordPressa, wszystkich polityk ImageMagick ani klientów pocztowych.
+A full run requires GD, Imagick, and one of the system fonts supported by the test. The test temporarily copies a font and removes it after the comparison; no font should be added to the repository without an appropriate license. Tests use WordPress API stubs rather than a full WordPress installation. They do not verify compatibility with every WordPress version, ImageMagick policy, or email client.
 
-CI wymaga GD, sprawdza oczekiwaną obecność/nieobecność Imagick i uruchamia matrycę PHP 8.1–8.5. Zmiany wchodzą przez gałąź roboczą, przegląd diff i zielone CI. Zalecany jest osobny test integracyjny na stagingu; pełne PHPCS/WPCS i benchmark produkcyjny nie są obecnie częścią tego zestawu.
+CI requires GD, checks the expected presence or absence of Imagick, and runs a PHP 8.1–8.5 matrix. Changes go through a working branch, diff review, and passing CI. A separate integration test on staging is recommended; full PHPCS/WPCS and a production benchmark are not currently part of this suite.
 
-## Paczka instalacyjna
+## Installation package
 
-W lokalnym klonie, po wybraniu sprawdzonego commita, można użyć:
+In a local clone, after selecting a verified commit, run:
 
 ```sh
 git archive --format=zip --prefix=email-countdown-timer/ \
   -o ../email-countdown-timer.zip HEAD
 ```
 
-`.gitattributes` wyłącza testy, skrypty i konfigurację CI z `git archive`. Pliki runtime, dokumentacja, `readme.txt` i licencja pozostają w paczce. Nie dodawaj `.git/`, plików środowiskowych ani prywatnych fontów do dystrybucji. Archiwum gałęzi roboczej nie jest automatycznie wydaniem stabilnym.
+`.gitattributes` excludes tests, scripts, and CI configuration from `git archive`. Runtime files, documentation, `readme.txt`, and the license remain in the package. Do not include `.git/`, environment files, or private fonts in the distribution. An archive of a working branch is not automatically a stable release.
 
-## Natywna Wiki GitHuba
+## Native GitHub Wiki
 
-GitHub przechowuje Wiki w oddzielnym repozytorium `email-countdown-timer.wiki.git`. Katalog `docs/wiki/` nie publikuje się sam do zakładki Wiki. Jeżeli Wiki nie była zainicjalizowana, właściciel musi najpierw utworzyć jej pierwszą stronę w interfejsie GitHuba.
+GitHub stores the Wiki in the separate `email-countdown-timer.wiki.git` repository. The `docs/wiki/` directory does not publish itself to the Wiki tab. If the Wiki has not been initialized, the owner must first create its initial page through the GitHub interface.
 
-Skrypt wymaga lokalnego Git, Python 3, dostępu do zapisu tej Wiki i skonfigurowanej tożsamości autora. Używa zwykłego uwierzytelnienia Git; nie zapisuj tokenu w repo ani nie wysyłaj go w rozmowie.
+The script requires local Git, Python 3, write access to that Wiki, and a configured author identity. It uses normal Git authentication; do not store a token in the repository or send one in a conversation.
 
 ```sh
-# Podgląd zmian, bez commita i bez push:
+# Preview changes without committing or pushing:
 bash scripts/publish-wiki.sh
 
-# Zapis do oddzielnego repozytorium Wiki:
+# Publish to the separate Wiki repository:
 bash scripts/publish-wiki.sh --publish
 ```
 
-Skrypt klonuje Wiki do katalogu tymczasowego, kopiuje tylko strony dostarczone w `docs/wiki/`, dostosowuje lokalne linki Markdown i publikuje bez force-push. Nie usuwa innych stron. Zmiany już istniejących stron o tych samych nazwach zostaną zastąpione wersją z repozytorium — przed publikacją sprawdź wyświetlany diff. Przy równoległej zmianie zdalnej zwykły push może zostać odrzucony; wtedy ponów podgląd na świeżym klonie.
+The script clones the Wiki into a temporary directory, copies only the pages supplied in `docs/wiki/`, adjusts local Markdown links, and publishes without force-pushing. It does not delete other pages. Existing pages with the same names will be replaced by the repository versions: review the displayed diff before publishing. If the remote changes concurrently, a normal push may be rejected; repeat the preview using a fresh clone.
 
-Źródło: [GitHub — adding or editing wiki pages](https://docs.github.com/en/communities/documenting-your-project-with-wikis/adding-or-editing-wiki-pages).
+Source: [GitHub — adding or editing wiki pages](https://docs.github.com/en/communities/documenting-your-project-with-wikis/adding-or-editing-wiki-pages).

@@ -1,20 +1,20 @@
-# Rozwiązywanie problemów
+# Troubleshooting
 
-| Objaw | Co sprawdzić |
+| Symptom | What to check |
 |---|---|
-| Brak wtyczki na liście | Czy główny plik PHP jest bezpośrednio w katalogu wtyczki; czy PHP spełnia wymaganie 8.1 |
-| Błąd ponownej deklaracji klasy | Wyłącz stary plugin/snippet przed uruchomieniem nowego |
-| GIF jest statyczny | Sprawdź dostępność Imagick w PHP obsługującym WWW, nie tylko w CLI |
-| Przezroczysty punkt / pusty obraz | Sprawdź status HTTP: 404 nieznane ID, 422 błędne zapisane dane, 503 brak GD lub błąd renderera/budżetu zasobów |
-| 405 | Endpoint przyjmuje wyłącznie GET i HEAD |
-| Font nie pojawia się na liście | Wymagane rozszerzenie TTF/OTF, czytelny plik w `fonts/`, bez dowiązania poza katalog |
-| Rozmiar fontu nic nie zmienia | Bez TTF/OTF + FreeType używany jest font bitmapowy o stałej wielkości |
-| Nieprawidłowe polskie znaki | Użyj lokalnego fontu zawierającego potrzebne glify; bitmapowy fallback nie zapewnia pełnego Unicode |
-| Obraz jest szerszy niż wartość w panelu | Zachowano minimalną szerokość, a nie skalowanie; długie etykiety mogą poszerzać obraz |
-| Licznik pokazuje wcześniejszy stan | Sprawdź przedział cache 15 s, cache hostingu/CDN i zachowanie klienta pocztowego |
-| Zapis formularza odrzucony | Odśwież nonce, sprawdź uprawnienia, datę i strefę oraz zakresy pól |
-| Czas nie zgadza się z oczekiwanym | Sprawdź strefę licznika, zegar serwera, termin kampanii i zmianę czasu lato/zima |
+| The plugin is missing from the plugin list | Check that the main PHP file is directly inside the plugin directory and that PHP meets the 8.1 requirement |
+| Class redeclaration error | Disable the old plugin/snippet before enabling the new version |
+| The GIF is static | Check Imagick availability in the PHP environment serving web requests, not just the CLI |
+| Transparent dot / blank image | Check the HTTP status: 404 for an unknown ID, 422 for invalid saved data, 503 for missing GD or a renderer/resource-budget error |
+| 405 | The endpoint accepts only GET and HEAD |
+| A font is missing from the list | It needs a TTF/OTF extension and must be a readable file in `fonts/`, without a symlink pointing outside that directory |
+| Font size has no effect | Without TTF/OTF + FreeType, the plugin uses a fixed-size bitmap font |
+| Incorrect Polish characters | Use a local font containing the required glyphs; the bitmap fallback does not provide full Unicode support |
+| The image is wider than the value in the admin panel | The setting preserves minimum width, not scaling; long labels may widen the image |
+| The timer shows an earlier state | Check the 15-second cache bucket, hosting/CDN caches, and email-client behavior |
+| Form submission is rejected | Refresh the nonce and check permissions, the date and time zone, and field ranges |
+| The time does not match expectations | Check the timer's time zone, server clock, campaign deadline, and daylight-saving transitions |
 
-Publiczny błąd celowo nie ujawnia wyjątków ani ścieżek serwera. `503` może mieć kilka przyczyn; sam kod statusu nie identyfikuje jednej. Sprawdź konfigurację rozszerzeń, limity i bezpieczne logi serwera na środowisku testowym. Wtyczka nie tworzy własnego szczegółowego dziennika wyjątków.
+Public errors deliberately do not expose exceptions or server paths. `503` has several possible causes; the status alone does not identify one. Check extension configuration, limits, and safe server logs in a staging environment. The plugin does not create its own detailed exception log.
 
-Do zgłoszenia błędu dołącz wersję wtyczki, WordPress/PHP, dostępność GD/Imagick, status HTTP, kroki odtworzenia i niesensytywną konfigurację testową. Nie wklejaj haseł, kluczy, cookies administratora, bazy danych ani list odbiorców. Dla podejrzeń podatności postępuj według `SECURITY.md` w głównym repozytorium.
+When reporting a bug, include the plugin version, WordPress/PHP versions, GD/Imagick availability, HTTP status, reproduction steps, and a nonsensitive test configuration. Do not paste passwords, keys, administrator cookies, a database, or recipient lists. For suspected vulnerabilities, follow `SECURITY.md` in the main repository.

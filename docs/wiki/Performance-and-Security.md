@@ -1,31 +1,31 @@
-# Wydajność i bezpieczeństwo
+# Performance and Security
 
-## Co jest cache'owane
+## What is cached
 
-Gotowy obraz jest zapisywany w WordPress Transients API jako Base64 wraz z sygnaturą konfiguracji i numerem przedziału czasu. Fizyczny klucz jest stały dla pary licznik/format. Zmiana 15-sekundowego przedziału nadpisuje ten sam slot zamiast tworzyć kolejne wpisy opcji. Termin ważności wpisu wynosi 60 sekund, ale do odpowiedzi wykorzystywany jest tylko obraz z bieżącego przedziału.
+The completed image is stored through the WordPress Transients API as Base64, together with a configuration signature and a time-bucket number. The physical key is stable for each timer/format pair. Moving to the next 15-second bucket overwrites the same slot instead of creating more option entries. The entry expires after 60 seconds, but only an image from the current bucket is served.
 
-Sygnatura obejmuje całą konfigurację, również kolor etykiet, termin, format, ścieżkę i czas modyfikacji fontu, dostępność Imagick oraz wersję implementacji. Zapis lub usunięcie licznika unieważnia jego trzy sloty PNG/GIF/WebP. Parametry `_t` i inne przypadkowe parametry URL nie dzielą cache serwera.
+The signature includes the entire configuration, including the label color, deadline, format, font path and modification time, Imagick availability, and implementation version. Saving or deleting a timer invalidates its three PNG/GIF/WebP slots. The `_t` parameter and other arbitrary URL parameters do not partition the server-side cache.
 
-W rendererze metryki tej samej czcionki i tekstu są obliczane raz na generowanie, a pierwsza klatka nie jest rysowana dwukrotnie. Na stronie wiele shortcode korzysta z jednego listenera. Nie przeprowadzono miarodajnego benchmarku RPS ani pomiaru procentowego przyspieszenia na serwerze produkcyjnym.
+The renderer measures the same font/text combination once per rendering operation, and the first frame is not drawn twice. Multiple shortcodes on a page share one listener. No representative requests-per-second benchmark or measurement of percentage speedup on a production server has been performed.
 
-## Ochrona endpointu i panelu
+## Endpoint and admin protection
 
-Panel wymaga `manage_options`, a operacje zapisu nonce. Wejście formularza przechodzi `wp_unslash()` i walidację typów, dat, kolorów i zakresów. Wyjście HTML jest escapowane, URL budowane przez API WordPressa, a przekierowania są lokalne i bezpieczne. Publiczne renderowanie ponownie waliduje zapisane dane.
+The admin panel requires `manage_options`, and save operations require a nonce. Form input passes through `wp_unslash()` and validation of types, dates, colors, and ranges. HTML output is escaped, URLs are built with WordPress APIs, and redirects are local and safe. Public rendering validates saved data again.
 
-Fonty muszą pozostać w lokalnym katalogu. Wymiary obrazu są sprawdzane przed alokacją GD. Nieistniejące ID kończy się 404 bez tworzenia animacji. Wtyczka nie podnosi limitu czasu PHP do 120 sekund. Bufory są zamykane tylko wtedy, gdy są usuwalne.
+Fonts must remain within the local directory. Image dimensions are checked before GD allocation. Unknown IDs return 404 without creating an animation. The plugin does not raise PHP's execution time limit to 120 seconds. Buffers are closed only when they are removable.
 
-Odpowiedź zawiera `X-Content-Type-Options: nosniff`, `Vary: Accept` oraz `Cache-Control: no-cache, no-store, must-revalidate`. Nie oznacza to gwarancji braku kopii u pośredników pocztowych; patrz [osadzanie](Embedding.md).
+Responses include `X-Content-Type-Options: nosniff`, `Vary: Accept`, and `Cache-Control: no-cache, no-store, must-revalidate`. This does not guarantee that email intermediaries will not keep copies; see [Embedding](Embedding.md).
 
-## Ryzyka pozostałe i hosting
+## Remaining risks and hosting
 
-Endpoint jest z założenia publiczny. Nadal może być celem nadużyć. **Nie ma blokady cache stampede**: równoległe żądania dla pustego cache mogą jednocześnie generować animację. Nie ma też limitu na IP. Liczby klatek nie zmniejszono, aby nie zmieniać działania poprawnych liczników.
+The endpoint is public by design and can still be abused. **There is no cache-stampede lock**: concurrent requests for an empty cache may generate the animation simultaneously. There is no per-IP rate limit either. The frame count was not reduced in order to preserve the behavior of valid timers.
 
-Przed dużą kampanią wykonaj test równoległych pobrań, obserwuj pamięć i CPU procesów PHP-FPM oraz liczbę połączeń do bazy. Trwały object cache może odciążyć bazę; nie rozwiązuje samodzielnie stampede. Ochronę przed nadmiernym ruchem ustawiaj na poziomie hostingu/WAF, uwzględniając wspólne adresy proxy klientów pocztowych. Zbyt restrykcyjne limity per-IP mogą blokować prawidłowe pobrania.
+Before a large campaign, test concurrent downloads and monitor PHP-FPM memory and CPU usage, as well as database connections. A persistent object cache may reduce database load, but does not solve stampedes on its own. Configure excessive-traffic protection at the hosting/WAF layer, accounting for shared email-client proxy addresses. Overly restrictive per-IP limits may block legitimate image requests.
 
-Nie włączaj bezrefleksyjnie pełnego cache CDN dla tego endpointu: wydłużenie ważności obrazu zmienia dokładność odliczania. Limity ImageMagick/PHP i polityka kodeków są zależne od serwera. Budżet pikseli ogranicza rozmiar wejścia, ale nie zastępuje konfiguracji zasobów.
+Do not enable full CDN caching for this endpoint without considering the consequences: extending image freshness changes countdown accuracy. ImageMagick/PHP limits and codec policies depend on the server. The pixel budget limits input size but does not replace resource configuration.
 
-## Dane i prywatność
+## Data and privacy
 
-Wtyczka zapisuje konfiguracje liczników i cache obrazów. Nie dodaje analityki odbiorców, identyfikatorów śledzących ani zewnętrznych żądań API. Zwykłe logi HTTP hostingu/CDN mogą jednak rejestrować pobrania obrazów. Nie utożsamiaj tego opisu implementacji z audytem prawnym całego mailingu.
+The plugin stores timer configurations and cached images. It does not add recipient analytics, tracking identifiers, or external API requests. Standard hosting/CDN HTTP logs may still record image requests. Do not treat this implementation description as a legal audit of the entire email campaign.
 
-Podstawa zasad walidacji: [WordPress Security APIs](https://developer.wordpress.org/apis/security/). Szczegółowe wyniki znajdują się w `docs/SECURITY-PERFORMANCE-AUDIT.md` głównego repozytorium.
+Basis for the validation principles: [WordPress Security APIs](https://developer.wordpress.org/apis/security/). Detailed findings are recorded in `docs/SECURITY-PERFORMANCE-AUDIT.md` in the main repository.

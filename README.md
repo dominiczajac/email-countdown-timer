@@ -1,75 +1,75 @@
 # Email Countdown Timer
 
-Wtyczka WordPress generująca obrazy odliczające do ustalonej daty: animowany GIF do wiadomości e-mail i stron WWW oraz statyczny PNG/WebP. Obrazy powstają na własnym serwerze WordPress; wtyczka nie wysyła wiadomości i nie wymaga zewnętrznego SaaS ani klucza API.
+A WordPress plugin that generates images counting down to a fixed deadline: animated GIFs for email and web pages, plus static PNG/WebP images. Images are generated on your own WordPress server; the plugin does not send email and does not require an external SaaS service or API key.
 
-**Wersja:** 12.1.1 · **Licencja:** GPL-3.0-only · **Panel:** Easy Countdown
+**Version:** 12.1.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
-## Wymagania
+## Requirements
 
-| Element | Wymaganie |
+| Component | Requirement |
 |---|---|
-| WordPress | Nagłówek deklaruje minimum 6.4; przed wdrożeniem potrzebny test na własnej instalacji |
-| PHP | Minimum 8.1; CI obejmuje 8.1–8.5 |
-| GD | Wymagane, z obsługą PNG/GIF; WebP zależy od kompilacji GD |
-| Imagick | Wymagane do animacji. Bez niego odpowiedź GIF jest statyczna |
-| FreeType | Wymagane do własnych czcionek TTF/OTF |
-| Dostęp sieciowy | Publicznie dostępny adres HTTPS WordPressa dla obrazów w e-mailach |
+| WordPress | The header declares a minimum of 6.4; test on your own installation before deploying |
+| PHP | Minimum 8.1; CI covers 8.1–8.5 |
+| GD | Required, with PNG/GIF support; WebP depends on the GD build |
+| Imagick | Required for animation. Without it, GIF responses are static |
+| FreeType | Required for custom TTF/OTF fonts |
+| Network access | A publicly accessible WordPress HTTPS URL for images embedded in email |
 
-Nie ma zależności Composer/npm potrzebnych do uruchomienia. Pliki czcionek nie są dołączone.
+No Composer/npm dependencies are required at runtime. Font files are not bundled.
 
-## Instalacja i pierwszy licznik
+## Installation and your first timer
 
-1. Umieść pliki w `wp-content/plugins/email-countdown-timer/`, tak aby plik `email-countdown-timer.php` znajdował się bezpośrednio w tym katalogu. Aktywuj **Email Countdown Timer** w panelu WordPressa.
-2. W menu **Easy Countdown** utwórz licznik, np. `promocja`: ustaw datę końca, strefę czasową, kolory i etykiety. Zapisz formularz.
-3. Skopiuj shortcode albo link do mailingu z tabeli liczników.
+1. Place the files in `wp-content/plugins/email-countdown-timer/`, with `email-countdown-timer.php` directly inside that directory. Activate **Email Countdown Timer** in WordPress.
+2. Open **Easy Countdown** and create a timer, such as `promotion`: set the deadline, time zone, colors, and labels. Save the form.
+3. Copy the shortcode or email image link from the timer list.
 
-**Aktualizacja z wcześniejszego kodu:** najpierw wykonaj kopię bazy i plików, a następnie wyłącz poprzednią wtyczkę lub snippet. Nie uruchamiaj obu implementacji jednocześnie: zachowana została nazwa klasy `ECD_Plugin_Colons_Fix`. Dane pozostają w opcji `easy_countdown_timers`; nie ma migracji ani automatycznego kasowania liczników przy dezaktywacji. Szczegóły: [instalacja i aktualizacja](docs/wiki/Installation.md).
+**Upgrading from the earlier code:** first back up your database and files, then disable the previous plugin or snippet. Do not run both implementations at once: the `ECD_Plugin_Colons_Fix` class name has been preserved. Data remains in the `easy_countdown_timers` option; there is no migration or automatic timer deletion on deactivation. See [Installation and Upgrades](docs/wiki/Installation.md).
 
-## Osadzanie
+## Embedding
 
-Na stronie WordPress użyj bloku Shortcode:
+Use a Shortcode block on a WordPress page:
 
 ```text
-[ecd_timer id="promocja"]
+[ecd_timer id="promotion"]
 ```
 
-W wiadomości HTML użyj adresu skopiowanego z panelu. Przykład — zastąp domenę i ID:
+In an HTML email, use the URL copied from the admin panel. Example — replace the domain and ID:
 
 ```html
-<img src="https://example.com/?ecd_action=render&amp;ecd=promocja&amp;mode=email"
-     alt="Czas do zakończenia promocji"
+<img src="https://example.com/?ecd_action=render&amp;ecd=promotion&amp;mode=email"
+     alt="Time remaining until the promotion ends"
      style="display:block;max-width:100%;height:auto;border:0;">
 ```
 
-Nie wklejaj shortcode do e-maila i nie załączaj pobranego GIF-a jako pliku, jeżeli licznik ma być wyliczany podczas pobierania obrazu z serwera. [Szczegóły osadzania](docs/wiki/Embedding.md).
+Do not paste the shortcode into an email or attach a downloaded GIF as a file when the timer needs to be calculated as the image is fetched from the server. See [Embedding](docs/wiki/Embedding.md).
 
-## Zachowane funkcje i istotne ograniczenia
+## Preserved features and important limitations
 
-Konfiguracja obejmuje datę i strefę czasową, trzy kolory, cztery etykiety, czcionkę, rozmiary tekstu, szerokość oraz ukrywanie dni poniżej 24 godzin. Zachowano polskie wartości domyślne, shortcode, adresy obrazów i układ renderera v12.1.
+Configuration includes the deadline and time zone, three colors, four labels, font, text sizes, width, and the option to hide days when fewer than 24 hours remain. The Polish admin interface and default values, shortcode, image URLs, and v12.1 renderer layout are preserved.
 
-GIF zawiera **60 klatek, po jednej sekundzie**. To skończona sekwencja obrazu, nie połączenie na żywo z serwerem. Shortcode pobiera nowy obraz po powrocie do widocznej karty; nie dodaje cyklicznego odpytywania co minutę. Wbudowany cache współdzieli obraz w 15-sekundowych przedziałach, więc pierwsza klatka nie musi odpowiadać dokładnie chwili pobrania.
+A GIF contains **60 frames, one second each**. It is a finite image sequence, not a live connection to the server. The shortcode fetches a new image when the browser tab becomes visible again; it does not poll every minute. The built-in cache shares images within 15-second buckets, so the first frame may not match the exact time of the request.
 
-**E-mail nie gwarantuje odliczania od chwili otwarcia.** Klient może wcześniej pobrać, buforować lub zablokować obraz. Apple Mail Privacy Protection może pobierać treści w tle; Gmail używa proxy obrazów. Nagłówki serwera nie dają kontroli nad całym tym procesem. W wiadomości podaj również bezwzględną datę zakończenia tekstem. [Źródła i ograniczenia](docs/wiki/Embedding.md#ograniczenia-klientow-pocztowych).
+**Email does not guarantee a countdown starting at the moment of opening.** A client may prefetch, cache, or block the image. Apple Mail Privacy Protection may fetch content in the background; Gmail uses an image proxy. Server headers do not provide control over the entire process. Include the absolute deadline as text in the message as well. See [Sources and limitations](docs/wiki/Embedding.md#email-client-limitations).
 
-Pole szerokości zachowuje dotychczasowe znaczenie: jest **minimalną szerokością obrazu**, nie skalowaniem do dokładnego wymiaru; `0` oznacza auto. Bez własnej czcionki używane są bitmapowe fonty GD o stałym rozmiarze. Nie zmienia się ich wielkość przez pola rozmiaru cyfr i etykiet. [Konfiguracja i limity](docs/wiki/Configuration.md).
+The width field retains its original meaning: it sets the **minimum image width**, rather than scaling to an exact size; `0` means automatic. Without a custom font, fixed-size GD bitmap fonts are used. The digit and label size fields do not resize those bitmap fonts. See [Configuration and limits](docs/wiki/Configuration.md).
 
-## Dokumentacja
+## Documentation
 
-[Spis Wiki](docs/wiki/Home.md) · [Instalacja](docs/wiki/Installation.md) · [Konfiguracja](docs/wiki/Configuration.md) · [Osadzanie](docs/wiki/Embedding.md) · [Wydajność i bezpieczeństwo](docs/wiki/Performance-and-Security.md) · [Diagnostyka](docs/wiki/Troubleshooting.md) · [Rozwój i publikacja Wiki](docs/wiki/Development.md)
+[Wiki index](docs/wiki/Home.md) · [Installation](docs/wiki/Installation.md) · [Configuration](docs/wiki/Configuration.md) · [Embedding](docs/wiki/Embedding.md) · [Performance and Security](docs/wiki/Performance-and-Security.md) · [Troubleshooting](docs/wiki/Troubleshooting.md) · [Development and Wiki publishing](docs/wiki/Development.md)
 
-Strony Wiki są wersjonowane w `docs/wiki/`. Ten katalog **nie jest automatycznie zakładką Wiki GitHuba**. Do publikacji w oddzielnym repozytorium Wiki służy `scripts/publish-wiki.sh`, uruchamiany przez właściciela z lokalnym uwierzytelnieniem Git.
+Wiki pages are version-controlled in `docs/wiki/`. This directory **is not automatically the native GitHub Wiki tab**. To publish to the separate Wiki repository, the owner runs `scripts/publish-wiki.sh` using local Git authentication.
 
-## Weryfikacja i rozwój
+## Verification and development
 
 ```sh
 php tests/run.php
 node --check assets/countdown.js
 ```
 
-CI sprawdza składnię i testy na PHP 8.1–8.5 z GD/Imagick oraz osobno PHP 8.4 bez Imagick. Testy obejmują walidację, zapisy z kontrolą uprawnień i nonce, cache, 60 klatek GIF oraz porównanie pikseli z oryginalnym rendererem. To testy z atrapami API WordPressa, **nie pełne testy integracyjne WordPressa**. Brak GD lokalnie jest jawnie zgłaszany jako pominięcie testów obrazów, a w CI jako błąd.
+CI checks syntax and runs tests on PHP 8.1–8.5 with GD/Imagick, plus a separate PHP 8.4 configuration without Imagick. Tests cover validation, saves with capability and nonce checks, caching, 60-frame GIFs, and pixel comparisons against the original renderer. These tests use WordPress API stubs; they are **not full WordPress integration tests**. Missing GD is explicitly reported as skipped image tests locally and as an error in CI.
 
-[Raport audytu](docs/SECURITY-PERFORMANCE-AUDIT.md) zawiera wyniki, zakres i ryzyka pozostałe. Nie deklarujemy zmierzonego procentowego przyspieszenia ani pełnej zgodności WPCS. Zasady zmian: [CONTRIBUTING.md](CONTRIBUTING.md); zgłoszenia bezpieczeństwa: [SECURITY.md](SECURITY.md).
+The [audit report](docs/SECURITY-PERFORMANCE-AUDIT.md) records results, scope, and remaining risks. We do not claim a measured percentage speedup or full WPCS compliance. Contribution guidelines: [CONTRIBUTING.md](CONTRIBUTING.md); security reports: [SECURITY.md](SECURITY.md).
 
-## Licencja
+## License
 
-Kod jest udostępniany na GNU GPL v3.0 (`GPL-3.0-only`). Zachowano plik [LICENSE](LICENSE) istniejący w repozytorium. Dodając własne czcionki, sprawdź ich odrębną licencję. [Historia zmian](CHANGELOG.md).
+The code is distributed under GNU GPL v3.0 (`GPL-3.0-only`). The repository's existing [LICENSE](LICENSE) file has been preserved. Check the separate license of any custom fonts you add. See the [Changelog](CHANGELOG.md).

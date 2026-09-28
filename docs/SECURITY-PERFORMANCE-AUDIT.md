@@ -1,63 +1,63 @@
-# Audyt bezpieczeństwa i wydajności — 12.1.1
+# Security and Performance Audit — 12.1.1
 
-Data: 2026-09-28. Zakres: dostarczony kod Easy Countdown v12.1 oraz przygotowanie publikacji w `dominiczajac/email-countdown-timer`. Raport rozróżnia obserwacje kodu, wykonane testy i ograniczenia weryfikacji.
+Date: 2026-09-28. Scope: the supplied Easy Countdown v12.1 code and preparation for publication in `dominiczajac/email-countdown-timer`. This report distinguishes code observations, completed tests, and verification limitations.
 
-## Podstawa i zakres zmian
+## Baseline and scope of changes
 
-Oryginał użytkownika: `Wklejony tekst(2).txt`, SHA-256 `7b5203cc43181482a5f33d93109aaf169c25b8e559fe8a34b1121f185815b6e2`.
+Original user file: `Wklejony tekst(2).txt`, SHA-256 `7b5203cc43181482a5f33d93109aaf169c25b8e559fe8a34b1121f185815b6e2`.
 
-Bazowy commit repozytorium: `b258d4abcd5f7299d4191fd0ea507863548597ea` (README, .gitignore i GPLv3; bez kodu wtyczki). Commit implementacji i testów: [`2b88b16767ee1e4f37974c45b238824bd61b3b30`](https://github.com/dominiczajac/email-countdown-timer/commit/2b88b16767ee1e4f37974c45b238824bd61b3b30).
+Repository baseline commit: `b258d4abcd5f7299d4191fd0ea507863548597ea` (README, .gitignore, and GPLv3; no plugin code). Implementation and test commit: [`2b88b16767ee1e4f37974c45b238824bd61b3b30`](https://github.com/dominiczajac/email-countdown-timer/commit/2b88b16767ee1e4f37974c45b238824bd61b3b30).
 
-Wcześniejszy roboczy ZIP nie był bazą implementacji: zmieniał język panelu, a pole ID z `disabled` nie było przesyłane podczas edycji. Przywrócono zachowanie oryginału (`readonly`). Zachowano istniejący plik LICENSE, zamiast zastępować GPLv3 poprzednio proponowaną GPLv2.
+The earlier working ZIP was not used as the implementation baseline: it changed the admin panel's language, and its `disabled` ID field was not submitted when editing. The original `readonly` behavior was restored. The existing LICENSE file was preserved instead of replacing GPLv3 with the previously proposed GPLv2.
 
-## Ustalenia i poprawki
+## Findings and fixes
 
-| Obserwacja w oryginale | Wpływ | Zmiana |
+| Original observation | Impact | Change |
 |---|---|---|
-| `edit` trafiał do nagłówka bez escaping | Ryzyko reflected XSS w kontekście panelu administratora | Normalizacja ID i `esc_html()` na wyjściu |
-| Surowe wartości POST i brak kontroli typów | Niepoprawne dane, ostrzeżenia/wyjątki, błędna konfiguracja | `wp_unslash()`, odrzucanie tablic, walidacja dat, kolorów i zakresów |
-| Nazwa fontu była doklejana do ścieżki | Wyjście poza przewidziany katalog przy nieprawidłowej konfiguracji | Nazwa bazowa, allowlista rozszerzeń, realpath i kontrola katalogu docelowego |
-| Brak limitów rozmiaru i powierzchni obrazu | Ryzyko nadmiernej alokacji i obciążenia publicznego endpointu | Budżet przed `imagecreatetruecolor()` i ograniczenia pól |
-| Nieistniejący timer tworzył licznik `+1 hour` | Niepotrzebna praca dla dowolnych ID i fałszywy wynik | Tani 404 z przezroczystym PNG |
-| Błędna data otrzymywała zastępczy termin | Wprowadzające w błąd odliczanie | Odrzucenie nieprawidłowej konfiguracji |
-| Brak `lc` w sygnaturze cache | Kolor etykiet mógł pozostać stary | Sygnatura pełnej konfiguracji i unieważnienie przy zapisie |
-| Timestamp bucket był częścią nazwy transientu | Kolejne klucze i wpisy bazy w czasie | Jeden slot licznik/format z numerem bucketu w wartości |
-| Wielokrotne obliczanie tych samych metryk | Zbędne wywołania FreeType w każdej klatce | Memoizacja na czas renderowania |
-| Klatka zerowa rysowana również jako master | Dodatkowe rysowanie | Ponowne użycie gotowej pierwszej klatki |
-| Osobny inline listener dla każdego shortcode | Zbędne handlery i interpolacja JS | Jeden zewnętrzny skrypt, dane w escapowanych atrybutach |
-| Brak Imagick dawał pusty string | Niedziałający obraz | Statyczny GIF bez Imagick |
-| Bezwarunkowe zamykanie buforów i limit czasu 120 s | Ryzyko zapętlenia i wydłużania kosztownych żądań | Kontrola usuwalności bufora; brak podnoszenia limitu hosta |
+| `edit` was inserted into the heading without escaping | Reflected XSS risk in the admin panel context | ID normalization and `esc_html()` on output |
+| Raw POST values and missing type checks | Invalid data, warnings/exceptions, and incorrect configuration | `wp_unslash()`, array rejection, and date, color, and range validation |
+| The font filename was appended to a path | Escape from the intended directory under invalid configuration | Basename, extension allowlist, realpath, and destination-directory checks |
+| No image dimension or area limits | Risk of excessive allocation and public-endpoint load | Budget checks before `imagecreatetruecolor()` and field limits |
+| A nonexistent timer generated a `+1 hour` countdown | Unnecessary work for arbitrary IDs and a false result | Inexpensive 404 with a transparent PNG |
+| An invalid date received a fallback deadline | Misleading countdown | Rejection of invalid configuration |
+| Missing `lc` in the cache signature | The label color could remain outdated | Full-configuration signature and invalidation on save |
+| The timestamp bucket was part of the transient name | More keys and database entries over time | One timer/format slot with the bucket number stored in its value |
+| Repeated calculation of the same metrics | Unnecessary FreeType calls in every frame | Per-render memoization |
+| Frame zero was also drawn as a master frame | Additional rendering work | Reuse of the completed first frame |
+| A separate inline listener for every shortcode | Redundant handlers and JavaScript interpolation | One external script, with data in escaped attributes |
+| Missing Imagick returned an empty string | Broken image | Static GIF without Imagick |
+| Unconditional buffer closing and a 120-second time limit | Risk of looping and extending expensive requests | Buffer-removability checks; no increase to the hosting limit |
 
-Kontrola `manage_options` i nonce istniała już w oryginalnym zapisie; została zachowana, nie należy przedstawiać jej jako nowo odkrytego braku autoryzacji. Nie stwierdzono w ramach tego przeglądu podstaw do nazywania ścieżki fontu nieautoryzowanym zdalnym wykonaniem kodu.
+The original save handler already checked `manage_options` and the nonce; those checks were retained and should not be described as a newly discovered authorization gap. This review found no basis for describing the font-path issue as unauthenticated remote code execution.
 
-## Zachowanie zachowane i świadome granice kompatybilności
+## Preserved behavior and deliberate compatibility boundaries
 
-Bez zmian pozostały: nazwa opcji, admin slug, shortcode, adresy obrazów, polskie domyślne etykiety, strefa Europe/Warsaw, geometria, kolory, minimalna szerokość, ukrywanie dni oraz 60 klatek po jednej sekundzie. Nie dodano odpytywania co minutę ani limitu odbiorców.
+The option name, admin slug, shortcode, image URLs, Polish default labels, Europe/Warsaw time zone, geometry, colors, minimum width, hide-days behavior, and 60 one-second frames remain unchanged. No once-per-minute polling or recipient limit was added.
 
-Zmiany dotyczą zachowania błędnych lub nadmiernych wejść: nie ma fikcyjnych timerów, tablice i nieprawidłowe daty są odrzucane, obowiązuje limit 400 000 pikseli i zakresy opisane w [konfiguracji](wiki/Configuration.md). Brak Imagick daje obraz statyczny. Paczka deklaruje PHP minimum 8.1 i WordPress minimum 6.4; nie twierdzimy, że przetestowano pełną instalację każdej wersji WordPressa.
+Changes affect invalid or excessive inputs: there are no fabricated timers; arrays and invalid dates are rejected; and the 400,000-pixel limit and ranges described in [Configuration](wiki/Configuration.md) apply. Without Imagick, the image is static. The package declares PHP 8.1 and WordPress 6.4 as minimum versions; we do not claim to have tested a full installation of every WordPress version.
 
-## Dowody weryfikacji
+## Verification evidence
 
-[Przebieg CI 36394611197](https://github.com/dominiczajac/email-countdown-timer/actions/runs/36394611197) dla commita `2b88b16`: wszystkie sześć zadań ukończone z wynikiem success — PHP 8.1, 8.2, 8.3, 8.4, 8.5 z GD/Imagick oraz PHP 8.4 z GD bez Imagick. Zweryfikowano statusy zadań i odczytano logi obu wariantów PHP 8.4.
+[CI run 36394611197](https://github.com/dominiczajac/email-countdown-timer/actions/runs/36394611197) for commit `2b88b16`: all six jobs completed successfully — PHP 8.1, 8.2, 8.3, 8.4, and 8.5 with GD/Imagick, plus PHP 8.4 with GD but without Imagick. Job statuses were verified and the logs for both PHP 8.4 variants were read.
 
-| Przebieg | Wynik potwierdzony w logu |
+| Run | Result confirmed in the log |
 |---|---|
-| PHP 8.4.26 + GD/Imagick | 258 asercji PASS |
-| PHP 8.4.26 + GD, bez Imagick | 137 asercji PASS |
-| Lokalny PHP 8.4.23, bez GD | 28 asercji PASS; testy obrazów jawnie pominięte |
+| PHP 8.4.26 + GD/Imagick | 258 assertions PASS |
+| PHP 8.4.26 + GD, without Imagick | 137 assertions PASS |
+| Local PHP 8.4.23, without GD | 28 assertions PASS; image tests explicitly skipped |
 
-Zestaw obejmuje 40 porównań pikseli bitmapowych obrazów z oryginalną geometrią, 60 porównań z systemową czcionką TTF przy przejściu przez próg doby, liczbę i opóźnienia 60 klatek GIF, porównania odtworzonych klatek, obsługę cache oraz walidację i kontroler. Test metryk sprawdza mniej niż 100 unikatowych pomiarów zamiast wielokrotnego powtarzania ich w 60 klatkach. Testowy wzorzec nie obsługuje HTTP i jest zablokowany poza CLI.
+The suite includes 40 bitmap-image pixel comparisons against the original geometry, 60 comparisons using a system TTF font across the one-day threshold, GIF frame-count and delay checks for 60 frames, comparisons of decoded frames, cache handling, validation, and controller tests. The metrics test checks fewer than 100 unique measurements rather than repeatedly recalculating them across 60 frames. The test reference does not serve HTTP and is blocked outside the CLI.
 
-Porównano lokalne hashe wszystkich dziewięciu plików implementacji/testów/CI z blobami opublikowanego drzewa `08ba7858b51cfef2c8d76dccd9eed52d6073dcf5`; wszystkie były zgodne. Późniejszy commit dokumentacji aktualizuje również przypięcie checkout po ostrzeżeniu CI o starym runtime Node. Status najnowszej rewizji należy sprawdzać osobno w Actions.
+Local hashes for all nine implementation/test/CI files were compared with the blobs in published tree `08ba7858b51cfef2c8d76dccd9eed52d6073dcf5`; all matched. The later documentation commit also updates the checkout pin after a CI warning about the older Node runtime. Check the latest revision's status separately in Actions.
 
-## Czego nie potwierdzono
+## What was not verified
 
-Nie wykonano pełnych testów integracyjnych z bazą i rzeczywistym WordPressem, testu wszystkich klientów pocztowych, benchmarku obciążeniowego ani pełnego PHPCS/WPCS. Asercje kontrolera korzystają z atrap API WordPressa. Testy nie stanowią certyfikacji bezpieczeństwa ani gwarancji zerowych regresji.
+No full integration tests with a database and real WordPress installation, exhaustive email-client tests, load benchmark, or full PHPCS/WPCS run were performed. Controller assertions use WordPress API stubs. Tests are not a security certification or a guarantee of zero regressions.
 
-Nie ma blokady stampede ani ochrony przed masowym ruchem do poprawnych ID. Równoległe cache misses mogą nadal renderować wiele GIF-ów. Nie podajemy procentowego przyspieszenia ani deklarowanej przepustowości bez pomiaru; potwierdzono redukcję zbędnych operacji oraz zachowanie wyniku w objętych testem przypadkach.
+There is no stampede lock or protection against mass traffic to valid IDs. Concurrent cache misses can still render multiple GIFs. We do not state a percentage speedup or throughput without measurement; the verified improvements are fewer redundant operations and preserved output in the tested cases.
 
-Własne fonty, nietypowe etykiety, zasoby PHP/ImageMagick i zachowanie klienta pocztowego wymagają testu stagingowego przed kampanią. Znany model GIF-a i cache nie pozwala gwarantować idealnie aktualnego odliczania przy każdym otwarciu e-maila.
+Custom fonts, unusual labels, PHP/ImageMagick resources, and email-client behavior require a staging test before a campaign. The GIF and caching model does not guarantee a perfectly up-to-date countdown every time an email is opened.
 
-## Podstawa zaleceń zewnętrznych
+## External basis for recommendations
 
-[WordPress Security APIs](https://developer.wordpress.org/apis/security/) — walidacja i escaping; [GitHub secure use](https://docs.github.com/en/actions/reference/security/secure-use) — minimalne uprawnienia i SHA akcji; [PHP imagettftext](https://www.php.net/manual/en/function.imagettftext.php) — FreeType i rozmiar w punktach. Te źródła opisują zasady platform, a nie wynik audytu tej wtyczki.
+[WordPress Security APIs](https://developer.wordpress.org/apis/security/) — validation and escaping; [GitHub secure use](https://docs.github.com/en/actions/reference/security/secure-use) — minimal permissions and action SHAs; [PHP imagettftext](https://www.php.net/manual/en/function.imagettftext.php) — FreeType and sizes in points. These sources describe platform principles, not the audit results for this plugin.

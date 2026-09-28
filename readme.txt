@@ -6,24 +6,24 @@ Stable tag: trunk
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Obrazy odliczające do ustalonej daty, generowane na własnym serwerze WordPress.
+Images counting down to a fixed deadline, generated on your own WordPress server.
 
 == Description ==
 
-Wersja kodu: 12.1.1. Panel Easy Countdown udostępnia datę, strefę czasową, kolory, etykiety, lokalne fonty i shortcode [ecd_timer id="promocja"].
+Code version: 12.1.1. The Easy Countdown admin panel provides a deadline, time zone, colors, labels, local fonts, and the [ecd_timer id="promotion"] shortcode.
 
-GD jest wymagane. Imagick umożliwia animowany GIF z 60 klatkami; bez niego GIF jest statyczny. Klienci pocztowi mogą pobierać i buforować obrazy przed otwarciem wiadomości. Zawsze podawaj również tekstową datę zakończenia.
+GD is required. Imagick enables animated GIFs with 60 frames; without it, GIFs are static. Email clients may prefetch and cache images before a message is opened. Always include the deadline as text as well.
 
-Pełna instrukcja znajduje się w README.md i docs/wiki/. Obecność tego pliku nie oznacza przyjęcia wtyczki do katalogu WordPress.org. Nie deklarujemy Tested up to bez testu pełnej instalacji WordPressa.
+Full instructions are available in README.md and docs/wiki/. The presence of this file does not mean the plugin has been accepted into the WordPress.org directory. We do not declare Tested up to without testing a full WordPress installation.
 
 == Installation ==
 
-1. Skopiuj wtyczkę do wp-content/plugins/email-countdown-timer/.
-2. Przy aktualizacji wyłącz wcześniejszy plugin lub snippet tej implementacji.
-3. Aktywuj Email Countdown Timer, otwórz Easy Countdown i utwórz licznik.
-4. Skopiuj shortcode albo URL obrazu do własnego szablonu e-mail.
+1. Copy the plugin to wp-content/plugins/email-countdown-timer/.
+2. When upgrading, disable the previous plugin or snippet of this implementation.
+3. Activate Email Countdown Timer, open Easy Countdown, and create a timer.
+4. Copy the shortcode for your WordPress page or the image URL for your email template.
 
 == Changelog ==
 
 = 12.1.1 =
-Walidacja i escaping, ograniczenie fontów i rozmiaru obrazu, naprawa kluczy cache, memoizacja metryk, testy regresji i dokumentacja. Zachowano dane oraz interfejsy v12.1; błędne lub nadmiernie duże konfiguracje są odrzucane.
+Validation and escaping, font-path and image-size limits, cache-key fixes, metrics memoization, regression tests, and documentation. v12.1 data and interfaces are preserved; invalid or excessively large configurations are rejected.

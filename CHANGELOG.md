@@ -1,19 +1,19 @@
-# Historia zmian
+# Changelog
 
 ## 12.1.1 — 2026-09-28
 
-Pierwsza uporządkowana wersja repozytoryjna oparta na dostarczonym kodzie Easy Countdown v12.1.
+The first structured repository version based on the supplied Easy Countdown v12.1 code.
 
-### Bezpieczeństwo
+### Security
 
-Usunięto nieescapowany nagłówek edycji. Dodano walidację typów wejścia, dat, stref, kolorów i zakresów; `wp_unslash()` przed zapisem; bezpieczne URL i przekierowania; ograniczenie ścieżek fontów oraz budżetu pikseli. Zachowano istniejące kontrole capability i nonce. Publiczny endpoint odrzuca nieznane ID oraz nieprawidłowe konfiguracje, obsługuje tylko GET/HEAD i nie podnosi limitu czasu PHP.
+Fixed the unescaped edit heading. Added validation of input types, dates, time zones, colors, and ranges; `wp_unslash()` before saving; safe URLs and redirects; font-path restrictions; and a pixel budget. Existing capability and nonce checks are preserved. The public endpoint rejects unknown IDs and invalid configurations, accepts only GET/HEAD, and does not raise PHP's execution time limit.
 
-### Wydajność i niezawodność
+### Performance and reliability
 
-Stałe sloty cache zastąpiły osobne klucze dla każdego przedziału czasu. Sygnatura zawiera teraz również kolor etykiet. Dodano memoizację metryk fontu, wykorzystano już narysowaną pierwszą klatkę i zastąpiono wiele listenerów jednym skryptem. Brak Imagick daje statyczny GIF zamiast pustej odpowiedzi. Uporządkowano zwalnianie zasobów i obsługę buforów.
+Stable cache slots replace separate keys for each time bucket. The signature now includes the label color. Added font-metrics memoization, reused the already-rendered first frame, and replaced multiple listeners with one script. Without Imagick, the plugin returns a static GIF instead of an empty response. Resource cleanup and buffer handling have been improved.
 
-### Kompatybilność i dokumentacja
+### Compatibility and documentation
 
-Zachowano polski panel, dane, shortcode, URL, sekwencję 60 klatek i geometrię renderera. Nowe bezpieczne zakresy oraz odrzucanie błędnych danych są opisane w Wiki. Dodano testy regresji, CI PHP 8.1–8.5, README, dokumentację Wiki i raport audytu. Minimalna deklarowana wersja PHP tej paczki to 8.1; WordPress w nagłówku: 6.4. Nie dodano automatycznego aktualizatora ani potwierdzenia publikacji na WordPress.org.
+Preserved the Polish admin panel, data, shortcode, URLs, 60-frame sequence, and renderer geometry. New safe ranges and the rejection of invalid data are documented in the Wiki. Added regression tests, PHP 8.1–8.5 CI, a README, Wiki documentation, and an audit report. The package declares a minimum PHP version of 8.1 and WordPress 6.4 in its header. No automatic updater or confirmation of WordPress.org publication has been added.
 
-Zachowano istniejący w repozytorium plik GNU GPL v3; deklaracja kodu: `GPL-3.0-only`.
+The repository's existing GNU GPL v3 license file is preserved; the code declares `GPL-3.0-only`.

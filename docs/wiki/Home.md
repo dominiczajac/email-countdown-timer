@@ -1,16 +1,16 @@
-# Dokumentacja Email Countdown Timer
+# Email Countdown Timer Documentation
 
-Dokumentacja dotyczy wersji **12.1.1**, opartej na dostarczonym rendererze Easy Countdown v12.1. Wtyczka tworzy obrazy odliczające do daty zapisanej przez administratora WordPressa. Nie jest systemem wysyłki e-maili ani mechanizmem egzekwowania zakończenia promocji.
+This documentation covers version **12.1.1**, based on the supplied Easy Countdown v12.1 renderer. The plugin creates countdown images using a deadline saved by a WordPress administrator. It is not an email delivery system or a mechanism for enforcing the end of a promotion.
 
-| Zadanie | Strona |
+| Task | Page |
 |---|---|
-| Uruchomienie i zachowanie istniejących liczników | [Instalacja](Installation.md) |
-| Pola panelu, fonty, daty i limity | [Konfiguracja](Configuration.md) |
-| Shortcode, HTML e-mail, adresy obrazów | [Osadzanie](Embedding.md) |
-| Cache, obciążenie, uprawnienia i prywatność | [Wydajność i bezpieczeństwo](Performance-and-Security.md) |
-| Pusty obraz, brak animacji, stara data | [Diagnostyka](Troubleshooting.md) |
-| Testy, pakowanie i aktualizacja Wiki | [Rozwój](Development.md) |
+| Getting started and keeping existing timers | [Installation](Installation.md) |
+| Admin fields, fonts, dates, and limits | [Configuration](Configuration.md) |
+| Shortcodes, email HTML, and image URLs | [Embedding](Embedding.md) |
+| Caching, load, permissions, and privacy | [Performance and Security](Performance-and-Security.md) |
+| Blank images, missing animation, or outdated countdowns | [Troubleshooting](Troubleshooting.md) |
+| Tests, packaging, and Wiki updates | [Development](Development.md) |
 
-Najważniejsze ograniczenie: GIF ma 60 klatek, a klient pocztowy może pobrać go przed otwarciem wiadomości. Zawsze umieszczaj datę końca także jako zwykły tekst.
+The main limitation: a GIF contains 60 frames, and an email client may fetch it before the message is opened. Always include the deadline as plain text as well.
 
-Źródłem dokumentacji są pliki `docs/wiki/` w głównym repozytorium. Publikacja w natywnej Wiki jest oddzielną operacją Git; sama obecność tych plików nie potwierdza jej wykonania.
+The documentation source is stored in `docs/wiki/` in the main repository. Publishing to the native GitHub Wiki is a separate Git operation; the presence of these files alone does not confirm publication.

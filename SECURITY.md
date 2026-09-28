@@ -1,9 +1,9 @@
-# Zgłaszanie problemów bezpieczeństwa
+# Reporting Security Issues
 
-Nie publikuj działających exploitów, danych dostępowych ani danych użytkowników w publicznym Issue. Jeżeli repozytorium udostępnia prywatne zgłoszenia w zakładce Security, użyj tej funkcji. Jeżeli jej nie ma, poproś właściciela o prywatny kanał kontaktu, podając publicznie wyłącznie ogólną informację, że chcesz zgłosić podatność. Ta instrukcja nie oznacza, że prywatne zgłaszanie zostało już włączone.
+Do not publish working exploits, credentials, or user data in a public issue. If private vulnerability reporting is available in the repository's Security tab, use it. Otherwise, ask the owner for a private contact channel, stating publicly only that you would like to report a vulnerability. These instructions do not imply that private reporting has already been enabled.
 
-Prywatny raport powinien zawierać wersję/commit, minimalne kroki odtworzenia na testowych danych, wymagane uprawnienia, możliwy wpływ oraz wersje PHP, WordPress i rozszerzeń. Usuń sekrety i dane osobowe z logów. Nie testuj witryn innych osób bez ich zgody.
+A private report should include the version/commit, minimal reproduction steps using test data, required permissions, potential impact, and the PHP, WordPress, and extension versions. Remove secrets and personal data from logs. Do not test other people's websites without their permission.
 
-Wersja 12.1.1 zawiera poprawki walidacji, escapowania, obsługi fontów i limitów renderowania. Nie stanowi gwarancji braku podatności. Publiczny endpoint obrazów pozostaje podatny na przeciążenie przy dostatecznie dużym ruchu; nie ma blokady stampede ani ochrony WAF wbudowanej we wtyczkę. Raport: `docs/SECURITY-PERFORMANCE-AUDIT.md`.
+Version 12.1.1 includes fixes for validation, escaping, font handling, and rendering limits. It does not guarantee the absence of vulnerabilities. The public image endpoint can still be overloaded by sufficient traffic; the plugin has no built-in stampede lock or WAF protection. See `docs/SECURITY-PERFORMANCE-AUDIT.md`.
 
-Nie zadeklarowano SLA ani okresu wsparcia starszych wersji. Przed wdrożeniem sprawdź bieżące poprawki w repo i wykonaj testy na własnym środowisku.
+No SLA or support period for older versions has been declared. Before deploying, check the repository for current fixes and test in your own environment.

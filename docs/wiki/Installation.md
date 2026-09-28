@@ -1,23 +1,23 @@
-# Instalacja i aktualizacja
+# Installation and Upgrades
 
-## Nowa instalacja
+## New installation
 
-Przygotuj WordPress, PHP co najmniej 8.1 i GD z obsługą PNG/GIF. Do animacji potrzebne jest dodatkowo rozszerzenie PHP Imagick oraz działający kodek GIF w ImageMagick. Czcionki TTF/OTF wymagają FreeType w GD. Nagłówek wtyczki deklaruje WordPress 6.4 jako minimum; testy CI nie zastępują sprawdzenia na rzeczywistej instalacji.
+Prepare WordPress, PHP 8.1 or later, and GD with PNG/GIF support. Animation also requires the PHP Imagick extension and a working GIF codec in ImageMagick. TTF/OTF fonts require FreeType support in GD. The plugin header declares WordPress 6.4 as the minimum; CI tests do not replace testing on a real installation.
 
-Pobierz kod, rozpakuj go do katalogu `email-countdown-timer` i umieść w `wp-content/plugins/`. W tym katalogu muszą znaleźć się: `email-countdown-timer.php`, `includes/` oraz `assets/`. Zachowaj również `LICENSE` i `readme.txt`. Nie twórz dodatkowego, zagnieżdżonego katalogu z drugą kopią nazwy wtyczki.
+Download the code, extract it into an `email-countdown-timer` directory, and place that directory in `wp-content/plugins/`. It must contain `email-countdown-timer.php`, `includes/`, and `assets/`. Keep `LICENSE` and `readme.txt` as well. Do not add another nested directory with a second copy of the plugin name.
 
-Aktywuj wtyczkę w WordPressie. Otwórz **Easy Countdown**, utwórz testowy licznik i sprawdź jego link w oknie bez zalogowanej sesji. Obraz w e-mailu musi być dostępny publicznie; Basic Auth na środowisku testowym lub ochrona całej witryny może zablokować jego pobieranie.
+Activate the plugin in WordPress. Open **Easy Countdown**, create a test timer, and check its link in a browser window without a logged-in session. An email image must be publicly accessible; Basic Auth on a staging environment or site-wide protection may prevent it from loading.
 
-## Przejście z v12.1 lub snippetu
+## Upgrading from v12.1 or a snippet
 
-Wykonaj kopię bazy i starego kodu oraz osobną kopię własnych fontów. Wyłącz poprzedni plugin/snippet przed aktywacją tej wersji. Obie implementacje używają klasy `ECD_Plugin_Colons_Fix`, więc jednoczesne wczytanie spowoduje konflikt.
+Back up the database and the old code, and make a separate backup of your custom fonts. Disable the previous plugin/snippet before activating this version. Both implementations use the `ECD_Plugin_Colons_Fix` class, so loading them at the same time causes a conflict.
 
-Zachowano opcję `easy_countdown_timers`, shortcode `ecd_timer`, menu `ecd-timers` oraz parametry `ecd_action`, `ecd`, `mode`. Prawidłowe zapisane daty i konfiguracje są odczytywane bez migracji. Dane uszkodzone lub przekraczające nowe limity bezpieczeństwa są odrzucane zamiast powodować kosztowne renderowanie. Popraw je w panelu; patrz [konfiguracja](Configuration.md).
+The `easy_countdown_timers` option, `ecd_timer` shortcode, `ecd-timers` menu slug, and `ecd_action`, `ecd`, and `mode` parameters are preserved. Valid saved dates and configurations are read without migration. Corrupted data or configurations exceeding the new safety limits are rejected instead of triggering expensive rendering. Correct them in the admin panel; see [Configuration](Configuration.md).
 
-Własne pliki TTF/OTF skopiuj do `fonts/` obok głównego pliku PHP. Nie ma automatycznego pobierania fontów ani instalatora ich licencji. Zachowaj kopię: wymiana całego katalogu wtyczki może je usunąć.
+Copy your own TTF/OTF files into `fonts/` next to the main PHP file. There is no automatic font download or font-license installer. Keep a backup: replacing the entire plugin directory may remove your fonts.
 
-## Aktualizacje i odinstalowanie
+## Updates and uninstallation
 
-Repozytorium nie zawiera automatycznego aktualizatora z GitHuba. Kolejne wersje wdrażaj świadomie po sprawdzeniu zmian i wykonaniu kopii. Dezaktywacja ani usunięcie plików nie kasują opcji z licznikami. Trwałe usunięcie konkretnego licznika wykonuje jego formularz w panelu.
+The repository does not include an automatic GitHub updater. Deploy subsequent versions deliberately, after reviewing the changes and creating a backup. Deactivation or file removal does not delete the option containing your timers. To permanently delete a particular timer, use its form in the admin panel.
 
-Przed uruchomieniem kampanii sprawdź zapis/edycję/usuwanie, wszystkie używane fonty, próg 24 godzin, datę po zakończeniu i odbiór w docelowych aplikacjach pocztowych. Cofnięcie wdrożenia nie powinno oznaczać powrotu do znanej podatnej wersji na publicznym serwerze.
+Before launching a campaign, test saving, editing, and deleting timers; every font you use; the 24-hour threshold; behavior after the deadline; and rendering in the target email applications. Rolling back a deployment should not mean returning to a known vulnerable version on a public server.

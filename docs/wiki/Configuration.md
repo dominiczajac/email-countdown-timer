@@ -1,32 +1,32 @@
-# Konfiguracja licznika
+# Timer Configuration
 
-Panel **Easy Countdown** jest dostępny dla użytkowników z uprawnieniem `manage_options`. Zapis i usuwanie wymagają również prawidłowego nonce formularza.
+The **Easy Countdown** admin panel is available to users with the `manage_options` capability. Saving and deleting also require a valid form nonce. The admin interface remains in Polish; the original field labels are included below to help you locate them.
 
-| Pole | Znaczenie i ograniczenia |
+| Field | Meaning and limits |
 |---|---|
-| ID Licznika | Identyfikator w shortcode i URL; normalizowany przez `sanitize_title`, maksymalnie 200 bajtów wejścia. Najprościej używać małych liter ASCII, cyfr i myślników. Przy edycji pole pozostaje `readonly`, nie `disabled` |
-| Data Końca | Konkretna data i godzina, z opcjonalnymi sekundami; format zapisu `YYYY-MM-DDTHH:MM[:SS]` lub odpowiednik ze spacją |
-| Strefa Czasowa | Identyfikator obsługiwany przez PHP, np. `Europe/Warsaw`; puste pole przyjmuje tę wartość |
-| Kolory | Tło `bg`, cyfry `dc`, etykiety `lc`; hex `#RGB` lub `#RRGGBB` |
-| Etykiety | Domyślnie `Dni`, `Godz`, `Min`, `Sek`; każda do 256 bajtów UTF-8, niekoniecznie 256 znaków |
-| Czcionka | Lokalny plik TTF/OTF z `fonts/`; ścieżki poza katalogiem są niedozwolone |
-| Rozmiar Cyfr | 1–200; domyślnie 40; wartość przekazywana do FreeType |
-| Rozmiar Etykiet | 1–100; domyślnie 12; wartość przekazywana do FreeType |
-| Szerokość | 0–4000 px; `0` oznacza auto, liczba dodatnia to minimum szerokości, bez skalowania zawartości |
-| Ukryj dni | Pomija blok dni, gdy pozostało mniej niż 24 godziny |
+| Timer ID (`ID Licznika`) | Identifier used in the shortcode and URL; normalized by `sanitize_title`, with a maximum input length of 200 bytes. Lowercase ASCII letters, digits, and hyphens are the simplest choice. During editing, the field remains `readonly`, not `disabled` |
+| Deadline (`Data Końca`) | A specific date and time, with optional seconds; stored as `YYYY-MM-DDTHH:MM[:SS]` or the equivalent with a space |
+| Time zone (`Strefa Czasowa`) | An identifier supported by PHP, such as `Europe/Warsaw`; an empty field uses that value |
+| Colors (`Kolory`) | Background `bg`, digits `dc`, and labels `lc`; hex values in `#RGB` or `#RRGGBB` format |
+| Labels (`Etykiety`) | Defaults: `Dni`, `Godz`, `Min`, `Sek`; each may contain up to 256 UTF-8 bytes, not necessarily 256 characters |
+| Font (`Czcionka`) | A local TTF/OTF file in `fonts/`; paths outside that directory are not allowed |
+| Digit size (`Rozmiar Cyfr`) | 1–200; default 40; the value passed to FreeType |
+| Label size (`Rozmiar Etykiet`) | 1–100; default 12; the value passed to FreeType |
+| Width (`Szerokość`) | 0–4000 px; `0` means automatic, and a positive number sets the minimum width without scaling the content |
+| Hide days (`Ukryj dni`) | Omits the days block when fewer than 24 hours remain |
 
-Etykiety pól rozmiaru w odziedziczonym panelu używają określenia „px”, ale funkcje GD/FreeType interpretują argument rozmiaru w punktach. Zachowano przekazywanie tej samej wartości jak w v12.1, bez zmiany wyglądu. Fonty bitmapowe GD mają stały rozmiar i te pola ich nie skalują.
+The inherited admin panel labels the size fields as “px”, but GD/FreeType functions interpret the size argument in points. The same values are passed as in v12.1 to preserve the appearance. GD bitmap fonts have a fixed size and are not scaled by these fields.
 
-Oprócz limitów pól obowiązuje budżet całego obrazu: najwyżej 4000 × 1000 wymiarów granicznych i **400 000 pikseli powierzchni**. Nie każda kombinacja dozwolonych rozmiarów i długich etykiet zmieści się w budżecie. Dla 60 klatek limit sumaryczny wynosi 24 miliony pikseli; to ograniczenie wejścia, nie gwarancja konkretnego zużycia RAM.
+In addition to field limits, the entire image has a budget: maximum dimensions of 4000 × 1000 and a maximum area of **400,000 pixels**. Not every combination of allowed sizes and long labels fits within that budget. For 60 frames, the cumulative limit is 24 million pixels; this is an input limit, not a guarantee of a specific RAM footprint.
 
-## Daty i wygaśnięcie
+## Dates and expiration
 
-Datę interpretuje PHP w wybranej strefie czasowej. Nie są przyjmowane względne terminy takie jak `+1 hour` ani nieistniejące daty kalendarzowe. Zachowano reguły PHP dotyczące zmiany czasu; godziny niejednoznaczne przy przejściu lato/zima należy przetestować przed kampanią.
+PHP interprets the date in the selected time zone. Relative deadlines such as `+1 hour` and nonexistent calendar dates are not accepted. PHP's daylight-saving-time rules are preserved; ambiguous times during daylight-saving transitions should be tested before a campaign.
 
-Po upływie terminu pozostały czas jest ograniczany do zera. Widoczność bloku dni nadal zależy od ustawienia ukrywania. Licznik nie blokuje zakupów, formularzy ani kuponów — termin oferty musi być egzekwowany przez właściwy system sprzedaży.
+After the deadline, the remaining time is clamped to zero. Whether the days block is visible still depends on the hide-days setting. The timer does not block purchases, forms, or coupons: the offer deadline must be enforced by the relevant sales system.
 
-## Fonty i polskie znaki
+## Fonts and Polish characters
 
-Pliki nie są dostarczane z wtyczką. Wybierz legalnie posiadany font i sprawdź obsługiwane znaki. Brak pliku lub FreeType powoduje użycie bitmapowego fontu GD, którego możliwości Unicode są ograniczone. Lista pomija dowiązania prowadzące poza katalog fontów. Nie ma publicznego uploadu czcionek.
+Font files are not bundled with the plugin. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a GD bitmap font with limited Unicode support. The font list excludes symlinks pointing outside the fonts directory. There is no public font upload endpoint.
 
-Źródło jednostek rozmiaru i wymagań FreeType: [PHP — imagettftext](https://www.php.net/manual/en/function.imagettftext.php).
+Source for size units and FreeType requirements: [PHP — imagettftext](https://www.php.net/manual/en/function.imagettftext.php).
