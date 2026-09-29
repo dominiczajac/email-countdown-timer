@@ -64,7 +64,7 @@ def request(path, phase, target, sample, auth=True):
         with opener.open(BASE + path, timeout=42) as response:
             body = response.read()
             item.update(status=response.status, sapi=response.headers.get('X-ECT-Lab-SAPI'),
-                        active=response.headers.get('X-ECT-Lab-Active'), final_url=response.url,
+                        active=response.headers.get('X-ECT-Lab-Active'), opcache=response.headers.get('X-ECT-Lab-OPcache'), final_url=response.url,
                         content_type=response.headers.get('Content-Type', ''), bytes=len(body),
                         sha256=hashlib.sha256(body).hexdigest())
     except Exception as error:
@@ -102,7 +102,7 @@ try:
                 for path, target, marker in targets:
                     item, body = request(path, phase, target, sample)
                     label = f'{phase}/{target}/{sample}'
-                    check(item.get('status') == 200 and item.get('sapi') == 'fpm-fcgi' and marker in body
+                    check(item.get('status') == 200 and item.get('sapi') == 'fpm-fcgi' and item.get('opcache') == 'on' and marker in body
                           and item.get('active') == ('on' if active else 'off')
                           and '/wp-login.php' not in item.get('final_url', '')
                           and b'Fatal error' not in body and item['elapsed_ms'] < 30000, label)

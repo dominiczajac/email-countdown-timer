@@ -70,7 +70,6 @@ php_admin_value[memory_limit] = 256M
 php_admin_value[error_log] = $ECD_FPM_EVIDENCE/php-fpm.log
 php_admin_flag[log_errors] = on
 php_admin_flag[display_errors] = off
-php_admin_flag[opcache.enable] = on
 EOF
 cat > "$ECD_FPM_ROOT/nginx.conf" <<EOF
 pid $ECD_FPM_ROOT/nginx.pid;
@@ -98,7 +97,7 @@ http {
 }
 EOF
 # Unprivileged masters; bind loopback ports only. No system configuration is changed.
-php-fpm8.4 --nodaemonize --fpm-config "$ECD_FPM_ROOT/fpm.conf" > "$ECD_FPM_EVIDENCE/fpm-console.log" 2>&1 &
+php-fpm8.4 -d opcache.enable=1 --nodaemonize --fpm-config "$ECD_FPM_ROOT/fpm.conf" > "$ECD_FPM_EVIDENCE/fpm-console.log" 2>&1 &
 fpm=$!
 nginx -p "$ECD_FPM_ROOT/" -c "$ECD_FPM_ROOT/nginx.conf" -g 'daemon off;' > "$ECD_FPM_EVIDENCE/nginx-console.log" 2>&1 &
 web=$!
