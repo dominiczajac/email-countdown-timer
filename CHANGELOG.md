@@ -1,5 +1,14 @@
 # Changelog
 
+## 12.5.1
+
+- Reserve shortcode layout using renderer-derived dimensions, explicit CSS aspect ratio and proportional containment; add asynchronous decode without new frontend assets or background requests.
+- Size newly copied Email HTML proportionally (maximum default width 600 px), retaining escaped alt, visible absolute deadline and conservative inline image styles.
+- Use WordPress's public HTML Tag Processor and request-local bounded geometry memoization. Renderer pixels, frame timing, public URLs, stored settings and uninstall behavior are unchanged.
+- Document Cloudflare query-specific cache bypass, tested configurations with qualifications, email-client limits and dependency/update boundaries.
+- Add native geometry, delayed-image CLS positive-control and isolated email rendering verification. Verification outcomes are recorded against the exact tested head; planned tests are not certified client coverage.
+
+
 ## 12.5.0
 
 - Align the display name, text domain and package directory with the existing Easy Countdown / easy-countdown submission; preserve repository URLs, internal/storage identifiers and public timer interfaces.

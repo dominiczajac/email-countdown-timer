@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.5.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.5.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -73,6 +73,36 @@ The panel uses a small scoped stylesheet/script, system typography, static saved
 After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline shows the configured end image, or zeros when no valid end image is available. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
 FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `easy-countdown/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
+
+## Layout stability and email rendering
+
+New shortcode output includes renderer-derived `width`/`height`, an explicit CSS aspect ratio and proportional containment. The browser can reserve space before the image arrives; even a later image with different intrinsic dimensions uses that reserved box. Dimensions are measured without encoding or requesting an image and memoized only within the current request. No new frontend library, stylesheet, polling or visitor measurement is added. Image decoding is asynchronous; existing eager/no-lazy hints are retained for countdown freshness. No timer is automatically promoted to high fetch priority.
+
+Custom theme CSS can still override this reservation. Purge the affected HTML page cache after changing geometry/fonts and recopy old HTML embeds to receive the new attributes. An unavailable native renderer or invalid saved configuration cannot provide a reliable calculated size. This is a targeted CLS mitigation, not a guarantee of whole-page LCP/INP/CLS scores.
+
+New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles, alt and an absolute deadline outside the image. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
+
+Remote-image blocking, animation preferences, dark mode, provider caching and prefetching remain controlled by the recipient/client. Do not bypass them. Keep important terms and the real deadline in readable text; an already downloaded GIF cannot fetch a new state. [Email verification scope and checklist](docs/EMAIL-RENDERING.md) and [dependency boundaries](docs/DEPENDENCIES-AND-COMPATIBILITY.md).
+
+## Troubleshooting: Cloudflare
+
+If an image stays stale, disappears or returns HTML behind Cloudflare, create a **Cache Rule** matching only the dynamic image endpoint. For example, replace the host below with your actual public hostname:
+
+```text
+(http.host eq "example.com" and any(http.request.uri.args["ecd_action"][*] eq "render"))
+```
+
+Set **Cache eligibility: Bypass cache** and place the exception after broader rules that force caching. Do not exclude your whole homepage or every page containing a timer. Keep `ecd` and `mode` intact. Remove any previously cached timer response and test the same image URL repeatedly without adding a request `no-cache` header or changing query parameters. A valid email response is HTTP 200, an actual GIF and `Cache-Control` containing `no-store` and `no-transform`; normally `CF-Cache-Status` is `DYNAMIC` or `BYPASS`, not `HIT`/`STALE`. One `MISS` is not proof of bypass.
+
+A `cf-mitigated: challenge` / HTML response is a security challenge, not an image. Mail image fetchers cannot be required to solve an interactive challenge. Investigate Security Events and use the narrowest appropriate exception; do not disable the site's protection globally. Ordinary Bot Fight Mode cannot be skipped through a WAF Skip rule. Custom Workers, forced edge TTLs and image-transformation pipelines need separate review. With FlyingPress, avoid stacking Rocket Loader on top of another script-delay engine unless tested. This guidance is based on vendor documentation, not a test of your Cloudflare zone.
+
+Sources: [Cache Rules settings](https://developers.cloudflare.com/cache/how-to/cache-rules/settings/), [rule order](https://developers.cloudflare.com/cache/how-to/cache-rules/order/), [query argument field](https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/http.request.uri.args/), [challenge detection](https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/), [bot false positives](https://developers.cloudflare.com/bots/troubleshooting/false-positives/).
+
+## Compatibility evidence, not a universal guarantee
+
+Easy Countdown 12.5.0 was exercised with pinned combinations of WP Super Cache 3.1.3, Autoptimize 3.1.16, Yoast SEO 28.6 and Contact Form 7 6.1.7; Elementor 4.3.2, Rank Math 1.0.279, Query Monitor 4.0.7 and Limit Login Attempts Reloaded 3.3.10; and WooCommerce 11.1.2 with W3 Total Cache 2.10.6. In the selected passing runs no image-rendering conflict was observed. These are specific settings and coexistence scenarios, not every feature of those products or all their releases. An intermittent commerce admin timeout occurred on the PHP CLI test server and remains documented, not erased by a successful rerun.
+
+A separate nginx/PHP-FPM experiment tests all eight on/off combinations of WooCommerce, W3 Total Cache and Easy Countdown with repeated admin, media, REST and public requests. It is an isolated experiment, not production load certification. [Test source and full qualifications in PR #13](https://github.com/dominiczajac/email-countdown-timer/pull/13). Paid FlyingPress/WP Rocket binaries, real Cloudflare zones and proprietary email applications have not been tested here.
 
 ## Privacy and removal
 

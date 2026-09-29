@@ -33,6 +33,7 @@ fi
 network=()
 [[ "$ECD_TOPOLOGY" != multisite ]] || network=(--network)
 "${wp[@]}" plugin activate easy-countdown "${network[@]}"
+"${wp[@]}" eval-file "$root/tests/integration/embed-geometry.php"
 "${wp[@]}" eval-file "$root/tests/integration/end-image.php"
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version
