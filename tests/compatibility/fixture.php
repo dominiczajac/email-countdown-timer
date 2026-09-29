@@ -3,6 +3,10 @@
 if (PHP_SAPI !== 'cli' || getenv('ECD_INTEGRATION_DISPOSABLE') !== '1' || wp_get_environment_type() !== 'local' || $GLOBALS['wpdb']->base_prefix !== 'ectcompat_') { exit(1); }
 $mode = $args[0] ?? '';
 if ($mode === 'seed') {
+    // Preconfigured-site profiles do not exercise first-install product tours.
+    // WooCommerce documents this transient removal for extension test/demo sites.
+    delete_transient('_wc_activation_redirect');
+    delete_transient('elementor_activation_redirect');
     require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-admin.php';
     $base = Email_Countdown_Timer_Config::normalize(Email_Countdown_Timer_Admin::defaults());
     $base['deadline'] = '2035-12-31T23:59:59'; $base['alt'] = 'Compatibility countdown';
