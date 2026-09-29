@@ -141,6 +141,7 @@ final class Email_Countdown_Timer_End_Image {
 
     /** Restore the caller's error handler, even for malformed local binary input. */
     private static function quiet( callable $operation ) {
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Scoped native decoder warning suppression prevents file paths/binary diagnostics leaking into images; the prior handler is restored in finally. No logging or debug output.
         set_error_handler( static function () { return true; } );
         try {
             return $operation();

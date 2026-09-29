@@ -17,6 +17,8 @@ with sync_playwright() as p:
     check(page.locator('[src*="assets/end-image.js"]').count()==1,'picker script only once on editor')
     page.locator('#ect-timer_id').fill('end-browser');page.locator('#ect-deadline').fill('2030-01-01T00:00:05')
     page.get_by_role('button',name='Choose Image',exact=True).click()
+    # Core may initially show Upload files; exercise its visible library tab.
+    page.locator('.media-modal .media-router').get_by_role('tab',name='Media Library',exact=True).click()
     # The native modal queries the administrator's Media Library, not a plugin API.
     item=page.locator('.media-modal .attachment[data-id="'+aid+'"]');expect(item).to_be_visible(timeout=20000);item.click()
     page.get_by_role('button',name='Use This Image',exact=True).click()
