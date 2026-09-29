@@ -1,0 +1,58 @@
+name: PHP-FPM commerce isolation
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/fpm.yml'
+      - 'tests/fpm/**'
+      - 'includes/**'
+      - 'assets/**'
+      - 'email-countdown-timer.php'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fpm-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [none, woo, w3, both]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: fpm-disposable-only
+          MYSQL_DATABASE: ect_fpm
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pfpm-disposable-only"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, gd, imagick
+          tools: wp-cli
+          coverage: none
+      - name: Install real FPM and nginx
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends nginx php8.4-fpm php8.4-mysql php8.4-gd php8.4-imagick
+      - name: Three paired on/off repetitions, every result retained
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_FPM_PROFILE: ${{ matrix.profile }}
+        run: bash tests/fpm/run.sh
+      - name: Preserve diagnostic evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fpm-${{ matrix.profile }}
+          path: ${{ runner.temp }}/fpm-evidence/
+          retention-days: 14
+          if-no-files-found: error
