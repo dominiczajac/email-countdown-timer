@@ -69,7 +69,7 @@ for i in {1..25}; do
 done
 # Preserve failures independently instead of stopping before other evidence is collected.
 http_result=0; browser_result=0
-"$RUNNER_TEMP/compat-venv/bin/python" "$root/tests/compatibility/http.py" || http_result=$?
+"$RUNNER_TEMP/compat-venv/bin/python" "$root/tests/compatibility/check_http.py" || http_result=$?
 "$RUNNER_TEMP/compat-venv/bin/python" "$root/tests/compatibility/browser.py" || browser_result=$?
 "${wp[@]}" eval-file "$root/tests/compatibility/fixture.php" inventory > "$ECD_COMPAT_EVIDENCE/environment-final.json"
 python3 - <<'PY'

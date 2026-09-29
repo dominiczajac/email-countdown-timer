@@ -4,7 +4,8 @@ from PIL import Image
 assert os.environ.get('GITHUB_ACTIONS') == 'true' and os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
 evidence = pathlib.Path(os.environ['ECD_COMPAT_EVIDENCE'])
 root = pathlib.Path(__file__).resolve().parents[2]
-fixture = json.loads((evidence / 'fixture.json').read_text())
+from cli_json import read_cli_json
+fixture = read_cli_json(evidence / 'fixture.json')
 profile = os.environ['ECD_COMPAT_PROFILE']
 wp = ['wp', '--path=' + os.environ['ECD_COMPAT_WP'], '--no-color', 'eval-file', str(root/'tests/compatibility/fixture.php')]
 checks, failures, observations = [], [], {}

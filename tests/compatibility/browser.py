@@ -4,7 +4,8 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright,expect
 assert os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('ECD_INTEGRATION_DISPOSABLE')=='1'
 base='http://localhost:8081';evidence=pathlib.Path(os.environ['ECD_COMPAT_EVIDENCE'])
-fixture=json.loads((evidence/'fixture.json').read_text()); checks=[]; failures=[]; js_errors=[];blocked=set()
+from cli_json import read_cli_json
+fixture=read_cli_json(evidence/'fixture.json'); checks=[]; failures=[]; js_errors=[];blocked=set()
 def check(value,name):
     (checks if value else failures).append(name)
 def submit(page):
@@ -29,7 +30,7 @@ with sync_playwright() as p:
         expect(image).not_to_have_attribute('src',old)
         check('ecd_action=render' in image.get_attribute('src'),'optimized refresh script reacts to visibility event')
         check(page.locator('[src*="assets/admin.js"],[src*="assets/end-image.js"]').count()==0,'no plugin admin/media scripts on public page')
-        for name,url in fixture['extra'].items():
+        for name,url in (fixture['extra'] or {}).items():
             page.goto(url,wait_until='domcontentloaded')
             if name=='product_url':
                 expect(page.get_by_role('heading',name='Compatibility sample product',exact=True)).to_be_visible()
@@ -37,8 +38,11 @@ with sync_playwright() as p:
             if name=='elementor_url':
                 expect(page.locator('.elementor-widget-shortcode')).to_be_visible()
                 check(page.locator('.elementor-widget-shortcode img[data-ecd-src]').count()>0,'real Elementor shortcode widget renders countdown')
-        page.goto(base+'/wp-login.php');page.locator('#user_login').fill('ci-admin');page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD']);page.locator('#wp-submit').click();page.wait_for_url('**/wp-admin/**')
-        page.goto(base+'/wp-admin/index.php')
+        page.goto(base+'/wp-login.php');page.locator('#user_login').fill('ci-admin');page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD'])
+        # WooCommerce can legitimately redirect a successful login to the storefront.
+        with page.expect_navigation(wait_until='domcontentloaded'):
+            page.locator('#wp-submit').click()
+        page.goto(base+'/wp-admin/index.php');expect(page.locator('#adminmenu')).to_be_visible()
         check(page.locator('[src*="assets/admin.js"]').count()==0,'Easy Countdown assets stay off Dashboard with other plugins active')
         page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new')
         page.locator('#ect-timer_id').fill('compat-browser');page.locator('#ect-deadline').fill('2001-01-01T00:00:05')
