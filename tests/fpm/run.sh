@@ -3,6 +3,10 @@
 set -euo pipefail
 [[ "${GITHUB_ACTIONS:-}" == true && "${ECD_INTEGRATION_DISPOSABLE:-}" == 1 && -n "${RUNNER_TEMP:-}" ]] || exit 1
 case "${ECD_FPM_PROFILE:-}" in none|woo|w3|both) ;; *) exit 1;; esac
+export ECD_FPM_PHP="${ECD_FPM_PHP:-8.4}"
+export ECD_FPM_OPCACHE="${ECD_FPM_OPCACHE:-1}"
+case "$ECD_FPM_PHP" in 8.3|8.4) ;; *) exit 1;; esac
+case "$ECD_FPM_OPCACHE" in 0|1) ;; *) exit 1;; esac
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 export ECD_FPM_ROOT="$(mktemp -d "$RUNNER_TEMP/ect-fpm.XXXXXX")"
 export ECD_FPM_EVIDENCE="$RUNNER_TEMP/fpm-evidence"
@@ -45,7 +49,7 @@ cp "$root/tests/fpm/probe.php" "$ECD_FPM_ROOT/wp/wp-content/mu-plugins/ect-fpm-p
 "${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_FPM_EVIDENCE/plugins.json"
 "${wp[@]}" core version --extra > "$ECD_FPM_EVIDENCE/versions.txt"
 php -v >> "$ECD_FPM_EVIDENCE/versions.txt"
-php-fpm8.4 -v >> "$ECD_FPM_EVIDENCE/versions.txt" 2>&1
+"php-fpm$ECD_FPM_PHP" -v >> "$ECD_FPM_EVIDENCE/versions.txt" 2>&1
 nginx -v >> "$ECD_FPM_EVIDENCE/versions.txt" 2>&1
 "${wp[@]}" eval 'global $wpdb; echo $wpdb->get_var("SELECT VERSION()")."\n"; echo "GD ".phpversion("gd")." Imagick ".phpversion("imagick")."\n"; if(class_exists("W3TC\\Dispatcher")){ $c=\W3TC\Dispatcher::config(); foreach(array("pgcache.enabled","pgcache.engine","browsercache.enabled","lazyload.enabled") as $k){ echo $k."=".wp_json_encode($c->get($k))."\n"; }}' >> "$ECD_FPM_EVIDENCE/versions.txt"
 cat > "$ECD_FPM_ROOT/fpm.conf" <<EOF
@@ -97,7 +101,7 @@ http {
 }
 EOF
 # Unprivileged masters; bind loopback ports only. No system configuration is changed.
-php-fpm8.4 -d opcache.enable=1 --nodaemonize --fpm-config "$ECD_FPM_ROOT/fpm.conf" > "$ECD_FPM_EVIDENCE/fpm-console.log" 2>&1 &
+"php-fpm$ECD_FPM_PHP" -d "opcache.enable=$ECD_FPM_OPCACHE" --nodaemonize --fpm-config "$ECD_FPM_ROOT/fpm.conf" > "$ECD_FPM_EVIDENCE/fpm-console.log" 2>&1 &
 fpm=$!
 nginx -p "$ECD_FPM_ROOT/" -c "$ECD_FPM_ROOT/nginx.conf" -g 'daemon off;' > "$ECD_FPM_EVIDENCE/nginx-console.log" 2>&1 &
 web=$!

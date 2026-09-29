@@ -15,12 +15,20 @@ concurrency:
   cancel-in-progress: true
 jobs:
   paired:
+    name: paired (${{ matrix.profile }}, PHP ${{ matrix.php }}, OPcache ${{ matrix.opcache }})
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         profile: [none, woo, w3, both]
+        php: ['8.4']
+        opcache: ['1']
+        include:
+          - {profile: woo, php: '8.3', opcache: '1'}
+          - {profile: both, php: '8.3', opcache: '1'}
+          - {profile: woo, php: '8.4', opcache: '0'}
+          - {profile: both, php: '8.4', opcache: '0'}
     services:
       mysql:
         image: mysql:8.4
@@ -37,7 +45,7 @@ jobs:
           persist-credentials: false
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.4'
+          php-version: ${{ matrix.php }}
           extensions: mysqli, gd, imagick
           tools: wp-cli
           coverage: none
@@ -46,17 +54,19 @@ jobs:
           mkdir -p "$RUNNER_TEMP/fpm-evidence"
           sudo add-apt-repository -y ppa:ondrej/php 2>&1 | tee "$RUNNER_TEMP/fpm-evidence/provision.log"
           sudo apt-get update -qq 2>&1 | tee -a "$RUNNER_TEMP/fpm-evidence/provision.log"
-          sudo apt-get install -y --no-install-recommends nginx php8.4-fpm php8.4-mysql php8.4-gd php8.4-imagick 2>&1 | tee -a "$RUNNER_TEMP/fpm-evidence/provision.log"
+          sudo apt-get install -y --no-install-recommends nginx php${{ matrix.php }}-fpm php${{ matrix.php }}-mysql php${{ matrix.php }}-gd php${{ matrix.php }}-imagick 2>&1 | tee -a "$RUNNER_TEMP/fpm-evidence/provision.log"
       - name: Three paired on/off repetitions, every result retained
         env:
           ECD_INTEGRATION_DISPOSABLE: '1'
           ECD_FPM_PROFILE: ${{ matrix.profile }}
+          ECD_FPM_PHP: ${{ matrix.php }}
+          ECD_FPM_OPCACHE: ${{ matrix.opcache }}
         run: bash tests/fpm/run.sh
       - name: Preserve diagnostic evidence even on failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: fpm-${{ matrix.profile }}
+          name: fpm-${{ matrix.profile }}-php${{ matrix.php }}-opcache${{ matrix.opcache }}
           path: ${{ runner.temp }}/fpm-evidence/
           retention-days: 14
           if-no-files-found: error

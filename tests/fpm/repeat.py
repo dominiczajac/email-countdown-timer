@@ -1,5 +1,4 @@
 """Paired on/off FPM observations; every attempt, including failures, is retained."""
-import concurrent.futures
 import hashlib
 import http.cookiejar
 import json
@@ -17,11 +16,14 @@ BASE = 'http://localhost:8091'
 ROOT = Path(os.environ['ECD_FPM_ROOT'])
 OUT = Path(os.environ['ECD_FPM_EVIDENCE'])
 PROFILE = os.environ['ECD_FPM_PROFILE']
+PHP_VERSION = os.environ.get('ECD_FPM_PHP', '8.4')
+EXPECTED_OPCACHE = 'on' if os.environ.get('ECD_FPM_OPCACHE', '1') == '1' else 'off'
+assert PHP_VERSION in ('8.3', '8.4')
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
 assert ROOT.is_relative_to(Path(os.environ['RUNNER_TEMP']))
-report = {'profile': PROFILE, 'source': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
-          'design': 'Four independent plugin profiles; each runs three counterbalanced Easy Countdown on/off pairs on one disposable site. Same theme, data, 30s PHP limit, 35s FPM termination, four workers. No failed attempt is silently retried.',
+report = {'profile': PROFILE, 'php_requested': PHP_VERSION, 'opcache_requested': EXPECTED_OPCACHE, 'source': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+          'design': 'Independent plugin profiles and separately labelled PHP/OPcache diagnostic cells; each runs three counterbalanced Easy Countdown on/off pairs on one disposable site. Same theme, data, 30s PHP limit, 35s FPM termination, four workers. No failed attempt is silently retried.',
           'requests': [], 'checks': [], 'failures': []}
 
 
@@ -63,7 +65,7 @@ def request(path, phase, target, sample, auth=True):
         opener = session if auth else urllib.request.build_opener()
         with opener.open(BASE + path, timeout=42) as response:
             body = response.read()
-            item.update(status=response.status, sapi=response.headers.get('X-ECT-Lab-SAPI'),
+            item.update(status=response.status, sapi=response.headers.get('X-ECT-Lab-SAPI'), php=response.headers.get('X-ECT-Lab-PHP'),
                         active=response.headers.get('X-ECT-Lab-Active'), opcache=response.headers.get('X-ECT-Lab-OPcache'), final_url=response.url,
                         content_type=response.headers.get('Content-Type', ''), bytes=len(body),
                         sha256=hashlib.sha256(body).hexdigest())
@@ -102,12 +104,13 @@ try:
                 for path, target, marker in targets:
                     item, body = request(path, phase, target, sample)
                     label = f'{phase}/{target}/{sample}'
-                    check(item.get('status') == 200 and item.get('sapi') == 'fpm-fcgi' and item.get('opcache') == 'on' and marker in body
+                    check(item.get('status') == 200 and item.get('sapi') == 'fpm-fcgi' and item.get('opcache') == EXPECTED_OPCACHE and item.get('php', '').startswith(PHP_VERSION + '.') and marker in body
                           and item.get('active') == ('on' if active else 'off')
                           and '/wp-login.php' not in item.get('final_url', '')
                           and b'Fatal error' not in body and item['elapsed_ms'] < 30000, label)
             first, html1 = request('/', phase, 'page-cache-first', 0, False)
             second, html2 = request('/', phase, 'page-cache-second', 1, False)
+            check(first.get('status') == 200 and second.get('status') == 200, phase + '/anonymous-page-status')
             markers = [re.search(rb'data-generation="([^"]+)"', b) for b in (html1, html2)]
             cache_hit = bool(all(markers) and markers[0][1] == markers[1][1])
             check(cache_hit == (PROFILE in ('w3', 'both')), phase + '/observed-page-cache')
@@ -128,6 +131,16 @@ try:
 except Exception as error:
     report['failures'].append(type(error).__name__ + ': ' + str(error))
 finally:
+    # Preserve native crashes and timeouts even if a worker recovers before the next request.
+    diagnostics = []
+    pattern = re.compile(r'SIGSEGV|SIGBUS|segmentation fault|Maximum execution time|Allowed memory size|execution timed out', re.I)
+    for name in ('fpm.log', 'php-fpm.log', 'php-debug.log', 'fpm-console.log'):
+        path = OUT / name
+        if path.exists():
+            diagnostics.extend({'file': name, 'line': line} for line in path.read_text(errors='replace').splitlines() if pattern.search(line))
+    report['native_diagnostics'] = diagnostics
+    if diagnostics:
+        report['failures'].append('Native failure/timeout diagnostics were recorded; not a clean profile')
     persist()
 print(json.dumps({'profile': PROFILE, 'requests': len(report['requests']), 'checks': len(report['checks']),
                   'failures': report['failures'], 'summary': report.get('summary', {})}, indent=2))
