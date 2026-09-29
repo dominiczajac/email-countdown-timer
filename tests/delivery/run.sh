@@ -3,6 +3,7 @@ set -euo pipefail
 [[ "${GITHUB_ACTIONS:-}" == true && "${ECD_INTEGRATION_DISPOSABLE:-}" == 1 && -n "${RUNNER_TEMP:-}" ]] || exit 1
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 wpdir="$(mktemp -d "$RUNNER_TEMP/ect-delivery.XXXXXX")"
+export ECD_DELIVERY_WP_PATH="$wpdir"
 export ECD_DELIVERY_EVIDENCE="$RUNNER_TEMP/delivery-evidence"
 mkdir -p "$ECD_DELIVERY_EVIDENCE"
 wp=(wp --path="$wpdir" --no-color)
