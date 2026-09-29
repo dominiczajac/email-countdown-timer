@@ -42,7 +42,14 @@ with sync_playwright() as p:
         # WooCommerce can legitimately redirect a successful login to the storefront.
         with page.expect_navigation(wait_until='domcontentloaded'):
             page.locator('#wp-submit').click()
-        page.goto(base+'/wp-admin/index.php');expect(page.locator('#adminmenu')).to_be_visible()
+        page.goto(base+'/wp-admin/index.php')
+        # A fresh Elementor install offers its own onboarding before Dashboard.
+        # Use its visible opt-out rather than mutating onboarding internals.
+        if 'page=elementor-app' in page.url:
+            skip=page.get_by_text('Skip setup',exact=True)
+            expect(skip).to_be_visible();skip.click()
+            expect(page.locator('#adminmenu')).to_be_visible(timeout=20000)
+        expect(page.locator('#adminmenu')).to_be_visible()
         check(page.locator('[src*="assets/admin.js"]').count()==0,'Easy Countdown assets stay off Dashboard with other plugins active')
         page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new')
         page.locator('#ect-timer_id').fill('compat-browser');page.locator('#ect-deadline').fill('2001-01-01T00:00:05')
@@ -59,6 +66,8 @@ with sync_playwright() as p:
         check(page.locator('#ect-alt').input_value()=='Updated compatibility alt','existing timer edits and alt persist')
         missing=page.locator('.email-countdown-admin input:not([type=hidden]),.email-countdown-admin select,.email-countdown-admin textarea').evaluate_all('(es)=>es.filter(e=>!e.labels.length).map(e=>e.id)')
         check(not missing,'plugin controls retain associated labels')
+        # Do not abort a native cross-document view transition by resizing mid-flight.
+        page.wait_for_function("!document.activeViewTransition && !document.getAnimations().some(a => a.playState === 'running')")
         page.set_viewport_size({'width':375,'height':900})
         check(page.locator('.email-countdown-admin').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1'),'plugin editor retains narrow-screen layout')
         page.screenshot(path=str(evidence/'editor.png'),full_page=True)

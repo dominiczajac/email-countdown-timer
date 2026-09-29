@@ -32,13 +32,14 @@ try:
     check(all(markers),'test origin marker is present in real theme output')
     hit=bool(all(markers) and markers[-1][1]==markers[-2][1])
     observations['page_cache_hit_confirmed']=hit
+    (evidence/'anonymous-page.html').write_bytes(pages[-1][2])
     observations['page_headers']={k:v for k,v in pages[-1][1].items() if k in ('content-type','cache-control','wp-super-cache','x-powered-by')}
     if profile in ('publishing','commerce'):
         check(hit,'configured page cache has an observable warm HIT (unchanged origin marker)')
     else: check(not hit,'uncached control produces a new origin marker')
     if profile=='publishing':
         check(b'autoptimize_' in pages[-1][2],'Autoptimize actually rewrites HTML asset references')
-        check(b'Yoast' in pages[-1][2],'Yoast participates in the tested HTML output')
+        check(b'yoast-schema-graph' in pages[-1][2].lower(),'Yoast structured data survives HTML optimization')
     for phase in ('normal-order','reverse-order'):
         if phase=='reverse-order': subprocess.run(wp+['reverse'],check=True,capture_output=True)
         prefix=phase+': '

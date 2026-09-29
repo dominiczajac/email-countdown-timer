@@ -22,19 +22,20 @@ bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown.zip" --r
 "${wp[@]}" theme activate twentytwentyfive
 "${wp[@]}" option update timezone_string Europe/Warsaw
 "${wp[@]}" rewrite structure '/%postname%/'
-# All third-party downloads are official distribution packages, not local substitutes.
+# Pin the observed official distribution versions to make reruns comparable.
 case "$ECD_COMPAT_PROFILE" in
-  publishing) plugins=(wp-super-cache autoptimize wordpress-seo contact-form-7);;
-  commerce) plugins=(woocommerce w3-total-cache);;
-  builder) plugins=(elementor seo-by-rank-math query-monitor limit-login-attempts-reloaded);;
+  publishing) plugins=(wp-super-cache:3.1.3 autoptimize:3.1.16 wordpress-seo:28.6 contact-form-7:6.1.7);;
+  commerce) plugins=(woocommerce:11.1.2 w3-total-cache:2.10.6);;
+  builder) plugins=(elementor:4.3.2 seo-by-rank-math:1.0.279 query-monitor:4.0.7 limit-login-attempts-reloaded:3.3.10);;
   baseline) plugins=();;
 esac
-for plugin in "${plugins[@]}"; do
-  "${wp[@]}" plugin install "$plugin" --activate
+for spec in "${plugins[@]}"; do
+  plugin="${spec%:*}"; version="${spec#*:}"
+  "${wp[@]}" plugin install "$plugin" --version="$version" --activate
   "${wp[@]}" plugin verify-checksums "$plugin"
 done
 if [[ "$ECD_COMPAT_PROFILE" == commerce ]]; then
-  "${wp[@]}" theme install storefront --activate
+  "${wp[@]}" theme install storefront --version=4.6.2 --activate
   "${wp[@]}" config set WP_CACHE true --raw
   "${wp[@]}" w3-total-cache option set pgcache.enabled true --type=boolean
   "${wp[@]}" w3-total-cache option set pgcache.engine file
@@ -43,7 +44,7 @@ if [[ "$ECD_COMPAT_PROFILE" == commerce ]]; then
   "${wp[@]}" w3-total-cache fix_environment
 fi
 if [[ "$ECD_COMPAT_PROFILE" == builder ]]; then
-  "${wp[@]}" theme install hello-elementor --activate
+  "${wp[@]}" theme install hello-elementor --version=3.5.1 --activate
 fi
 if [[ "$ECD_COMPAT_PROFILE" == publishing ]]; then
   "${wp[@]}" config set WP_CACHE true --raw
@@ -82,5 +83,8 @@ for package in root.iterdir():
  report[package.name]={'file_count':len(files),'source_digest':hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest()}
 (pathlib.Path(os.environ['ECD_COMPAT_EVIDENCE'])/'plugin-source-digests.json').write_text(json.dumps(report,indent=2)+'\n')
 PY
+# Negative attribution control: bootstrap other plugins with Easy Countdown skipped.
+# Retain all resulting third-party diagnostics; never filter real image responses.
+"${wp[@]}" --skip-plugins=easy-countdown eval 'if (defined("EMAIL_COUNTDOWN_TIMER_VERSION")) { WP_CLI::error("Control did not skip Easy Countdown."); } WP_CLI::line("Control: WordPress and other active plugins loaded without Easy Countdown.");' > "$ECD_COMPAT_EVIDENCE/without-easy-countdown.log" 2>&1
 test "$http_result" -eq 0
 test "$browser_result" -eq 0
