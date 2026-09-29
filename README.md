@@ -1,8 +1,8 @@
-# Email Countdown Timer
+# Easy Countdown
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.4.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.5.0 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -18,7 +18,21 @@ Locally generated countdown images for email campaigns and WordPress pages. Set 
 
 There are no bundled runtime Composer/npm dependencies or font binaries. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
 
+## Existing WordPress.org submission
+
+The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors` still needs the actual WordPress.org username, not an email address.
+
+## Image after the countdown
+
+Choose a local image in **Create/Edit Timer > After Countdown**. The native Media Library picker is available on this editor only; attachment-ID entry also works without JavaScript. Save to apply. A zero/empty selection keeps the previous zero-countdown behavior. Existing records and open older forms retain their state.
+
+New requests at/after the deadline show the chosen image. When a generated 60-second GIF crosses that deadline, its remaining frames show the image as well. The image is fitted to the timer canvas without distortion, using the configured background. JPEG/PNG/GIF/WebP only: up to 4 MiB, 4096 pixels per side and 4 million pixels. Animated inputs use the first frame. Remote-only assets, SVG and symlinked files are rejected; output is re-encoded locally without copying original metadata. A removed attachment falls back to zeros. Media Library images remain user-owned and are never deleted by this plugin.
+
+A previously delivered GIF cannot request new bytes after its playback ends, and email services may cache an earlier response. The feature follows the actual deadline, not simply the end of every 60-second animation. Use visible deadline text and an `alt` suitable for both states. [Full end-image guide](docs/wiki/End-Image.md).
+
 ## Install or update
+
+**Slug transition:** if the earlier GitHub copy is installed under `email-countdown-timer/`, back up data/fonts and deactivate it without uninstalling before activating the new `easy-countdown/` copy. Both names share data; do not activate both or uninstall either with cleanup enabled while the other needs that data. The new copy detects the known active legacy basename and refuses duplicate initialization. This does not rename files on your live site automatically.
 
 Use the installation ZIP, not a working directory containing developer/test files. In WordPress, open **Plugins > Add New > Upload Plugin** and install it. For an update, replace the installed plugin rather than uninstalling it; uninstall may remove data if you enabled that option. Back up your database and custom fonts first, and disable any older duplicate implementation or snippet.
 
@@ -56,24 +70,24 @@ Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-sit
 
 The panel uses a small scoped stylesheet/script, system typography, static saved previews and no background polling, per-keystroke rendering or animated list thumbnails. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
-After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline is clamped to zero. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
+After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline shows the configured end image, or zeros when no valid end image is available. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
-FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `email-countdown-timer/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
+FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `easy-countdown/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
 
 ## Privacy and removal
 
-The shipped code adds no visitor cookies, persistent browser storage, individual impression/open counters, fingerprinting or developer telemetry. It stores administrator-authored campaign settings, uninstall preference, copied-font ownership hashes and short-lived shared image caches locally. No Google service is contacted. HTTP delivery still exposes connection data to infrastructure; WordPress, other plugins, hosting and mail-image proxies have their own processing and logs. [Technical privacy disclosure](docs/wiki/Privacy-and-Local-Fonts.md).
+The shipped code adds no visitor cookies, persistent browser storage, individual impression/open counters, fingerprinting or developer telemetry. It stores administrator-authored campaign settings (including optional end-image attachment IDs), uninstall preference, copied-font ownership hashes and short-lived shared image caches locally. No Google service is contacted. HTTP delivery still exposes connection data to infrastructure; WordPress, other plugins, hosting and mail-image proxies have their own processing and logs. [Technical privacy disclosure](docs/wiki/Privacy-and-Local-Fonts.md).
 
 The **WordPress Privacy Policy Guide** contains suggested wording and administrator guidance. The plugin does not edit or publish your privacy-policy page. Review providers, logs and retention before using the suggestion; this is not whole-site GDPR/ePrivacy certification.
 
-**Data Settings > Delete all plugin data when uninstalling** is off by default and per site on multisite. Deactivation preserves data. Opt-in uninstall removes owned options/cache and unchanged font files recorded by the copy tool. Font-access rule/index files remain for manual fonts. Manual/replaced fonts, unrelated data, other plugins' cron jobs and backups remain. The plugin schedules no cron jobs. [Data removal](docs/wiki/Data-Removal.md).
+**Data Settings > Delete all plugin data when uninstalling** is off by default and per site on multisite. Deactivation preserves data. Opt-in uninstall removes owned options/cache and unchanged font files recorded by the copy tool. Media Library attachments are never deleted. Font-access rule/index files remain for manual fonts. Manual/replaced fonts, unrelated data, other plugins' cron jobs and backups remain. The plugin schedules no cron jobs. [Data removal](docs/wiki/Data-Removal.md).
 
 ## Development and packaging
 
 Read [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Work through focused PRs and current-head checks; never bypass `main` protection or change the frozen renderer test oracle to hide a regression.
 
 ```sh
-bash scripts/build-zip.sh --output dist/email-countdown-timer.zip --report dist/distribution.json
+bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json
 python3 tests/test-build.py
 php tests/run.php
 php tests/uninstall.php

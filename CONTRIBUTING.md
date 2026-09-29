@@ -4,7 +4,7 @@ Work on a focused branch, open a real PR early and describe the problem, scope, 
 
 Preserve `easy_countdown_timers`, `ecd_timer`, image URLs, saved labels, timezone, geometry and frame count/timing unless a compatibility change is explicit. The v12.1 test renderer is frozen; do not change expected results to hide regressions. Document invalid-input and resource-limit changes in the changelog.
 
-Use the distinctive `Email_Countdown_Timer_` and `EMAIL_COUNTDOWN_TIMER_` prefixes for new internals. English user-facing strings use the `email-countdown-timer` translation domain. Saved labels and default campaign data must not change when the administrator's locale changes. Test new, custom and empty saved labels.
+Use the distinctive `Email_Countdown_Timer_` and `EMAIL_COUNTDOWN_TIMER_` prefixes for new internals. English user-facing strings use the `easy-countdown` translation domain. Saved labels and default campaign data must not change when the administrator's locale changes. Test new, custom and empty saved labels.
 
 Validate input, escape at the actual output boundary and preserve capability/nonce checks. Do not add secrets, production data, fonts, telemetry, dependencies or external services without authorization and licensing review. Pin CI actions to full SHAs and retain minimal token permissions. Explain necessary code-local static-analysis annotations; do not globally suppress findings to obtain a green build.
 
@@ -17,7 +17,7 @@ python3 tests/test-pcp-gate.py
 node --check assets/countdown.js
 ```
 
-The isolated suites use WordPress/database doubles, with native rendering when available. Hosted CI separately provisions real WordPress/MySQL/Redis and runs Plugin Check with runtime checks. `required-checks` passes only when all three layers pass; cancelled, skipped or failed results must not satisfy it. A zero PCP exit code is not sufficient: parse its findings. Never replace actual tests with a successful no-op.
+The isolated suites use WordPress/database doubles, with native rendering when available. Hosted CI separately provisions real WordPress/MySQL/Redis and runs Plugin Check with runtime checks. `required-checks` passes only when all required layers pass; cancelled, skipped or failed results must not satisfy it. A zero PCP exit code is not sufficient: parse its findings. Never replace actual tests with a successful no-op.
 
 UI changes also require real browser checks: labels, keyboard/focus, narrow layouts, saved values, validation, copying and destructive actions. Use synthetic screenshots. Do not silently turn a UI restyling PR into a preview endpoint or renderer rewrite.
 
@@ -27,4 +27,4 @@ CODEOWNERS routes review; it is not independent approval. Do not approve your ow
 
 ## Installation artifact
 
-Use `bash scripts/build-zip.sh --output dist/email-countdown-timer.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Never add font binaries or site data to runtime directories. See [build instructions](docs/DISTRIBUTION-BUILD.md).
+Use `bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Never add font binaries or site data to runtime directories. See [build instructions](docs/DISTRIBUTION-BUILD.md).
