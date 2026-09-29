@@ -74,7 +74,7 @@ final class Email_Countdown_Timer_Uninstaller {
                 self::BATCH_SIZE
             ), ARRAY_A );
             if ( ! is_array( $rows ) || '' !== $wpdb->last_error ) {
-                throw new RuntimeException( 'Email Countdown Timer could not enumerate its database cache for uninstall.' );
+                throw new RuntimeException( 'Easy Countdown could not enumerate its database cache for uninstall.' );
             }
             foreach ( $rows as $row ) {
                 $cursor = (int) $row['option_id'];

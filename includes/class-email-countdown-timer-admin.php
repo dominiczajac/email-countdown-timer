@@ -19,6 +19,11 @@ final class Email_Countdown_Timer_Admin {
         if ( ! in_array( $hook, self::$screens, true ) ) {
             return;
         }
+        // The WordPress media UI belongs only on the timer editor, never the list/front end.
+        if ( 'editor' === self::state()['view'] && current_user_can( 'upload_files' ) && function_exists( 'wp_enqueue_media' ) ) {
+            wp_enqueue_media();
+            wp_enqueue_script( 'easy-countdown-end-image', plugins_url( 'assets/end-image.js', EMAIL_COUNTDOWN_TIMER_FILE ), array( 'media-views', 'wp-a11y' ), EMAIL_COUNTDOWN_TIMER_VERSION, true );
+        }
         wp_enqueue_style( 'email-countdown-timer-admin', plugins_url( 'assets/admin.css', EMAIL_COUNTDOWN_TIMER_FILE ), array(), EMAIL_COUNTDOWN_TIMER_VERSION );
         wp_enqueue_script( 'email-countdown-timer-admin', plugins_url( 'assets/admin.js', EMAIL_COUNTDOWN_TIMER_FILE ), array( 'wp-a11y' ), EMAIL_COUNTDOWN_TIMER_VERSION, true );
     }
@@ -32,7 +37,7 @@ final class Email_Countdown_Timer_Admin {
         return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => $new_timer ? wp_timezone_string() : 'Europe/Warsaw',
             'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => '',
             'size_digit' => 40, 'size_label' => 12, 'fixed_width' => 0, 'hide_days' => 0,
-            'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown' );
+            'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown', 'expiry_image_id' => 0 );
     }
 
     private static function timers(): array {
@@ -47,18 +52,18 @@ final class Email_Countdown_Timer_Admin {
 
     public static function handle_post(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You are not allowed to manage timers.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
+            wp_die( esc_html__( 'You are not allowed to manage timers.', 'easy-countdown' ), '', array( 'response' => 403 ) );
             return;
         }
         if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
-            wp_die( esc_html__( 'Use the timer form to make this change.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
+            wp_die( esc_html__( 'Use the timer form to make this change.', 'easy-countdown' ), '', array( 'response' => 405 ) );
             return;
         }
         check_admin_referer( 'email_countdown_timer_admin' );
         self::$pending = null;
         $timers = get_option( self::OPTION, array() );
         if ( ! is_array( $timers ) ) {
-            wp_die( esc_html__( 'Stored timer data is invalid. Restore a backup before making changes.', 'email-countdown-timer' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'Stored timer data is invalid. Restore a backup before making changes.', 'easy-countdown' ), '', array( 'response' => 500 ) );
             return;
         }
         $original = Email_Countdown_Timer_Config::id( self::posted( 'original_id' ) );
@@ -74,7 +79,7 @@ final class Email_Countdown_Timer_Admin {
         foreach ( $defaults as $key => $default ) {
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above; reject malformed typed input before normalization.
             if ( isset( $_POST[ $key ] ) && ! is_string( $_POST[ $key ] ) ) {
-                $errors[ $key ] = __( 'Enter a single value for this field.', 'email-countdown-timer' );
+                $errors[ $key ] = __( 'Enter a single value for this field.', 'easy-countdown' );
             }
             $data[ $key ] = self::posted( $key, 'deadline' === $key ? '' : (string) $default );
         }
@@ -91,50 +96,69 @@ final class Email_Countdown_Timer_Admin {
             }
         }
 
+        // A pre-update edit form must not erase the new optional selection.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Capability, POST and nonce were checked above.
+        if ( ! array_key_exists( 'expiry_image_id', $_POST ) ) {
+            unset( $data['expiry_image_id'] );
+            if ( isset( $timers[ $original ]['expiry_image_id'] ) ) {
+                $data['expiry_image_id'] = $timers[ $original ]['expiry_image_id'];
+            }
+        }
+
         if ( 'email_countdown_timer_delete' === $action ) {
             if ( '' === $id || ! isset( $timers[ $id ] ) || '1' !== self::posted( 'confirm_delete' ) ) {
-                wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'email-countdown-timer' ), '', array( 'response' => 400 ) );
+                wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'easy-countdown' ), '', array( 'response' => 400 ) );
                 return;
             }
             unset( $timers[ $id ] );
         } elseif ( 'email_countdown_timer_save' === $action ) {
             if ( '' === $id ) {
-                $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'email-countdown-timer' );
+                $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'easy-countdown' );
             } elseif ( '' === $original && isset( $timers[ $id ] ) ) {
-                $errors['timer_id'] = __( 'This ID already exists. Edit the existing timer or choose a different ID.', 'email-countdown-timer' );
+                $errors['timer_id'] = __( 'This ID already exists. Edit the existing timer or choose a different ID.', 'easy-countdown' );
             } elseif ( '' !== $original && ( $original !== $id || ! isset( $timers[ $original ] ) ) ) {
-                $errors['timer_id'] = __( 'The original timer no longer exists or its ID was changed. Return to Timers.', 'email-countdown-timer' );
+                $errors['timer_id'] = __( 'The original timer no longer exists or its ID was changed. Return to Timers.', 'easy-countdown' );
             }
             foreach ( array( 'size_digit' => array( 1, 200 ), 'size_label' => array( 1, 100 ), 'fixed_width' => array( 0, 4000 ) ) as $key => $range ) {
                 $number = filter_var( $data[ $key ], FILTER_VALIDATE_INT );
                 if ( false === $number || $number < $range[0] || $number > $range[1] ) {
                     /* translators: 1: minimum value, 2: maximum value. */
-                    $errors[ $key ] = sprintf( __( 'Enter a whole number from %1$d to %2$d.', 'email-countdown-timer' ), $range[0], $range[1] );
+                    $errors[ $key ] = sprintf( __( 'Enter a whole number from %1$d to %2$d.', 'easy-countdown' ), $range[0], $range[1] );
                 }
             }
             foreach ( array( 'bg', 'dc', 'lc' ) as $key ) {
                 if ( ! sanitize_hex_color( $data[ $key ] ) ) {
-                    $errors[ $key ] = __( 'Enter a HEX color, for example #135E96.', 'email-countdown-timer' );
+                    $errors[ $key ] = __( 'Enter a HEX color, for example #135E96.', 'easy-countdown' );
                 }
             }
             foreach ( array( 'label_d', 'label_h', 'label_m', 'label_s' ) as $key ) {
                 if ( strlen( $data[ $key ] ) > 256 ) {
-                    $errors[ $key ] = __( 'Use at most 256 bytes for this label.', 'email-countdown-timer' );
+                    $errors[ $key ] = __( 'Use at most 256 bytes for this label.', 'easy-countdown' );
                 }
             }
             if ( isset( $data['alt'] ) && strlen( $data['alt'] ) > 1000 ) {
-                $errors['alt'] = __( 'Use at most 1000 bytes for alternative text.', 'email-countdown-timer' );
+                $errors['alt'] = __( 'Use at most 1000 bytes for alternative text.', 'easy-countdown' );
             }
             try {
                 new DateTimeZone( '' === $data['tz'] ? 'Europe/Warsaw' : $data['tz'] );
             } catch ( Exception $exception ) {
-                $errors['tz'] = __( 'Enter a valid time zone, for example Europe/Warsaw.', 'email-countdown-timer' );
+                $errors['tz'] = __( 'Enter a valid time zone, for example Europe/Warsaw.', 'easy-countdown' );
             }
             if ( ! isset( $errors['tz'] ) ) {
                 try {
                     Email_Countdown_Timer_Config::deadline( $data );
                 } catch ( InvalidArgumentException $exception ) {
                     $errors['deadline'] = $exception->getMessage();
+                }
+            }
+            if ( array_key_exists( 'expiry_image_id', $data ) ) {
+                try {
+                    $end_id = Email_Countdown_Timer_End_Image::id( $data['expiry_image_id'] );
+                    if ( ! Email_Countdown_Timer_End_Image::validate_selection( $end_id ) ) {
+                        $errors['expiry_image_id'] = __( 'Choose an accessible local JPEG, PNG, GIF or WebP from the Media Library (up to 4 MiB and 4 million pixels), or use 0 for no end image.', 'easy-countdown' );
+                    }
+                } catch ( InvalidArgumentException $exception ) {
+                    $errors['expiry_image_id'] = __( 'Use a whole attachment ID, or 0 for no end image.', 'easy-countdown' );
                 }
             }
             try {
@@ -156,7 +180,7 @@ final class Email_Countdown_Timer_Admin {
             return;
         }
         if ( ! update_option( self::OPTION, $timers, false ) && get_option( self::OPTION, array() ) !== $timers ) {
-            wp_die( esc_html__( 'The database could not save this change. No success has been recorded.', 'email-countdown-timer' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'The database could not save this change. No success has been recorded.', 'easy-countdown' ), '', array( 'response' => 500 ) );
             return;
         }
         foreach ( array( 'png', 'gif', 'webp' ) as $format ) {
@@ -181,14 +205,14 @@ final class Email_Countdown_Timer_Admin {
         if ( ! $ttf ) {
             foreach ( array( 'label_d', 'label_h', 'label_m', 'label_s' ) as $field ) {
                 if ( preg_match( '/[^\x20-\x7e]/', $config[ $field ] ) ) {
-                    $errors[ $field ] = __( 'The active bitmap fallback supports printable ASCII labels only. Select an available TTF/OTF with the required characters.', 'email-countdown-timer' );
+                    $errors[ $field ] = __( 'The active bitmap fallback supports printable ASCII labels only. Select an available TTF/OTF with the required characters.', 'easy-countdown' );
                 }
             }
         }
         try {
             ( new Email_Countdown_Timer_Renderer() )->measure( $config, Email_Countdown_Timer_Config::deadline( $config ), time() );
         } catch ( Throwable $error ) {
-            $errors['font'] = __( 'This font, text and size combination cannot be rendered. Check the font and reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels total.', 'email-countdown-timer' );
+            $errors['font'] = __( 'This font, text and size combination cannot be rendered. Check the font and reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels total.', 'easy-countdown' );
         }
         return $errors;
     }
@@ -213,13 +237,13 @@ final class Email_Countdown_Timer_Admin {
         $data = array_replace( self::defaults( null === $saved ), $saved ?? array() );
         $errors = $pending['errors'] ?? array();
         if ( '' !== $original && null === $saved ) {
-            $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'email-countdown-timer' );
+            $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'easy-countdown' );
         }
         if ( $saved ) {
             try {
                 Email_Countdown_Timer_Config::normalize( $saved );
             } catch ( InvalidArgumentException $exception ) {
-                $errors['form'] = __( 'The saved configuration contains invalid values. Review the fields before saving.', 'email-countdown-timer' );
+                $errors['form'] = __( 'The saved configuration contains invalid values. Review the fields before saving.', 'easy-countdown' );
             }
         }
         if ( $pending ) {
@@ -269,7 +293,7 @@ final class Email_Countdown_Timer_Admin {
             $data['tz'] = Email_Countdown_Timer_Config::text( $data, 'tz', 'Europe/Warsaw' );
             return ( new DateTimeImmutable( '@' . $timestamp ) )->setTimezone( new DateTimeZone( $data['tz'] ?: 'Europe/Warsaw' ) )->format( 'Y-m-d H:i:s T' ) . ' (' . ( $data['tz'] ?: 'Europe/Warsaw' ) . ')';
         } catch ( Exception $exception ) {
-            return __( 'Invalid deadline or time zone', 'email-countdown-timer' );
+            return __( 'Invalid deadline or time zone', 'easy-countdown' );
         }
     }
 }

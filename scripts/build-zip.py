@@ -17,7 +17,7 @@ import tempfile
 import zipfile
 import zlib
 
-SLUG = "email-countdown-timer"
+SLUG = "easy-countdown"
 ROOT_FILES = {"email-countdown-timer.php", "uninstall.php", "readme.txt", "LICENSE"}
 
 
@@ -66,6 +66,10 @@ def metadata(files: dict[str, bytes]) -> str:
         if len(matches) != 1:
             raise ValueError("Missing or ambiguous package metadata: " + pattern)
         return matches[0].strip()
+    if one(r"^\s*\* Text Domain:\s*(\S+)", php) != SLUG:
+        raise ValueError("Text Domain must match the WordPress.org submission slug")
+    if one(r"^\s*\* Plugin Name:\s*(.+)$", php) != "Easy Countdown" or not readme.startswith("=== Easy Countdown ===\n"):
+        raise ValueError("The distribution must use the Easy Countdown display name")
     version = one(r"^\s*\* Version:\s*(\S+)", php)
     constant = one(r"define\(\s*'EMAIL_COUNTDOWN_TIMER_VERSION',\s*'([^']+)'\s*\)", php)
     stable = one(r"^Stable tag:\s*(\S+)", readme)

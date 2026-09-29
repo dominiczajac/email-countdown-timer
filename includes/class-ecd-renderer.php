@@ -12,14 +12,19 @@ final class Email_Countdown_Timer_Renderer {
         }
         return $this->boxes[$key];
     }
-    public function render(array $c, int $deadline, int $now, string $format): string {
+    public function render(array $c, int $deadline, int $now, string $format, ?array $ending = null): string {
         $this->boxes = [];
         $args = [$c['bg'], $c['dc'], $c['lc'], $c['font'], $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
             ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']]];
         $image = $this->drawFrame(max(0, $deadline-$now), ...array_merge($args, [$c['fixed_width']]));
-        if ($format !== 'gif' || !class_exists('Imagick')) return $this->encode($image, $format);
         $width = imagesx($image);
         $height = imagesy($image);
+        $endFrame = $ending !== null ? Email_Countdown_Timer_End_Image::canvas($ending, $width, $height, $c['bg']) : null;
+        if ($endFrame !== null && $now >= $deadline) return $this->encode($endFrame, $format);
+        if ($format !== 'gif' || !class_exists('Imagick')) return $this->encode($image, $format);
+        // Encode once, then reuse immutable bytes for the remaining end frames.
+        $endBlob = $endFrame !== null ? $this->encode($endFrame, 'gif') : null;
+        unset($endFrame);
         // Bound the aggregate decoded animation, not just an individual frame.
         if ($width * $height * 60 > 24000000) {
             unset($image);
@@ -30,10 +35,14 @@ final class Email_Countdown_Timer_Renderer {
         try {
             $animation->setFormat('gif');
             for ($i=0; $i<60; $i++) {
-                // Reuse frame zero instead of drawing it a second time.
-                if ($i > 0) $image = $this->drawFrame(max(0, $deadline-$now-$i), ...array_merge($args, [$width, $height]));
-                $blob = $this->encode($image, 'gif');
-                unset($image);
+                if ($endBlob !== null && $now + $i >= $deadline) {
+                    $blob = $endBlob;
+                } else {
+                    // Reuse frame zero instead of drawing it a second time.
+                    if ($i > 0) $image = $this->drawFrame(max(0, $deadline-$now-$i), ...array_merge($args, [$width, $height]));
+                    $blob = $this->encode($image, 'gif');
+                    unset($image);
+                }
                 $frame = new Imagick();
                 try {
                     $frame->readImageBlob($blob);
@@ -50,11 +59,15 @@ final class Email_Countdown_Timer_Renderer {
         }
     }
     /** Bounded current-time fallback: one frame in the requested image format. */
-    public function render_static(array $c, int $deadline, int $now, string $format): string {
+    public function render_static(array $c, int $deadline, int $now, string $format, ?array $ending = null): string {
         $this->boxes = [];
         $image = $this->drawFrame(max(0, $deadline - $now), $c['bg'], $c['dc'], $c['lc'], $c['font'],
             $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
             ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+        if ($ending !== null && $now >= $deadline) {
+            $endFrame = Email_Countdown_Timer_End_Image::canvas($ending, imagesx($image), imagesy($image), $c['bg']);
+            if ($endFrame !== null) return $this->encode($endFrame, $format);
+        }
         return $this->encode($image, $format);
     }
     private function encode($image, string $format): string {

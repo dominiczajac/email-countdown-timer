@@ -7,7 +7,7 @@ $GLOBALS['policy_admin'] = false;
 $GLOBALS['policy_bad_translation'] = false;
 function is_admin() { return $GLOBALS['policy_admin']; }
 function esc_html__($text, $domain) {
-    if ($domain !== 'email-countdown-timer') throw new RuntimeException('Wrong text domain');
+    if ($domain !== 'easy-countdown') throw new RuntimeException('Wrong text domain');
     return htmlspecialchars($GLOBALS['policy_bad_translation'] ? '<script>unsafe</script>' : $text, ENT_QUOTES, 'UTF-8');
 }
 if (($argv[1] ?? '') !== 'missing') {
@@ -24,7 +24,7 @@ if (($argv[1] ?? '') === 'missing') {
     exit;
 }
 $policy = $GLOBALS['policy_calls'][0] ?? null;
-if (!$policy || $policy[0] !== 'Email Countdown Timer' || !str_contains($policy[1], 'privacy-policy-tutorial') || !str_contains($policy[1], 'HTTP request')) throw new RuntimeException('Incomplete disclosure');
+if (!$policy || $policy[0] !== 'Easy Countdown' || !str_contains($policy[1], 'privacy-policy-tutorial') || !str_contains($policy[1], 'HTTP request')) throw new RuntimeException('Incomplete disclosure');
 if (str_contains($policy[1], 'GDPR compliant')) throw new RuntimeException('Unjustified compliance claim');
 $GLOBALS['policy_bad_translation'] = true;
 Email_Countdown_Timer_Privacy::suggest();

@@ -1,95 +1,78 @@
-=== Email Countdown Timer ===
+=== Easy Countdown ===
 Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.4.3
+Stable tag: 12.5.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Create locally generated countdown images for emails and WordPress pages, with custom colors, labels, fonts and alternative text.
+Create local countdown images for email and WordPress, with custom fonts, alternative text and an optional image shown after the deadline.
 
 == Description ==
 
-Email Countdown Timer generates images counting down to a fixed date and time on your own WordPress server. Create a campaign in Easy Countdown, then copy an image URL or HTML for your email editor, or use [ecd_timer id="promotion"] on a WordPress page. The plugin does not send email or require an external countdown service.
+Easy Countdown generates countdown images on your own WordPress server. Create a timer, then copy its image URL or email HTML, or use [ecd_timer id="promotion"] on a WordPress page. No external countdown service is required. The plugin does not send email or track individual opens.
 
-* Animated GIFs with 60 one-second frames when Imagick is available; static images with GD alone.
-* A deadline and time zone for each campaign, custom colors and labels, and a local TTF/OTF font selector.
-* Alternative text for website shortcodes, saved previews and newly copied email HTML.
-* A lightweight English, translation-ready admin interface with keyboard-accessible controls, validation and manual copying when JavaScript is unavailable.
-* A static saved preview; animation starts only on request. No preview rendering on each keystroke or background polling.
-* Persistent local font storage and an explicit, non-destructive tool for copying legacy fonts.
-* Optional removal of owned plugin data on uninstall, disabled by default. Deactivation keeps your settings.
+* Animated GIFs with 60 one-second frames when Imagick and database session locks are available.
+* Per-timer deadlines and time zones, custom colors, labels and local TTF/OTF fonts.
+* An optional Media Library image after the deadline, including GIF frames that cross the deadline.
+* Alternative text for shortcodes, saved previews and newly copied email HTML.
+* A server-rendered, English and translation-ready admin interface, with a static saved preview and explicit animation controls.
+* Optional removal of owned plugin data on uninstall; off by default. Deactivation keeps your configuration.
 
-GD is required to render images. Imagick enables animation, and FreeType enables custom fonts. Animated generation requires both Imagick and working MySQL/MariaDB advisory locks on a consistent session/primary. Without usable locking, cache misses produce uncached single-frame images, not animation. Shared caching and locks reduce duplicate GIF generation. If the generation lock is busy or unavailable, a current single-frame image is returned instead of a stale animation. Rendering errors can still prevent an image; test your hosting before a campaign.
+GD is required. Imagick enables animation; FreeType enables custom fonts. Animation requires MySQL/MariaDB advisory locks on a consistent connection. Unavailable locking gives current static output on a cache miss, not an unprotected full animation. These requirements are independent of whether the Media Library image is configured.
 
-A countdown image is not a promise of exact live delivery: email services may prefetch, cache or block remote images, and some clients show only the first GIF frame. Always include the actual deadline as visible text. Keep the image URL available for the lifetime of the campaign.
+Email services can prefetch, cache or block images, and some clients show only the first GIF frame. Always include the absolute deadline as visible text. The plugin cannot change an image already retained by an email proxy, or make a previously completed GIF refresh itself.
 
 == Installation ==
 
-1. In Plugins > Add New > Upload Plugin, select the installation ZIP and activate Email Countdown Timer.
-2. Open Easy Countdown > Create Timer. Choose a unique ID, set the deadline and time zone, then save.
-3. Use Embed Codes to copy email HTML, an image URL or the website shortcode.
-4. Send a test message through your actual email platform and check the page while logged out.
+1. Upload the Easy Countdown installation ZIP through Plugins > Add New > Upload Plugin.
+2. Open Easy Countdown > Create Timer, choose an ID, deadline and time zone, and save.
+3. Optionally choose a local image in After Countdown, then save again.
+4. Copy the image URL/email HTML or website shortcode. Test in your actual email platform and on a logged-out page.
 
-When updating, replace rather than uninstall the plugin. Back up your database/fonts, disable duplicate older snippets, and reload open timer forms. For updates from 12.3.1 or older, first copy plugin-local fonts out of the directory WordPress replaces; migration details: https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md
+The WordPress.org submission slug and package directory are easy-countdown. The existing GitHub repository keeps its email-countdown-timer name. The internal main PHP filename, options, shortcode and query parameters remain compatible.
+
+Moving from the GitHub package installed in email-countdown-timer/: back up the database and fonts, deactivate that copy without uninstalling it, then install/activate easy-countdown. Do not run both copies. Existing timers and image URLs remain. Do not uninstall the old copy with data removal enabled: both names use the same stored data. Copy plugin-local fonts to persistent storage before deleting/replacing either code directory.
 
 == Frequently Asked Questions ==
 
-= Where should I put custom fonts? =
-Use trusted, licensed static TTF/OTF files in the persistent directory under your site's uploads base: normally wp-content/uploads/email-countdown-timer/fonts/. Multisite adds a site-ID subdirectory; custom upload locations can differ. Data Settings shows the available location. Create it through your hosting file manager if necessary and preserve filenames and license notices.
+= How does the end image work? =
+In Create/Edit Timer > After Countdown choose an image with the native Media Library selector, or enter its attachment ID. Use 0 to keep the default zero countdown. Save Changes applies the choice; unsaved changes do not affect sent campaigns.
 
-Protect font files against direct HTTP downloads before using them. Data Settings > Font File Access can install Apache deny rules without overwriting existing files. nginx needs host-managed rules; a local file write is not verification. Blocking downloads does not grant permission for server-side use. Instructions: https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md
+The image must be a local JPEG, PNG, GIF or WebP attachment, no larger than 4 MiB, 4096 pixels per side or 4 million pixels in total. SVG, remote-only/offloaded files, private/trashed attachments and symlinked paths are not accepted. Use trusted files. An animated source contributes only its first frame. Output is re-encoded, not redirected to the original file, and source metadata is not copied.
 
-= Are Google Fonts imported automatically? =
-No. Automatic importing is deferred. You may obtain a licensed TTF/OTF yourself and upload it through SFTP or your hosting file manager. There is no browser font-upload endpoint, Google request or API-key field. Fonts are read on the server to draw the image, not downloaded by email recipients.
+The end image is fitted into the countdown canvas without stretching, using the timer background for unused space. A wide image with a similar aspect ratio works best. On a new request at/after the deadline it replaces the zero image. If the deadline occurs inside the generated 60-second GIF, remaining frames show it. If the deadline is later than that GIF's playback window, the old GIF cannot update itself: another request is needed. Email caches may keep old output despite cache headers. Removing the attachment falls back to the zero countdown. The plugin never deletes Media Library files when a timer or the plugin is removed.
 
-= Why do custom labels or sizes fail validation? =
-The combined font, text and dimensions must fit the image limits. Without an available FreeType font, the bitmap fallback uses fixed sizes and new saves require printable ASCII labels. Choose a suitable local font for other characters; the file must include the required glyphs.
+= What alternative text should I use? =
+Use a description suitable for both the timer and its end image. One HTML alt attribute cannot change during GIF playback. Empty alt is appropriate only when nearby text supplies the same information. Older records without alt keep their automatic description. Recopy email HTML after editing and purge affected website HTML caches. A sent email or plain image URL cannot have its HTML alt changed by replacing image bytes.
 
-= Can I set image alternative text? =
-Yes. Set Image alternative text (alt) in the editor. Saved empty text produces alt="" and is appropriate only when nearby text already conveys the same information. Older records without this field use an automatic description. Recopy email HTML after editing; a sent email or plain image URL cannot have its HTML alt changed by changing the image. Purge cached website HTML after editing a shortcode's alt.
+= Where should I put fonts? =
+Use trusted, licensed static TTF/OTF files in the persistent directory shown in Data Settings, normally wp-content/uploads/email-countdown-timer/fonts/. That existing storage name is retained across the easy-countdown rename. Multisite adds a site-ID directory. No font is bundled or downloaded automatically from Google. Copy font license notices manually. See the repository Local Font Storage guide for older plugin-local fonts and upgrade instructions.
 
-= What should I exclude in FlyingPress or WP Rocket? =
-Only when needed, exclude email-countdown-timer/assets/countdown.js from delayed execution and email-countdown-timer-image from image lazy loading. Requests with ecd_action=render must bypass page caching and image conversion. Do not disable optimization globally. FlyingPress without CDN still needs correct local cache settings. See the repository Optimization and Caching guide; not every proprietary plugin version or settings combination has been tested.
+= Can visitors download the original font files? =
+Possibly, unless the server blocks direct access. Data Settings > Font File Access can install fixed Apache deny rules without overwriting existing files. nginx needs a host-managed rule. Writing .htaccess is not verification of server enforcement. Ask your host to verify denied GET/HEAD font requests and working timer images. Protection does not grant a font license.
 
 = Why is a GIF static? =
-Imagick may be unavailable, or a generation lock may be busy or unsupported. If a large animation takes longer than the one-second lock wait, some simultaneous requests may receive a current static frame while its owner finishes. With persistently unavailable locking, cache misses remain static and uncached. Data Settings > Rendering Diagnostics checks locking. Static fallback does not replace the animation cache. The hosting still needs adequate CPU, memory and native libraries.
+Imagick may be missing, the timer may have ended with an end image, or the generation lock may be unavailable or busy. Image requests wait up to one second for a lock. When generating a large GIF takes longer, some simultaneous requests receive one current frame while the owner finishes. That fallback does not replace the animation cache. Hosts without usable advisory locks consistently use static output on misses. Data Settings > Rendering Diagnostics shows lock availability; test your hosting capacity before a campaign.
 
-= Does the plugin track visitors or email opens? =
-The plugin adds no visitor analytics, open counters, tracking cookies, browser storage or developer telemetry. It stores campaign configuration, an uninstall preference, copied-font ownership hashes and temporary shared images locally. Hosting, WordPress, other plugins and email-image proxies may separately process request data. Suggested wording is available in WordPress's Privacy Policy Guide; adapt it to your providers. Do not add recipient IDs, email addresses or secrets to image URLs or public timer fields.
+= Which optimization assets should I exclude? =
+Only when needed, exclude easy-countdown/assets/countdown.js from delayed JavaScript and email-countdown-timer-image from image lazy loading. Older installations use email-countdown-timer/assets/countdown.js. Requests with ecd_action=render must bypass page caching and image conversion. Do not disable optimization globally. FlyingPress without CDN still needs appropriate local cache settings. Not every proprietary version/configuration is integration-tested; see the repository Optimization and Caching guide.
 
-= What happens when I uninstall? =
-Data is retained unless you first enable Delete all plugin data when uninstalling in Data Settings. Opt-in uninstall removes owned database data and unchanged files owned by the font-copy tool. Manually uploaded or replaced fonts are not deleted. The choice is per site on multisite. Font access rule/index files are also retained so remaining manual fonts do not lose protection. Shared caches, other plugins' cron jobs and backups are not erased. The plugin schedules no cron jobs.
+= Does this plugin collect user data? =
+The shipped code adds no visitor analytics, open counters, tracking cookies, persistent browser storage or developer telemetry. It stores timer settings, optional attachment IDs, uninstall preference, copied-font ownership hashes and short-lived shared images locally. Media selection uses WordPress core's administrator-only Media Library. It does not add an external image service, new upload endpoint or remote downloads. Hosting, WordPress, other plugins and email-image proxies can separately process requests. Suggested wording is available in WordPress's Privacy Policy Guide. Do not put personal data or secrets in public timer fields, images or URLs.
 
-= Which time zone is used? =
-New timers start with the WordPress site time zone (including a configured UTC offset). Existing timers keep their saved zone. Old records without a zone retain Europe/Warsaw for compatibility; changing the site setting does not move their deadlines.
-
-== Upgrade Notice ==
-
-= 12.4.3 =
-Reload old timer editor tabs after updating: obsolete save_timer forms are rejected without changing data. Review font HTTP protection with your host. Back up fonts and your database; do not uninstall to update.
+= What happens on uninstall? =
+Data is retained unless Delete all plugin data when uninstalling was explicitly enabled. Opt-in removes owned database data and unchanged files owned by the font-copy tool, per site in multisite. It does not delete Media Library images, manually managed/replaced fonts, shared cache, other plugins' cron, backups or infrastructure logs. Font access rules stay in place for remaining manual files. The plugin schedules no cron.
 
 == Changelog ==
 
-= 12.4.3 =
-* Add explicit administrator-controlled font HTTP access rules and host-specific instructions.
-* Return a fresh completed image without caching after lock loss; crossed deadlines still use a current frame.
-* Use the site time zone for new timers while preserving existing deadlines.
-* Retire obsolete form writes safely; clarify animation requirements and local-font protection.
+= 12.5.0 =
+* Align display name, text domain and distribution directory with the existing Easy Countdown submission.
+* Add an optional local end image, native media selection and exact deadline/cache handling.
+* Preserve existing public image URLs, shortcodes, stored timers and persistent font paths.
 
+== Upgrade Notice ==
 
-= 12.4.2 =
-* One verified distribution ZIP is used for packaging and installation tests.
-* Add suggested text to the WordPress Privacy Policy Guide without editing a published policy.
-* Update installation, local-font, privacy and troubleshooting instructions.
-
-= 12.4.1 =
-* Distinguish generation-lock outcomes and return a current static image when locking is busy or unavailable.
-* Add administrator rendering diagnostics.
-
-= 12.4.0 =
-* Add persistent local font storage and explicit legacy copying.
-* Validate combined image geometry and explain bitmap-font limits before saving.
-
-Earlier changes and detailed guides: https://github.com/dominiczajac/email-countdown-timer
+= 12.5.0 =
+Back up data/fonts. If the old email-countdown-timer directory is installed, deactivate it without uninstalling before activating easy-countdown. Both share data; never enable both. Existing WordPress.org submissions should receive this updated package, not a duplicate submission.

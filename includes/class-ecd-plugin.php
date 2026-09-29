@@ -18,7 +18,7 @@ class Email_Countdown_Timer_Plugin {
     }
     public function registerAdminMenu(): void {
         require_once __DIR__.'/class-email-countdown-timer-admin.php';
-        $hook = add_menu_page(__('Easy Countdown', 'email-countdown-timer'), __('Easy Countdown', 'email-countdown-timer'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
+        $hook = add_menu_page(__('Easy Countdown', 'easy-countdown'), __('Easy Countdown', 'easy-countdown'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
         Email_Countdown_Timer_Admin::add_screen($hook);
     }
     public function enqueueAdminAssets(string $hook): void {
@@ -40,7 +40,7 @@ class Email_Countdown_Timer_Plugin {
         check_admin_referer('ecd_save_timer_nonce');
         // Old forms cannot bypass the current editor's validation and delete confirmation.
         // Keep the old nonce/capability gate, but perform no legacy mutation or redirect.
-        wp_die(esc_html__('This form version is no longer supported. Reload Easy Countdown and use the current editor. No timer data was changed.', 'email-countdown-timer'), '', ['response'=>409]);
+        wp_die(esc_html__('This form version is no longer supported. Reload Easy Countdown and use the current editor. No timer data was changed.', 'easy-countdown'), '', ['response'=>409]);
         return;
     }
     public function renderAdminPage(): void {
@@ -52,7 +52,7 @@ class Email_Countdown_Timer_Plugin {
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
         if ($id === '') return '';
         $timers = $this->getTimers();
-        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'email-countdown-timer'));
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'easy-countdown'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
         return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
@@ -103,11 +103,7 @@ class Email_Countdown_Timer_Plugin {
         $deadline = Email_Countdown_Timer_Config::deadline($config);
         $fixedTime = $now;
         $now = $now ?? time();
-        $bucket = intdiv($now, 15);
-        $font = Email_Countdown_Timer_Config::fontPath($config['font']);
-        $imageConfig = $config;
-        unset($imageConfig['alt']);
-        $signature = hash('sha256', serialize([$imageConfig, $deadline, $fmt, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION]));
+        [$signature, $bucket, $ending] = $this->imageState($config, $deadline, $now, $fmt);
         $key = $this->cacheKey($id, $fmt);
         $blob = $this->cachedImage($key, $signature, $bucket);
         if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
@@ -121,10 +117,10 @@ class Email_Countdown_Timer_Plugin {
         try {
             // Another process may have filled the slot while this request waited.
             $renderNow = $fixedTime ?? time();
-            $bucket = intdiv($renderNow, 15);
+            [$signature, $bucket, $ending] = $this->imageState($config, $deadline, $renderNow, $fmt);
             $blob = $this->cachedImage($key, $signature, $bucket, true);
             if ($blob === null) {
-                $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $renderNow, $fmt);
+                $blob = (new Email_Countdown_Timer_Renderer())->render($config, $deadline, $renderNow, $fmt, $ending);
                 if ($blob === '') {
                     // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Internal fixed error; the public controller returns only a fixed PNG with status 503.
                     throw new RuntimeException('Image generation or lock ownership failed.');
@@ -148,6 +144,18 @@ class Email_Countdown_Timer_Plugin {
             $lock->release();
         }
     }
+    private function imageState(array $config, int $deadline, int $now, string $format): array {
+        $font = Email_Countdown_Timer_Config::fontPath($config['font']);
+        $imageConfig = $config;
+        unset($imageConfig['alt']);
+        $endID = (int)($config['expiry_image_id'] ?? 0);
+        $ending = $endID > 0 && ($now >= $deadline || ($format === 'gif' && class_exists('Imagick') && $deadline - $now < 60))
+            ? Email_Countdown_Timer_End_Image::resolve($endID) : null;
+        $expired = $endID > 0 && $now >= $deadline;
+        // A pre-deadline hit must never hide the end image within the same time bucket.
+        $signature = hash('sha256', serialize([$imageConfig, $deadline, $format, $font, $font ? filemtime($font) : 0, class_exists('Imagick'), self::VERSION, $expired, $ending]));
+        return [$signature, $expired && $ending !== null ? -1 : intdiv($now, 15), $ending];
+    }
     private static function completed_image_is_fresh(int $started, int $now, int $deadline): bool {
         // Same freshness interval, no clock rollback, and no crossed campaign deadline.
         return $now >= $started && intdiv($now, 15) === intdiv($started, 15)
@@ -156,7 +164,8 @@ class Email_Countdown_Timer_Plugin {
     private function staticFallback(array $config, int $deadline, int $now, string $format, string $reason): void {
         // One current frame, never a stale animation or an unprotected 60-frame job.
         // Do not cache it in the animated slot or change the requested MIME type.
-        $blob = (new Email_Countdown_Timer_Renderer())->render_static($config, $deadline, $now, $format);
+        [, , $ending] = $this->imageState($config, $deadline, $now, $format);
+        $blob = (new Email_Countdown_Timer_Renderer())->render_static($config, $deadline, $now, $format, $ending);
         $reason = in_array($reason, ['busy','unsupported','error'], true) ? $reason : 'error';
         header('X-Email-Countdown-Mode: static-'.$reason);
         $this->outputImage($blob, $format);

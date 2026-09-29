@@ -8,8 +8,8 @@ final class Email_Countdown_Timer_Font_Access {
     /** No font names, request values or executable code are written into these files. */
     public static function templates(): array {
         return array(
-            '.htaccess' => "# Email Countdown Timer: server-side font directory only.\nRequire all denied\n",
-            'index.html' => "<!-- Email Countdown Timer: no directory listing. Direct font access needs server rules. -->\n",
+            '.htaccess' => "# Easy Countdown: server-side font directory only.\nRequire all denied\n",
+            'index.html' => "<!-- Easy Countdown: no directory listing. Direct font access needs server rules. -->\n",
         );
     }
 
@@ -67,20 +67,20 @@ final class Email_Countdown_Timer_Font_Access {
 
     public static function handle(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You are not allowed to manage font access.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
+            wp_die( esc_html__( 'You are not allowed to manage font access.', 'easy-countdown' ), '', array( 'response' => 403 ) );
             return;
         }
         $method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
             ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
         if ( 'POST' !== $method ) {
-            wp_die( esc_html__( 'Use the font access form.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
+            wp_die( esc_html__( 'Use the font access form.', 'easy-countdown' ), '', array( 'response' => 405 ) );
             return;
         }
         check_admin_referer( 'email_countdown_timer_font_access' );
         try {
             $result = self::install();
         } catch ( Throwable $error ) {
-            wp_die( esc_html__( 'Font access rules could not be created. Configure the font directories through your host. No existing rules were overwritten.', 'email-countdown-timer' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'Font access rules could not be created. Configure the font directories through your host. No existing rules were overwritten.', 'easy-countdown' ), '', array( 'response' => 500 ) );
             return;
         }
         // A local write is not proof that the web server enforces it. Never claim otherwise.
