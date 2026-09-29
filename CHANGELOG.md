@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Honor attachment and parent-post password restrictions when selecting or resolving a public end image, including existing image-cache entries. Restricted media use the existing zero-countdown fallback regardless of viewer login or password cookies. This does not revoke copies already downloaded by clients or proxies.
+
 ## 12.5.0
 
 - Align the display name, text domain and package directory with the existing Easy Countdown / easy-countdown submission; preserve repository URLs, internal/storage identifiers and public timer interfaces.

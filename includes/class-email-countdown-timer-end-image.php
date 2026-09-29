@@ -33,6 +33,15 @@ final class Email_Countdown_Timer_End_Image {
             || ! in_array( get_post_status( $post ), array( 'inherit', 'publish' ), true ) ) {
             return null;
         }
+        // This is shared public output, not a viewer-specific password challenge.
+        // A valid post-password cookie or administrator login must not grant publication.
+        if ( '' !== (string) ( $post->post_password ?? '' ) ) {
+            return null;
+        }
+        $parent = ! empty( $post->post_parent ) ? get_post( (int) $post->post_parent ) : null;
+        if ( $parent && '' !== (string) ( $parent->post_password ?? '' ) ) {
+            return null;
+        }
         // Bypass offload/URL filters: an absent local copy is not downloaded.
         $file = get_attached_file( $id, true );
         $uploads = wp_get_upload_dir();
