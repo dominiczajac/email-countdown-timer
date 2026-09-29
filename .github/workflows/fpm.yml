@@ -42,7 +42,11 @@ jobs:
           tools: wp-cli
           coverage: none
       - name: Install real FPM and nginx
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends nginx php8.4-fpm php8.4-mysql php8.4-gd php8.4-imagick
+        run: |
+          mkdir -p "$RUNNER_TEMP/fpm-evidence"
+          sudo add-apt-repository -y ppa:ondrej/php 2>&1 | tee "$RUNNER_TEMP/fpm-evidence/provision.log"
+          sudo apt-get update -qq 2>&1 | tee -a "$RUNNER_TEMP/fpm-evidence/provision.log"
+          sudo apt-get install -y --no-install-recommends nginx php8.4-fpm php8.4-mysql php8.4-gd php8.4-imagick 2>&1 | tee -a "$RUNNER_TEMP/fpm-evidence/provision.log"
       - name: Three paired on/off repetitions, every result retained
         env:
           ECD_INTEGRATION_DISPOSABLE: '1'
