@@ -17,7 +17,7 @@ wp=(wp --path="$wpdir" --no-color)
 if [[ "${ECD_TOPOLOGY:?}" == multisite ]]; then
   "${wp[@]}" core multisite-convert --title='Disposable network'
 fi
-install_dir="$wpdir/wp-content/plugins/email-countdown-timer"
+install_dir="$wpdir/wp-content/plugins/easy-countdown"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
@@ -32,7 +32,8 @@ if [[ "${ECD_CACHE:?}" == redis ]]; then
 fi
 network=()
 [[ "$ECD_TOPOLOGY" != multisite ]] || network=(--network)
-"${wp[@]}" plugin activate email-countdown-timer "${network[@]}"
+"${wp[@]}" plugin activate easy-countdown "${network[@]}"
+"${wp[@]}" eval-file "$root/tests/integration/end-image.php"
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version
 "${wp[@]}" eval-file "$root/tests/integration/fonts.php"
@@ -50,14 +51,14 @@ php -r '$a=new Imagick(); $a->readImageBlob(file_get_contents($argv[1])); if($a-
 status="$(curl -sS -o /dev/null -w '%{http_code}' 'http://localhost:8080/?ecd_action=render&ecd=unknown-ci-timer&mode=email')"
 [[ "$status" == 404 ]]
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
-"${wp[@]}" plugin deactivate email-countdown-timer "${network[@]}"
+"${wp[@]}" plugin deactivate easy-countdown "${network[@]}"
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" invoke-uninstall
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" optin
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" invoke-uninstall
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" deleted
-"${wp[@]}" plugin uninstall email-countdown-timer --skip-delete
+"${wp[@]}" plugin uninstall easy-countdown --skip-delete
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" deleted
 # A fresh PHP process verifies persistent cache coherence after actual uninstall.
 echo "WORDPRESS LIFECYCLE PASS: version=$ECD_WORDPRESS_VERSION topology=$ECD_TOPOLOGY cache=$ECD_CACHE"

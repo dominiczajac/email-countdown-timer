@@ -1,5 +1,12 @@
 # Changelog
 
+## 12.5.0
+
+- Align the display name, text domain and package directory with the existing Easy Countdown / easy-countdown submission; preserve repository URLs, internal/storage identifiers and public timer interfaces.
+- Add an optional local Media Library end image, including exact deadline/cache boundaries and transitions within 60-second GIFs. Re-encode bounded raster input without source metadata; never delete user media.
+- Load the native media picker only on the editor, with attachment-ID entry available without JavaScript. Preserve old forms and unconfigured timers.
+- Refuse duplicate initialization alongside the known active legacy package and document the explicit deactivation/install transition.
+
 ## 12.4.3
 
 - Add an explicit, nonce/capability-protected local font access-rule installer. Do not overwrite existing files or symlinks; shared legacy rules on multisite require network-administrator permission. Apache must honor its rules; nginx requires host configuration. New required CI checks test both server types and ignored-rule negative cases.

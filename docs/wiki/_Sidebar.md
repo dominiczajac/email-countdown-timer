@@ -1,9 +1,10 @@
-**Email Countdown Timer**
+**Easy Countdown**
 
 - [Home](Home.md)
 - [Installation](Installation.md)
 - [Admin interface](Admin-Interface.md)
 - [Configuration](Configuration.md)
+- [End image](End-Image.md)
 - [Embedding](Embedding.md)
 - [Optimizer compatibility](Optimization-Compatibility.md)
 - [Font HTTP access](Font-HTTP-Access.md)

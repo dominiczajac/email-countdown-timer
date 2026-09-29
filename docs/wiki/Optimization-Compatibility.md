@@ -1,21 +1,21 @@
 # FlyingPress, WP Rocket and other optimizers
 
-Applies to source versions 12.3.0 and 12.3.1. Guidance was checked against the vendors' official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries.
+Applies to Easy Countdown 12.5.0; legacy asset-path alternatives are noted below. Guidance was checked against the vendors' official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries.
 
 ## Exclude narrowly, only where needed
 
 | Symptom / setting | Exact asset or identifying keyword | Action |
 |---|---|---|
-| A website timer does not refresh when returning to its tab | `email-countdown-timer/assets/countdown.js` | Exclude this file from Delay JavaScript / load-after-interaction. If the issue is caused by minification or combination, exclude it there separately. Ordinary `defer` is supported. The WordPress handle is `ecd-refresh`; the usual script element ID is `ecd-refresh-js`. |
+| A website timer does not refresh when returning to its tab | `easy-countdown/assets/countdown.js` | Exclude this file from Delay JavaScript / load-after-interaction. If the issue is caused by minification or combination, exclude it there separately. Ordinary `defer` is supported. The WordPress handle is `ecd-refresh`; the usual script element ID is `ecd-refresh-js`. |
 | Image is blank or replaced by a lazy-load placeholder | `email-countdown-timer-image` | Add this keyword to the image lazy-load exclusion field (without a leading dot). It is a class on the `img` itself. For custom, manually written markup, add the class or match `ecd_action=render` in the image URL. |
 | A timer GIF becomes static or shows an old countdown | Requests with query parameter `ecd_action=render` | Bypass HTML/page/edge caching and image conversion/proxy/CDN transformation for this dynamic image request. Do not add these parameters to a 'cache query strings' allowlist or an 'ignored parameters' list. |
-| A nonstandard optimizer modifies authenticated wp-admin | `email-countdown-timer/assets/admin.css` and `email-countdown-timer/assets/admin.js` | Exclude only those admin assets from the offending feature. In ordinary operation these assets are not loaded on the front end and need no public-page CSS exclusion. |
+| A nonstandard optimizer modifies authenticated wp-admin | `easy-countdown/assets/admin.css`, `easy-countdown/assets/admin.js` and `easy-countdown/assets/end-image.js` | Exclude only those admin assets from the offending feature. In ordinary operation these assets are not loaded on the front end and need no public-page CSS exclusion. |
 
 Use the actual asset URL when WordPress content directories are customized. Do not exclude all of `/wp-content/`, all JavaScript, all images, or the entire website merely for this plugin. Keep CSS/JS minification enabled unless testing identifies a specific breakage. No front-end stylesheet is added by this plugin.
 
 ## WP Rocket
 
-Under File Optimization, add `email-countdown-timer/assets/countdown.js` to Delay JavaScript execution's **Excluded JavaScript Files** only if necessary. A minification/defer exclusion is a separate setting. The image exists in server-rendered HTML and does not need JavaScript to appear or play its initial GIF; this script refreshes it only on tab visibility changes.
+Under File Optimization, add `easy-countdown/assets/countdown.js` to Delay JavaScript execution's **Excluded JavaScript Files** only if necessary. A minification/defer exclusion is a separate setting. The image exists in server-rendered HTML and does not need JavaScript to appear or play its initial GIF; this script refreshes it only on tab visibility changes.
 
 Under Media, use `email-countdown-timer-image` in **Excluded images or iframes** when diagnosing lazy-load problems. Generated markup includes `loading="eager"` and `data-no-lazy="1"` as interoperability hints. Other optimizers or themes may still rewrite that markup.
 
@@ -31,7 +31,7 @@ For confirmed minifier breakage only, the documented `flying_press_exclude_from_
 
 ```php
 add_filter( 'flying_press_exclude_from_minify:js', static function ( $keywords ) {
-    $keywords[] = 'email-countdown-timer/assets/countdown.js';
+    $keywords[] = 'easy-countdown/assets/countdown.js';
     return $keywords;
 } );
 ```
@@ -65,6 +65,8 @@ After changing a timer's alt, purge the **HTML page** cache of pages containing 
 
 ## FlyingPress without a CDN
 
-Version 12.3.1 sets the `flying_press_is_cacheable` filter to false only for `ecd_action=render`; the early `DONOTCACHEPAGE` flag and `no-store, no-transform` response remain. Pages containing the shortcode remain cacheable. Without a CDN there are no CDN settings to change, but a hosting/page-cache layer can still run before this plugin. Clear the affected page HTML cache after changing alt text. Apply the narrow script or LazyLoad exclusions above only if an actual display/refresh issue occurs.
+Since 12.3.1, the plugin sets the `flying_press_is_cacheable` filter to false only for `ecd_action=render`; the early `DONOTCACHEPAGE` flag and `no-store, no-transform` response remain. Pages containing the shortcode remain cacheable. Without a CDN there are no CDN settings to change, but a hosting/page-cache layer can still run before this plugin. Clear the affected page HTML cache after changing alt text. Apply the narrow script or LazyLoad exclusions above only if an actual display/refresh issue occurs.
 
 No commercial FlyingPress binary or production site configuration was tested by this reconciliation; this is not a compatibility certificate for an unspecified vendor version.
+
+After the 12.5.0 directory alignment, use `easy-countdown/assets/countdown.js` for newly installed packages. Older GitHub copies can still use `email-countdown-timer/assets/countdown.js`. The `email-countdown-timer-image` HTML class and render query parameters intentionally remain unchanged. The native media selector and `assets/end-image.js` are admin-editor-only, not public page assets.

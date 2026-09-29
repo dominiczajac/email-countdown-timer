@@ -18,7 +18,7 @@ if [[ "${ECD_CACHE:-database}" == redis ]]; then
   "${wp[@]}" plugin install redis-cache --version=3.0.0 --activate
   "${wp[@]}" redis enable
 fi
-target="$wpdir/wp-content/plugins/email-countdown-timer"
+target="$wpdir/wp-content/plugins/easy-countdown"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
@@ -26,7 +26,7 @@ rm -f "$archive"
 mkdir -p "$target/fonts" "$wpdir/wp-content/mu-plugins"
 # Test-only local runner font, never included in the ZIP or repository.
 cp /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf "$target/fonts/fixture.ttf"
-"${wp[@]}" plugin activate email-countdown-timer
+"${wp[@]}" plugin activate easy-countdown
 cp "$root/tests/http/observer.php" "$wpdir/wp-content/mu-plugins/ect-http-observer.php"
 "${wp[@]}" eval-file "$root/tests/http/fixture.php" seed
 "${wp[@]}" eval-file "$root/tests/http/fixture.php" versions > "$ECD_HTTP_EVIDENCE/versions.json"
@@ -38,3 +38,5 @@ export ECD_HTTP_SERVER_PID="$server"
 trap 'kill -- -"$server" 2>/dev/null || true; rm -f "$target/fonts/fixture.ttf"' EXIT
 for i in {1..30}; do curl -fsS http://127.0.0.1:8082/?ecd_action=render\&ecd=missing -o /dev/null 2>/dev/null || true; if kill -0 "$server" && curl -sI http://127.0.0.1:8082/ | grep -q HTTP; then break; fi; sleep 1; done
 python3 "$root/tests/http/benchmark.py"
+
+python3 "$root/tests/http/end-image.py"

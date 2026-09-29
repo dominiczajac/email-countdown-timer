@@ -178,18 +178,18 @@ final class Email_Countdown_Timer_Fonts {
 
     public static function handle_copy(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You are not allowed to manage fonts.', 'email-countdown-timer' ), '', array( 'response' => 403 ) );
+            wp_die( esc_html__( 'You are not allowed to manage fonts.', 'easy-countdown' ), '', array( 'response' => 403 ) );
             return;
         }
         if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
-            wp_die( esc_html__( 'Use the font copy form.', 'email-countdown-timer' ), '', array( 'response' => 405 ) );
+            wp_die( esc_html__( 'Use the font copy form.', 'easy-countdown' ), '', array( 'response' => 405 ) );
             return;
         }
         check_admin_referer( 'email_countdown_timer_copy_fonts' );
         try {
             $result = self::copy_legacy();
         } catch ( Throwable $error ) {
-            wp_die( esc_html__( 'Local font copying failed. Check directory permissions and database locks, or use SFTP. Original files were not removed.', 'email-countdown-timer' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'Local font copying failed. Check directory permissions and database locks, or use SFTP. Original files were not removed.', 'easy-countdown' ), '', array( 'response' => 500 ) );
             return;
         }
         wp_safe_redirect( add_query_arg( array( 'page' => 'email-countdown-timer-data', 'fonts_copied' => $result['copied'], 'fonts_skipped' => $result['skipped'] ), admin_url( 'admin.php' ) ) );

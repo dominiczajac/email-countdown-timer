@@ -54,6 +54,6 @@ if [[ "$mode" == "--dry-run" ]]; then
 fi
 git -C "$work/wiki" var GIT_AUTHOR_IDENT >/dev/null
 git -C "$work/wiki" var GIT_COMMITTER_IDENT >/dev/null
-git -C "$work/wiki" commit -m 'docs: synchronize Email Countdown Timer wiki'
+git -C "$work/wiki" commit -m 'docs: synchronize Easy Countdown wiki'
 # A concurrent remote update is rejected; never force-push.
 git -C "$work/wiki" push origin "HEAD:refs/heads/$branch"

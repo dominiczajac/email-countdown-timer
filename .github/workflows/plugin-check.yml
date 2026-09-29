@@ -41,9 +41,9 @@ jobs:
           wp --path="$wpdir" config set WP_ENVIRONMENT_TYPE local
           wp --path="$wpdir" config set DISABLE_WP_CRON true --raw
           wp --path="$wpdir" core install --url=http://localhost:8080 --title='Disposable PCP' --admin_user=ci-admin --admin_password="$(openssl rand -hex 20)" --admin_email=ci@example.invalid --skip-email
-          target="$wpdir/wp-content/plugins/email-countdown-timer"
-          bash scripts/build-zip.sh --output "$RUNNER_TEMP/pcp-evidence/email-countdown-timer.zip" --report "$RUNNER_TEMP/pcp-evidence/distribution.json"
-          wp --path="$wpdir" plugin install "$RUNNER_TEMP/pcp-evidence/email-countdown-timer.zip"
+          target="$wpdir/wp-content/plugins/easy-countdown"
+          bash scripts/build-zip.sh --output "$RUNNER_TEMP/pcp-evidence/easy-countdown.zip" --report "$RUNNER_TEMP/pcp-evidence/distribution.json"
+          wp --path="$wpdir" plugin install "$RUNNER_TEMP/pcp-evidence/easy-countdown.zip"
           python3 scripts/verify-distribution.py "$RUNNER_TEMP/pcp-evidence/distribution.json" "$target"
           wp --path="$wpdir" plugin install plugin-check --version=2.1.0 --activate
           {
@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          wp --path="$PCP_WP_PATH" --require="$PCP_WP_PATH/wp-content/plugins/plugin-check/cli.php" --no-color plugin check email-countdown-timer --format=strict-json > "$RUNNER_TEMP/pcp-evidence/plugin-check.json" 2> "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr"
+          wp --path="$PCP_WP_PATH" --require="$PCP_WP_PATH/wp-content/plugins/plugin-check/cli.php" --no-color plugin check easy-countdown --format=strict-json > "$RUNNER_TEMP/pcp-evidence/plugin-check.json" 2> "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr"
           result=$?
           cat "$RUNNER_TEMP/pcp-evidence/plugin-check.json"
           cat "$RUNNER_TEMP/pcp-evidence/plugin-check.stderr" >&2

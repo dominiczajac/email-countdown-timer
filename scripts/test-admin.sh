@@ -12,14 +12,15 @@ export ECD_BROWSER_PASSWORD="$(openssl rand -hex 20)"
 "${wp[@]}" config set WP_ENVIRONMENT_TYPE local
 "${wp[@]}" config set DISABLE_WP_CRON true --raw
 "${wp[@]}" core install --url=http://localhost:8081 --title='Disposable Admin UI' --admin_user=ci-admin --admin_password="$ECD_BROWSER_PASSWORD" --admin_email=ci@example.invalid --skip-email
-install_dir="$wpdir/wp-content/plugins/email-countdown-timer"
+install_dir="$wpdir/wp-content/plugins/easy-countdown"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
 rm -f "$archive"
-"${wp[@]}" plugin activate email-countdown-timer
+"${wp[@]}" plugin activate easy-countdown
 # Existing browser fixtures explicitly use Warsaw; new tests also exercise changed zones.
 "${wp[@]}" option update timezone_string Europe/Warsaw
+export ECD_BROWSER_END_ID="$("${wp[@]}" eval-file "$root/tests/browser/end-image-fixture.php")"
 policy_id="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Privacy fixture' --post_content='ECT privacy sentinel' --porcelain)"
 "${wp[@]}" option update wp_page_for_privacy_policy "$policy_id"
 export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[ecd_timer id="alt-browser-test"]' --porcelain)"
@@ -39,7 +40,7 @@ performance_result=0
 "${wp[@]}" eval-file "$root/tests/integration/performance.php" > "$RUNNER_TEMP/admin-evidence/performance.json" || performance_result=$?
 python3 - <<'PY'
 import gzip, json, os, pathlib, subprocess
-paths=[pathlib.Path('assets/admin.css'),pathlib.Path('assets/admin.js')]
+paths=[pathlib.Path('assets/admin.css'),pathlib.Path('assets/admin.js'),pathlib.Path('assets/end-image.js')]
 report={'source':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'custom_gzip_bytes':{str(p):len(gzip.compress(p.read_bytes(),mtime=0)) for p in paths}}
 report['total_gzip_bytes']=sum(report['custom_gzip_bytes'].values())
 assert report['total_gzip_bytes']<=15*1024
@@ -54,3 +55,6 @@ test "$privacy_result" -eq 0
 "${wp[@]}" option update timezone_string Pacific/Chatham
 "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/maintenance.py"
 "${wp[@]}" option update timezone_string Europe/Warsaw
+
+"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/end-image.py"
+"${wp[@]}" post get "$ECD_BROWSER_END_ID" --field=post_type | grep -qx attachment
