@@ -26,7 +26,7 @@ class BuildTests(unittest.TestCase):
             target = self.root / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / name, target)
-        for folder in ("includes", "assets"):
+        for folder in ("includes", "assets", "blocks"):
             shutil.copytree(ROOT / folder, self.root / folder)
         self.output = self.base / "plugin.zip"
 
@@ -65,6 +65,17 @@ class BuildTests(unittest.TestCase):
         self.build()
         with zipfile.ZipFile(self.output) as archive:
             self.assertFalse(any("fonts/" in p or "wp-config" in p or "scripts/" in p for p in archive.namelist()))
+
+    def test_block_metadata_drift(self):
+        p = self.root / "blocks/timer/block.json"
+        data = json.loads(p.read_text())
+        data["version"] = "0.0.0"
+        p.write_text(json.dumps(data))
+        with self.assertRaises(ValueError): self.build()
+
+    def test_unlisted_block_file(self):
+        (self.root / "blocks/timer/unlisted.js").write_text("/* fixture */")
+        with self.assertRaises(ValueError): self.build()
 
     def test_missing_runtime_file(self):
         (self.root / "uninstall.php").unlink()

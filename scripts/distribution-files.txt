@@ -20,3 +20,6 @@ includes/class-email-countdown-timer-render-lock.php
 includes/class-email-countdown-timer-uninstaller.php
 readme.txt
 uninstall.php
+assets/block-editor.js
+blocks/timer/block.json
+includes/class-email-countdown-timer-block.php

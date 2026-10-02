@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Easy Countdown
  * Description: Countdown timers for WordPress pages and email campaigns.
- * Version: 12.5.2
+ * Version: 12.6.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Dominic Zajac
@@ -34,7 +34,7 @@ if (isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) && $_GET['ecd_a
     // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard cache-plugin interoperability flag, not a plugin-owned global.
     define('DONOTCACHEPAGE', true);
 }
-define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.5.2');
+define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.6.0');
 define('EMAIL_COUNTDOWN_TIMER_FILE', __FILE__);
 define('EMAIL_COUNTDOWN_TIMER_DIR', __DIR__.'/');
 require_once __DIR__.'/includes/class-email-countdown-timer-fonts.php';
@@ -44,7 +44,14 @@ require_once __DIR__.'/includes/class-email-countdown-timer-end-image.php';
 require_once __DIR__.'/includes/class-ecd-renderer.php';
 require_once __DIR__.'/includes/class-email-countdown-timer-embed.php';
 require_once __DIR__.'/includes/class-ecd-plugin.php';
-new Email_Countdown_Timer_Plugin();
+// Reuse the same controller; image requests exit before the later block hook.
+( static function (): void {
+    $plugin = new Email_Countdown_Timer_Plugin();
+    add_action( 'init', static function () use ( $plugin ): void {
+        require_once __DIR__ . '/includes/class-email-countdown-timer-block.php';
+        Email_Countdown_Timer_Block::register( $plugin );
+    } );
+} )();
 // Load policy wording only in admin, never during public image rendering.
 add_action('admin_init', static function (): void {
     require_once __DIR__.'/includes/class-email-countdown-timer-privacy.php';
