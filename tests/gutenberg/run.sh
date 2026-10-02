@@ -52,12 +52,18 @@ cat > "$service_dir/fpm.conf" <<EOF
 pid = $service_dir/fpm.pid
 error_log = $ECD_BLOCK_EVIDENCE/fpm.log
 daemonize = no
+rlimit_core = 536870912
 [block]
 listen = 127.0.0.1:9003
 pm = static
 pm.max_children = 4
 clear_env = no
 catch_workers_output = yes
+process.dumpable = yes
+rlimit_core = 536870912
+request_slowlog_timeout = 5s
+request_slowlog_trace_depth = 64
+slowlog = $ECD_BLOCK_EVIDENCE/fpm-slow.log
 request_terminate_timeout = 35s
 php_admin_value[max_execution_time] = 30
 php_admin_value[error_log] = $ECD_BLOCK_EVIDENCE/php-errors.log
@@ -87,12 +93,40 @@ http {
   }
 }
 EOF
+# Cores remain private to this synthetic job. Only bounded native backtraces
+# without locals are retained, never heap/cookie contents or the raw dump.
+original_core_pattern="$(cat /proc/sys/kernel/core_pattern)"
+ulimit -c 524288
+sudo sysctl -q -w "kernel.core_pattern=$service_dir/core.%p"
+finish() {
+  result=$?
+  trap - EXIT
+  if [[ "$result" != 0 ]]; then
+    "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/failure-control.py" || true
+  fi
+  kill "${server:-}" "${fpm:-}" 2>/dev/null || true
+  wait "${server:-}" "${fpm:-}" 2>/dev/null || true
+  shopt -s nullglob
+  cores=("$service_dir"/core.*)
+  for core in "${cores[@]:0:2}"; do
+    timeout 30s gdb --batch -nx -q -ex 'set debuginfod enabled off' \
+      -ex 'set print frame-arguments none' -ex 'thread apply all bt 40' \
+      "/usr/sbin/php-fpm$php_minor" "$core" \
+      > "$ECD_BLOCK_EVIDENCE/native-$(basename "$core").txt" 2>&1 || true
+  done
+  rm -f "$service_dir"/core.*
+  sudo sysctl -q -w "kernel.core_pattern=$original_core_pattern" || true
+  unset ECD_BLOCK_PASSWORD
+  exit "$result"
+}
+trap finish EXIT
+# Record only runtime configuration, not environment variables or credentials.
+php -r 'echo json_encode(["php"=>PHP_VERSION,"extensions"=>get_loaded_extensions(),"opcache"=>array_combine(["opcache.enable","opcache.jit","opcache.jit_buffer_size","opcache.optimization_level","opcache.protect_memory"],array_map("ini_get",["opcache.enable","opcache.jit","opcache.jit_buffer_size","opcache.optimization_level","opcache.protect_memory"]))],JSON_PRETTY_PRINT),"\n";' > "$ECD_BLOCK_EVIDENCE/php-configuration.json"
 # Match enabled CLI extensions supplied by setup-php; SAPI is verified over HTTP.
 PHP_INI_SCAN_DIR="/etc/php/$php_minor/cli/conf.d" "/usr/sbin/php-fpm$php_minor" -c "/etc/php/$php_minor/cli/php.ini" -y "$service_dir/fpm.conf" -F &
 fpm=$!
 nginx -p "$service_dir/" -c "$service_dir/nginx.conf" -g 'daemon off;' &
 server=$!
-trap 'kill "$server" "$fpm" 2>/dev/null || true; unset ECD_BLOCK_PASSWORD' EXIT
 for i in {1..20}; do if curl -fsS http://localhost:8093/wp-login.php -o /dev/null; then break; fi; sleep 1; done
 "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/browser.py"
 # A recovered worker must not hide a native crash or PHP fatal in a passing run.
