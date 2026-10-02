@@ -1,0 +1,53 @@
+name: Native Gutenberg block
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  editor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        wordpress: ['6.4', 'latest']
+        theme: [twentytwentyone, twentytwentyfour]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: block-disposable-only
+          MYSQL_DATABASE: ect_block
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pblock-disposable-only"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.wordpress == '6.4' && '8.1' || '8.4' }}
+          extensions: mysqli, gd, imagick
+          tools: wp-cli:2.12.0
+          coverage: none
+      - name: Verify tools and install isolated browser dependency
+        run: |
+          test "$(wp cli version)" = 'WP-CLI 2.12.0'
+          python3 -m venv "$RUNNER_TEMP/block-venv"
+          "$RUNNER_TEMP/block-venv/bin/pip" install playwright==1.57.0
+      - name: Installed block, real editor and anonymous front end
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_WORDPRESS_VERSION: ${{ matrix.wordpress }}
+          ECD_BLOCK_THEME: ${{ matrix.theme }}
+        run: bash tests/gutenberg/run.sh
+      - name: Preserve successful and failed checks
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: gutenberg-${{ matrix.wordpress }}-${{ matrix.theme }}
+          path: ${{ runner.temp }}/block-evidence/
+          retention-days: 14
+          if-no-files-found: error

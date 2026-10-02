@@ -63,6 +63,8 @@ jobs:
           php tests/maintenance.php
       - name: Local end-image and branding regression tests
         run: php tests/end-image.php
+      - name: Gutenberg adapter contracts
+        run: php tests/gutenberg.php
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail
@@ -70,7 +72,7 @@ jobs:
       - name: Optimizer timing simulation
         run: node tests/frontend-compat.js
       - name: JavaScript syntax
-        run: node --check assets/countdown.js && node --check assets/admin.js && node --check assets/end-image.js
+        run: node --check assets/block-editor.js && node --check assets/countdown.js && node --check assets/admin.js && node --check assets/end-image.js
   font-http:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -96,22 +98,26 @@ jobs:
     uses: ./.github/workflows/wordpress.yml
   delivery:
     uses: ./.github/workflows/delivery.yml
+  gutenberg:
+    uses: ./.github/workflows/gutenberg.yml
   # Fail closed on failed, skipped or cancelled unit/integration jobs.
   required-checks:
     name: required-checks
     if: ${{ always() }}
-    needs: [test, wordpress, plugin-check, font-http, delivery]
+    needs: [test, wordpress, plugin-check, font-http, delivery, gutenberg]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Require unit and real WordPress matrices to pass
         env:
+          GUTENBERG_RESULT: ${{ needs.gutenberg.result }}
           DELIVERY_RESULT: ${{ needs.delivery.result }}
           FONT_HTTP_RESULT: ${{ needs.font-http.result }}
           TEST_RESULT: ${{ needs.test.result }}
           PCP_RESULT: ${{ needs.plugin-check.result }}
           WORDPRESS_RESULT: ${{ needs.wordpress.result }}
         run: |
+          test "$GUTENBERG_RESULT" = success
           test "$DELIVERY_RESULT" = success
           test "$FONT_HTTP_RESULT" = success
           test "$TEST_RESULT" = success
