@@ -31,8 +31,10 @@ jobs:
           extensions: "${{ matrix.backend == 'gd' && 'gd, :imagick' || 'gd, imagick' }}"
           coverage: none
           tools: none
-      - name: Plugin Check gate negative tests
-        run: python3 tests/test-pcp-gate.py
+      - name: Plugin Check and native-log gate negative tests
+        run: |
+          python3 tests/test-pcp-gate.py
+          python3 tests/test-native-log-gate.py
       - name: Distribution build negative tests and privacy guide
         run: |
           python3 tests/test-build.py

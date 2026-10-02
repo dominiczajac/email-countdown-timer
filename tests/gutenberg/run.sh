@@ -109,6 +109,12 @@ sudo sysctl -q -w "kernel.core_pattern=$service_dir/core.%p"
 finish() {
   result=$?
   trap - EXIT
+  # Preserve any original failure. Gates may promote success to failure only.
+  set +e
+  python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_BLOCK_EVIDENCE" \
+    --require-browser --report "$ECD_BLOCK_EVIDENCE/native-log-before-control.json"
+  gate_result=$?
+  if [[ "$result" == 0 && "$gate_result" != 0 ]]; then result=1; fi
   if [[ "$result" != 0 ]]; then
     "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/failure-control.py" "$fpm" "$service_dir" "$php_minor" || true
   fi
@@ -124,6 +130,11 @@ finish() {
   done
   rm -f "$service_dir"/core.*
   sudo sysctl -q -w "kernel.core_pattern=$original_core_pattern" || true
+  # Recheck after workers/diagnostics stop: a late crash must not remain green.
+  python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_BLOCK_EVIDENCE" \
+    --require-browser --report "$ECD_BLOCK_EVIDENCE/native-log-final.json"
+  gate_result=$?
+  if [[ "$result" == 0 && "$gate_result" != 0 ]]; then result=1; fi
   unset ECD_BLOCK_PASSWORD
   exit "$result"
 }
@@ -138,4 +149,4 @@ server=$!
 for i in {1..20}; do if curl -fsS http://localhost:8093/wp-login.php -o /dev/null; then break; fi; sleep 1; done
 "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/browser.py"
 # Inspect every required log independently: grep's exit 2 must never hide a crash.
-python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_BLOCK_EVIDENCE" | tee "$ECD_BLOCK_EVIDENCE/native-log-check.json"
+python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_BLOCK_EVIDENCE" --require-browser --report "$ECD_BLOCK_EVIDENCE/native-log-check.json"
