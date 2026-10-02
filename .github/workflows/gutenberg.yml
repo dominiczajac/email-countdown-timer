@@ -36,6 +36,9 @@ jobs:
         run: |
           test "$(wp cli version)" = 'WP-CLI 2.12.0'
           php_minor="$(php -r 'echo PHP_MAJOR_VERSION,".",PHP_MINOR_VERSION;')"
+          mkdir -p "$RUNNER_TEMP/block-evidence"
+          # setup-php uses cached binaries; the apt repository for extra SAPIs may be absent.
+          sudo add-apt-repository -y ppa:ondrej/php
           sudo apt-get update -qq
           sudo apt-get install -y nginx "php${php_minor}-fpm"
           python3 -m venv "$RUNNER_TEMP/block-venv"

@@ -44,6 +44,7 @@ cat > "$wpdir/wp-content/mu-plugins/ect-test-environment.php" <<'PHP'
 if ( ! defined('ABSPATH') || wp_get_environment_type() !== 'local' ) { exit; }
 header('X-Ect-Test-Sapi: ' . PHP_SAPI);
 header('X-Ect-Test-PHP: ' . PHP_VERSION);
+header('X-Ect-Test-OPcache: ' . (ini_get('opcache.enable') ? 'on' : 'off'));
 header('X-Ect-Test-GD: ' . (function_exists('imagecreatetruecolor') ? 'yes' : 'no'));
 PHP
 cat > "$service_dir/fpm.conf" <<EOF

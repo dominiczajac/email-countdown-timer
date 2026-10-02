@@ -15,6 +15,7 @@ wpdir = Path(os.environ['ECD_BLOCK_WP_PATH']).resolve()
 assert wpdir.is_relative_to(Path(os.environ['RUNNER_TEMP']).resolve())
 post_id = int(os.environ['ECD_BLOCK_POST_ID'])
 checks, errors, requests = [], [], []
+complete = False
 
 def check(value, name):
     if not value:
@@ -97,6 +98,11 @@ try:
         expect(preview).to_have_js_property('complete',True)
         check(preview.evaluate('(img)=>img.naturalWidth>1'),'static preview is an actual image')
         check('mode=static' in preview.get_attribute('src'),'editor requests static not animated image')
+        old_preview = preview.get_attribute('src')
+        frame.get_by_role('button', name='Refresh preview', exact=True).click()
+        expect(preview).not_to_have_attribute('src', old_preview)
+        expect(preview).to_have_js_property('complete', True)
+        check(preview.evaluate('(img)=>img.naturalWidth>1'), 'explicit refresh fetches a current static image')
         expect(page.get_by_label('Alignment', exact=True)).to_be_visible()
         page.get_by_label('Alignment', exact=True).select_option('center')
         page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.alignment==='center'", arg=first)
@@ -129,6 +135,7 @@ try:
         front.on('request',lambda request:front_requests.append(request.url))
         response = front.goto(base+'/?p='+str(post_id))
         check(response.headers.get('x-ect-test-sapi') == 'fpm-fcgi' and response.headers.get('x-ect-test-gd') == 'yes', 'actual PHP-FPM and GD confirmed over HTTP')
+        check(response.headers.get('x-ect-test-opcache') == 'on', 'OPcache remains enabled in the tested PHP-FPM process')
         (evidence/'http-environment.json').write_text(json.dumps({key:value for key,value in response.headers.items() if key.startswith('x-ect-test-')},indent=2))
         imgs=front.locator('.wp-block-easy-countdown-timer img')
         expect(imgs).to_have_count(2)
@@ -168,8 +175,9 @@ try:
         expect(frame.get_by_text('This timer is no longer in the saved list.',exact=False)).to_be_visible()
         check(True,'missing saved timer shows editor warning')
         check(not errors,'no uncaught editor JavaScript errors')
+        complete = True
         browser.close()
 finally:
     wp('option','update','easy_countdown_timers',original,'--format=json')
-    (evidence/'browser.json').write_text(json.dumps({'checks':checks,'count':len(checks),'page_errors':errors,'theme':os.environ.get('ECD_BLOCK_THEME'),'wordpress':os.environ.get('ECD_WORDPRESS_VERSION'),'complete':len(checks)>=30},indent=2)+'\n')
+    (evidence/'browser.json').write_text(json.dumps({'checks':checks,'count':len(checks),'page_errors':errors,'theme':os.environ.get('ECD_BLOCK_THEME'),'wordpress':os.environ.get('ECD_WORDPRESS_VERSION'),'complete':complete},indent=2)+'\n')
 print('GUTENBERG BROWSER PASS:',len(checks),'checks')
