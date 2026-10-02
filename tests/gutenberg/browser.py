@@ -37,18 +37,18 @@ def open_editor(page):
         wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
         wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block');
     }""")
-    # The block store receives editor settings after core/editor has initialized.
-    # Wait for actual filter output; never inject replacement settings into the test.
+    # Wait for the real, permission-checked inline bootstrap. Never inject test settings.
     try:
-        page.wait_for_function("wp.data.select('core/block-editor').getSettings().easyCountdown")
+        page.wait_for_function("window.emailCountdownTimerBlock")
     except Exception:
         page.screenshot(path=str(evidence/'editor-settings-failure.png'), full_page=True)
         (evidence/'editor-settings-failure.json').write_text(json.dumps({
-            'bootstrap_contains_our_key': 'easyCountdown' in page.content(),
+            'bootstrap_contains_our_key': 'emailCountdownTimerBlock' in page.content(),
             'store_keys': page.evaluate("Object.keys(wp.data.select('core/block-editor').getSettings())"),
             'page_errors': errors
         }, indent=2))
         raise
+    page.wait_for_function("""() => document.querySelector('.block-editor-block-list__layout') || Array.from(document.querySelectorAll('iframe')).some(f=>f.contentDocument && f.contentDocument.querySelector('.block-editor-block-list__layout'))""")
     # Dismiss a guide if already mounted; this never skips block assertions.
     for button in page.get_by_role('button', name=re.compile('Close.*(dialog|guide)', re.I)).all():
         if button.is_visible():
@@ -79,7 +79,7 @@ try:
         page.wait_for_url('**/wp-admin/**')
         check(page.locator('script[src*="assets/block-editor.js"]').count()==0,'block editor code absent on dashboard')
         open_editor(page)
-        data = page.evaluate("wp.data.select('core/block-editor').getSettings().easyCountdown")
+        data = page.evaluate("window.emailCountdownTimerBlock")
         check(sorted(x['value'] for x in data['timers']) == ['gutenberg-a','gutenberg-b'], 'native editor receives actual saved IDs')
         check(all(set(x)=={'value','label'} for x in data['timers']), 'no raw campaign fields passed into choices')
         check(page.evaluate("wp.blocks.getBlockType('easy-countdown/timer').apiVersion") == 3, 'client registered with API 3')
@@ -127,7 +127,9 @@ try:
         front=anon.new_page()
         front_requests=[]
         front.on('request',lambda request:front_requests.append(request.url))
-        front.goto(base+'/?p='+str(post_id))
+        response = front.goto(base+'/?p='+str(post_id))
+        check(response.headers.get('x-ect-test-sapi') == 'fpm-fcgi' and response.headers.get('x-ect-test-gd') == 'yes', 'actual PHP-FPM and GD confirmed over HTTP')
+        (evidence/'http-environment.json').write_text(json.dumps({key:value for key,value in response.headers.items() if key.startswith('x-ect-test-')},indent=2))
         imgs=front.locator('.wp-block-easy-countdown-timer img')
         expect(imgs).to_have_count(2)
         for image in imgs.all():

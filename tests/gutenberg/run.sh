@@ -35,8 +35,67 @@ python3 "$root/scripts/verify-distribution.py" "$ECD_BLOCK_EVIDENCE/distribution
 "${wp[@]}" eval-file "$root/tests/integration/gutenberg.php" > "$ECD_BLOCK_EVIDENCE/integration.txt"
 export ECD_BLOCK_POST_ID="$("${wp[@]}" eval-file "$root/tests/gutenberg/fixture.php")"
 { git rev-parse HEAD; php -v; "${wp[@]}" core version --extra; "${wp[@]}" theme list --status=active --format=json; } > "$ECD_BLOCK_EVIDENCE/versions.txt"
-php -S 127.0.0.1:8093 -t "$wpdir" > "$ECD_BLOCK_EVIDENCE/http.log" 2>&1 &
+# Real FPM workers and nginx, not the single-process development server.
+php_minor="$(php -r 'echo PHP_MAJOR_VERSION,".",PHP_MINOR_VERSION;')"
+service_dir="$(mktemp -d "$RUNNER_TEMP/ect-block-services.XXXXXX")"
+mkdir -p "$wpdir/wp-content/mu-plugins"
+cat > "$wpdir/wp-content/mu-plugins/ect-test-environment.php" <<'PHP'
+<?php
+if ( ! defined('ABSPATH') || wp_get_environment_type() !== 'local' ) { exit; }
+header('X-Ect-Test-Sapi: ' . PHP_SAPI);
+header('X-Ect-Test-PHP: ' . PHP_VERSION);
+header('X-Ect-Test-GD: ' . (function_exists('imagecreatetruecolor') ? 'yes' : 'no'));
+PHP
+cat > "$service_dir/fpm.conf" <<EOF
+[global]
+pid = $service_dir/fpm.pid
+error_log = $ECD_BLOCK_EVIDENCE/fpm.log
+daemonize = no
+[block]
+listen = 127.0.0.1:9003
+pm = static
+pm.max_children = 4
+clear_env = no
+catch_workers_output = yes
+request_terminate_timeout = 35s
+php_admin_value[max_execution_time] = 30
+php_admin_value[error_log] = $ECD_BLOCK_EVIDENCE/php-errors.log
+php_admin_flag[log_errors] = on
+EOF
+cat > "$service_dir/nginx.conf" <<EOF
+pid $service_dir/nginx.pid;
+error_log $ECD_BLOCK_EVIDENCE/nginx-error.log;
+events { worker_connections 256; }
+http {
+  include /etc/nginx/mime.types;
+  access_log $ECD_BLOCK_EVIDENCE/http.log;
+  client_body_temp_path $service_dir/body;
+  fastcgi_temp_path $service_dir/fastcgi;
+  server {
+    listen 127.0.0.1:8093;
+    server_name localhost;
+    root $wpdir;
+    index index.php;
+    location / { try_files \$uri \$uri/ /index.php?\$args; }
+    location ~ \.php\$ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+      fastcgi_pass 127.0.0.1:9003;
+      fastcgi_read_timeout 40s;
+    }
+  }
+}
+EOF
+# Match enabled CLI extensions supplied by setup-php; SAPI is verified over HTTP.
+PHP_INI_SCAN_DIR="/etc/php/$php_minor/cli/conf.d" "/usr/sbin/php-fpm$php_minor" -c "/etc/php/$php_minor/cli/php.ini" -y "$service_dir/fpm.conf" -F &
+fpm=$!
+nginx -p "$service_dir/" -c "$service_dir/nginx.conf" -g 'daemon off;' &
 server=$!
-trap 'kill "$server" 2>/dev/null || true; unset ECD_BLOCK_PASSWORD' EXIT
+trap 'kill "$server" "$fpm" 2>/dev/null || true; unset ECD_BLOCK_PASSWORD' EXIT
 for i in {1..20}; do if curl -fsS http://localhost:8093/wp-login.php -o /dev/null; then break; fi; sleep 1; done
 "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/browser.py"
+# A recovered worker must not hide a native crash or PHP fatal in a passing run.
+if grep -Ei 'SIGSEGV|segmentation fault|exited on signal|PHP Fatal|Maximum execution time' "$ECD_BLOCK_EVIDENCE/fpm.log" "$ECD_BLOCK_EVIDENCE/php-errors.log" 2>/dev/null; then
+  echo 'Native/PHP failure observed; editor run is not clean.' >&2
+  exit 1
+fi
