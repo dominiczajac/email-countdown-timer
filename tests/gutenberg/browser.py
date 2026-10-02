@@ -136,6 +136,9 @@ try:
         response = front.goto(base+'/?p='+str(post_id))
         check(response.headers.get('x-ect-test-sapi') == 'fpm-fcgi' and response.headers.get('x-ect-test-gd') == 'yes', 'actual PHP-FPM and GD confirmed over HTTP')
         check(response.headers.get('x-ect-test-opcache') == 'on', 'OPcache remains enabled in the tested PHP-FPM process')
+        expected_jit = os.environ['ECD_BLOCK_JIT']
+        check(response.headers.get('x-ect-test-jit') == expected_jit, 'configured JIT mode confirmed in actual FPM: ' + expected_jit)
+        check(response.headers.get('x-ect-test-jit-active') == ('on' if expected_jit == '1235' else 'off'), 'actual JIT activation matches the experimental cell')
         (evidence/'http-environment.json').write_text(json.dumps({key:value for key,value in response.headers.items() if key.startswith('x-ect-test-')},indent=2))
         imgs=front.locator('.wp-block-easy-countdown-timer img')
         expect(imgs).to_have_count(2)
@@ -179,5 +182,5 @@ try:
         browser.close()
 finally:
     wp('option','update','easy_countdown_timers',original,'--format=json')
-    (evidence/'browser.json').write_text(json.dumps({'checks':checks,'count':len(checks),'page_errors':errors,'theme':os.environ.get('ECD_BLOCK_THEME'),'wordpress':os.environ.get('ECD_WORDPRESS_VERSION'),'complete':complete},indent=2)+'\n')
+    (evidence/'browser.json').write_text(json.dumps({'checks':checks,'count':len(checks),'page_errors':errors,'theme':os.environ.get('ECD_BLOCK_THEME'),'wordpress':os.environ.get('ECD_WORDPRESS_VERSION'),'complete':complete,'jit':os.environ.get('ECD_BLOCK_JIT')},indent=2)+'\n')
 print('GUTENBERG BROWSER PASS:',len(checks),'checks')

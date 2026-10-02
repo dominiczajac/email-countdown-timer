@@ -12,6 +12,8 @@ jobs:
       matrix:
         wordpress: ['6.4', 'latest']
         theme: [twentytwentyone, twentytwentyfour]
+        # Keep the original runner-JIT cells required; add a controlled JIT-disabled comparison.
+        jit: ['1235', 'disable']
     services:
       mysql:
         image: mysql:8.4
@@ -32,6 +34,7 @@ jobs:
           extensions: mysqli, gd, imagick
           tools: wp-cli:2.12.0
           coverage: none
+          ini-values: opcache.enable=1, opcache.jit=${{ matrix.jit }}, opcache.jit_buffer_size=256M
       - name: Verify tools and install isolated browser dependency
         run: |
           test "$(wp cli version)" = 'WP-CLI 2.12.0'
@@ -48,12 +51,13 @@ jobs:
           ECD_INTEGRATION_DISPOSABLE: '1'
           ECD_WORDPRESS_VERSION: ${{ matrix.wordpress }}
           ECD_BLOCK_THEME: ${{ matrix.theme }}
+          ECD_BLOCK_JIT: ${{ matrix.jit }}
         run: bash tests/gutenberg/run.sh
       - name: Preserve successful and failed checks
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: gutenberg-${{ matrix.wordpress }}-${{ matrix.theme }}
+          name: gutenberg-${{ matrix.wordpress }}-${{ matrix.theme }}-jit-${{ matrix.jit }}
           path: ${{ runner.temp }}/block-evidence/
           retention-days: 14
           if-no-files-found: error

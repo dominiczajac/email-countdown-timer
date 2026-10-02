@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "${GITHUB_ACTIONS:-}" == true && "${ECD_INTEGRATION_DISPOSABLE:-}" == 1 && -n "${RUNNER_TEMP:-}" ]] || exit 1
+case "${ECD_BLOCK_JIT:?}" in 1235|disable) ;; *) echo 'Unexpected diagnostic JIT mode' >&2; exit 1 ;; esac
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 wpdir="$(mktemp -d "$RUNNER_TEMP/ect-block.XXXXXX")"
 export ECD_BLOCK_WP_PATH="$wpdir" ECD_BLOCK_EVIDENCE="$RUNNER_TEMP/block-evidence"
@@ -46,6 +47,9 @@ header('X-Ect-Test-Sapi: ' . PHP_SAPI);
 header('X-Ect-Test-PHP: ' . PHP_VERSION);
 header('X-Ect-Test-OPcache: ' . (ini_get('opcache.enable') ? 'on' : 'off'));
 header('X-Ect-Test-GD: ' . (function_exists('imagecreatetruecolor') ? 'yes' : 'no'));
+header('X-Ect-Test-JIT: ' . ini_get('opcache.jit'));
+$status = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
+header('X-Ect-Test-JIT-Active: ' . (is_array($status) && !empty($status['jit']['on']) ? 'on' : 'off'));
 PHP
 cat > "$service_dir/fpm.conf" <<EOF
 [global]
