@@ -23,6 +23,27 @@ try {
     $end_posts[7]=(object)['post_type'=>'attachment','post_status'=>'inherit','post_mime_type'=>'image/png'];
     $end_files[7]=$end_root.'/sample.png';
     ok(Email_Countdown_Timer_End_Image::resolve(7)!==null,'valid local raster header resolved');
+    // Public publication must not depend on a viewer's login or password cookie.
+    foreach (['inherit', 'publish'] as $status) {
+        $end_posts[7]->post_status = $status;
+        foreach (['fixture-password', '0'] as $password) {
+            $end_posts[7]->post_password = $password;
+            ok(Email_Countdown_Timer_End_Image::resolve(7) === null, 'password on unattached media rejected, including zero string');
+            $end_posts[7]->post_password = '';
+            $end_posts[9] = (object)['post_status'=>'publish', 'post_password'=>$password];
+            $end_posts[7]->post_parent = 9;
+            foreach ([false, true] as $viewer) {
+                $admin = $viewer;
+                ok(Email_Countdown_Timer_End_Image::resolve(7) === null, 'parent password rejected independently of viewer and raw status');
+                ok(!Email_Countdown_Timer_End_Image::validate_selection(7), 'password-restricted selection denied');
+            }
+            $end_posts[9]->post_password = '';
+            ok(Email_Countdown_Timer_End_Image::resolve(7) !== null, 'removing password restores public eligibility');
+            unset($end_posts[7]->post_parent);
+        }
+    }
+    $end_posts[7]->post_status = 'inherit';
+    $admin = true;
     foreach (['https://example.invalid/font.png','php://filter/resource=x', $end_root.'/../not-there.png'] as $bad) {
         $end_files[7]=$bad; ok(Email_Countdown_Timer_End_Image::resolve(7)===null,'remote/wrapper/traversal rejected');
     }

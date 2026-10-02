@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.5.1 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.5.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -20,9 +20,11 @@ There are no bundled runtime Composer/npm dependencies or font binaries. Custom 
 
 ## Existing WordPress.org submission
 
-The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors` still needs the actual WordPress.org username, not an email address.
+The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors: ddoomm` identifies the maintainer's confirmed WordPress.org account. The submitted package must be the same archive validated by CI and the maintainer's live checks; see [finalization and live checks](docs/REVIEW-HANDOFF-12.5.2.md).
 
 ## Image after the countdown
+
+Password-protected attachments and attachments whose immediate parent has a password are not eligible as public end images, regardless of the viewer's login or password cookie. New origin responses use the existing zero-countdown fallback; already downloaded copies cannot be revoked.
 
 Choose a local image in **Create/Edit Timer > After Countdown**. The native Media Library picker is available on this editor only; attachment-ID entry also works without JavaScript. Save to apply. A zero/empty selection keeps the previous zero-countdown behavior. Existing records and open older forms retain their state.
 
