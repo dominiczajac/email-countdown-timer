@@ -30,7 +30,7 @@ Uninstall with the existing opt-in removes plugin-owned data; it does not erase 
 
 ## Manual fonts and persistent storage
 
-Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint or font binaries are provided.
+Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint is provided. One optional Lato Regular example is bundled under SIL OFL 1.1 and used locally, without remote font requests.
 
 Opt-in uninstall removes only unchanged files recorded as owned by the copy tool. Manually uploaded/replaced files and empty directories may remain; a retained file is not visitor tracking.
 

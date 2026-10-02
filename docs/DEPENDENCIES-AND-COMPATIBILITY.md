@@ -8,6 +8,7 @@ The runtime is PHP plus small native browser JavaScript. There are no shipped Co
 | Markup | Public `WP_HTML_Tag_Processor`, available since WP 6.2; plugin minimum is WP 6.4 | Use core parsing rather than a bundled parser/regular-expression HTML mutation. |
 | Admin media picker | Core `wp_enqueue_media` / `wp.media`, loaded on the editor only | Keep native picker and non-JavaScript attachment-ID entry; do not bundle another media library. |
 | Admin accessibility | Native controls and core `wp-a11y` | Preserve labels, focus, error feedback and fallback form submission. Automated checks do not replace assistive-technology tests. |
+| Included font | Unmodified Lato Regular, SIL OFL 1.1 | Explicit file/hash/license allowlist; no runtime download, discovery or change to existing selections. See fonts/README.txt. |
 | Drawing | PHP GD and optional FreeType | Required for text rasterization and static fallback. Inspect function support and limits, not merely PHP version. Host patches native libraries. |
 | Animation | PHP Imagick / ImageMagick | Existing bounded GIF composition and static fallback when absent. WordPress's static image-editor abstraction is not a drop-in equivalent for 60 timed countdown frames. Avoid rebuilding working animation to hide this dependency. |
 | Coordination | MySQL/MariaDB session advisory locks | Retain owner/connection checks and current static fallback. This is not universal SQLite/proxy support. A new backend needs separate concurrency tests. |

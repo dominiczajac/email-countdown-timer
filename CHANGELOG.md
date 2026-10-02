@@ -1,5 +1,11 @@
 # Changelog
 
+## 12.5.3
+
+- Include one unmodified, locally available Lato Regular font under SIL OFL 1.1, with its original license and pinned source/hash notice. Bitmap and existing campaign choices are preserved.
+- Package only the explicitly allowlisted font; reject a modified font/license and keep arbitrary user fonts out of distribution. No runtime font download or discovery.
+- Keep unchanged bundled fonts out of user-font migration; custom font storage remains persistent.
+
 ## 12.5.2
 
 - Honor attachment and parent-post password restrictions when selecting or resolving a public end image, including existing image-cache entries. Restricted media use the existing zero-countdown fallback regardless of viewer login or password cookies. This does not revoke copies already downloaded by clients or proxies.

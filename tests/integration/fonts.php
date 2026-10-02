@@ -20,6 +20,7 @@ $previous = get_option(Email_Countdown_Timer_Fonts::OPTION, null);
 try {
     copy($source, $original);
     $copied = Email_Countdown_Timer_Fonts::copy_legacy();
+    $assert(!array_key_exists(Email_Countdown_Timer_Fonts::BUNDLED_FILE, get_option(Email_Countdown_Timer_Fonts::OPTION, [])), 'Bundled example is not adopted as migrated user data');
     require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-font-access.php';
     $rules = Email_Countdown_Timer_Font_Access::install();
     $assert($rules['failed'] === 0, 'Font access rules created without modifying fonts');
