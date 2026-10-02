@@ -2,7 +2,7 @@ name: Apply authorized example-font packaging once
 on:
   push:
     branches: [feat/bundled-example-font]
-    paths: [.github/apply-font-packaging.py]
+    paths: [.github/apply-font-packaging.py, .github/workflows/import-example-font-once.yml]
 permissions:
   contents: write
 jobs:
@@ -14,9 +14,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
-      - name: Apply reviewed text changes and preserve upstream font bytes
+      - name: Apply reviewed changes and verify glyph coverage before publication
         run: |
           python3 .github/apply-font-packaging.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/test-build.py')
+          s = p.read_text()
+          s = s.replace('self.assertTrue(set(map(ord, required)).issubset(coverage), "Missing expected timer glyphs")', 'self.assertEqual(sorted(set(map(ord, required)) - coverage), [], "Missing expected timer glyph code points")')
+          p.write_text(s)
+          p = Path('tests/integration/bundled-font.php')
+          s = p.read_text().replace('$checks = 0;', "require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-admin.php';\n$checks = 0;", 1)
+          p.write_text(s)
+          PY
           python3 tests/test-build.py
+          git add -- tests/test-build.py tests/integration/bundled-font.php
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat: package one optional local OFL font with provenance and regressions'
           git push origin HEAD:refs/heads/feat/bundled-example-font
