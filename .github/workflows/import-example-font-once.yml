@@ -1,12 +1,12 @@
-name: Import authorized example font once
+name: Apply authorized example-font packaging once
 on:
   push:
     branches: [feat/bundled-example-font]
-    paths: [.github/workflows/import-example-font-once.yml]
+    paths: [.github/apply-font-packaging.py]
 permissions:
   contents: write
 jobs:
-  import:
+  apply:
     if: github.repository == 'dominiczajac/email-countdown-timer' && github.ref == 'refs/heads/feat/bundled-example-font'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -14,30 +14,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
-      - name: Copy only pinned public upstream files, with integrity verification
+      - name: Apply reviewed text changes and preserve upstream font bytes
         run: |
-          python3 - <<'PY'
-          import hashlib
-          from pathlib import Path
-          import urllib.request
-          source = 'https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/gudea/'
-          directory = Path('fonts')
-          assert not directory.exists(), 'Do not overwrite an existing font directory'
-          payloads = {}
-          for name, size, blob in [('Gudea-Regular.ttf', 22932, 'a15eab8ab0950f43959f8f45d325f25ad743f9fb'), ('OFL.txt', 4404, '5ab72bd156912c721cf94a21fddbfc4a7ecb7456')]:
-              with urllib.request.urlopen(source + name, timeout=30) as response:
-                  data = response.read(size + 1)
-              assert len(data) == size, 'Unexpected source size'
-              assert hashlib.sha1(b'blob ' + str(size).encode() + b'\0' + data).hexdigest() == blob, 'Upstream object mismatch'
-              payloads[name] = data
-              print(name, size, 'SHA256', hashlib.sha256(data).hexdigest())
-          assert payloads['Gudea-Regular.ttf'][:4] == b'\x00\x01\x00\x00'
-          assert b'SIL OPEN FONT LICENSE Version 1.1' in payloads['OFL.txt']
-          directory.mkdir()
-          for name, data in payloads.items():
-              with (directory / name).open('xb') as target:
-                  target.write(data)
-          PY
-          git add -- fonts/Gudea-Regular.ttf fonts/OFL.txt
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'build: vendor unmodified OFL Gudea Regular from pinned public upstream'
+          python3 .github/apply-font-packaging.py
+          python3 tests/test-build.py
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat: package one optional local OFL font with provenance and regressions'
           git push origin HEAD:refs/heads/feat/bundled-example-font
