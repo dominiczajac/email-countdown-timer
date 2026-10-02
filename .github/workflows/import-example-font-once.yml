@@ -14,14 +14,40 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
-      - name: Apply reviewed changes and verify glyph coverage before publication
+      - name: Use an unmodified OFL face with the full required alphabet
         run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import urllib.request
+          source = 'https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/lato/'
+          payloads = {}
+          for name, size, blob in [('Lato-Regular.ttf', 656568, '0f3d0f837d24834b9b5b0a6b735459c56f5e75c3'), ('OFL.txt', 4407, '98383e3d835a5c5aea988a74b569193a30dcbcec')]:
+              with urllib.request.urlopen(source + name, timeout=30) as response:
+                  data = response.read(size + 1)
+              assert len(data) == size
+              assert hashlib.sha1(b'blob ' + str(size).encode() + b'\0' + data).hexdigest() == blob
+              payloads[name] = data
+              print(name, size, 'SHA256', hashlib.sha256(data).hexdigest())
+          old = Path('fonts/Gudea-Regular.ttf')
+          assert hashlib.sha256(old.read_bytes()).hexdigest() == 'a4b5410090a821ea17021627312babdf3d8db0271217fd8c4d9f629ef0a2d90b'
+          assert hashlib.sha256(Path('fonts/OFL.txt').read_bytes()).hexdigest() == '315a576cbc7ab61c9e347b5725893bc8498fdcb8fc10831793c6864bc2cefba8'
+          old.unlink()
+          for name, data in payloads.items():
+              Path('fonts', name).write_bytes(data)
+          p = Path('.github/apply-font-packaging.py')
+          s = p.read_text().replace('Gudea', 'Lato').replace('gudea', 'lato').replace('Agustina Mingote', 'Lukasz Dziedzic / tyPoland')
+          s = s.replace('a4b5410090a821ea17021627312babdf3d8db0271217fd8c4d9f629ef0a2d90b', hashlib.sha256(payloads['Lato-Regular.ttf']).hexdigest())
+          s = s.replace('315a576cbc7ab61c9e347b5725893bc8498fdcb8fc10831793c6864bc2cefba8', hashlib.sha256(payloads['OFL.txt']).hexdigest())
+          s = s.replace('a15eab8ab0950f43959f8f45d325f25ad743f9fb', '0f3d0f837d24834b9b5b0a6b735459c56f5e75c3')
+          s = s.replace("changed.extend(['fonts/Lato-Regular.ttf','fonts/'+F])", "changed.extend(['fonts/Gudea-Regular.ttf','fonts/'+F,'fonts/OFL.txt'])")
+          p.write_text(s)
+          PY
           python3 .github/apply-font-packaging.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('tests/test-build.py')
-          s = p.read_text()
-          s = s.replace('self.assertTrue(set(map(ord, required)).issubset(coverage), "Missing expected timer glyphs")', 'self.assertEqual(sorted(set(map(ord, required)) - coverage), [], "Missing expected timer glyph code points")')
+          s = p.read_text().replace('self.assertTrue(set(map(ord, required)).issubset(coverage), "Missing expected timer glyphs")', 'self.assertEqual(sorted(set(map(ord, required)) - coverage), [], "Missing expected timer glyph code points")')
           p.write_text(s)
           p = Path('tests/integration/bundled-font.php')
           s = p.read_text().replace('$checks = 0;', "require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-admin.php';\n$checks = 0;", 1)
@@ -29,5 +55,5 @@ jobs:
           PY
           python3 tests/test-build.py
           git add -- tests/test-build.py tests/integration/bundled-font.php
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat: package one optional local OFL font with provenance and regressions'
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat: package optional OFL Lato Regular with verified Polish glyphs and regression coverage'
           git push origin HEAD:refs/heads/feat/bundled-example-font
