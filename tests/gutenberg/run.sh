@@ -6,6 +6,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 wpdir="$(mktemp -d "$RUNNER_TEMP/ect-block.XXXXXX")"
 export ECD_BLOCK_WP_PATH="$wpdir" ECD_BLOCK_EVIDENCE="$RUNNER_TEMP/block-evidence"
 mkdir -p "$ECD_BLOCK_EVIDENCE"
+touch "$ECD_BLOCK_EVIDENCE/php-errors.log"
 exec > >(tee "$ECD_BLOCK_EVIDENCE/provision-and-test.log") 2>&1
 wp=(wp --path="$wpdir" --no-color)
 export ECD_BLOCK_PASSWORD="$(openssl rand -hex 20)"
@@ -50,6 +51,9 @@ header('X-Ect-Test-GD: ' . (function_exists('imagecreatetruecolor') ? 'yes' : 'n
 header('X-Ect-Test-JIT: ' . ini_get('opcache.jit'));
 $status = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
 header('X-Ect-Test-JIT-Active: ' . (is_array($status) && !empty($status['jit']['on']) ? 'on' : 'off'));
+add_action('init', static function () {
+    header('X-Ect-Test-Plugin-Loaded: ' . (class_exists('Email_Countdown_Timer_Plugin', false) ? 'yes' : 'no'));
+});
 PHP
 cat > "$service_dir/fpm.conf" <<EOF
 [global]
@@ -106,7 +110,7 @@ finish() {
   result=$?
   trap - EXIT
   if [[ "$result" != 0 ]]; then
-    "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/failure-control.py" || true
+    "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/failure-control.py" "$fpm" "$service_dir" "$php_minor" || true
   fi
   kill "${server:-}" "${fpm:-}" 2>/dev/null || true
   wait "${server:-}" "${fpm:-}" 2>/dev/null || true
@@ -133,8 +137,5 @@ nginx -p "$service_dir/" -c "$service_dir/nginx.conf" -g 'daemon off;' &
 server=$!
 for i in {1..20}; do if curl -fsS http://localhost:8093/wp-login.php -o /dev/null; then break; fi; sleep 1; done
 "$RUNNER_TEMP/block-venv/bin/python" "$root/tests/gutenberg/browser.py"
-# A recovered worker must not hide a native crash or PHP fatal in a passing run.
-if grep -Ei 'SIGSEGV|segmentation fault|exited on signal|PHP Fatal|Maximum execution time' "$ECD_BLOCK_EVIDENCE/fpm.log" "$ECD_BLOCK_EVIDENCE/php-errors.log" 2>/dev/null; then
-  echo 'Native/PHP failure observed; editor run is not clean.' >&2
-  exit 1
-fi
+# Inspect every required log independently: grep's exit 2 must never hide a crash.
+python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_BLOCK_EVIDENCE" | tee "$ECD_BLOCK_EVIDENCE/native-log-check.json"
