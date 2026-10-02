@@ -37,6 +37,18 @@ def open_editor(page):
         wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
         wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block');
     }""")
+    # The block store receives editor settings after core/editor has initialized.
+    # Wait for actual filter output; never inject replacement settings into the test.
+    try:
+        page.wait_for_function("wp.data.select('core/block-editor').getSettings().easyCountdown")
+    except Exception:
+        page.screenshot(path=str(evidence/'editor-settings-failure.png'), full_page=True)
+        (evidence/'editor-settings-failure.json').write_text(json.dumps({
+            'bootstrap_contains_our_key': 'easyCountdown' in page.content(),
+            'store_keys': page.evaluate("Object.keys(wp.data.select('core/block-editor').getSettings())"),
+            'page_errors': errors
+        }, indent=2))
+        raise
     # Dismiss a guide if already mounted; this never skips block assertions.
     for button in page.get_by_role('button', name=re.compile('Close.*(dialog|guide)', re.I)).all():
         if button.is_visible():
@@ -143,7 +155,7 @@ try:
         measured.route('**/*ecd_action=render*',delay)
         measured.goto(base+'/?p='+str(post_id),wait_until='networkidle')
         after=measured.locator('.wp-block-easy-countdown-timer').evaluate_all('(xs)=>xs.map(x=>({top:x.getBoundingClientRect().top,height:x.getBoundingClientRect().height}))')
-        check(bool(captured) and all(abs(x['height']-y['height'])<1 and abs(x['top']-y['top'])<1 for x,y in zip(captured[0],after)),'delayed image does not move tested block boxes')
+        check(bool(captured) and len(captured[0]) == 2 and len(after) == 2 and all(abs(x['height']-y['height'])<1 and abs(x['top']-y['top'])<1 for x,y in zip(captured[0],after)),'delayed image does not move tested block boxes')
         # Known benign fixture removal, not probing private media or production.
         wp('option','patch','delete','easy_countdown_timers','gutenberg-a')
         front.reload()
