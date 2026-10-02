@@ -59,10 +59,10 @@ final class Email_Countdown_Timer_Block {
         $post = is_object( $context ) && isset( $context->post ) ? $context->post : null;
         if ( $post instanceof WP_Post ) {
             if ( ! current_user_can( 'edit_post', $post->ID ) ) {
-                return $settings;
+                return self::expose_settings( $settings );
             }
         } elseif ( ! current_user_can( 'edit_theme_options' ) ) {
-            return $settings;
+            return self::expose_settings( $settings );
         }
         $timers = get_option( 'easy_countdown_timers', array() );
         $choices = array();
@@ -88,13 +88,18 @@ final class Email_Countdown_Timer_Block {
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
             'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
         );
-        // Older editors filter unknown settings before populating core/block-editor.
-        // Attach the capability-checked data to the editor script via the public API.
+        return self::expose_settings( $settings );
+    }
+
+    /** Core may whitelist store settings; attach the authorized data to our editor-only script. */
+    private static function expose_settings( array $settings ): array {
+        $data = wp_json_encode( $settings['easyCountdown'] ?? new stdClass(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
         wp_add_inline_script(
             'easy-countdown-block-editor',
-            'window.emailCountdownTimerBlock = ' . wp_json_encode( $settings['easyCountdown'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';',
+            'window.emailCountdownTimerBlock = ' . ( false === $data ? '{}' : $data ) . ';',
             'before'
         );
         return $settings;
     }
+
 }

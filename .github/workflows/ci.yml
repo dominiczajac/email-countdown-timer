@@ -64,7 +64,9 @@ jobs:
       - name: Local end-image and branding regression tests
         run: php tests/end-image.php
       - name: Gutenberg adapter contracts
-        run: php tests/gutenberg.php
+        run: |
+          php tests/gutenberg.php
+          node tests/gutenberg/editor-unit.cjs
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail

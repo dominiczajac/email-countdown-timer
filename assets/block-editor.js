@@ -10,14 +10,17 @@
         var attributes = props.attributes;
         var timerId = typeof attributes.timerId === 'string' ? attributes.timerId : '';
         var alignment = Object.prototype.hasOwnProperty.call(positions, attributes.alignment) ? attributes.alignment : 'left';
+        // Core filters custom store keys in some editors. PHP attaches this bounded,
+        // capability-checked payload only to our editor script, before it executes.
         var settings = window.emailCountdownTimerBlock || emptySettings;
         var timers = Array.isArray(settings.timers) ? settings.timers : [];
         var searchState = wp.element.useState('');
         var search = searchState[0];
         var setSearch = searchState[1];
-        var visibleTimers = timers.filter(function (timer) {
-            return timer.label.toLowerCase().indexOf(search.toLowerCase()) !== -1;
-        });
+        var visibleTimers = timers.filter(function (timer) { return timer.label.toLowerCase().indexOf(search.toLowerCase()) !== -1; });
+        var refreshState = wp.element.useState(0);
+        var refresh = refreshState[0];
+        var setRefresh = refreshState[1];
         var errorState = wp.element.useState(false);
         var failed = errorState[0];
         var setFailed = errorState[1];
@@ -27,8 +30,8 @@
         wp.element.useEffect(function () { setFailed(false); setDraft(timerId); }, [timerId]);
         var previewUrl = wp.element.useMemo(function () {
             if (!timerId || !settings.imageUrl) return '';
-            return settings.imageUrl + '&ecd=' + encodeURIComponent(timerId) + '&_t=' + Date.now();
-        }, [timerId, settings.imageUrl]);
+            return settings.imageUrl + '&ecd=' + encodeURIComponent(timerId) + '&_t=' + Date.now() + '-' + refresh;
+        }, [timerId, settings.imageUrl, refresh]);
         var found = timers.some(function (timer) { return timer.value === timerId; });
         var missing = !!timerId && !found && !settings.truncated;
         var blockProps = wp.blockEditor.useBlockProps();
@@ -52,12 +55,13 @@
             )
         );
         return el(wp.element.Fragment, {}, controls,
+            el(wp.blockEditor.BlockControls, {}, el(wp.blockEditor.AlignmentToolbar, {
+                value: alignment, onChange: function (value) { props.setAttributes({ alignment: value || 'left' }); }
+            })),
             el('div', blockProps,
                 el(wp.components.ComboboxControl, {
                     label: __('Timer', 'easy-countdown'), value: timerId,
-                    options: visibleTimers,
-                    onFilterValueChange: function (value) { setSearch(value || ''); },
-                    onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
+                    options: visibleTimers, onFilterValueChange: function (value) { setSearch(value || ''); }, onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
                     help: __('Choose a saved timer. Reopen the editor after creating a campaign.', 'easy-countdown')
                 }),
                 !timers.length ? el('p', {}, settings.manageUrl ? __('Create a timer in Easy Countdown, then reopen this editor.', 'easy-countdown') : __('Ask a site administrator to create a timer.', 'easy-countdown')) : null,
@@ -71,6 +75,9 @@
                         onError: function () { setFailed(true); }, onLoad: function () { setFailed(false); }
                     })
                 ) : null,
+                previewUrl && !missing ? el(wp.components.Button, {
+                    variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function (value) { return value + 1; }); }
+                }, __('Refresh preview', 'easy-countdown')) : null,
                 timerId ? el('p', {}, __('Static editor preview. The website uses the saved timer, deadline, alternative text and end image. No campaign settings are copied into this block.', 'easy-countdown')) : null
             )
         );
