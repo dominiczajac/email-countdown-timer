@@ -55,8 +55,10 @@ class Email_Countdown_Timer_Plugin {
         $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'easy-countdown'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
-        return sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
+        $html = sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
             esc_attr(wp_unique_id('ecd_')), esc_url(add_query_arg('_t', time(), $base)), esc_url($base), esc_attr($alt));
+        require_once __DIR__.'/class-email-countdown-timer-embed.php';
+        return Email_Countdown_Timer_Embed::reserve($html, $timers[$id] ?? []);
     }
     private function isImageRequest(): bool {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check; no mutation or request value is output.

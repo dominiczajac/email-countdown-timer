@@ -9,6 +9,7 @@ includes/admin-view.php
 includes/class-ecd-config.php
 includes/class-ecd-plugin.php
 includes/class-ecd-renderer.php
+includes/class-email-countdown-timer-embed.php
 includes/class-email-countdown-timer-end-image.php
 includes/class-email-countdown-timer-admin.php
 includes/class-email-countdown-timer-data-settings.php

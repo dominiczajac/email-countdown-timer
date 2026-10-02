@@ -94,21 +94,25 @@ jobs:
     uses: ./.github/workflows/plugin-check.yml
   wordpress:
     uses: ./.github/workflows/wordpress.yml
+  delivery:
+    uses: ./.github/workflows/delivery.yml
   # Fail closed on failed, skipped or cancelled unit/integration jobs.
   required-checks:
     name: required-checks
     if: ${{ always() }}
-    needs: [test, wordpress, plugin-check, font-http]
+    needs: [test, wordpress, plugin-check, font-http, delivery]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Require unit and real WordPress matrices to pass
         env:
+          DELIVERY_RESULT: ${{ needs.delivery.result }}
           FONT_HTTP_RESULT: ${{ needs.font-http.result }}
           TEST_RESULT: ${{ needs.test.result }}
           PCP_RESULT: ${{ needs.plugin-check.result }}
           WORDPRESS_RESULT: ${{ needs.wordpress.result }}
         run: |
+          test "$DELIVERY_RESULT" = success
           test "$FONT_HTTP_RESULT" = success
           test "$TEST_RESULT" = success
           test "$WORDPRESS_RESULT" = success

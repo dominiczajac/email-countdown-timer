@@ -1,8 +1,20 @@
 # Changelog
 
-## Unreleased
+## 12.5.2
 
 - Honor attachment and parent-post password restrictions when selecting or resolving a public end image, including existing image-cache entries. Restricted media use the existing zero-countdown fallback regardless of viewer login or password cookies. This does not revoke copies already downloaded by clients or proxies.
+
+- Integrate the presentation and delivery improvements from the 12.5.1 review candidate with the password-publication fix; previous test ZIPs are superseded.
+- Finalize the WordPress.org readme with confirmed contributor ddoomm, screenshot captions, requirements and qualified troubleshooting. No new runtime dependencies or telemetry.
+
+## 12.5.1 (review candidate; superseded by 12.5.2)
+
+- Reserve shortcode layout using renderer-derived dimensions, explicit CSS aspect ratio and proportional containment; add asynchronous decode without new frontend assets or background requests.
+- Size newly copied Email HTML proportionally (maximum default width 600 px), retaining escaped alt, visible absolute deadline and conservative inline image styles.
+- Use WordPress's public HTML Tag Processor and request-local bounded geometry memoization. Renderer pixels, frame timing, public URLs, stored settings and uninstall behavior are unchanged.
+- Document Cloudflare query-specific cache bypass, tested configurations with qualifications, email-client limits and dependency/update boundaries.
+- Add native geometry, delayed-image CLS positive-control and isolated email rendering verification. Verification outcomes are recorded against the exact tested head; planned tests are not certified client coverage.
+
 
 ## 12.5.0
 
