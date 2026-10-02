@@ -52,6 +52,9 @@ try {
     $expect(!isset(Email_Countdown_Timer_Block::editor_settings(array(),new WP_Block_Editor_Context(array('post'=>get_post($other))))['easyCountdown']),'author cannot get list for another authors post');
     wp_set_current_user($users['administrator']);
     $settings=Email_Countdown_Timer_Block::editor_settings(array(),$context)['easyCountdown'];
+    $inline=wp_scripts()->get_data('easy-countdown-block-editor','before');
+    $expect(is_array($inline) && str_starts_with(end($inline),'window.emailCountdownTimerBlock = '),'server attaches editor bootstrap using core inline API');
+    $expect(json_decode(substr(end($inline),strlen('window.emailCountdownTimerBlock = '),-1),true)===$settings,'inline data matches authorized bounded choices exactly');
     $expect(str_contains($settings['manageUrl'],'page=ecd-timers'),'admin settings link');
     $expect(isset(Email_Countdown_Timer_Block::editor_settings(array(),new WP_Block_Editor_Context())['easyCountdown']),'admin site editor supported');
     $expect(get_option('easy_countdown_timers')===$snapshot,'no campaign mutation');

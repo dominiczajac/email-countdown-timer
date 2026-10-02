@@ -4,6 +4,8 @@ require __DIR__ . '/run.php';
 require_once __DIR__ . '/../includes/class-email-countdown-timer-block.php';
 class WP_Post { public function __construct( public int $ID ) {} }
 function get_block_wrapper_attributes( $attributes ) { return 'style="' . esc_attr( $attributes['style'] ) . '"'; }
+function wp_json_encode( $value, $flags = 0 ) { return json_encode( $value, $flags ); }
+function wp_add_inline_script( ...$args ) { $GLOBALS['block_inline'][] = $args; }
 function wp_register_script( ...$args ) { $GLOBALS['block_script'] = $args; }
 function wp_set_script_translations( ...$args ) {}
 function add_filter( ...$args ) {}
@@ -14,11 +16,14 @@ $before = $options;
 $admin = false;
 $context = (object) array( 'post' => new WP_Post( 1 ) );
 ok( ! isset( Email_Countdown_Timer_Block::editor_settings( array( 'easyCountdown' => 'stale' ), $context )['easyCountdown'] ), 'unauthorized context has no editor list' );
+ok( empty( $GLOBALS['block_inline'] ), 'denied editor receives no inline data' );
 $admin = true;
 $data = Email_Countdown_Timer_Block::editor_settings( array(), $context )['easyCountdown'];
 ok( $data['timers'] === array( array( 'value' => 'block-test', 'label' => 'block-test' ) ), 'choices contain IDs only' );
 ok( str_contains( $data['imageUrl'], 'mode=static' ), 'preview URL is static' );
 ok( $data['manageUrl'] !== '', 'administrator settings link' );
+$inline = end( $GLOBALS['block_inline'] );
+ok( $inline[0] === 'easy-countdown-block-editor' && $inline[2] === 'before' && str_contains( $inline[1], 'window.emailCountdownTimerBlock = ' ), 'native inline data attached only to editor handle' );
 foreach ( array( '', null, array(), 'unknown', 'BLOCK-TEST', 'block-test ', str_repeat( 'a', 201 ) ) as $invalid ) {
     ok( Email_Countdown_Timer_Block::render( array( 'timerId' => $invalid ), $plugin ) === '', 'invalid or missing reference has no public image' );
 }

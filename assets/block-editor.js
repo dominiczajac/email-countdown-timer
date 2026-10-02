@@ -10,10 +10,14 @@
         var attributes = props.attributes;
         var timerId = typeof attributes.timerId === 'string' ? attributes.timerId : '';
         var alignment = Object.prototype.hasOwnProperty.call(positions, attributes.alignment) ? attributes.alignment : 'left';
-        var settings = wp.data.useSelect(function (select) {
-            return select('core/block-editor').getSettings().easyCountdown || emptySettings;
-        }, []);
+        var settings = window.emailCountdownTimerBlock || emptySettings;
         var timers = Array.isArray(settings.timers) ? settings.timers : [];
+        var searchState = wp.element.useState('');
+        var search = searchState[0];
+        var setSearch = searchState[1];
+        var visibleTimers = timers.filter(function (timer) {
+            return timer.label.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+        });
         var errorState = wp.element.useState(false);
         var failed = errorState[0];
         var setFailed = errorState[1];
@@ -51,8 +55,10 @@
             el('div', blockProps,
                 el(wp.components.ComboboxControl, {
                     label: __('Timer', 'easy-countdown'), value: timerId,
-                    options: timers, onChange: function (value) { props.setAttributes({ timerId: value || '' }); },
-                    help: __('Choose a saved timer. Reopen the editor after creating or renaming a campaign.', 'easy-countdown')
+                    options: visibleTimers,
+                    onFilterValueChange: function (value) { setSearch(value || ''); },
+                    onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
+                    help: __('Choose a saved timer. Reopen the editor after creating a campaign.', 'easy-countdown')
                 }),
                 !timers.length ? el('p', {}, settings.manageUrl ? __('Create a timer in Easy Countdown, then reopen this editor.', 'easy-countdown') : __('Ask a site administrator to create a timer.', 'easy-countdown')) : null,
                 missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or reopen the editor. A deleted timer displays nothing on the website.', 'easy-countdown')) : null,

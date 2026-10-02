@@ -14,7 +14,7 @@ final class Email_Countdown_Timer_Block {
         wp_register_script(
             'easy-countdown-block-editor',
             plugins_url( 'assets/block-editor.js', EMAIL_COUNTDOWN_TIMER_FILE ),
-            array( 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-data' ),
+            array( 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n' ),
             EMAIL_COUNTDOWN_TIMER_VERSION,
             true
         );
@@ -87,6 +87,13 @@ final class Email_Countdown_Timer_Block {
             'truncated' => $truncated,
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
             'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
+        );
+        // Older editors filter unknown settings before populating core/block-editor.
+        // Attach the capability-checked data to the editor script via the public API.
+        wp_add_inline_script(
+            'easy-countdown-block-editor',
+            'window.emailCountdownTimerBlock = ' . wp_json_encode( $settings['easyCountdown'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';',
+            'before'
         );
         return $settings;
     }
