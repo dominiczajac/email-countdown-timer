@@ -27,8 +27,10 @@ jobs:
         with:
           php-version: '8.4'
           extensions: mysqli, gd, imagick
-          tools: wp-cli
+          tools: wp-cli:2.12.0
           coverage: none
+      - name: Verify pinned WP-CLI before provisioning
+        run: test "$(wp cli version)" = 'WP-CLI 2.12.0'
       - name: Provision disposable WordPress and exact distribution files
         shell: bash
         run: |
