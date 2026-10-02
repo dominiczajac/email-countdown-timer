@@ -78,6 +78,7 @@ try:
         result["states"].append(row)
         log_path = out / "fpm.log"
         log_offset = log_path.stat().st_size if log_path.exists() else 0
+        existing_cores = set(service.glob("core.*"))
         environment = os.environ.copy()
         environment["PHP_INI_SCAN_DIR"] = "/etc/php/" + minor + "/cli/conf.d"
         try:
@@ -96,7 +97,13 @@ try:
                 client = urllib.request.build_opener(
                     urllib.request.ProxyHandler({}), LocalRedirect(),
                     urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-                client.open(base + "/wp-login.php", timeout=40).close()
+                with client.open(base + "/wp-login.php", timeout=40) as login:
+                    row["initial_environment"] = {
+                        key.lower(): value for key, value in login.headers.items()
+                        if key.lower().startswith("x-ect-test-")
+                    }
+                assert row["initial_environment"].get("x-ect-test-sapi") == "fpm-fcgi"
+                assert row["initial_environment"].get("x-ect-test-plugin-loaded") == ("yes" if enabled else "no")
                 data = urllib.parse.urlencode({"log": "ci-admin", "pwd": os.environ["ECD_BLOCK_PASSWORD"],
                     "wp-submit": "Log In", "redirect_to": base + "/wp-admin/", "testcookie": "1"}).encode()
                 client.open(base + "/wp-login.php", data=data, timeout=40).close()
@@ -119,6 +126,14 @@ try:
                         request["error_type"] = type(error).__name__
                     request["elapsed_ms"] = round((time.monotonic() - start) * 1000, 1)
                     if request.get("status") != 200 or not request.get("editor_bootstrap"):
+                        # A reset response can precede completion of a native dump
+                        # and the master's exit log. Do not immediately kill it.
+                        for _ in range(50):
+                            with log_path.open("rb") as current_log:
+                                current_log.seek(log_offset)
+                                if b"SIGSEGV" in current_log.read():
+                                    break
+                            time.sleep(0.1)
                         break
         except Exception as error:
             row["error_type"] = type(error).__name__
@@ -135,6 +150,27 @@ try:
                 log.seek(log_offset)
                 phase_log = log.read().decode("utf-8", "replace")
             row["native_crashes"] = phase_log.count("SIGSEGV")
+            new_cores = [path for path in sorted(set(service.glob("core.*")) - existing_cores)
+                         if path.is_file() and not path.is_symlink()
+                         and path.name[5:].isdigit()]
+            row["new_core_count"] = len(new_cores)
+            # Keep one argument-free stack per control state; raw cores are
+            # deleted by run.sh and never included in artifact directories.
+            if new_cores:
+                trace_name = "native-control-" + ("on" if enabled else "off") + ".txt"
+                with (out / trace_name).open("w") as trace:
+                    try:
+                        status = subprocess.run(
+                            ["gdb", "--batch", "-nx", "-q",
+                             "-ex", "set debuginfod enabled off",
+                             "-ex", "set print frame-arguments none",
+                             "-ex", "thread apply all bt 40",
+                             "/usr/sbin/php-fpm" + minor, str(new_cores[0])],
+                            stdout=trace, stderr=subprocess.STDOUT, timeout=20)
+                        row["native_trace_exit"] = status.returncode
+                    except subprocess.TimeoutExpired:
+                        row["native_trace_timed_out"] = True
+                row["native_trace"] = trace_name
 except Exception as error:
     result["error_type"] = type(error).__name__
 finally:
