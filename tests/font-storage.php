@@ -1,5 +1,5 @@
 <?php
-/** File-system tests in owned temporary paths; fonts are never shipped. */
+/** File-system tests in owned temporary paths; arbitrary fixture fonts are never shipped. */
 if ( PHP_SAPI !== 'cli' ) { exit(1); }
 ob_start();
 require __DIR__ . '/run.php';

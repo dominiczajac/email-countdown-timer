@@ -11,7 +11,7 @@ Python 3.9+ and its standard library are required **only for development packagi
 
 ## One source of distribution contents
 
-`scripts/distribution-files.txt` is the explicit allowlist. The builder refuses missing required files, unlisted files under includes/assets, duplicate/unsafe paths, source symlinks and inconsistent header/constant/readme version or license metadata. It never includes font binaries, uploads, repository history, development documentation, tests or CI files. An intentional new runtime file requires a manifest update. Development files may exist outside runtime folders; they are not packed.
+`scripts/distribution-files.txt` is the explicit allowlist. The builder refuses missing required files, unlisted files under includes/assets, duplicate/unsafe paths, source symlinks and inconsistent header/constant/readme version or license metadata. It includes exactly the allowlisted Lato Regular font and original OFL notice, verified by SHA256, plus its README. Other fonts, uploads, repository history, development documentation, tests and CI files are excluded. No build-time or runtime download is required. An intentional new runtime file requires a manifest update. Development files may exist outside runtime folders; they are not packed.
 
 The ZIP contains exactly one top-level `easy-countdown/` directory. No manually installed font or configuration is copied from a developer's machine. Failed input validation preserves an existing output archive; publication uses a temporary file and atomic replace. Build outputs inside the source tree are restricted to `dist/`, which is ignored by Git. This is packaging hygiene, not signing, provenance attestation or protection against a compromised build machine.
 

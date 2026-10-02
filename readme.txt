@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.5.2
+Stable tag: 12.5.3
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,7 +18,7 @@ Create fixed-deadline countdown images locally. Copy an image URL or Email HTML 
 
 * Multiple timers with independent deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
-* Custom colors, labels, sizes and local TTF/OTF fonts.
+* Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
 * Alternative text, a visible email deadline and proportional image dimensions.
 * Reserved website image space without another frontend library or polling.
@@ -36,7 +36,7 @@ Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache
 
 Easy Countdown adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. It stores campaign settings, selected media IDs, uninstall preference, font-copy ownership records and short-lived shared image caches locally. It does not send email or contact Google Fonts.
 
-Hosting, WordPress, other plugins and email proxies have separate processing and logs. Keep personal data, recipient identifiers and secrets out of public fields, images and URLs. WordPress's Privacy Policy Guide contains suggested wording, not automatic publication or legal certification.
+Hosting, WordPress, other plugins and email proxies have separate processing and logs. Keep personal data and secrets out of public content and URLs. WordPress's Privacy Policy Guide contains suggested wording, not automatic publication or legal certification.
 
 [Source code and documentation](https://github.com/dominiczajac/email-countdown-timer)
 
@@ -72,7 +72,7 @@ Describe both countdown and expired states: alt cannot change during GIF playbac
 New shortcode HTML reserves measured dimensions and a fixed proportional box before image download, with asynchronous decoding. Theme CSS can override these styles. Purge page HTML after geometry/font changes and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-Upload trusted, licensed static TTF/OTF files through SFTP to the directory in Data Settings, normally wp-content/uploads/email-countdown-timer/fonts/. Multisite uses separate site-ID directories. No fonts or Google Fonts importer are included. Keep license notices and confirm server-rendering rights. [Font storage and migration](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
+Select Lato Regular (included) in Appearance > Typography and Size > Font, then save. Its SIL OFL 1.1 license permits commercial software bundling; original license/source notices are in fonts/. Bitmap remains the default. FreeType is required. Put your own licensed TTF/OTF files in the persistent directory shown in Data Settings, not this replaceable plugin folder. No Google importer is included. [Font storage and migration](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -89,7 +89,7 @@ Set Cache eligibility to Bypass cache and place this exception after conflicting
 Repeated GETs to the same timer URL should return an actual image, not HTML. Check for no-store/no-transform and normally CF-Cache-Status DYNAMIC or BYPASS rather than HIT/STALE. A single MISS is insufficient. Investigate HTML challenges in Security Events; do not disable site-wide protection. Ordinary Bot Fight Mode cannot be bypassed with WAF Skip. Custom Workers and image transformations need separate review. No live Cloudflare-zone test is claimed.
 
 = Which other plugins and email applications were tested? =
-Recorded isolated profiles include WP Super Cache, Autoptimize, Yoast SEO, Contact Form 7, Elementor, Rank Math, Query Monitor, Limit Login Attempts Reloaded, WooCommerce and W3 Total Cache. Successful timer checks are not universal certification: intermittent admin/native failures remain under investigation, including events with Easy Countdown inactive. [Exact versions, environments and results](https://github.com/dominiczajac/email-countdown-timer/pull/13).
+Recorded profiles include WP Super Cache, Autoptimize, Yoast, Contact Form 7, Elementor, Rank Math, Query Monitor, Limit Login Attempts Reloaded, WooCommerce and W3 Total Cache. This is not universal certification: intermittent admin/native failures remain under investigation, including with Easy Countdown inactive. [Exact versions, environments and results](https://github.com/dominiczajac/email-countdown-timer/pull/13).
 
 Local Thunderbird/Linux testing exercised image blocking, GIF playback and expiry. Gmail, Outlook, Apple Mail and real mailbox delivery are not certified. New Email HTML has proportional dimensions, up to 600 pixels wide, and inline styles. Test with your sender/clients; respect image-blocking preferences and retain a visible deadline.
 
@@ -105,6 +105,9 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 
 == Changelog ==
 
+= 12.5.3 =
+* Add one local Lato Regular font under SIL OFL 1.1. No download or automatic font change.
+
 = 12.5.2 =
 * Integrate reserved website layout and proportional email embeds with the end-image password fix.
 * Add the confirmed contributor, screenshot captions and Cloudflare troubleshooting.
@@ -113,5 +116,5 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 
 == Upgrade Notice ==
 
-= 12.5.2 =
-Back up data/fonts and update without uninstalling. Purge affected page HTML and recopy manual/email embeds for the new dimensions. Password-protected end images are no longer published by the timer. Existing image URLs and saved campaigns are preserved.
+= 12.5.3 =
+Lato Regular is included as an optional choice. Existing fonts and bitmap defaults remain.

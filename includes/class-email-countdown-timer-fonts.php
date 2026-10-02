@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Email_Countdown_Timer_Fonts {
     public const OPTION = 'email_countdown_timer_copied_fonts';
+    public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
+    private const BUNDLED_SHA256 = 'd636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251';
     private const MAX_BYTES = 5242880;
 
     public static function register(): void {
@@ -129,6 +131,10 @@ final class Email_Countdown_Timer_Fonts {
                     continue;
                 }
                 $hash = hash_file( 'sha256', $file );
+                // An unchanged shipped font is restored by updates, not user migration data.
+                if ( self::BUNDLED_FILE === $name && self::BUNDLED_SHA256 === $hash ) {
+                    continue;
+                }
                 $destination = $target . DIRECTORY_SEPARATOR . $name;
                 if ( file_exists( $destination ) || is_link( $destination ) ) {
                     // Identical manually copied files are not adopted for deletion.

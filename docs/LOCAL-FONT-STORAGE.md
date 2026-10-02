@@ -30,7 +30,7 @@ Stored campaigns and public URLs are not migrated. Existing public rendering kee
 
 Tests: `php tests/font-storage.php`, existing frozen pixel regressions, real WordPress lifecycle/browser/HTTP suites. Test results for a particular commit must be read from that commit's CI, not inferred from this list.
 
-References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and PHP `link()` documentation. No font binaries are distributed with the plugin.
+References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and PHP `link()` documentation. One unmodified OFL Lato Regular example is distributed in the plugin fonts/ directory. It is optional and restored by updates; its exact unchanged copy is skipped by the legacy-copy tool. Additional user fonts still belong in persistent storage.
 
 ## Direct HTTP access
 
