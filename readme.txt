@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.5.2
+Stable tag: 12.6.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,6 +16,7 @@ Create fixed-deadline countdown images locally. Copy an image URL or Email HTML 
 
 **Features**
 
+* Native Easy Countdown block with a timer selector, static preview and alignment.
 * Multiple timers with independent deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes and local TTF/OTF fonts.
@@ -52,15 +53,15 @@ Back up data/fonts and update without uninstalling. Deactivate a legacy email-co
 
 == Frequently Asked Questions ==
 
+= How do I use the block editor? =
+Insert Easy Countdown and choose a saved timer; set alignment in its sidebar. Administrators can open timer settings in a new tab. The block stores only the ID/alignment, not another campaign configuration. Deleted timers display nothing. Reopen the editor to refresh the list. Preview is static; the website uses the saved campaign. Shortcodes and classic-editor usage remain supported. Deactivation hides dynamic blocks until reactivation.
+
+
 = Does the timer start separately for each recipient? =
 No. Each timer uses one fixed deadline shared by the campaign. It does not identify recipients, maintain individual sessions or count email opens.
 
 = How does the image after expiry work? =
-Choose an image in Create/Edit Timer > After Countdown and save. New requests at or after the deadline show it. If the deadline falls within the generated 60-second GIF, the remaining frames show the image. Without a selected image, the timer reaches zero.
-
-Accepts local JPEG/PNG/GIF/WebP up to 4 MiB, 4096 pixels per side and 4 million pixels. Output is re-encoded and proportionally fitted; animated sources supply their first frame. SVG, remote-only files, symlinks and disallowed publication states are rejected. An attachment or immediate-parent password makes the image ineligible regardless of viewer cookies. Missing/restricted images fall back to zeros. Media Library files are not deleted.
-
-An already downloaded GIF cannot fetch another image after playback ends, and an email service may retain an earlier response. Updating the origin does not revoke those copies.
+Choose a local image in After Countdown and save. Requests after expiry, and GIF frames crossing expiry, show it instead of zeros. Accepts JPEG/PNG/GIF/WebP up to 4 MiB, 4096px per side and 4 million pixels. Output is re-encoded and proportionally fitted; animated sources supply their first frame. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images fall back to zeros; media files are never deleted. Already-downloaded or proxy-cached images cannot be revoked or refreshed by the plugin.
 
 = Why is the GIF not animated? =
 Imagick may be missing, the timer may have ended, or the lock may be busy/unavailable. Requests wait up to one second; a slower render can make simultaneous requests receive a current static frame, without overwriting animation cache. Use Data Settings > Rendering Diagnostics and test host capacity. Client animation and image-blocking preferences also apply.
@@ -89,9 +90,7 @@ Set Cache eligibility to Bypass cache and place this exception after conflicting
 Repeated GETs to the same timer URL should return an actual image, not HTML. Check for no-store/no-transform and normally CF-Cache-Status DYNAMIC or BYPASS rather than HIT/STALE. A single MISS is insufficient. Investigate HTML challenges in Security Events; do not disable site-wide protection. Ordinary Bot Fight Mode cannot be bypassed with WAF Skip. Custom Workers and image transformations need separate review. No live Cloudflare-zone test is claimed.
 
 = Which other plugins and email applications were tested? =
-Recorded isolated profiles include WP Super Cache, Autoptimize, Yoast SEO, Contact Form 7, Elementor, Rank Math, Query Monitor, Limit Login Attempts Reloaded, WooCommerce and W3 Total Cache. Successful timer checks are not universal certification: intermittent admin/native failures remain under investigation, including events with Easy Countdown inactive. [Exact versions, environments and results](https://github.com/dominiczajac/email-countdown-timer/pull/13).
-
-Local Thunderbird/Linux testing exercised image blocking, GIF playback and expiry. Gmail, Outlook, Apple Mail and real mailbox delivery are not certified. New Email HTML has proportional dimensions, up to 600 pixels wide, and inline styles. Test with your sender/clients; respect image-blocking preferences and retain a visible deadline.
+Recorded profiles cover caching, SEO and builder plugins. Timer checks passed, but intermittent admin/PHP failures remain documented, including cases without Easy Countdown. No universal compatibility certification. [Exact environments and results](https://github.com/dominiczajac/email-countdown-timer/pull/13). Local Thunderbird testing covered image blocking, playback and expiry; Gmail, Outlook, Apple Mail and mailbox delivery remain unverified. Test your sender and clients.
 
 = What happens when I deactivate or uninstall? =
 Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes only owned options/cache and unchanged font-copy-tool files. Media, manual/replaced fonts, unrelated data/cron, backups and infrastructure logs remain. Font-access rules remain; no cron is scheduled.
@@ -105,13 +104,13 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 
 == Changelog ==
 
-= 12.5.2 =
-* Integrate reserved website layout and proportional email embeds with the end-image password fix.
-* Add the confirmed contributor, screenshot captions and Cloudflare troubleshooting.
+= 12.6.0 =
+* Add a dynamic Gutenberg block for existing timers, with static preview and alignment.
+* Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Reject end images protected by an attachment or immediate-parent password before shared-cache lookup and decoding.
 * Preserve existing timer URLs, shortcodes and saved campaign settings.
 
 == Upgrade Notice ==
 
-= 12.5.2 =
+= 12.6.0 =
 Back up data/fonts and update without uninstalling. Purge affected page HTML and recopy manual/email embeds for the new dimensions. Password-protected end images are no longer published by the timer. Existing image URLs and saved campaigns are preserved.

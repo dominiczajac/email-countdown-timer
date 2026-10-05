@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "easy-countdown/timer",
+  "version": "12.6.0",
+  "title": "Easy Countdown",
+  "category": "widgets",
+  "icon": "clock",
+  "description": "Display an existing countdown with its saved appearance and deadline.",
+  "keywords": [
+    "countdown",
+    "timer",
+    "campaign"
+  ],
+  "textdomain": "easy-countdown",
+  "attributes": {
+    "timerId": {
+      "type": "string",
+      "default": ""
+    },
+    "alignment": {
+      "type": "string",
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ],
+      "default": "left"
+    }
+  },
+  "supports": {
+    "html": false,
+    "customClassName": false
+  },
+  "editorScript": "easy-countdown-block-editor"
+}
