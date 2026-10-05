@@ -66,3 +66,35 @@ Earlier JIT-disabled cells passed with OPcache enabled. Keep those observations
 separate from the failing JIT-enabled cells. Do not change users' PHP settings,
 claim an engine fix, or clear release blockers from a clean Plugin Check report
 alone. Keep this PR unmerged until its acceptance status is explicitly resolved.
+
+## Pending-handoff reconciliation — 5 October 2026
+
+The maintainer asked to publish the newest prepared changes. Remote PR #17 was
+already at `63f97ca1af7932f1d1ec036bb89bd042fce4ccd7`, with the stronger
+pre-control/post-shutdown scanner and 7 existing + 22 additional tests. The
+separate three-file handoff prepared against `960a4a4` must not replace that
+implementation. Its source patch SHA256 is
+`2c717038fab62e5e8602c64b7cd72b3c2c0e0cc0afd051c2ab83cccc403969d1`.
+
+Only eight still-missing EXIT-handler regression scenarios are carried forward:
+late PHP timeout; a required log disappearing during shutdown; exact cold-control
+arguments; failed diagnostics followed by cleanup; preservation of an original
+failure when the checker fails; checker failure on an otherwise-successful run;
+final-report write failure; and preservation of an original failure together
+with a late native crash. Existing tests and the newer scanner remain intact.
+The harmless process doubles are extended; the real Python scanner and actual
+shell EXIT-handler text are still exercised. This does not reproduce a native
+crash or send requests to any WordPress site.
+
+The updated suite has 30 tests, plus the unchanged seven in
+`tests/gutenberg/test-log-gate.py`. Both already run in CI; workflow files,
+`run.sh`, native controls, runtime files and release metadata are unchanged.
+Local validation also passed all 12 packaging tests, 25 PHP block/147 controller
+assertions and 16 JS component assertions. PHP/native-image tests are explicitly
+skipped locally because GD/Imagick are unavailable. The canonical 24-file ZIP is
+byte-identical to the recovered PCP-built archive, SHA256
+`b7ed9ca687247cb9f78bc283105ae46935abd5b10e62711b2661237aca700580`.
+
+The new head must receive its own hosted result. Previous run `37019656984`
+belongs to `63f97ca`, not this reconciliation; its failed JIT profile is not fixed
+by adding tests. Keep the PR draft and unmerged while required checks fail.

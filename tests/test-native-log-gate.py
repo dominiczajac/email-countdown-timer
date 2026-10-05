@@ -125,7 +125,8 @@ class NativeGateTests(unittest.TestCase):
         self.assertNotEqual(0, again.returncode)
 
 
-    def run_exit_handler(self, original_status=0, late_crash=False):
+    def run_exit_handler(self, original_status=0, late_crash=False, *,
+                         wait_command=':', control_status=0, checker_status=None):
         # Exercise the real shell handler. Process/kernel operations are no-ops;
         # the real Python gate runs against this test's temporary evidence only.
         script = (ROOT / 'tests/gutenberg/run.sh').read_text()
@@ -134,16 +135,20 @@ class NativeGateTests(unittest.TestCase):
         service.mkdir()
         fake = self.root / 'block-venv/bin/python'
         fake.parent.mkdir(parents=True)
-        fake.write_text('#!/usr/bin/env bash\nprintf called > "$ECD_BLOCK_EVIDENCE/diagnostic-called"\nexit 0\n')
+        fake.write_text('#!/usr/bin/env bash\nprintf called > "$ECD_BLOCK_EVIDENCE/diagnostic-called"\n'
+                        'printf "%s\\n" "$@" > "$ECD_BLOCK_EVIDENCE/control-arguments.txt"\n'
+                        'exit "${TEST_CONTROL_STATUS:-0}"\n')
         fake.chmod(0o700)
         kill = ('printf "child exited on signal 11\\n" >> "$ECD_BLOCK_EVIDENCE/fpm.log"' if late_crash else ':')
         wrapper = ('set -euo pipefail\n'
-                   'sudo() { :; }; wait() { :; }; kill() { ' + kill + '; };\n'
+                   'sudo() { :; }; wait() { ' + wait_command + '; }; kill() { ' + kill + '; };\n'
                    'root=' + shlex.quote(str(ROOT)) + '\n'
                    'export ECD_BLOCK_EVIDENCE=' + shlex.quote(str(self.root)) + '\n'
                    'export RUNNER_TEMP=' + shlex.quote(str(self.root)) + '\n'
                    'service_dir=' + shlex.quote(str(service)) + '\n'
+                   'export TEST_CONTROL_STATUS=' + str(control_status) + '\n'
                    'original_core_pattern=core; php_minor=8.4; server=0; fpm=0\n'
+                   + (('python3() { return ' + str(checker_status) + '; };\n') if checker_status is not None else '')
                    + function + '\ntrap finish EXIT\nexit ' + str(original_status) + '\n')
         return subprocess.run(['bash', '-c', wrapper], capture_output=True, timeout=10)
 
@@ -169,6 +174,59 @@ class NativeGateTests(unittest.TestCase):
         result = self.run_exit_handler(late_crash=True)
         self.assertEqual(1, result.returncode, result.stderr.decode())
         self.assertTrue(json.loads((self.root / 'native-log-before-control.json').read_text())['passed'])
+        self.assertFalse(json.loads((self.root / 'native-log-final.json').read_text())['passed'])
+
+
+    def test_exit_handler_catches_late_php_timeout(self):
+        result = self.run_exit_handler(wait_command=
+            'printf "PHP Fatal error: Maximum execution time exceeded\\n" >> "$ECD_BLOCK_EVIDENCE/php-errors.log"')
+        self.assertEqual(1, result.returncode, result.stderr.decode())
+        self.assertTrue(json.loads((self.root / 'native-log-before-control.json').read_text())['passed'])
+        self.assertFalse(json.loads((self.root / 'native-log-final.json').read_text())['passed'])
+
+    def test_exit_handler_rejects_log_disappearing_at_shutdown(self):
+        result = self.run_exit_handler(wait_command='rm -f "$ECD_BLOCK_EVIDENCE/php-errors.log"')
+        self.assertEqual(1, result.returncode, result.stderr.decode())
+        self.assertTrue(json.loads((self.root / 'native-log-before-control.json').read_text())['passed'])
+        final = json.loads((self.root / 'native-log-final.json').read_text())
+        self.assertFalse(final['passed'])
+        self.assertIn({'file': 'php-errors.log', 'reason': 'missing_required_log'}, final['errors'])
+
+    def test_exit_handler_preserves_diagnostic_arguments(self):
+        result = self.run_exit_handler(7)
+        self.assertEqual(7, result.returncode, result.stderr.decode())
+        arguments = (self.root / 'control-arguments.txt').read_text().splitlines()
+        self.assertEqual([str(ROOT / 'tests/gutenberg/failure-control.py'),
+                          '0', str(self.root / 'services'), '8.4'], arguments)
+
+    def test_exit_handler_finishes_after_diagnostic_error(self):
+        result = self.run_exit_handler(7, control_status=42)
+        self.assertEqual(7, result.returncode, result.stderr.decode())
+        self.assertTrue((self.root / 'diagnostic-called').is_file())
+        self.assertTrue(json.loads((self.root / 'native-log-final.json').read_text())['passed'])
+
+    def test_exit_handler_preserves_original_failure_when_checker_fails(self):
+        result = self.run_exit_handler(7, checker_status=42)
+        self.assertEqual(7, result.returncode, result.stderr.decode())
+        self.assertTrue((self.root / 'diagnostic-called').is_file())
+
+    def test_exit_handler_checker_error_cannot_pass(self):
+        result = self.run_exit_handler(checker_status=42)
+        self.assertEqual(1, result.returncode, result.stderr.decode())
+        self.assertTrue((self.root / 'diagnostic-called').is_file())
+        self.assertFalse((self.root / 'native-log-final.json').exists())
+
+    def test_exit_handler_final_report_write_failure_cannot_pass(self):
+        (self.root / 'native-log-final.json').mkdir()
+        result = self.run_exit_handler()
+        self.assertEqual(1, result.returncode, result.stderr.decode())
+        self.assertTrue(json.loads((self.root / 'native-log-before-control.json').read_text())['passed'])
+        self.assertTrue((self.root / 'native-log-final.json').is_dir())
+        self.assertFalse((self.root / 'diagnostic-called').exists())
+
+    def test_exit_handler_original_failure_survives_late_crash(self):
+        result = self.run_exit_handler(9, late_crash=True)
+        self.assertEqual(9, result.returncode, result.stderr.decode())
         self.assertFalse(json.loads((self.root / 'native-log-final.json').read_text())['passed'])
 
 
