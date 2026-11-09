@@ -72,6 +72,22 @@
             label.hidden = false; sync(); text.addEventListener('input', sync);
             picker.addEventListener('input', () => { text.value = picker.value.toUpperCase(); text.dispatchEvent(new Event('input', { bubbles: true })); });
         });
+        const presetBox = root.querySelector('[data-ect-presets]');
+        if (presetBox) {
+            presetBox.hidden = false;
+            const result = presetBox.querySelector('[data-ect-preset-result]');
+            presetBox.querySelectorAll('[data-ect-preset]').forEach(button => {
+                button.addEventListener('click', () => {
+                    ['bg', 'dc', 'lc'].forEach(key => {
+                        const field = form.elements[key];
+                        if (!field) return;
+                        field.value = button.dataset[key];
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                    });
+                    result.textContent = result.dataset.applied;
+                });
+            });
+        }
     }
     const image = root.querySelector('#ect-preview');
     const animation = root.querySelector('#ect-animation');

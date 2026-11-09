@@ -33,9 +33,12 @@ final class Email_Countdown_Timer_Admin {
     }
 
     public static function defaults( bool $new_timer = true ): array {
-        // Campaign labels are saved data, deliberately independent of the admin locale.
+        // New campaigns use the included font only when FreeType can render it.
+        // Saved campaigns keep their original selection and missing values.
+        $included = $new_timer && function_exists( 'imagettftext' ) && function_exists( 'imagettfbbox' )
+            && null !== Email_Countdown_Timer_Config::fontPath( Email_Countdown_Timer_Fonts::BUNDLED_CHOICE );
         return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => $new_timer ? wp_timezone_string() : 'Europe/Warsaw',
-            'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => '',
+            'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => $included ? Email_Countdown_Timer_Fonts::BUNDLED_CHOICE : '',
             'size_digit' => 40, 'size_label' => 12, 'fixed_width' => 0, 'hide_days' => 0,
             'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown', 'expiry_image_id' => 0 );
     }
