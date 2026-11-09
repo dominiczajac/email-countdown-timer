@@ -52,6 +52,10 @@ try {
     ok(in_array($bundled_option, Email_Countdown_Timer_Config::fonts(), true) && in_array($bundled_name, Email_Countdown_Timer_Config::fonts(), true), 'both choices are independently available');
     unlink($same_name_custom);
     ok(Email_Countdown_Timer_Config::fontPath($bundled_name)===null, 'missing custom filename never resolves to included face');
+    $new_font = Email_Countdown_Timer_Admin::defaults(true)['font'];
+    ok($new_font === (function_exists('imagettftext') && function_exists('imagettfbbox') ? $bundled_option : ''), 'new editor proposes Lato only with FreeType');
+    ok(Email_Countdown_Timer_Admin::defaults(false)['font']==='', 'existing-record defaults retain bitmap');
+
     ok(Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','font'=>$bundled_option])['font']===$bundled_option, 'reserved bundled choice accepted by normalization');
 
     file_put_contents($original,"\0\1\0\0".str_repeat('different',5));

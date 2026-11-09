@@ -1,5 +1,10 @@
 # Changelog
 
+## 12.5.4 (candidate)
+
+- Use included Lato Regular for new campaigns only when FreeType can render it; preserve saved campaigns and renderer defaults.
+- Offer four high-contrast color presets in the timer editor, applied only when explicitly chosen and never auto-saved.
+
 ## 12.5.3
 
 - Include one unmodified, locally available Lato Regular font under SIL OFL 1.1, with its original license and pinned source/hash notice. Bitmap and existing campaign choices are preserved.

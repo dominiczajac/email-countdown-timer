@@ -18,7 +18,8 @@ $expect(hash_file('sha256', EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/OFL.txt') === '74
 $before = get_option('easy_countdown_timers', []);
 $expect(in_array($choice, Email_Countdown_Timer_Config::fonts(), true), 'reserved bundled selector available');
 $expect(Email_Countdown_Timer_Config::fontPath($choice) === realpath($file), 'reserved choice resolves shipped font');
-$expect(Email_Countdown_Timer_Admin::defaults()['font'] === '', 'new timer bitmap default unchanged');
+$expect(Email_Countdown_Timer_Admin::defaults()['font'] === $choice, 'new timer offers Lato when FreeType is present');
+$expect(Email_Countdown_Timer_Admin::defaults(false)['font'] === '', 'saved legacy records still default to bitmap when no font was stored');
 $config = Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-01-01T00:00:00','tz'=>'UTC']);
 $expect($config['font'] === '', 'legacy missing selection remains bitmap');
 $font_config = array_replace($config, ['font'=>$choice,'label_d'=>'Dzień','label_h'=>'Godziny','label_m'=>'Minuty','label_s'=>'Sekundy']);

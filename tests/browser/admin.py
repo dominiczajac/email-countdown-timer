@@ -44,6 +44,11 @@ with sync_playwright() as p:
     page.get_by_role('link', name='Create Timer', exact=True).click()
     page.locator('#ect-timer_id').fill('browser-test')
     page.locator('#ect-deadline').fill('2030-12-31T23:59:59')
+    page.get_by_role('button', name='Midnight', exact=True).click()
+    check(page.locator('#ect-bg').input_value() == '#111827' and page.locator('#ect-dc').input_value() == '#F9FAFB' and page.locator('#ect-lc').input_value() == '#CBD5E1', 'Midnight preset sets high-contrast colors')
+    page.get_by_role('button', name='Classic', exact=True).click()
+    check(page.locator('#ect-bg').input_value() == '#FFFFFF' and page.locator('#ect-dc').input_value() == '#111827', 'Classic preset restores light colors without submitting')
+
     page.get_by_text('Custom Labels', exact=True).click()
     page.locator('#ect-label_d').fill('Campaign days')
     page.locator('#ect-label_h').fill('')

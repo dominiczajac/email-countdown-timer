@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.5.3
+Stable tag: 12.5.4
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -72,7 +72,7 @@ Describe both countdown and expired states: alt cannot change during GIF playbac
 New shortcode HTML reserves measured dimensions and a fixed proportional box before image download, with asynchronous decoding. Theme CSS can override these styles. Purge page HTML after geometry/font changes and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-Select Lato Regular (included) in Appearance > Typography and Size > Font, then save. Its SIL OFL 1.1 license permits commercial software bundling; original license/source notices are in fonts/. Bitmap remains the default. FreeType is required. Put your own licensed TTF/OTF files in the persistent directory shown in Data Settings, not this replaceable plugin folder. No Google importer is included. [Font storage and migration](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
+New timers select included Lato when FreeType is available; otherwise bitmap. Saved timers are unchanged. The font is SIL OFL 1.1, including commercial bundling (see fonts/OFL.txt). Keep custom TTF/OTF in the persistent directory shown in Data Settings; no Google importer. [Font storage and migration](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -105,8 +105,11 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 
 == Changelog ==
 
+= 12.5.4 =
+* Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
+
 = 12.5.3 =
-* Add one local Lato Regular font under SIL OFL 1.1. No download or automatic font change.
+* Offer included Lato for new timers when FreeType works; add four accessible color presets.
 
 = 12.5.2 =
 * Integrate reserved website layout and proportional email embeds with the end-image password fix.
@@ -117,4 +120,4 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 == Upgrade Notice ==
 
 = 12.5.3 =
-Lato Regular is included as an optional choice. Existing fonts and bitmap defaults remain.
+New timers use included Lato when FreeType works; saved settings remain unchanged.

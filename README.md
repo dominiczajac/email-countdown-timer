@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.5.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.5.4 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -66,7 +66,7 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 
 Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
 
-**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. Bitmap and existing selections are unchanged. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
+**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. New timers select Lato when FreeType is available; saved campaigns and renderer defaults are unchanged. Four high-contrast color presets apply to the edit form without saving automatically. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
 
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
