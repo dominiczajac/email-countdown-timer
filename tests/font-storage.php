@@ -1,5 +1,5 @@
 <?php
-/** File-system tests in owned temporary paths; fonts are never shipped. */
+/** File-system tests in owned temporary paths; arbitrary fixture fonts are never shipped. */
 if ( PHP_SAPI !== 'cli' ) { exit(1); }
 ob_start();
 require __DIR__ . '/run.php';
@@ -43,6 +43,17 @@ try {
     ok(count(array_keys(Email_Countdown_Timer_Config::fonts(),$name,true))===1, 'deduplicate names across roots');
     unlink($original);
     ok(Email_Countdown_Timer_Config::fontPath($name)===realpath($destination), 'persistent font survives removal of legacy file');
+    $bundled_name = Email_Countdown_Timer_Fonts::BUNDLED_FILE;
+    $bundled_option = Email_Countdown_Timer_Fonts::BUNDLED_CHOICE;
+    $same_name_custom = $dir . '/' . $bundled_name;
+    file_put_contents($same_name_custom, 'distinct-custom-test-font');
+    ok(Email_Countdown_Timer_Config::fontPath($bundled_name)===realpath($same_name_custom), 'existing same-name font keeps its user file');
+    ok(Email_Countdown_Timer_Config::fontPath($bundled_option)===realpath($legacy.'/'.$bundled_name), 'reserved choice resolves the included face separately');
+    ok(in_array($bundled_option, Email_Countdown_Timer_Config::fonts(), true) && in_array($bundled_name, Email_Countdown_Timer_Config::fonts(), true), 'both choices are independently available');
+    unlink($same_name_custom);
+    ok(Email_Countdown_Timer_Config::fontPath($bundled_name)===null, 'missing custom filename never resolves to included face');
+    ok(Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','font'=>$bundled_option])['font']===$bundled_option, 'reserved bundled choice accepted by normalization');
+
     file_put_contents($original,"\0\1\0\0".str_repeat('different',5));
     $hash=hash_file('sha256',$destination); $result=Email_Countdown_Timer_Fonts::copy_legacy();
     ok($result['skipped']>=1 && hash_file('sha256',$destination)===$hash, 'different same-name destination never overwritten');

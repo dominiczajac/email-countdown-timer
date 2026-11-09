@@ -1,5 +1,8 @@
-# Explicit shipped sources. Font binaries and development files are never bundled.
+# Explicit shipped sources. Only the reviewed example font and its notices are bundled.
 LICENSE
+fonts/easy-countdown-lato-regular.ttf
+fonts/OFL.txt
+fonts/README.txt
 assets/admin.css
 assets/admin.js
 assets/end-image.js

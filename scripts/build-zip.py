@@ -18,6 +18,12 @@ import zipfile
 import zlib
 
 SLUG = "easy-countdown"
+# Exactly one reviewed font; never package arbitrary site-managed font files.
+FONT_HASHES = {
+    "fonts/easy-countdown-lato-regular.ttf": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
+    "fonts/OFL.txt": "74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e",
+}
+FONT_FILES = set(FONT_HASHES) | {"fonts/README.txt"}
 ROOT_FILES = {"email-countdown-timer.php", "uninstall.php", "readme.txt", "LICENSE"}
 
 
@@ -36,14 +42,14 @@ def regular_file(root: Path, relative: str) -> Path:
 def sources(root: Path) -> dict[str, bytes]:
     manifest = regular_file(root, "scripts/distribution-files.txt").read_text(encoding="utf-8")
     names = [line.strip() for line in manifest.splitlines() if line.strip() and not line.lstrip().startswith("#")]
-    if len(names) != len(set(names)) or not ROOT_FILES.issubset(names):
+    if len(names) != len(set(names)) or not (ROOT_FILES | FONT_FILES).issubset(names):
         raise ValueError("Duplicate manifest entry or missing required root file")
     for name in names:
-        valid = name in ROOT_FILES or re.fullmatch(r"includes/[a-z0-9-]+\.php|assets/[a-z0-9-]+\.(?:css|js)", name)
+        valid = name in ROOT_FILES | FONT_FILES or re.fullmatch(r"includes/[a-z0-9-]+\.php|assets/[a-z0-9-]+\.(?:css|js)", name)
         if not valid:
             raise ValueError(f"Unsupported distribution path: {name}")
     # A newly added runtime file must be deliberately added to the same manifest.
-    discovered = set(ROOT_FILES)
+    discovered = ROOT_FILES | FONT_FILES
     for directory in ("includes", "assets"):
         base = root / directory
         if base.is_symlink() or not base.is_dir():
@@ -55,7 +61,11 @@ def sources(root: Path) -> dict[str, bytes]:
                 discovered.add(path.relative_to(root).as_posix())
     if discovered != set(names):
         raise ValueError("Manifest/runtime mismatch: " + ", ".join(sorted(discovered ^ set(names))))
-    return {name: regular_file(root, name).read_bytes() for name in sorted(names)}
+    files = {name: regular_file(root, name).read_bytes() for name in sorted(names)}
+    for name, expected in FONT_HASHES.items():
+        if hashlib.sha256(files[name]).hexdigest() != expected:
+            raise ValueError("Bundled font or original license changed: " + name)
+    return files
 
 
 def metadata(files: dict[str, bytes]) -> str:

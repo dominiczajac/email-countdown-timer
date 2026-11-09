@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.5.2 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.5.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -16,7 +16,7 @@ Locally generated countdown images for email campaigns and WordPress pages. Set 
 | Database | Consistent MySQL/MariaDB session/primary for serialized animation generation; unavailable locking means cache misses remain uncached static images, even with Imagick |
 | Network | A publicly reachable HTTPS image URL for email recipients |
 
-There are no bundled runtime Composer/npm dependencies or font binaries. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
+There are no bundled runtime Composer/npm dependencies. One example font, Lato Regular, is included under SIL OFL 1.1 with its original license. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
 
 ## Existing WordPress.org submission
 
@@ -65,6 +65,8 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 **Protect the font directory from direct HTTP downloads.** **Data Settings > Font File Access > Install Font Access Rules (Apache)** creates fixed deny rules without replacing existing files; it does not verify their enforcement. nginx requires host-managed configuration. Site administrators on multisite can protect their own font root; changing the shared legacy root requires network-administrator permission. [Host rules, GET/HEAD verification and licensing boundaries](docs/FONT-HTTP-ACCESS.md).
 
 Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
+
+**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. Bitmap and existing selections are unchanged. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
 
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
@@ -125,7 +127,7 @@ php tests/run.php
 php tests/uninstall.php
 ```
 
-The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Fonts, tests, CI and development docs are not bundled. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
+The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Only the allowlisted example font and its notices are bundled; user fonts, tests, CI and development docs are not. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
 
 [Wiki sources](docs/wiki/Home.md) · [Changelog](CHANGELOG.md) · [Directory readiness](docs/WORDPRESS-ORG-READINESS.md) · [Static fallback](docs/STATIC-FALLBACK.md)
 

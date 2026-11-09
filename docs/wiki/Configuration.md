@@ -33,7 +33,7 @@ After the deadline, the remaining time is clamped to zero. Whether the days bloc
 
 ## Fonts and Unicode characters
 
-Font files are not bundled with the plugin. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a fixed-size GD bitmap font. New saves then require printable ASCII labels; arbitrary UTF-8 is not supported by that fallback. The font list excludes symlinks. Protect direct HTTP downloads separately; see [font file access](Font-HTTP-Access.md). There is no public font upload endpoint.
+One Lato Regular font is bundled under SIL OFL 1.1. Select Lato Regular (included) in Typography and Size; bitmap remains the default. Choose a font you are entitled to use and check its supported characters. If the file or FreeType is unavailable, the plugin uses a fixed-size GD bitmap font. New saves then require printable ASCII labels; arbitrary UTF-8 is not supported by that fallback. The font list excludes symlinks. Protect direct HTTP downloads separately; see [font file access](Font-HTTP-Access.md). There is no public font upload endpoint.
 
 Source for size units and FreeType requirements: [PHP — imagettftext](https://www.php.net/manual/en/function.imagettftext.php).
 
