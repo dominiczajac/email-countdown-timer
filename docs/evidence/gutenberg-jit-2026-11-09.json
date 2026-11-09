@@ -1,0 +1,946 @@
+{
+  "observed_date": "2026-11-09",
+  "execution": "local Docker; not a hosted Actions run",
+  "candidate": {
+    "commit": "490867a2e28d5298e7a6194133509c84c8435903",
+    "zip_sha256": "b7ed9ca687247cb9f78bc283105ae46935abd5b10e62711b2661237aca700580",
+    "runtime_files": 24
+  },
+  "source": {
+    "wordpress_control_tag": "7.1.2",
+    "wordpress_control_commit": "160387b7312c9407c7fe4b1d3dd2055206749a34",
+    "php_base_digest": "sha256:845c7ba3487a47607f12cd35d09ac0e0880e8703f92a54ad517b69faef136072",
+    "unpatched_php_image_id": "sha256:57d86f3e860b0389bbb1dceab091a3853eb80cc7d572363d73031fb45b7cb337",
+    "patched_php_image_id": "sha256:49e7f7ecdd0b64116e084494c6f036fb1163bb3e9ecd83bed3ce70ee72bc8e78",
+    "browser_wordpress_image_digest": "sha256:8f5afd664b5f35d83b0e52d4f62952456313460ac58678b460c59e74eca1c79c",
+    "nginx_image_digest": "sha256:146adea4768b83c607d0bdfa4188464e3da6e0a3ad4475db1d1d8f64f27c29cc",
+    "database": "MariaDB 11.4.13",
+    "control_theme_versions": {
+      "twentytwentyone": "2.9",
+      "twentytwentyfour": "1.6"
+    },
+    "patched_source_parent": "c4efd2093177d45012412eecc8a97d6759ccbd29",
+    "patched_source_head": "bdb9a8b8cb1bb21d5ca82e3db3c4ae71d0db9550",
+    "upstream_diff_sha256": "e75a014afcdfbbe286be95e36aff50de57bed51b77d8c1d1846bcedcbeb379d4",
+    "upstream_phpt_url": "https://raw.githubusercontent.com/php/php-src/php-8.4.27/ext/opcache/tests/jit/gh23991.phpt",
+    "upstream_phpt_sha256": "682829013f622a3defcbd2180781d98fe5fbbc5216730a74186408b7c203c7b9"
+  },
+  "control_method": {
+    "fresh_fpm_per_state": true,
+    "workers": 4,
+    "max_editor_requests_per_state": 6,
+    "configured_jit_buffer": "256M",
+    "php_execution_limit_seconds": 30,
+    "fpm_termination_limit_seconds": 35,
+    "nginx_read_limit_seconds": 40,
+    "gd_imagick": "not installed in minimal control image; enabled for separate native browser runs"
+  },
+  "unpatched_controls": [
+    {
+      "theme": "twentytwentyone",
+      "jit": "1235",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        502
+      ],
+      "editor_bootstrap": [
+        false
+      ],
+      "elapsed_ms": [
+        38039.9
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 1,
+      "final_native_or_php_failure": true
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "1235",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        502
+      ],
+      "editor_bootstrap": [
+        false
+      ],
+      "elapsed_ms": [
+        36449.9
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": true
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "disable",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        142.6,
+        139.0,
+        106.1,
+        142.2,
+        103.9,
+        122.1
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "disable",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        242.8,
+        118.8,
+        126.2,
+        121.4,
+        117.2,
+        115.3
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "1235",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        502
+      ],
+      "editor_bootstrap": [
+        false
+      ],
+      "elapsed_ms": [
+        36797.8
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": true
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "1235",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        502
+      ],
+      "editor_bootstrap": [
+        true,
+        false
+      ],
+      "elapsed_ms": [
+        649.4,
+        94.6
+      ],
+      "native_sigsegv_count": 1,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": true
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "disable",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        174.2,
+        152.5,
+        142.8,
+        262.5,
+        290.1,
+        252.8
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "disable",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        198.8,
+        147.1,
+        155.4,
+        152.8,
+        164.2,
+        150.0
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    }
+  ],
+  "isolated_upstream_fix_controls": [
+    {
+      "theme": "twentytwentyone",
+      "jit": "1235",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        835.2,
+        313.8,
+        217.9,
+        172.8,
+        197.5,
+        189.8
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "1235",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        581.0,
+        200.4,
+        179.6,
+        123.0,
+        137.4,
+        120.1
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "disable",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        213.4,
+        158.5,
+        276.8,
+        150.3,
+        141.3,
+        212.9
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyone",
+      "jit": "disable",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        157.5,
+        174.4,
+        174.0,
+        182.6,
+        296.4,
+        248.8
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "1235",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        832.5,
+        386.0,
+        263.6,
+        225.1,
+        198.5,
+        205.0
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "1235",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        488.0,
+        269.4,
+        203.3,
+        145.4,
+        136.1,
+        181.6
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "disable",
+      "plugin_active": false,
+      "active_plugins": [],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "no"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        234.0,
+        185.7,
+        207.5,
+        174.8,
+        167.9,
+        182.5
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    },
+    {
+      "theme": "twentytwentyfour",
+      "jit": "disable",
+      "plugin_active": true,
+      "active_plugins": [
+        "easy-countdown/email-countdown-timer.php"
+      ],
+      "initial_http_environment": {
+        "x-ect-test-sapi": "fpm-fcgi",
+        "x-ect-test-php": "8.4.26",
+        "x-ect-test-gd": "no",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-plugin-loaded": "yes"
+      },
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "editor_bootstrap": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "elapsed_ms": [
+        186.3,
+        156.0,
+        163.1,
+        141.8,
+        139.3,
+        131.4
+      ],
+      "native_sigsegv_count": 0,
+      "fpm_request_timeout_count": 0,
+      "final_native_or_php_failure": false
+    }
+  ],
+  "upstream_php_regression": {
+    "internal_timeout_seconds": 10,
+    "kill_after_seconds": 2,
+    "network": "none",
+    "unpatched_exit": 124,
+    "patched_exit": 0,
+    "patched_output_matches_expected_warning_and_array": true
+  },
+  "native_browser_profiles": [
+    {
+      "wordpress": "7.1.4",
+      "theme": "twentytwentyfour",
+      "jit": "1235",
+      "checks": [
+        "block editor code absent on dashboard",
+        "native editor receives actual saved IDs",
+        "no raw campaign fields passed into choices",
+        "client registered with API 3",
+        "select existing timer with keyboard in native ComboboxControl",
+        "static preview is an actual image",
+        "editor requests static not animated image",
+        "explicit refresh fetches a current static image",
+        "sidebar alignment updates block attributes",
+        "administrator settings link scoped and safely opens another tab",
+        "no periodic preview polling in observation window",
+        "no animated request from editor",
+        "core saves multiple dynamic blocks",
+        "saved post has references, not copied image/configuration",
+        "reopen has no invalid block",
+        "selection and alignment survive reopen",
+        "block edits do not mutate saved campaigns",
+        "actual PHP-FPM and GD confirmed over HTTP",
+        "OPcache remains enabled in the tested PHP-FPM process",
+        "configured JIT mode confirmed in actual FPM: 1235",
+        "actual JIT activation matches the experimental cell",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "multiple block images have unique IDs",
+        "frontend uses saved alternative text",
+        "frontend centered alignment",
+        "frontend right alignment",
+        "new editor JS never loaded by frontend",
+        "image fits narrow container 320",
+        "image fits narrow container 768",
+        "delayed image does not move tested block boxes",
+        "deleted campaign disappears without affecting other block",
+        "missing saved timer shows editor warning",
+        "no uncaught editor JavaScript errors"
+      ],
+      "count": 36,
+      "complete": true,
+      "page_errors": [],
+      "integration_assertions": 46,
+      "http_environment": {
+        "x-ect-test-gd": "yes",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-php": "8.4.27",
+        "x-ect-test-plugin-loaded": "yes",
+        "x-ect-test-sapi": "fpm-fcgi"
+      },
+      "final_log_gate": {
+        "passed": true,
+        "checked_files": [
+          "fpm.log",
+          "php-errors.log"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "wordpress": "7.1.4",
+      "theme": "twentytwentyfour",
+      "jit": "disable",
+      "checks": [
+        "block editor code absent on dashboard",
+        "native editor receives actual saved IDs",
+        "no raw campaign fields passed into choices",
+        "client registered with API 3",
+        "select existing timer with keyboard in native ComboboxControl",
+        "static preview is an actual image",
+        "editor requests static not animated image",
+        "explicit refresh fetches a current static image",
+        "sidebar alignment updates block attributes",
+        "administrator settings link scoped and safely opens another tab",
+        "no periodic preview polling in observation window",
+        "no animated request from editor",
+        "core saves multiple dynamic blocks",
+        "saved post has references, not copied image/configuration",
+        "reopen has no invalid block",
+        "selection and alignment survive reopen",
+        "block edits do not mutate saved campaigns",
+        "actual PHP-FPM and GD confirmed over HTTP",
+        "OPcache remains enabled in the tested PHP-FPM process",
+        "configured JIT mode confirmed in actual FPM: disable",
+        "actual JIT activation matches the experimental cell",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "multiple block images have unique IDs",
+        "frontend uses saved alternative text",
+        "frontend centered alignment",
+        "frontend right alignment",
+        "new editor JS never loaded by frontend",
+        "image fits narrow container 320",
+        "image fits narrow container 768",
+        "delayed image does not move tested block boxes",
+        "deleted campaign disappears without affecting other block",
+        "missing saved timer shows editor warning",
+        "no uncaught editor JavaScript errors"
+      ],
+      "count": 36,
+      "complete": true,
+      "page_errors": [],
+      "integration_assertions": 46,
+      "http_environment": {
+        "x-ect-test-gd": "yes",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-php": "8.4.27",
+        "x-ect-test-plugin-loaded": "yes",
+        "x-ect-test-sapi": "fpm-fcgi"
+      },
+      "final_log_gate": {
+        "passed": true,
+        "checked_files": [
+          "fpm.log",
+          "php-errors.log"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "wordpress": "7.1.4",
+      "theme": "twentytwentyone",
+      "jit": "1235",
+      "checks": [
+        "block editor code absent on dashboard",
+        "native editor receives actual saved IDs",
+        "no raw campaign fields passed into choices",
+        "client registered with API 3",
+        "select existing timer with keyboard in native ComboboxControl",
+        "static preview is an actual image",
+        "editor requests static not animated image",
+        "explicit refresh fetches a current static image",
+        "sidebar alignment updates block attributes",
+        "administrator settings link scoped and safely opens another tab",
+        "no periodic preview polling in observation window",
+        "no animated request from editor",
+        "core saves multiple dynamic blocks",
+        "saved post has references, not copied image/configuration",
+        "reopen has no invalid block",
+        "selection and alignment survive reopen",
+        "block edits do not mutate saved campaigns",
+        "actual PHP-FPM and GD confirmed over HTTP",
+        "OPcache remains enabled in the tested PHP-FPM process",
+        "configured JIT mode confirmed in actual FPM: 1235",
+        "actual JIT activation matches the experimental cell",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "multiple block images have unique IDs",
+        "frontend uses saved alternative text",
+        "frontend centered alignment",
+        "frontend right alignment",
+        "new editor JS never loaded by frontend",
+        "image fits narrow container 320",
+        "image fits narrow container 768",
+        "delayed image does not move tested block boxes",
+        "deleted campaign disappears without affecting other block",
+        "missing saved timer shows editor warning",
+        "no uncaught editor JavaScript errors"
+      ],
+      "count": 36,
+      "complete": true,
+      "page_errors": [],
+      "integration_assertions": 46,
+      "http_environment": {
+        "x-ect-test-gd": "yes",
+        "x-ect-test-jit": "1235",
+        "x-ect-test-jit-active": "on",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-php": "8.4.27",
+        "x-ect-test-plugin-loaded": "yes",
+        "x-ect-test-sapi": "fpm-fcgi"
+      },
+      "final_log_gate": {
+        "passed": true,
+        "checked_files": [
+          "fpm.log",
+          "php-errors.log"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "wordpress": "7.1.4",
+      "theme": "twentytwentyone",
+      "jit": "disable",
+      "checks": [
+        "block editor code absent on dashboard",
+        "native editor receives actual saved IDs",
+        "no raw campaign fields passed into choices",
+        "client registered with API 3",
+        "select existing timer with keyboard in native ComboboxControl",
+        "static preview is an actual image",
+        "editor requests static not animated image",
+        "explicit refresh fetches a current static image",
+        "sidebar alignment updates block attributes",
+        "administrator settings link scoped and safely opens another tab",
+        "no periodic preview polling in observation window",
+        "no animated request from editor",
+        "core saves multiple dynamic blocks",
+        "saved post has references, not copied image/configuration",
+        "reopen has no invalid block",
+        "selection and alignment survive reopen",
+        "block edits do not mutate saved campaigns",
+        "actual PHP-FPM and GD confirmed over HTTP",
+        "OPcache remains enabled in the tested PHP-FPM process",
+        "configured JIT mode confirmed in actual FPM: disable",
+        "actual JIT activation matches the experimental cell",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "anonymous block image renders",
+        "frontend reserves measured space",
+        "multiple block images have unique IDs",
+        "frontend uses saved alternative text",
+        "frontend centered alignment",
+        "frontend right alignment",
+        "new editor JS never loaded by frontend",
+        "image fits narrow container 320",
+        "image fits narrow container 768",
+        "delayed image does not move tested block boxes",
+        "deleted campaign disappears without affecting other block",
+        "missing saved timer shows editor warning",
+        "no uncaught editor JavaScript errors"
+      ],
+      "count": 36,
+      "complete": true,
+      "page_errors": [],
+      "integration_assertions": 46,
+      "http_environment": {
+        "x-ect-test-gd": "yes",
+        "x-ect-test-jit": "disable",
+        "x-ect-test-jit-active": "off",
+        "x-ect-test-opcache": "on",
+        "x-ect-test-php": "8.4.27",
+        "x-ect-test-plugin-loaded": "yes",
+        "x-ect-test-sapi": "fpm-fcgi"
+      },
+      "final_log_gate": {
+        "passed": true,
+        "checked_files": [
+          "fpm.log",
+          "php-errors.log"
+        ],
+        "errors": []
+      }
+    }
+  ],
+  "limitations": [
+    "Local MariaDB/container builds differ from hosted MySQL/PPA builds.",
+    "Only the fixed loopback port was adapted for the existing native browser script.",
+    "No attempt to attribute all historical SIGSEGVs to one stack.",
+    "Old CI artifacts and new exact-head hosted results require separate verification.",
+    "The candidate omits main's already merged Lato integration."
+  ]
+}

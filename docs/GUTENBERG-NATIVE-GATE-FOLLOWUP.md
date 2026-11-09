@@ -1,5 +1,9 @@
 # Gutenberg native acceptance gate follow-up
 
+For the 9 November continuation, see [the controlled upstream-fix
+investigation and acceptance proposal](GUTENBERG-JIT-DISPOSITION.md). The
+historical results below remain attached to their original revisions.
+
 ## Scope and recovered changes
 
 The original follow-up patch was prepared against `23c0493`. Before publication,
