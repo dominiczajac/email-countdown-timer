@@ -162,3 +162,27 @@ controller/rendering assertions on PHP 8.3.36 with native extensions.
 No application, test assertion, workflow, JIT setting, timeout or required
 gate is changed by this investigation's documentation commit. The existing
 release boundary remains in force.
+
+## Follow-on branch synchronization
+
+The documentation checkpoint `144cc8e` received CodeQL results but no new
+pull-request CI run. A local merge-tree check identified conflicts against
+main `12fa546` in the plugin version, WordPress readme, package builder and
+packaging tests. GitHub does not run `pull_request` workflows for a conflicting
+test merge. Those conflicts were resolved on the PR branch, preserving both
+the native block and main's approved Lato implementation and regressions.
+This branch synchronization does not merge PR #17 into protected main.
+
+The combined candidate remains 12.6.0. Packaging retains both block metadata
+validation and the font/OFL hash allowlist; no test or readme-size limit was
+relaxed. Its 27-file installer SHA256 is
+`82eda49c1e88e388c7f8204af6a6419d3ac87e2aaa51a945d027b407b5ac5073`.
+It is a different artifact from the historical 24-file diagnostic candidate.
+
+Five real-WordPress assertions now check the bundled-font campaign through the
+native block, matching reserved dimensions against actual PNG pixels and
+preserving its saved font selection. They also exercise the unchanged bitmap
+fallback when FreeType functions are unavailable. The browser fixture includes
+one Lato campaign and one bitmap campaign. Full native and exact-head hosted
+acceptance must be assessed for this combined candidate separately from the
+earlier evidence JSON. No font defaults or campaign migration are added.

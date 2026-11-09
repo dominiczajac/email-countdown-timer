@@ -27,4 +27,4 @@ CODEOWNERS routes review; it is not independent approval. Do not approve your ow
 
 ## Installation artifact
 
-Use `bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Never add font binaries or site data to runtime directories. See [build instructions](docs/DISTRIBUTION-BUILD.md).
+Use `bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Only the reviewed Lato example and its original OFL notice may be bundled; do not add other font binaries or site data without authorization, licensing review and an explicit manifest/hash update. See [build instructions](docs/DISTRIBUTION-BUILD.md).

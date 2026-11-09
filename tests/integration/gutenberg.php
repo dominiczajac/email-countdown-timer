@@ -31,6 +31,24 @@ try {
     $b = new WP_HTML_Tag_Processor( $render( array( 'timerId'=>'empty-alt' ) ) ); $b->next_tag('IMG');
     $expect( $a->get_attribute('id') !== $b->get_attribute('id') && $b->get_attribute('alt') === '', 'multiple images unique IDs; empty alt preserved' );
     $expect( wp_script_is('ecd-refresh','enqueued') && ! wp_script_is('easy-countdown-block-editor','enqueued'), 'only existing refresh script enqueued by public render' );
+    // The integrated installer must reserve the actual bundled-font image geometry.
+    $font_config = array_replace( $c, array( 'font' => Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ) );
+    update_option( 'easy_countdown_timers', array_replace( $snapshot, array( 'block-test' => $font_config ) ), false );
+    $font_tag = new WP_HTML_Tag_Processor( $render( array( 'timerId' => 'block-test' ) ) );
+    $expect( $font_tag->next_tag( 'IMG' ), 'bundled-font campaign renders through the native block' );
+    $renderer = new Email_Countdown_Timer_Renderer();
+    $deadline = Email_Countdown_Timer_Config::deadline( $font_config );
+    $now = time();
+    $pixels = $renderer->render_static( $font_config, $deadline, $now, 'png' );
+    $image = imagecreatefromstring( $pixels );
+    $expect( $image instanceof GdImage, 'bundled-font block campaign produces a real image' );
+    $expect( imagesx( $image ) === (int) $font_tag->get_attribute( 'width' ) && imagesy( $image ) === (int) $font_tag->get_attribute( 'height' ), 'block dimensions match actual bundled-font pixels' );
+    $bitmap = $renderer->render_static( $c, $deadline, $now, 'png' );
+    $freetype = function_exists( 'imagettfbbox' ) && function_exists( 'imagettftext' );
+    $expect( $freetype ? $pixels !== $bitmap : $pixels === $bitmap, 'bundled font uses FreeType or the unchanged bitmap fallback' );
+    $expect( get_option( 'easy_countdown_timers' )['block-test']['font'] === Email_Countdown_Timer_Fonts::BUNDLED_CHOICE, 'block rendering preserves the saved font choice' );
+    unset( $image );
+    update_option( 'easy_countdown_timers', $snapshot, false );
     foreach ( array('author','subscriber','administrator') as $role ) {
         $id = wp_insert_user(array('user_login'=>'ect-block-'.$role.'-'.wp_generate_password(8,false), 'user_pass'=>wp_generate_password(32), 'role'=>$role));
         $expect( !is_wp_error($id), 'create synthetic '.$role ); $users[$role]=$id;

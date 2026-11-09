@@ -20,6 +20,7 @@ $previous = get_option(Email_Countdown_Timer_Fonts::OPTION, null);
 try {
     copy($source, $original);
     $copied = Email_Countdown_Timer_Fonts::copy_legacy();
+    $assert(!array_key_exists(Email_Countdown_Timer_Fonts::BUNDLED_FILE, get_option(Email_Countdown_Timer_Fonts::OPTION, [])), 'Bundled example is not adopted as migrated user data');
     require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-font-access.php';
     $rules = Email_Countdown_Timer_Font_Access::install();
     $assert($rules['failed'] === 0, 'Font access rules created without modifying fonts');
@@ -28,6 +29,16 @@ try {
     $destination = $directory . '/' . $name;
     $assert($copied['copied'] === 1 && is_file($original) && is_file($destination), 'Real copy preserves source');
     $assert(hash_file('sha256', $source) === hash_file('sha256', $destination), 'Real copy preserves bytes');
+    $collision = $directory . '/' . Email_Countdown_Timer_Fonts::BUNDLED_FILE;
+    $assert(!file_exists($collision), 'disposable collision fixture absent');
+    copy($source, $collision);
+    $assert(Email_Countdown_Timer_Config::fontPath(Email_Countdown_Timer_Fonts::BUNDLED_FILE) === realpath($collision), 'same-name persistent font keeps its file');
+    $assert(Email_Countdown_Timer_Config::fontPath(Email_Countdown_Timer_Fonts::BUNDLED_CHOICE) === realpath(EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/' . Email_Countdown_Timer_Fonts::BUNDLED_FILE), 'included face has separate selector');
+    $assert(in_array(Email_Countdown_Timer_Fonts::BUNDLED_FILE, Email_Countdown_Timer_Config::fonts(), true), 'custom name remains available');
+    $assert(in_array(Email_Countdown_Timer_Fonts::BUNDLED_CHOICE, Email_Countdown_Timer_Config::fonts(), true), 'included face remains available');
+    unlink($collision);
+    $assert(Email_Countdown_Timer_Config::fontPath(Email_Countdown_Timer_Fonts::BUNDLED_FILE) === null, 'missing user file never aliases bundled font');
+
     $assert((get_option(Email_Countdown_Timer_Fonts::OPTION, [])[$name] ?? '') === hash_file('sha256', $source), 'Manifest persisted');
     $config = Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','font'=>$name,'label_d'=>'Dzień']);
     $renderer = new Email_Countdown_Timer_Renderer();
@@ -49,7 +60,7 @@ try {
     $assert(get_option(Email_Countdown_Timer_Fonts::OPTION, null) === null, 'Ownership option removed');
     if (is_multisite()) $assert(str_ends_with($directory, 'site-' . get_current_blog_id()), 'Multisite directory explicitly site-scoped');
 } finally {
-    foreach ([$original, $destination, $manual] as $file) if ($file && is_file($file)) unlink($file);
+    foreach ([$original, $destination, $manual, $collision ?? null] as $file) if ($file && is_file($file)) unlink($file);
     if (null !== $previous) update_option(Email_Countdown_Timer_Fonts::OPTION, $previous, false);
     else delete_option(Email_Countdown_Timer_Fonts::OPTION);
 }

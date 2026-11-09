@@ -22,11 +22,10 @@ Preserve existing URLs, shortcode, saved data, renderer pixels and timing, font 
 
 These tests complement existing Plugin Check, image/security, HTTP, lifecycle, layout and email checks. Failures and skipped checks must remain visible. Exact executed results are recorded in the PR, not assumed from this description. They are not full WCAG certification or proof of compatibility with every editor extension, theme, cache or hosting setup.
 
-This 12.6.0 candidate starts from main `507183c572f4633badd26dbcfe1ab141d722dae8` (12.5.2). As of 9 November 2026, optional font PR #16 is merged into main at `12fa546`, but has not yet been integrated into this block candidate. Diagnostic PR #13 remains separate. See the [native JIT investigation](GUTENBERG-JIT-DISPOSITION.md) for Gate A evidence and the remaining acceptance boundary. No merge, release or WordPress.org submission is implied.
+This 12.6.0 candidate originally started from main `507183c572f4633badd26dbcfe1ab141d722dae8` (12.5.2). On 9 November 2026, the PR branch was synchronized with main `12fa546`, including the already approved optional Lato font from PR #16. Both block metadata and the font/license allowlist remain required by packaging checks. Diagnostic PR #13 remains separate. See the [native JIT investigation](GUTENBERG-JIT-DISPOSITION.md) for Gate A evidence and the remaining acceptance boundary. The branch update does not merge PR #17 into main or publish a release or WordPress.org submission.
 
 ## Upstream references
 
 - https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/
 - https://developer.wordpress.org/block-editor/how-to-guides/enqueueing-assets-in-the-editor/
 - https://developer.wordpress.org/reference/functions/register_block_type/
-
