@@ -35,3 +35,5 @@ References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and P
 ## Direct HTTP access
 
 Local storage alone does not make font binaries private. Configure denial for the dedicated font roots before storing files whose licenses restrict downloading. The explicit Font File Access action can create Apache rules, but does not verify enforcement and never overwrites existing files. nginx needs host-managed rules. Shared legacy roots on multisite require network-administrator permission; per-site uploads remain independently scoped. See [font HTTP protection](FONT-HTTP-ACCESS.md). Guard files remain on uninstall to protect manually managed fonts; they contain no campaign or visitor data.
+
+The included Lato face uses a reserved internal selection rather than its shipped filename. An existing persistent custom font with the same basename remains bound to its own file; a missing custom file is not silently replaced by bundled Lato. Existing saved campaigns are not migrated.

@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Email_Countdown_Timer_Fonts {
     public const OPTION = 'email_countdown_timer_copied_fonts';
     public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
+    public const BUNDLED_CHOICE = 'builtin:lato-regular';
     private const BUNDLED_SHA256 = 'd636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251';
     private const MAX_BYTES = 5242880;
 
@@ -72,26 +73,39 @@ final class Email_Countdown_Timer_Fonts {
     }
 
     public static function path( string $name ): ?string {
+        if ( self::BUNDLED_CHOICE === $name ) {
+            return self::contained_file( self::legacy_directory(), self::BUNDLED_FILE );
+        }
         if ( ! self::valid_name( $name ) ) {
             return null;
         }
-        // Keep legacy precedence until the same file is copied and the old code directory replaced.
-        // A name collision never silently changes a running campaign's typeface.
+        // A pre-existing filename selection must not silently become the bundled face.
+        if ( self::BUNDLED_FILE === $name ) {
+            return self::contained_file( self::persistent_directory(), $name );
+        }
         return self::contained_file( self::legacy_directory(), $name )
             ?? self::contained_file( self::persistent_directory(), $name );
     }
 
     public static function names(): array {
         $names = array();
-        foreach ( array( self::legacy_directory(), self::persistent_directory() ) as $directory ) {
+        $legacy = self::legacy_directory();
+        foreach ( array( $legacy, self::persistent_directory() ) as $directory ) {
             if ( null === $directory || ! is_readable( $directory ) ) {
                 continue;
             }
             foreach ( scandir( $directory ) ?: array() as $name ) {
+                if ( $directory === $legacy && self::BUNDLED_FILE === $name ) {
+                    // The shipped font is exposed only via its reserved selection.
+                    continue;
+                }
                 if ( null !== self::contained_file( $directory, $name ) ) {
                     $names[ $name ] = $name;
                 }
             }
+        }
+        if ( null !== self::contained_file( $legacy, self::BUNDLED_FILE ) ) {
+            $names[ self::BUNDLED_CHOICE ] = self::BUNDLED_CHOICE;
         }
         natcasesort( $names );
         return array_values( $names );

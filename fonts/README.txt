@@ -26,3 +26,5 @@ normally wp-content/uploads/email-countdown-timer/fonts/ (per-site on multisite)
 Do not replace the included file or its license. Unchanged bundled files do not
 need the legacy-copy tool. Existing manually supplied filenames keep resolving
 as before; adding this example does not migrate or overwrite those files.
+
+The included Lato is selected through a reserved built-in choice, not its filename. Existing campaigns referencing a custom font named easy-countdown-lato-regular.ttf still use their own persistent file (when present), preserving their rendered pixels during upgrades.
