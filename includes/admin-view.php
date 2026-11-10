@@ -145,10 +145,23 @@ if ( ! current_user_can( 'manage_options' ) ) {
                             </div>
                             <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'fixed_width', __( 'Minimum Image Width (px)', 'easy-countdown' ), 'number', __( '0 means automatic. This sets a minimum width, not image scaling. Height follows content with padding.', 'easy-countdown' ), array( 'min' => '0', 'max' => '4000', 'required' => 'required' ) ); ?>
                         </div></details>
-                        <details class="ect-disclosure" data-ect-disclosure open><summary><?php echo esc_html__( 'Custom Labels', 'easy-countdown' ); ?></summary><div class="ect-two-fields">
+                        <details class="ect-disclosure" data-ect-disclosure open><summary><?php echo esc_html__( 'Custom Labels', 'easy-countdown' ); ?></summary><div>
+                            <div data-ect-label-presets hidden>
+                                <label for="ect-label-language"><?php echo esc_html__( 'Countdown label language', 'easy-countdown' ); ?></label>
+                                <div class="ect-inline"><select id="ect-label-language" aria-describedby="ect-label-language-help">
+                                    <option value=""><?php echo esc_html__( 'Choose a label preset', 'easy-countdown' ); ?></option>
+                                    <?php foreach ( Email_Countdown_Timer_Admin::label_presets() as $email_countdown_timer_language => $email_countdown_timer_label_preset ) : ?>
+                                        <option value="<?php echo esc_attr( $email_countdown_timer_language ); ?>" data-labels="<?php echo esc_attr( wp_json_encode( $email_countdown_timer_label_preset['labels'] ) ); ?>"><?php echo esc_html( $email_countdown_timer_label_preset['label'] ); ?></option>
+                                    <?php endforeach; ?>
+                                </select><button id="ect-apply-labels" class="button" type="button" disabled><?php echo esc_html__( 'Apply label preset', 'easy-countdown' ); ?></button></div>
+                                <p class="description" id="ect-label-language-help"><?php echo esc_html__( 'Apply replaces only the four label fields. Review and save to keep the changes. Existing labels never follow the admin language. Accents require an appropriate local font; bitmap supports printable ASCII only.', 'easy-countdown' ); ?></p>
+                                <p data-ect-label-result role="status" aria-live="polite" data-applied="<?php echo esc_attr__( 'Labels applied. Review the text and save to keep these changes.', 'easy-countdown' ); ?>"></p>
+                            </div>
+                            <div class="ect-two-fields">
                             <?php foreach ( array( 'label_d' => __( 'Days', 'easy-countdown' ), 'label_h' => __( 'Hours', 'easy-countdown' ), 'label_m' => __( 'Minutes', 'easy-countdown' ), 'label_s' => __( 'Seconds', 'easy-countdown' ) ) as $email_countdown_timer_key => $email_countdown_timer_label ) : ?>
                                 <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, $email_countdown_timer_key, $email_countdown_timer_label, 'text', __( 'An empty label is allowed. Maximum 256 bytes.', 'easy-countdown' ) ); ?>
                             <?php endforeach; ?>
+                            </div>
                         </div></details>
                     </section>
                     <section class="ect-card" aria-labelledby="ect-after-title"><h3 id="ect-after-title"><?php echo esc_html__( 'After Countdown', 'easy-countdown' ); ?></h3>

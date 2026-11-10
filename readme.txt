@@ -25,6 +25,7 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 * Reserved website image space without another frontend library or polling.
 * Saved previews, animation on request and copyable embed codes.
 * Quick Create presets and a dashboard widget for users who manage timers.
+* Explicit English, Polish, German, Spanish and French countdown label presets.
 * English, translation-ready administration using WordPress controls.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
@@ -45,7 +46,7 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 == Installation ==
 
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone and preset. Create Timer opens all settings.
+2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone, appearance and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
 4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
 5. Check the public image while logged out and send a test using your actual mailing platform.
@@ -110,6 +111,7 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
 * Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.
+* Add explicit label-language presets independent of admin locale; preserve existing custom/empty labels and validate accents against font capability.
 
 = 12.5.3 =
 * Bundle optional local Lato Regular under SIL OFL 1.1, with integrity-checked font and license notices.

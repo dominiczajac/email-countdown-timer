@@ -41,6 +41,9 @@ function wp_enqueue_style($handle, ...$args) { $GLOBALS['styles'][$handle]=$args
 function esc_url($text) { return esc_attr($text); }
 function wp_date($format) { return date($format); }
 function wp_timezone_string() { return $GLOBALS['ect_site_tz'] ?? 'Europe/Warsaw'; }
+if ( ! function_exists( 'wp_json_encode' ) ) {
+    function wp_json_encode( $data, $flags = 0 ) { return json_encode( $data, $flags ); }
+}
 function admin_url($path) { return 'https://example.test/wp-admin/'.$path; }
 function home_url($path) { return 'https://example.test'.$path; }
 function plugins_url($path, $file) { return 'https://example.test/wp-content/plugins/email-countdown-timer/'.$path; }
@@ -98,7 +101,8 @@ $_POST=array_merge(array_map('strval',$base), ['ecd_action'=>'email_countdown_ti
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(),'redirect:'), 'save redirects'); }
 ok($options['easy_countdown_timers']['sale']['label_d']==="D'ni", 'unslash once');
 $_GET=['edit'=>'sale']; ob_start(); $plugin->renderAdminPage(); $html=ob_get_clean();
-ok(strpos($html, 'readonly')!==false && strpos($html, 'disabled')===false, 'editable form submits readonly ID');
+preg_match('/<input\b[^>]*\bid="ect-timer_id"[^>]*>/', $html, $id_control);
+ok(!empty($id_control[0]) && str_contains($id_control[0], 'readonly') && !preg_match('/\sdisabled(?:\s|=|>)/', $id_control[0]), 'editable form submits its enabled readonly ID control');
 ok(strpos($html, '2027-12-31T23:59:59')!==false, 'deadline seconds preserved');
 $_GET=['edit'=>['x']]; ob_start(); $plugin->renderAdminPage(); ob_end_clean(); ok(true,'array edit input');
 $short=$plugin->renderShortcode(['id'=>'sale']); $short2=$plugin->renderShortcode(['id'=>'sale']);
@@ -188,6 +192,7 @@ require __DIR__.'/internationalization.php';
 require __DIR__.'/admin-ui.php';
 require __DIR__.'/timezone-ui.php';
 require __DIR__.'/campaign-management.php';
+require __DIR__.'/label-presets.php';
 require __DIR__.'/alt-privacy-lock.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;
