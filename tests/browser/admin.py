@@ -6,6 +6,7 @@ import re
 import shutil
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
+from wordpress import log_in
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -30,11 +31,7 @@ with sync_playwright() as p:
     page.on('dialog', lambda d: d.accept() if d.type == 'beforeunload' else d.dismiss())
     requests = []
     page.on('request', lambda request: requests.append(request.url))
-    page.goto(base + '/wp-login.php')
-    page.locator('#user_login').fill('ci-admin')
-    page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD'])
-    page.locator('#wp-submit').click()
-    page.wait_for_url('**/wp-admin/**')
+    log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
     check(page.locator('[href*="assets/admin.css"]').count() == 0, 'no custom admin CSS on Dashboard')
     check(page.locator('[src*="assets/admin.js"]').count() == 0, 'no custom admin JS on Dashboard')
     widget = page.locator('#email-countdown-timer-dashboard')
@@ -151,6 +148,7 @@ with sync_playwright() as p:
     page.locator('#ect-editor button[type=submit]').click()
     expect(page.get_by_text('Timer saved.', exact=True)).to_be_visible()
     check('alt=""' in page.locator('#ect-manual-html').input_value(), 'explicit empty alt remains empty in email HTML')
+    expect(page.locator('[data-ect-copy="ect-manual-html"]')).to_be_visible()
     page.get_by_text('Delete Timer', exact=True).click()
     page.locator('[name=confirm_delete]').check()
     page.locator('#ect-delete button').click()
@@ -207,6 +205,7 @@ with sync_playwright() as p:
     check(plain.locator('#ect-bg').input_value() == '#111827' and plain.locator('#ect-dc').input_value() == '#F9FAFB', 'Quick Create applies the preset on the server without JavaScript')
     nojs.close()
     page.goto(base + '/wp-admin/admin.php?page=ecd-timers&edit=browser-test')
+    expect(page.locator('[data-ect-copy="ect-manual-html"]')).to_be_visible()
     page.get_by_text('Delete Timer', exact=True).click()
     page.locator('[name=confirm_delete]').check()
     page.locator('#ect-delete button').click()

@@ -1,6 +1,7 @@
 """Explicit font-rule action and site-zone defaults in real WordPress admin."""
 import json, os, pathlib, shutil
 from playwright.sync_api import sync_playwright, expect
+from wordpress import log_in
 assert os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('ECD_INTEGRATION_DISPOSABLE')=='1'
 base='http://localhost:8081'; checks=[]
 def check(value,name):
@@ -9,7 +10,7 @@ def check(value,name):
 with sync_playwright() as p:
     binary=shutil.which('google-chrome') or shutil.which('chromium');assert binary
     browser=p.chromium.launch(executable_path=binary,args=['--no-sandbox']);ctx=browser.new_context();page=ctx.new_page()
-    page.goto(base+'/wp-login.php');page.locator('#user_login').fill('ci-admin');page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD']);page.locator('#wp-submit').click();page.wait_for_url('**/wp-admin/**')
+    log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new')
     check(page.locator('#ect-tz').input_value()=='Pacific/Chatham','new editor inherits changed real site timezone')
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers&edit=alt-browser-test')
