@@ -59,6 +59,7 @@
 
     function Edit(props) {
         var attributes = props.attributes;
+        var displayMode = attributes.displayMode === 'live' ? 'live' : 'image';
         var timerId = typeof attributes.timerId === 'string' ? attributes.timerId : '';
         var alignment = Object.prototype.hasOwnProperty.call(positions, attributes.alignment) ? attributes.alignment : 'left';
         // Core filters custom store keys in some editors. PHP attaches this bounded,
@@ -89,6 +90,14 @@
         var blockProps = wp.blockEditor.useBlockProps();
         var controls = el(wp.blockEditor.InspectorControls, {},
             el(wp.components.PanelBody, { title: __('Countdown', 'easy-countdown'), initialOpen: true },
+                el(wp.components.SelectControl, {
+                    label: __('Website display', 'easy-countdown'), value: displayMode,
+                    options: [
+                        { label: __('Image (default)', 'easy-countdown'), value: 'image' },
+                        { label: __('Live text', 'easy-countdown'), value: 'live' }
+                    ], onChange: function (value) { props.setAttributes({ displayMode: value === 'live' ? 'live' : 'image' }); },
+                    help: __('Live text uses the saved deadline, colors and labels with theme typography. It updates locally without image polling and includes a Pause control. Reduced-motion visitors start paused. Image fonts and dimensions apply to Image mode.', 'easy-countdown')
+                }),
                 el(wp.components.SelectControl, {
                     label: __('Alignment', 'easy-countdown'), value: alignment,
                     options: [
@@ -139,6 +148,7 @@
                 previewUrl && !missing ? el(wp.components.Button, {
                     variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function (value) { return value + 1; }); }
                 }, __('Refresh preview', 'easy-countdown')) : null,
+                displayMode === 'live' ? el('p', {}, __('Live text is enabled on the website. This image previews the campaign only; open the page to check theme typography and pause/resume. Clear any page cache after editing a campaign.', 'easy-countdown')) : null,
                 timerId ? el('p', {}, __('Static editor preview. The website uses the saved timer, deadline, alternative text and end image. No campaign settings are copied into this block.', 'easy-countdown')) : null
             )
         );

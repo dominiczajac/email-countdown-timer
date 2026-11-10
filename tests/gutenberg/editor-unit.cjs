@@ -71,6 +71,14 @@ async function main() {
     check(h.definition.apiVersion === 3 && h.definition.save() === null, 'native API3 dynamic registration');
     let tree = h.render({ timerId: 'alpha', alignment: 'left' });
     check(all(tree, 'img').length === 1, 'valid timer has preview without any wp.data store');
+    const modeHarness = harness();
+    const display = all(modeHarness.render({ timerId: 'alpha' }), 'SelectControl').find(n => n.props.label === 'Website display');
+    check(display.props.value === 'image', 'old blocks default to Image mode');
+    display.props.onChange('live');
+    check(modeHarness.changes.at(-1).displayMode === 'live' && Object.keys(modeHarness.changes.at(-1)).length === 1, 'explicit live choice stores only the block mode');
+    const liveTree = modeHarness.render({ timerId: 'alpha', displayMode: 'live' });
+    check(all(liveTree, 'p').some(n => String(n.children[0]).includes('theme typography')), 'live mode explains static preview and frontend differences');
+
     check(all(tree, 'img')[0].props.src.includes('mode=static'), 'static endpoint');
     check(all(tree, 'img')[0].props.referrerPolicy === 'no-referrer', 'no referrer');
     const before = all(tree, 'img')[0].props.src;

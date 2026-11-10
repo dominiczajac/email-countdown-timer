@@ -6,13 +6,31 @@ Insert **Easy Countdown** in the block editor and choose a saved timer. Set left
 
 The preview is one static image, without background polling. With no campaigns, the block shows an explicit empty state. Administrators can open Quick Create in a new tab; other editors are asked to contact a site administrator. On return, **Refresh campaigns** updates the shared list in all mounted timer blocks without reloading the editor or rewriting selected IDs/alignment. **Refresh preview** independently updates the selected static image. A failed list request retains the previous list and selection, with explicit retry guidance; it never retries automatically. Save work before reopening an editor with an expired session.
 
-At most 250 IDs are supplied to an authorized editor; when truncated, the sidebar also accepts another known ID with an explicit Apply action. Missing or deleted references show an editor warning and produce no public image. The block stores only `timerId` and `alignment`, not copied deadlines, font settings or image data. Changes to campaigns apply when the page is rendered again; purge page HTML caches after changing alt or geometry.
+At most 250 IDs are supplied to an authorized editor; when truncated, the sidebar also accepts another known ID with an explicit Apply action. Missing or deleted references show an editor warning and produce no public image. The block stores `timerId`, `alignment` and an optional `displayMode`, not copied deadlines, font settings or image data. Changes to campaigns apply when the page is rendered again; purge page HTML caches after changing alt or geometry.
 
 Shortcodes and classic-editor usage are unchanged. Dynamic blocks are empty when the plugin is inactive and resume when reactivated. Existing posts are not migrated.
 
+## Live text on websites
+
+The sidebar **Website display** defaults to **Image**. Select **Live text** to
+update digits locally for as long as the page stays open, without image polling.
+The editor continues to show a static campaign image, with explicit guidance that
+the published text uses theme typography. Labels, colors, hidden days and the
+absolute deadline come from the saved campaign. Image fonts/sizes/width do not
+control live text. No saved campaign is migrated or copied into the post.
+
+Visitors can pause/resume; reduced-motion visitors start paused with a current
+snapshot. Hidden pages suspend ticking and catch up when visible. Digits are
+silent to screen readers; the exact deadline remains accessible. Without
+JavaScript the component labels itself a snapshot. A configured end image makes
+one existing static image request at expiry and fits the reserved stage; failure
+leaves zero digits visible. Browser clocks must be accurate. Purge page caches
+after campaign changes; cached HTML does not poll for new settings. See the
+[decision and limits](LIVE-WEBSITE-COUNTDOWN.md).
+
 ## Architecture and boundaries
 
-`block.json` (Block API 3) is registered with WordPress core. Only editor assets depend on the core block/element/component/data packages. The public render callback delegates to the existing shortcode and dimensions adapter: no second image renderer, frontend framework, polling, new public listing API or campaign mutation. The block has no custom REST route.
+`block.json` (Block API 3) is registered with WordPress core. Only editor assets depend on the core block/element/component/data packages. Image mode delegates to the existing shortcode and dimensions adapter: no second image renderer, frontend framework, polling, new public listing API or campaign mutation. The block has no custom REST route.
 
 Native `block_editor_settings_all` supplies bounded IDs only after checking edit access to the concrete post, or site-editor capability for contexts without a post. It omits raw settings, attachment IDs, paths and deadlines. Administrator links do not replace authorization in the destination form. Native WordPress escaping and the existing image-publication policy remain in effect.
 

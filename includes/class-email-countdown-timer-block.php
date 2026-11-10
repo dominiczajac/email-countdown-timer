@@ -48,9 +48,13 @@ final class Email_Countdown_Timer_Block {
         $alignment = $attributes['alignment'] ?? 'left';
         $positions = array( 'left' => 'flex-start', 'center' => 'center', 'right' => 'flex-end' );
         $position = is_string( $alignment ) && isset( $positions[ $alignment ] ) ? $positions[ $alignment ] : 'flex-start';
-        // The shortcode is the one authoritative implementation of alt, dimensions,
-        // cache interoperability and frontend refresh. Never generate an image here.
-        $html = $plugin->renderShortcode( array( 'id' => $id ) );
+        // Only an explicit allowlisted mode opts in; existing posts keep image output.
+        if ( 'live' === ( $attributes['displayMode'] ?? null ) ) {
+            require_once __DIR__ . '/class-email-countdown-timer-live.php';
+            $html = Email_Countdown_Timer_Live::render( $id, $timers[ $id ] );
+        } else {
+            $html = $plugin->renderShortcode( array( 'id' => $id ) );
+        }
         $wrapper = get_block_wrapper_attributes( array( 'style' => 'display:flex;justify-content:' . $position . ';' ) );
         return '<div ' . $wrapper . '>' . $html . '</div>';
     }

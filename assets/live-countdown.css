@@ -1,0 +1,55 @@
+/* Opt-in block only. Stable stage, theme typography and no digit animation. */
+.ecd-live {
+    box-sizing: border-box;
+    container-type: inline-size;
+    width: 32rem;
+    max-width: 100%;
+    min-width: 0;
+    padding: 1rem;
+    color: var(--ecd-digit);
+    background: var(--ecd-bg);
+    font-family: inherit;
+}
+.ecd-live *, .ecd-live *::before, .ecd-live *::after { box-sizing: border-box; }
+.ecd-live__stage { position: relative; height: 8rem; }
+.ecd-live__digits {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    height: 100%;
+    gap: .25rem;
+    text-align: center;
+}
+.ecd-live__digits--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ecd-live__unit { min-width: 0; }
+.ecd-live__number {
+    display: block;
+    font: inherit;
+    font-size: clamp(.625rem, 5cqi, 2rem);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.ecd-live__label {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ecd-label);
+    font-size: .875rem;
+    line-height: 1.5;
+}
+.ecd-live .ecd-live__end-image {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: contain;
+    border: 0;
+}
+.ecd-live .ecd-live__deadline { margin: .5rem 0; font-size: .875rem; overflow-wrap: anywhere; }
+.ecd-live__controls { min-height: 2.75rem; }
+.ecd-live__controls button { max-width: 100%; min-height: 2.75rem; font: inherit; white-space: normal; }
+.ecd-live [hidden] { display: none !important; }

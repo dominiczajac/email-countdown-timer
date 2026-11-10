@@ -12,17 +12,16 @@ Countdown images for email and WordPress, with local fonts and an end image.
 
 == Description ==
 
-Create fixed-deadline images locally. Copy Email HTML or an Image URL into your mailing platform, or use [ecd_timer id="promotion"] on WordPress. No external countdown account or API key is required.
+Create countdowns locally. Copy Email HTML or an Image URL into your mailing platform, or use [ecd_timer id="promotion"] on WordPress. No external account or API key is required.
 
 **Features**
 
-* Native Easy Countdown block with a timer selector, static preview and alignment.
+* Native block with image or opt-in live text, timer selection and alignment.
 * Private campaign names, suggested IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
 * Alternative text, a visible email deadline and proportional image dimensions.
-* Reserved website image space without another frontend library or polling.
 * Saved previews, animation on request and copyable embed codes.
 * Quick Create presets and a dashboard widget for users who manage timers.
 * English, Polish, German, Spanish and French label presets.
@@ -56,7 +55,7 @@ Back up data/fonts and update without uninstalling. Deactivate a legacy email-co
 == Frequently Asked Questions ==
 
 = How do I use the block editor? =
-Insert Easy Countdown and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves ID/alignment and uses a static preview. Deleted timers display nothing. Shortcodes remain supported.
+Insert Easy Countdown and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves a campaign reference and uses a static preview. Website display > Live text adds local ticking and Pause/Resume with theme typography. Image remains the default. Reduced motion starts paused; no-JS shows a snapshot. Clear page caches after campaign changes.
 
 
 = Does the timer start separately for each recipient? =
@@ -107,7 +106,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Changelog ==
 
 = 12.6.0 =
-* Add a dynamic Gutenberg block for existing timers, with static preview and alignment.
+* Add the native block, static preview and opt-in live text with Pause/Resume.
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
 * Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.

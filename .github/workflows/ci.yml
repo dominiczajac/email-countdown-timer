@@ -73,6 +73,7 @@ jobs:
         run: |
           php tests/gutenberg.php
           node tests/gutenberg/editor-unit.cjs
+          node tests/live-countdown.cjs
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php
       - name: Privacy-sensitive API guardrail
@@ -80,7 +81,7 @@ jobs:
       - name: Optimizer timing simulation
         run: node tests/frontend-compat.js
       - name: JavaScript syntax
-        run: node --check assets/block-editor.js && node --check assets/countdown.js && node --check assets/admin.js && node --check assets/end-image.js
+        run: node --check assets/live-countdown.js && node --check assets/block-editor.js && node --check assets/countdown.js && node --check assets/admin.js && node --check assets/end-image.js
   font-http:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
