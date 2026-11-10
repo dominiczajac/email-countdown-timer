@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Six counterbalanced states on the owned loopback PHP-FPM fixture, never production."""
 import io
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,10 @@ from contracts import ORDER, PROFILES, Page, accept, generation, page_evidence
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
 from wordpress import log_in
+
+
+class LabFailure(Exception):
+    """Only fixed check labels are copied into public CI annotations."""
 
 
 def main():
@@ -41,7 +46,7 @@ def main():
 
     def check(value, label):
         if not value:
-            raise AssertionError(label)
+            raise LabFailure(label)
         current['checks'].append(label)
 
     def wp(*args):
@@ -198,7 +203,9 @@ def main():
                               and inventory['theme']['name'] == 'twentytwentyfive', 'plugin-state')
                         url = fixture['pages'][key]['url']
                         check(local(url) and not urlsplit(url).query and urlsplit(url).path == '/' + key + '/', 'independent-page-url')
-                        with playwright.request.new_context() as request:
+                        with ExitStack() as resources:
+                            request = playwright.request.new_context()
+                            resources.callback(request.dispose)
                             phase = 'page-generation'
                             html = ''
                             for _ in range(4):
@@ -233,7 +240,7 @@ def main():
                         current['complete'] = True
                         print(f'::notice title=Cache state::{profile} JIT {jit} {key}: {len(current["checks"])} checks passed', flush=True)
                     except Exception as error:
-                        reason = str(error) if isinstance(error, AssertionError) else type(error).__name__
+                        reason = str(error) if isinstance(error, LabFailure) else type(error).__name__
                         failure = {'state': key, 'phase': phase, 'reason': reason}
                         current['failures'].append(failure)
                         report['failures'].append(failure)

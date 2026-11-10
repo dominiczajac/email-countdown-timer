@@ -45,5 +45,5 @@ if ( $mode === 'seed' ) {
     if ( $profile === 'autoptimize' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { $configuration[ $key ] = get_option( $key ); }
     }
-    echo wp_json_encode( array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => get_option( 'active_plugins' ), 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE ) );
+    echo wp_json_encode( array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => array_values( get_option( 'active_plugins', array() ) ), 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE ) );
 } else { exit( 1 ); }

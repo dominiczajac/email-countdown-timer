@@ -27,6 +27,13 @@ block/live text and pause/resume in a real browser. Keep timeouts and native-log
 gates strict. Retain all negative outcomes and report the exact failing phase;
 no retry is used to replace a failed result.
 
+The initial harness run at `245b79b` failed all eight cells before cache/browser
+measurement. The runner incorrectly used Playwright's APIRequestContext as a
+context manager, and the inventory did not normalize WordPress's sparse active
+plugin array after deactivation. These are test-harness failures, not evidence
+for or against plugin compatibility. Their original CI/artifacts remain at
+[run 42896894744](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42896894744).
+
 These bounded profiles do not certify every option or environment. FlyingPress
 and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs
 a separately verified LiteSpeed server. Elementor, WooCommerce, additional

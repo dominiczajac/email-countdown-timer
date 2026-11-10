@@ -31,12 +31,14 @@ trap finish EXIT
 wp=(wp --path="$ECD_CACHE_WP" --no-color)
 archive="$(mktemp "$RUNNER_TEMP/ect-cache-core.XXXXXX.zip")"
 stage="$(mktemp -d "$RUNNER_TEMP/ect-cache-stage.XXXXXX")"
+phase=wordpress-download
 curl --fail --location --retry 2 --proto '=https' --proto-redir '=https' https://wordpress.org/wordpress-7.1.2.zip -o "$archive"
 sha256sum "$archive" > "$ECD_CACHE_EVIDENCE/core-archive.sha256"
 unzip -q "$archive" -d "$stage"
 cp -a "$stage/wordpress/." "$ECD_CACHE_WP/"
 rm -f "$archive"
 "${wp[@]}" core verify-checksums
+phase=wordpress-config
 "${wp[@]}" config create --dbname=ect_cache_lab --dbuser=root --dbpass=cache-lab-disposable-only --dbhost=127.0.0.1:3307 --dbprefix=ectcache_ --skip-salts
 "${wp[@]}" config shuffle-salts
 "${wp[@]}" config set WP_ENVIRONMENT_TYPE local
@@ -48,6 +50,7 @@ rm -f "$archive"
 "${wp[@]}" core install --url=http://localhost:8095 --title='Isolated cache lab' --admin_user=ci-admin --admin_password="$ECD_CACHE_PASSWORD" --admin_email=ci@example.invalid --skip-email
 "${wp[@]}" theme activate twentytwentyfive
 "${wp[@]}" rewrite structure '/%postname%/'
+phase=candidate-install
 bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown-cache.zip" --report "$ECD_CACHE_EVIDENCE/distribution.json"
 "${wp[@]}" plugin install "$RUNNER_TEMP/easy-countdown-cache.zip" --activate
 python3 "$root/scripts/verify-distribution.py" "$ECD_CACHE_EVIDENCE/distribution.json" "$ECD_CACHE_WP/wp-content/plugins/easy-countdown"
@@ -58,6 +61,7 @@ case "$ECD_CACHE_PROFILE" in
   baseline) version='' ;;
 esac
 if [[ -n "$version" ]]; then
+  phase=vendor-install
   "${wp[@]}" plugin install "$ECD_CACHE_PROFILE" --version="$version"
   "${wp[@]}" plugin verify-checksums "$ECD_CACHE_PROFILE"
 fi
@@ -65,6 +69,7 @@ mkdir -p "$ECD_CACHE_WP/wp-content/mu-plugins"
 cp "$root/tests/cache-profiles/observer.php" "$ECD_CACHE_WP/wp-content/mu-plugins/ecd-cache-lab.php"
 "${wp[@]}" config set WP_HTTP_BLOCK_EXTERNAL true --raw
 "${wp[@]}" config set WP_ACCESSIBLE_HOSTS 'localhost,127.0.0.1'
+phase=vendor-config
 if [[ -n "$version" ]]; then "${wp[@]}" plugin activate "$ECD_CACHE_PROFILE"; fi
 if [[ "$ECD_CACHE_PROFILE" == wp-super-cache || "$ECD_CACHE_PROFILE" == w3-total-cache ]]; then
   "${wp[@]}" config set WP_CACHE true --raw
@@ -80,6 +85,7 @@ if [[ "$ECD_CACHE_PROFILE" == w3-total-cache ]]; then
   "${wp[@]}" w3-total-cache fix_environment
 fi
 "${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" configure
+phase=fixture-seed
 "${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" seed > "$ECD_CACHE_EVIDENCE/fixture.json"
 "${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" inventory > "$ECD_CACHE_EVIDENCE/environment.json"
 "${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_CACHE_EVIDENCE/plugins.json"
