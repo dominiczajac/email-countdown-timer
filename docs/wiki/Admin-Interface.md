@@ -14,6 +14,8 @@ New forms suggest an opaque unique ID without reserving or saving it. The option
 
 ## Save and correct errors
 
+The **Time Zone** selector lists named IANA zones. New campaigns start in the WordPress site zone; existing aliases, fixed offsets and legacy missing-zone interpretation are kept. Saving confirms the deadline with its numeric offset and UTC equivalent. Review that confirmation before sharing, especially for dates near a daylight saving transition. Selecting a zone never migrates another campaign.
+
 **Create Timer** and **Save Changes** submit explicitly. There is no autosave. Invalid fields are marked individually and listed in an error summary. With JavaScript, focus moves to the summary and linked fields open their enclosing sections. Server validation preserves entered scalar values; malformed non-scalar requests are rejected. A failed database write must not show a success message.
 
 The unsaved-change badge tracks changes locally; browsers may warn before leaving an edited form. No request is made for each keystroke or color change. The contrast helper compares digit/label colors against the image background without changing campaign colors or guaranteeing accessibility of a complete email.
