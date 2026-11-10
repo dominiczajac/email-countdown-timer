@@ -3,11 +3,14 @@
 ## 12.6.0 (review candidate)
 
 - Add a native dynamic Gutenberg block for existing timers, with a static preview, manual refresh and alignment controls. Reuse the existing shortcode renderer and permission-checked campaign references.
-- Integrate main's optional Lato font and original OFL notices with the block distribution. Preserve existing campaign fonts, URLs, shortcode behavior and bitmap defaults.
+- Integrate main's local Lato font and original OFL notices with the block distribution. Preserve existing campaign fonts, URLs, shortcode behavior and renderer defaults.
 - Record the upstream PHP #23991 JIT diagnosis and keep the required native acceptance matrix intact. This candidate is not a published release.
-
 - Use included Lato Regular for new campaigns only when FreeType can render it; preserve saved campaigns and renderer defaults.
 - Offer four high-contrast color presets in the timer editor, applied only when explicitly chosen and never auto-saved.
+- Add Quick Create with an ID, deadline, time zone and preset, using the existing protected save flow without JavaScript. Failed submissions retain their values in the full editor.
+- Add an Easy Countdown dashboard widget for users with `manage_options`, sharing Quick Create and linking to existing campaigns. Use native dashboard styles without image generation or new assets.
+- Add a Gutenberg first-campaign empty state and explicit shared campaign-list refresh. Recheck the concrete post/site-editor capability and a context-bound nonce; return at most 250 IDs through authenticated admin AJAX only.
+- Separate Website (block/shortcode) and Email (HTML/image URL) embedding, with independent copy actions and visible manual-copy fields.
 
 ## 12.5.3
 

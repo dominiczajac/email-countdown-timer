@@ -40,7 +40,9 @@ Use the installation ZIP, not a working directory containing developer/test file
 
 **Before the first update from 12.3.1 or older, copy/back up plugin-local fonts before WordPress replaces the old directory.** New code cannot recover files removed before it runs. Preserve font filenames and license notices. Persistent storage normally lives at `wp-content/uploads/email-countdown-timer/fonts/`; multisite adds `site-ID/`, and custom uploads paths can differ. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
 
-Open **Easy Countdown > Create Timer**, select a unique ID, set the deadline and time zone, and save. New timers inherit the WordPress site time zone, including UTC offsets; existing campaigns and legacy missing-zone records keep their original interpretation. Reload older editor tabs after updating: obsolete `save_timer` submissions are rejected without changing data. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
+Use **Quick Create** in Easy Countdown or the **Easy Countdown dashboard widget**: choose a unique ID, deadline, time zone and color preset, then create the campaign. Both forms work without JavaScript and open the saved timer in the full editor. The widget also links to five existing timers in ID order and **All timers** for search; only users with the existing `manage_options` permission see it. WordPress Screen Options can hide the widget. **Create Timer** opens the full editor directly.
+
+New timers inherit the WordPress site time zone, including UTC offsets; existing campaigns and legacy missing-zone records keep their original interpretation. Reload older editor tabs after updating: obsolete `save_timer` submissions are rejected without changing data. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
 
 ## Display and accessibility
 
@@ -57,6 +59,10 @@ In the WordPress block editor, insert **Easy Countdown**, choose an existing tim
 ```text
 [ecd_timer id="promotion"]
 ```
+
+**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
+
+**Embed Codes > Email** provides separate **Email HTML** and **Image URL** copy actions. All three code fields remain available for manual copying without JavaScript. WordPress shortcodes do not run in email.
 
 Email HTML can be copied from the editor with an image description and visible absolute deadline. Images are generated from the current server time, with 15-second shared freshness buckets. Animated GIFs contain 60 one-second frames. A single downloaded GIF does not recalculate forever: email providers can prefetch, cache or block it, and some clients only display the first frame. **Always include the actual deadline as visible text.** Do not insert recipient IDs, email addresses or confidential information into public timer fields or URLs.
 

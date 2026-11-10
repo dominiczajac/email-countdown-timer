@@ -8,11 +8,11 @@ Stable tag: 12.6.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Create countdown images on your own server for email campaigns and WordPress pages, with local fonts and a custom end image.
+Countdown images for email and WordPress, with local fonts and an end image.
 
 == Description ==
 
-Create fixed-deadline countdown images locally. Copy an image URL or Email HTML into your mailing platform, or use [ecd_timer id="promotion"] on a WordPress page. No external countdown account or API key is required.
+Create fixed-deadline images locally. Copy Email HTML or an Image URL into your mailing platform, or use [ecd_timer id="promotion"] on WordPress. No external countdown account or API key is required.
 
 **Features**
 
@@ -24,6 +24,7 @@ Create fixed-deadline countdown images locally. Copy an image URL or Email HTML 
 * Alternative text, a visible email deadline and proportional image dimensions.
 * Reserved website image space without another frontend library or polling.
 * Saved previews, animation on request and copyable embed codes.
+* Quick Create presets and a dashboard widget for users who manage timers.
 * English, translation-ready administration using WordPress controls.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
@@ -44,9 +45,9 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 == Installation ==
 
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Open Easy Countdown > Create Timer. Set a unique ID, deadline and time zone, then save.
+2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone and preset. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
-4. Copy the image URL or email HTML into your email editor, or insert [ecd_timer id="promotion"] on a WordPress page, replacing promotion with your timer ID.
+4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
 5. Check the public image while logged out and send a test using your actual mailing platform.
 
 Back up data/fonts and update without uninstalling. Deactivate a legacy email-countdown-timer copy before activating easy-countdown: both share data. Never run both or uninstall with cleanup enabled while data is needed. Copy plugin-local fonts before replacing code directories.
@@ -54,7 +55,7 @@ Back up data/fonts and update without uninstalling. Deactivate a legacy email-co
 == Frequently Asked Questions ==
 
 = How do I use the block editor? =
-Insert Easy Countdown, choose a saved timer and set alignment in its sidebar. Administrators can open timer settings. The block saves only ID/alignment; its preview is static. Reopen the editor to refresh the list. Deleted timers show nothing. Deactivation hides blocks until reactivation. Shortcodes and the classic editor remain supported.
+Insert Easy Countdown and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves ID/alignment and uses a static preview. Deleted timers display nothing. Shortcodes remain supported.
 
 
 = Does the timer start separately for each recipient? =
@@ -73,7 +74,7 @@ Describe both countdown and expired states: alt cannot change during GIF playbac
 Shortcodes reserve measured, proportional space before images load; themes can override it. Purge page HTML after geometry/font changes and recopy manual/email embeds. This is not a whole-page Core Web Vitals guarantee.
 
 = Where do I install fonts? =
-New timers select included Lato when FreeType is available; otherwise bitmap. Saved timers are unchanged. The font is SIL OFL 1.1, including commercial bundling (see fonts/OFL.txt). Keep custom TTF/OTF in the persistent directory shown in Data Settings; no Google importer. [Font storage and migration](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
+New timers use included Lato with FreeType, otherwise bitmap. Saved timers are unchanged. Lato is SIL OFL 1.1 (fonts/OFL.txt). Keep custom TTF/OTF in Data Settings’ persistent directory; no Google importer. [Font storage](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -108,6 +109,7 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 * Add a dynamic Gutenberg block for existing timers, with static preview and alignment.
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
+* Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.
 
 = 12.5.3 =
 * Bundle optional local Lato Regular under SIL OFL 1.1, with integrity-checked font and license notices.
