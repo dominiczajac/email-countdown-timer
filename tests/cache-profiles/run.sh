@@ -24,6 +24,9 @@ finish() {
   python3 "$root/tests/gutenberg/check-native-logs.py" "$ECD_CACHE_EVIDENCE" --report "$ECD_CACHE_EVIDENCE/native-logs.json"
   native_result=$?
   if [[ "$result" == 0 && "$native_result" != 0 ]]; then result=1; fi
+  python3 "$root/tests/cache-profiles/contracts.py" "$ECD_CACHE_EVIDENCE/checks.json" --report "$ECD_CACHE_EVIDENCE/acceptance.json"
+  acceptance_result=$?
+  if [[ "$result" == 0 && "$acceptance_result" != 0 ]]; then result=1; fi
   if [[ "$result" != 0 ]]; then printf '::error title=Cache profile::%s JIT %s failed in %s; retained evidence stays negative.\n' "$ECD_CACHE_PROFILE" "$ECD_CACHE_JIT" "$phase"; fi
   unset ECD_CACHE_PASSWORD
   exit "$result"

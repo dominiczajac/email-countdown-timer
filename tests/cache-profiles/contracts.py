@@ -7,6 +7,7 @@ PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10
 ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pair-3-on']
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
 ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser'}
+ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
 
 
 class Page(HTMLParser):
@@ -41,7 +42,7 @@ def generation(html):
 
 def page_evidence(markers, cached):
     """Two fixed warm requests followed by two measurements; never retry failures."""
-    if len(markers) != 4 or any(not isinstance(x, str) or not re.fullmatch('[a-f0-9]{24}', x) for x in markers):
+    if not isinstance(markers, list) or len(markers) != 4 or any(not isinstance(x, str) or not re.fullmatch('[a-f0-9]{24}', x) for x in markers):
         return False
     return markers[2] == markers[3] if cached else len(set(markers)) == 4
 
@@ -52,6 +53,15 @@ def core_avatar(url, resource_type):
     return (resource_type == 'image' and parts.scheme == 'https'
             and parts.netloc == 'secure.gravatar.com'
             and re.fullmatch(r'/avatar/(?:[a-f0-9]{32}|[a-f0-9]{64})', parts.path) is not None)
+
+
+def navigation_cancel(failure, url, phase, navigating):
+    parts = urlsplit(url)
+    return (failure == 'net::ERR_ABORTED' and navigating and phase in ADMIN_PHASES
+            and parts.scheme == 'http' and parts.netloc == 'localhost:8095'
+            and parts.path.startswith(('/wp-includes/', '/wp-admin/', '/wp-json/'))
+            and 'ecd_action=render' not in url and '/easy-countdown/' not in url
+            and '/cache/autoptimize/' not in url)
 
 
 def accept(report):
@@ -68,6 +78,9 @@ def accept(report):
         active = state['key'].endswith('-on')
         if state.get('active') is not active or state.get('complete') is not True or state.get('failures') != []:
             return False
+        markers = state.get('generations')
+        if not page_evidence(markers, report['profile'] in ('wp-super-cache', 'w3-total-cache')):
+            return False
         checks = state.get('checks')
         required = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
         if active and report['profile'] == 'autoptimize':
@@ -77,11 +90,36 @@ def accept(report):
             artifacts = state.get('engine_cache_files')
             if not isinstance(artifacts, list) or not artifacts:
                 return False
-            if any(not isinstance(item, dict) or item.get('generation') != state.get('generations', [None])[-1]
+            if any(not isinstance(item, dict) or item.get('generation') != markers[-1]
                    or not isinstance(item.get('sha256'), str) or not re.fullmatch('[a-f0-9]{64}', item['sha256']) for item in artifacts):
                 return False
         if not isinstance(checks, list) or not all(isinstance(x, str) for x in checks) or not required.issubset(checks):
             return False
-        if not page_evidence(state.get('generations', []), report['profile'] in ('wp-super-cache', 'w3-total-cache')):
-            return False
     return True
+
+
+def main():
+    import argparse
+    import json
+    from pathlib import Path
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('evidence', type=Path)
+    parser.add_argument('--report', type=Path)
+    args = parser.parse_args()
+    result = {'passed': False}
+    try:
+        if args.evidence.is_symlink() or not args.evidence.is_file() or args.evidence.stat().st_size > 16 * 1024 * 1024:
+            raise ValueError('invalid_evidence')
+        result['passed'] = accept(json.loads(args.evidence.read_text()))
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        result['reason'] = type(error).__name__
+    encoded = json.dumps(result) + '\n'
+    if args.report:
+        with args.report.open('x') as stream:
+            stream.write(encoded)
+    print(encoded, end='')
+    return 0 if result['passed'] else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

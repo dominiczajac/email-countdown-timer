@@ -14,14 +14,11 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, core_avatar, generation, page_evidence
+from contracts import ORDER, PROFILES, Page, accept, core_avatar, generation, navigation_cancel, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
 from wordpress import log_in
-
-ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
-
 
 def annotation(level, title, message):
     message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
@@ -48,6 +45,7 @@ def main():
     report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
+    navigating = False
 
     def local(url):
         parsed = urlsplit(url)
@@ -81,7 +79,12 @@ def main():
         current['runtime'] = {k: v for k, v in headers.items() if k.startswith('x-ecd-lab-')}
 
     def navigate(page, path):
-        response = page.goto(base + path, wait_until='load', timeout=45000)
+        nonlocal navigating
+        navigating = True
+        try:
+            response = page.goto(base + path, wait_until='load', timeout=45000)
+        finally:
+            navigating = False
         check(response is not None and response.status == 200, 'admin-http')
         return response
 
@@ -111,11 +114,9 @@ def main():
             def failed(request):
                 if request.url in expected_aborted:
                     return
-                item = {'state': current['key'], 'phase': phase, 'path': urlsplit(request.url).path}
-                if (request.failure == 'net::ERR_ABORTED' and phase in ADMIN_PHASES
-                        and request.resource_type in ('xhr', 'fetch') and local(request.url)
-                        and 'ecd_action=render' not in request.url
-                        and '/easy-countdown/' not in request.url and '/cache/autoptimize/' not in request.url):
+                item = {'state': current['key'], 'phase': phase, 'path': urlsplit(request.url).path,
+                        'resource_type': request.resource_type, 'failure': request.failure}
+                if navigation_cancel(request.failure, request.url, phase, navigating):
                     # Navigating between real admin pages can cancel outstanding AJAX.
                     # Required image/script behavior is separately checked before leaving.
                     report['navigation_cancellations'].append(item)
@@ -169,13 +170,17 @@ def main():
             check(image.format == 'PNG' and image.width == 600 and image.height > 1, 'image-static')
 
     def browser_state(browser, url):
-        nonlocal phase
+        nonlocal phase, navigating
         with browser.new_context(viewport={'width': 1280, 'height': 900}, reduced_motion='no-preference') as admin:
             isolate(admin)
             page = admin.new_page()
             page.on('dialog', lambda dialog: dialog.accept() if dialog.type == 'beforeunload' else dialog.dismiss())
             phase = 'admin-login'
-            log_in(page, base, 'ci-admin', os.environ['ECD_CACHE_PASSWORD'])
+            navigating = True
+            try:
+                log_in(page, base, 'ci-admin', os.environ['ECD_CACHE_PASSWORD'])
+            finally:
+                navigating = False
             phase = 'dashboard'
             runtime(navigate(page, '/wp-admin/'))
             expect(page.locator('#wpadminbar')).to_be_visible()
@@ -199,6 +204,8 @@ def main():
                 expect(page.locator('#ect-preview')).to_have_js_property('complete', True)
                 check(page.locator('#ect-preview').evaluate('(img) => img.naturalWidth > 1'), 'timer-editor')
                 page.screenshot(path=str(evidence / (current['key'] + '-editor.png')))
+            navigating = True
+        navigating = False
 
         if not current['active']:
             return
@@ -268,12 +275,21 @@ def main():
                             resources.callback(request.dispose)
                             phase = 'page-generation'
                             html = ''
+                            current['page_accept'] = 'text/html'
+                            current['page_response_headers'] = []
                             for _ in range(4):
-                                response = request.get(url, timeout=45000, max_redirects=0)
+                                response = request.get(url, headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
                                 check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'anonymous-page-http')
                                 html = response.text()
+                                current['page_response_headers'].append({k: v for k, v in response.headers.items() if k.startswith('x-ecd-lab-')})
                                 current['generations'].append(generation(html))
                             cached = profile in ('wp-super-cache', 'w3-total-cache')
+                            if not page_evidence(current['generations'], cached):
+                                annotation('error', 'Cache page details', json.dumps({'profile': profile, 'state': key,
+                                    'unique_generations': len(set(current['generations'])), 'accept': current['page_accept'],
+                                    'headers': current['page_response_headers'][-1],
+                                    'cache_comment': 'Cached page generated by WP-Super-Cache' in html,
+                                    'uncached_comment': 'Page not cached by WP Super Cache' in html}))
                             check(page_evidence(current['generations'], cached), 'page-generation')
                             if cached:
                                 current['engine_cache_files'] = cache_files(current['generations'][-1])

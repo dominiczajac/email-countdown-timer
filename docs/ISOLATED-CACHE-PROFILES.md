@@ -55,8 +55,22 @@ The Autoptimize assertion proves the live JavaScript is bundled and executes;
 it does not certify CSS optimization. The synthetic control-image attributes
 are observational lazy-load evidence. Cache-file inspection is limited to this
 small fixture and 2 MiB per file; an oversized or unreadable required artifact
-fails closed. Frontend image/script cancellations fail; only recorded admin
-XHR/fetch cancellations during navigation can be non-failing.
+fails closed. Frontend image/script cancellations fail; only recorded core/admin
+requests aborted while the harness navigates or closes admin pages can be
+non-failing. Countdown and optimized assets remain protected.
+
+At `0bc7777`, W3 Total Cache and Autoptimize passed both JIT cells; baseline
+passed JIT-disabled (5/8 successful jobs). The JIT-enabled baseline recorded an
+aborted core emoji script during dashboard navigation; the next harness
+revision classifies only core/admin aborts during explicit navigation, with
+negative tests for protected assets and real request failures. WP Super Cache
+still failed the page-generation check
+in all off/on controls, despite an identified installed drop-in and enabled
+flags. This is not accepted as a compatibility pass. Preserve
+[run 42900124590](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42900124590).
+The next revision requests HTML explicitly, records fixed early-cache/response
+diagnostics and adds an independent final completeness gate. No page-hit
+assertion, native gate or timeout is relaxed.
 
 These bounded profiles do not certify every option or environment. FlyingPress
 and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs

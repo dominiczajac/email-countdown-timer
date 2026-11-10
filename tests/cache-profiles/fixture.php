@@ -39,9 +39,9 @@ if ( $mode === 'seed' ) {
     if ( function_exists( 'w3tc_flush_all' ) ) { w3tc_flush_all(); }
     if ( class_exists( 'autoptimizeCache' ) ) { autoptimizeCache::clearall(); }
 } elseif ( $mode === 'inventory' ) {
-    global $wpdb, $cache_enabled, $super_cache_enabled, $wp_cache_mod_rewrite, $cache_rebuild;
+    global $wpdb, $cache_enabled, $super_cache_enabled, $wp_cache_mod_rewrite, $cache_rebuild_files;
     $configuration = array();
-    if ( $profile === 'wp-super-cache' ) { $configuration = array( 'cache_enabled' => $cache_enabled ?? null, 'super_cache_enabled' => $super_cache_enabled ?? null, 'wp_cache_mod_rewrite' => $wp_cache_mod_rewrite ?? null, 'cache_rebuild' => $cache_rebuild ?? null ); }
+    if ( $profile === 'wp-super-cache' ) { $configuration = array( 'cache_enabled' => $cache_enabled ?? null, 'super_cache_enabled' => $super_cache_enabled ?? null, 'wp_cache_mod_rewrite' => $wp_cache_mod_rewrite ?? null, 'cache_rebuild_files' => $cache_rebuild_files ?? null ); }
     if ( $profile === 'w3-total-cache' ) {
         $c = \W3TC\Dispatcher::config();
         foreach ( array( 'pgcache.enabled', 'pgcache.engine', 'browsercache.enabled', 'lazyload.enabled' ) as $key ) { $configuration[ $key ] = $c->get( $key ); }
