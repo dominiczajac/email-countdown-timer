@@ -2,6 +2,7 @@
 import json
 import os
 import pathlib
+import re
 import shutil
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
@@ -38,6 +39,8 @@ with sync_playwright() as p:
     check(page.locator('[src*="assets/admin.js"]').count() == 0, 'no custom admin JS on Dashboard')
     widget = page.locator('#email-countdown-timer-dashboard')
     expect(widget).to_be_visible()
+    check(re.fullmatch(r'timer-[0-9a-f]{12}', widget.locator('#ect-dashboard-id').input_value()), 'dashboard suggests an opaque ID without saving a timer')
+    widget.locator('#ect-dashboard-name').fill('Private dashboard campaign')
     widget.locator('#ect-dashboard-id').fill('dashboard-test')
     # datetime-local removes zero seconds; Playwright requires its canonical value.
     widget.locator('#ect-dashboard-deadline').fill('2031-05-15T12:00')
@@ -45,8 +48,9 @@ with sync_playwright() as p:
     widget.get_by_role('button', name='Create campaign', exact=True).click()
     page.wait_for_url('**edit=dashboard-test**')
     check(page.locator('#ect-dc').input_value() == '#F9FAFB', 'dashboard Quick Create saves preset colors through the protected controller')
+    check(page.locator('#ect-campaign_name').input_value() == 'Private dashboard campaign', 'dashboard saves the optional private name')
     page.goto(base + '/wp-admin/index.php')
-    page.locator('#email-countdown-timer-dashboard').get_by_role('link', name='Edit dashboard-test', exact=True).click()
+    page.locator('#email-countdown-timer-dashboard').get_by_role('link', name='Edit Private dashboard campaign', exact=True).click()
     page.wait_for_url('**edit=dashboard-test**')
     check(page.locator('#ect-timer_id').input_value() == 'dashboard-test', 'dashboard shortcut opens an existing campaign for editing')
     page.goto(base + '/wp-admin/admin.php?page=ecd-timers')
@@ -54,6 +58,24 @@ with sync_playwright() as p:
     check(page.locator('.email-countdown-admin img').count() == 0, 'list contains no generated image thumbnails')
     check(page.locator('[href*="assets/admin.css"]').count() == 1, 'exactly one plugin stylesheet')
     check(page.locator('[src*="assets/admin.js"]').count() == 1, 'exactly one plugin script')
+    generated_id = page.locator('#ect-quick-id').input_value()
+    check(re.fullmatch(r'timer-[0-9a-f]{12}', generated_id), 'Quick Create suggests an opaque editable ID')
+    page.locator('#ect-quick-name').fill('Private named campaign')
+    page.locator('#ect-quick-deadline').fill('2031-08-20T12:30')
+    page.get_by_role('button', name='Create campaign', exact=True).click()
+    page.wait_for_url('**edit=' + generated_id + '**')
+    original_url = page.locator('#ect-embed-code').input_value()
+    check(page.locator('#ect-timer_id').input_value() == generated_id and 'Private' not in original_url and 'Private' not in page.locator('#ect-manual-html').input_value(), 'private name does not enter generated ID, public URL or email HTML')
+    page.get_by_role('link', name='Back to Timers', exact=True).click()
+    page.locator('#ect-search').fill('Private named campaign')
+    page.locator('.ect-search button').click()
+    check(page.locator('table tbody tr').count() == 1 and page.locator('table code').inner_text() == generated_id, 'name search returns the matching immutable timer ID')
+    page.get_by_role('link', name='Edit ' + generated_id, exact=True).click()
+    page.locator('#ect-campaign_name').fill('Renamed internal campaign')
+    page.locator('#ect-editor button[type=submit]').click()
+    expect(page.get_by_text('Timer saved.', exact=True)).to_be_visible()
+    check(page.locator('#ect-timer_id').input_value() == generated_id and page.locator('#ect-embed-code').input_value() == original_url, 'renaming a campaign preserves its ID and existing embed URL')
+    page.get_by_role('link', name='Back to Timers', exact=True).click()
     page.locator('#ect-quick-id').fill('quick-browser-test')
     page.locator('#ect-quick-deadline').fill('2031-08-20T12:30')
     page.locator('#ect-quick-tz').fill('America/New_York')
@@ -155,11 +177,13 @@ with sync_playwright() as p:
     plain = nojs.new_page()
     plain.goto(base + '/wp-admin/index.php')
     plain.locator('#ect-dashboard-id').fill('dashboard-no-js')
+    plain.locator('#ect-dashboard-name').fill('Private no-JS campaign')
     plain.locator('#ect-dashboard-deadline').fill('2032-05-15T12:00')
     plain.locator('#ect-dashboard-preset').select_option('ocean')
     plain.get_by_role('button', name='Create campaign', exact=True).click()
     expect(plain.get_by_text('Timer saved.', exact=True)).to_be_visible()
     check(plain.locator('#ect-dc').input_value() == '#1D4ED8', 'dashboard creation works without JavaScript')
+    check(plain.locator('#ect-campaign_name').input_value() == 'Private no-JS campaign', 'private names work without JavaScript')
     plain.goto(base + '/wp-admin/admin.php?page=ecd-timers&edit=browser-test')
     check(plain.locator('#ect-animation').is_hidden(), 'no-JS view does not expose inert animation control')
     expect(plain.locator('#ect-label_s')).to_be_visible()

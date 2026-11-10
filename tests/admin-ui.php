@@ -35,6 +35,48 @@ $submit_admin( array_replace( $valid_post, array( 'timer_id' => 'renamed' ) ) );
 ok( isset( Email_Countdown_Timer_Admin::state()['errors']['timer_id'] ) && $options === $before, 'read-only ID enforced server-side' );
 ok( str_starts_with( $submit_admin( $valid_post ), 'redirect:' ), 'valid modern form redirects only after saving' );
 ok( $options['easy_countdown_timers']['existing'] === $ui_config, 'modern form preserves campaign configuration' );
+$before_names = $options;
+$test_uuid_sequence = array( 'deadbeef-0000-4000-8000-000000000001', 'cafebabe-0000-4000-8000-000000000002' );
+$options['easy_countdown_timers']['timer-deadbeef0000'] = null;
+ok( Email_Countdown_Timer_Admin::suggested_id() === 'timer-cafebabe0000', 'ID suggestion skips occupied keys, including malformed stored records' );
+$options = $before_names;
+$new_id = Email_Countdown_Timer_Admin::suggested_id();
+ok( (bool) preg_match( '/^timer-[0-9a-f]{12}$/D', $new_id ) && $options === $before_names, 'opaque ID suggestion needs no saved reservation or campaign name' );
+$private_name = 'Private "Łódź" & summer';
+$named_post = array_replace( $valid_post, array( 'campaign_name' => '<b>' . $private_name . '</b>' ) );
+$admin = false;
+ok( str_starts_with( $submit_admin( $named_post ), 'die:' ) && $options === $before_names, 'private-name writes retain the capability gate' );
+$admin = true;
+foreach ( array( array( 'bad' ), str_repeat( 'n', 201 ) ) as $bad_name ) {
+    $submit_admin( array_replace( $valid_post, array( 'campaign_name' => $bad_name ) ) );
+    ok( isset( Email_Countdown_Timer_Admin::state()['errors']['campaign_name'] ) && $options === $before_names, 'invalid name cannot mutate a campaign' );
+}
+ok( str_starts_with( $submit_admin( $named_post ), 'redirect:' ), 'private name saves through the existing form' );
+$named_config = $options['easy_countdown_timers']['existing'];
+ok( $named_config['campaign_name'] === $private_name && Email_Countdown_Timer_Config::normalize( $named_config ) === $ui_config, 'name is plain admin metadata outside renderer normalization' );
+$_GET = array( 's' => 'Łódź' );
+ok( array_keys( Email_Countdown_Timer_Admin::state()['timers'] ) === array( 'existing' ), 'administration search finds a private name with its existing immutable ID' );
+ob_start(); $plugin->renderAdminPage(); $named_list = ob_get_clean();
+ok( str_contains( $named_list, 'Private &quot;Łódź&quot; &amp; summer' ) && str_contains( $named_list, 'edit=existing' ), 'list escapes names and links by the original ID' );
+ok( ! str_contains( $plugin->renderShortcode( array( 'id' => 'existing' ) ), 'Private' ), 'private name is not used as public alt text or markup' );
+$reset_admin(); $_GET = array( 'edit' => 'existing' );
+ob_start(); $plugin->renderAdminPage(); $named_editor = ob_get_clean();
+preg_match( '/<textarea[^>]*id="ect-manual-html"[^>]*>(.*?)<\/textarea>/s', $named_editor, $named_html );
+ok( ! str_contains( $named_html[1] ?? '', 'Private' ), 'private name never enters email HTML' );
+ok( str_starts_with( $submit_admin( $valid_post ), 'redirect:' ) && $options['easy_countdown_timers']['existing'] === $named_config, 'older forms without the new field preserve a saved private name' );
+if ( function_exists( 'imagecreatetruecolor' ) ) {
+    $old_transients = $transients; $old_writes = $writes; $old_get = $_GET;
+    $transients = array(); $writes = 0;
+    $_GET = array( 'ecd' => 'existing', 'mode' => 'email' );
+    $image_method = new ReflectionMethod( $plugin, 'generateImage' );
+    ob_start(); $image_method->invoke( $plugin, false, 1790580000 ); $named_pixels = ob_get_clean();
+    $options['easy_countdown_timers']['existing']['campaign_name'] = 'Different private name';
+    ob_start(); $image_method->invoke( $plugin, false, 1790580000 ); $renamed_pixels = ob_get_clean();
+    ok( $named_pixels === $renamed_pixels && $writes === 1 && ! str_contains( serialize( $transients ), $private_name ), 'renaming private metadata does not change image pixels, cache signature or cached content' );
+    $transients = $old_transients; $writes = $old_writes; $_GET = $old_get;
+}
+ok( str_starts_with( $submit_admin( array_replace( $valid_post, array( 'campaign_name' => '' ) ) ), 'redirect:' ) && $options['easy_countdown_timers']['existing'] === $ui_config, 'explicitly empty name removes only that optional metadata' );
+$options = $before_names; $reset_admin(); $_GET = array();
 $quick = array( 'ecd_action' => 'email_countdown_timer_save', 'creation_mode' => 'quick', 'original_id' => '', 'timer_id' => 'quick-new', 'deadline' => '2031-08-20T12:30:00', 'tz' => 'America/New_York', 'appearance_preset' => 'midnight' );
 $before_quick = $options;
 $admin = false;

@@ -4,11 +4,13 @@ The 12.2.0 interface runs inside the existing **Easy Countdown** WordPress menu.
 
 ## Find or create a timer
 
-The default screen is **Your Timers**, with ID search and 25 records per page. It shows deadline/time zone, a text status, **Edit** and **Get Embed Code**. It does not generate image thumbnails. Pagination limits HTML, not the size of the existing single database option containing all timers.
+The default screen is **Your Timers**, with name/ID search and 25 records per page. It shows an optional campaign name alongside the immutable ID, deadline/time zone, a text status, **Edit** and **Get Embed Code**. It does not generate image thumbnails. Pagination limits HTML, not the size of the existing single database option containing all timers.
 
 Select **Create Timer**. Enter a unique ID, deadline and time zone in **Schedule**, then choose colors in **Appearance**. **Typography and Size** contains local fonts and the existing numeric fields; **Custom Labels** contains the four campaign labels. Empty labels are allowed. Missing local fonts keep their saved names and fall back to the bitmap renderer rather than silently changing stored data.
 
 A timer's ID is read-only during editing and enforced on the server. Reusing an ID in a new form returns an error instead of overwriting the existing timer.
+
+New forms suggest an opaque unique ID without reserving or saving it. The optional **Campaign name** stays in administration only; it is not used to generate that ID, as image alt text, in email HTML or in Gutenberg's catalog. Rename a campaign without changing its existing URLs. Old forms that omit the name preserve it; clearing the name deliberately removes just that metadata. The dashboard widget also shows names and the underlying IDs.
 
 ## Save and correct errors
 

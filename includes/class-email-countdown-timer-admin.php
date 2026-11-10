@@ -137,7 +137,7 @@ final class Email_Countdown_Timer_Admin {
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $id ) ); ?>"><?php echo esc_html( self::campaign_name( $timer ) ?: (string) $id ); ?></a><?php if ( '' !== self::campaign_name( $timer ) ) : ?> <code><?php echo esc_html( (string) $id ); ?></code><?php endif; ?></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::campaign_name( $timer ) ?: (string) $id ) ); ?>"><?php echo esc_html( self::campaign_name( $timer ) ?: (string) $id ); ?></a><?php if ( '' !== self::campaign_name( $timer ) ) : ?> <code><?php echo esc_html( (string) $id ); ?></code><?php endif; ?></li>
                     <?php endforeach; ?>
                 </ul>
                 <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>

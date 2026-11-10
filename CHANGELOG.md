@@ -2,6 +2,7 @@
 
 ## 12.6.0 (review candidate)
 
+- Add optional private campaign names and opaque suggested IDs for new timers. Search administration by name or ID, preserve old forms and immutable saved IDs, and keep names out of public rendering, email HTML and the editor catalog.
 - Add a native dynamic Gutenberg block for existing timers, with a static preview, manual refresh and alignment controls. Reuse the existing shortcode renderer and permission-checked campaign references.
 - Integrate main's local Lato font and original OFL notices with the block distribution. Preserve existing campaign fonts, URLs, shortcode behavior and renderer defaults.
 - Record the upstream PHP #23991 JIT diagnosis and keep the required native acceptance matrix intact. This candidate is not a published release.
