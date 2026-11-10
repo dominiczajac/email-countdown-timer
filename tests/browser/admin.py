@@ -4,9 +4,11 @@ import os
 import pathlib
 import re
 import shutil
+import sys
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 from wordpress import log_in
+from status import verify_status
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -15,6 +17,15 @@ evidence = pathlib.Path(os.environ['RUNNER_TEMP']) / 'admin-evidence'
 evidence.mkdir(exist_ok=True)
 checks = []
 errors = []
+_original_exception_hook = sys.excepthook
+
+def report_native_failure(exc_type, exc_value, traceback):
+    # Only type/count enter annotations; no exception text, credentials or input.
+    if os.environ.get('GITHUB_ACTIONS') == 'true':
+        print(f'::error title=Native admin browser::{exc_type.__name__} after {len(checks)} completed checks. See retained evidence.', flush=True)
+    _original_exception_hook(exc_type, exc_value, traceback)
+
+sys.excepthook = report_native_failure
 
 def check(value, name):
     if not value:
@@ -274,6 +285,7 @@ with sync_playwright() as p:
     page.goto(base + '/wp-admin/admin.php?page=email-countdown-timer-data')
     check(page.locator('[href*="assets/admin.css"]').count() == 1, 'Data Settings shares scoped styling')
     check(not page.locator('[name=delete_data_on_uninstall]').is_checked(), 'uninstall opt-in remains off')
+    verify_status(page, browser, context, base, evidence, check)
     check(not errors, 'no browser JavaScript exceptions')
     check(not any(urlsplit(u).hostname in {'fonts.googleapis.com', 'fonts.gstatic.com'} for u in requests), 'zero Google Fonts requests')
     report = {'checks': checks, 'count': len(checks), 'browser': browser.version, 'wordpress_site': 'disposable localhost only', 'js_errors': errors, 'limits': 'Custom browser checks; not a screen-reader audit, full axe scan or WCAG certification.'}

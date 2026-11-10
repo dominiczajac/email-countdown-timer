@@ -18,3 +18,17 @@
 Public errors deliberately do not expose exceptions or server paths. `503` has several possible causes; the status alone does not identify one. Check extension configuration, limits, and safe server logs in a staging environment. The plugin does not create its own detailed exception log.
 
 When reporting a bug, include the plugin version, WordPress/PHP versions, GD/Imagick availability, HTTP status, reproduction steps, and a nonsensitive test configuration. Do not paste passwords, keys, administrator cookies, a database, or recipient lists. For suspected vulnerabilities, follow `SECURITY.md` in the main repository.
+
+
+## On-demand status and a support report
+
+Use **Easy Countdown > Status & Troubleshooting > Run local checks**. Optionally
+enter a saved campaign ID to check its font and enable a separate public-image
+test. Results explain GD, FreeType, Imagick, locking and font fallback with a
+severity and action. Opening the page makes no probe or image request.
+
+The report contains versions and fixed results, never site URLs, campaign
+IDs/names/settings, font paths/names, media IDs, credentials or raw errors. Review
+it before copying/sharing. No report is sent automatically. The image button
+makes one anonymous browser request with a timeout; cross-host image URLs require
+CORS. This is not a remote-host, email-client or full compatibility certification.

@@ -12,7 +12,7 @@ Countdown images for email and WordPress, with local fonts and an end image.
 
 == Description ==
 
-Create countdowns locally. Copy Email HTML or an Image URL into your mailing platform, or use [ecd_timer id="promotion"] on WordPress. No external account or API key is required.
+Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or use [ecd_timer id="promotion"] on WordPress. No external account/API key.
 
 **Features**
 
@@ -21,9 +21,9 @@ Create countdowns locally. Copy Email HTML or an Image URL into your mailing pla
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
-* Alternative text, a visible email deadline and proportional image dimensions.
-* Saved previews, animation on request and copyable embed codes.
-* Quick Create presets and a dashboard widget for users who manage timers.
+* Alt text, a visible email deadline and reserved image space.
+* Quick Create presets and an administrator dashboard widget.
+* On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
 * Translation-ready English admin with WordPress controls.
 * Opt-in cleanup on uninstall; settings are retained by default.
@@ -91,7 +91,7 @@ Set Cache eligibility to Bypass cache and place this exception after conflicting
 Repeated GETs to the same timer URL should return an actual image, not HTML. Check for no-store/no-transform and normally CF-Cache-Status DYNAMIC or BYPASS rather than HIT/STALE. A single MISS is insufficient. Investigate HTML challenges in Security Events; do not disable site-wide protection. Ordinary Bot Fight Mode cannot be bypassed with WAF Skip. Custom Workers and image transformations need separate review. No live Cloudflare-zone test is claimed.
 
 = Which other plugins and email applications were tested? =
-Recorded profiles cover caching, SEO and builder plugins. Intermittent admin/PHP failures remain documented, including cases without Easy Countdown. This is not universal certification. [Versions and results](https://github.com/dominiczajac/email-countdown-timer/pull/13). Local Thunderbird testing covered image blocking, playback and expiry; Gmail, Outlook, Apple Mail and real delivery remain unverified. Test your sender/clients and retain a visible deadline.
+Profiles cover caching, SEO and builders. Reports include admin/PHP failures without Easy Countdown. This is not universal certification. [Versions and results](https://github.com/dominiczajac/email-countdown-timer/pull/13). Local Thunderbird testing covered image blocking, playback and expiry; Gmail, Outlook, Apple Mail and real delivery remain unverified. Test your sender/clients and retain a visible deadline.
 
 = What happens when I deactivate or uninstall? =
 Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned options/cache and unchanged files created by the font-copy tool. It keeps media, manual/replaced fonts, unrelated data/cron, backups, infrastructure logs and font-access rules. No cron is scheduled.
@@ -106,6 +106,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Changelog ==
 
 = 12.6.0 =
+* Add on-demand diagnostics and a redacted report, without automatic network probes.
 * Add the native block, static preview and opt-in live text with Pause/Resume.
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.

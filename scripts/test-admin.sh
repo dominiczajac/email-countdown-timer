@@ -29,18 +29,29 @@ server=$!
 trap 'kill "$server" 2>/dev/null || true; unset ECD_BROWSER_PASSWORD' EXIT
 for i in {1..20}; do curl -fsS http://localhost:8081/wp-login.php -o /dev/null && break; sleep 1; done
 # Collect both reports even if one fails; the job still fails on any failed test.
+# Fixed suite names/exit codes also reach check annotations without exposing inputs.
+email_countdown_timer_test_step() {
+  local suite="$1"
+  shift
+  local result=0
+  "$@" || result=$?
+  if [[ "$result" != 0 ]]; then
+    printf '::error title=%s::Native suite failed with exit code %s. See its retained evidence.\n' "$suite" "$result" >&2
+  fi
+  return "$result"
+}
 browser_result=0
-"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/admin.py" || browser_result=$?
+email_countdown_timer_test_step "Admin browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/admin.py" || browser_result=$?
 alt_result=0
-"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/alt.py" || alt_result=$?
+email_countdown_timer_test_step "Alt browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/alt.py" || alt_result=$?
 privacy_result=0
-"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/privacy.py" || privacy_result=$?
+email_countdown_timer_test_step "Privacy browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/privacy.py" || privacy_result=$?
 test "$("${wp[@]}" post get "$policy_id" --field=post_content)" = 'ECT privacy sentinel'
 performance_result=0
-"${wp[@]}" eval-file "$root/tests/integration/performance.php" > "$RUNNER_TEMP/admin-evidence/performance.json" || performance_result=$?
+email_countdown_timer_test_step "Synthetic performance" "${wp[@]}" eval-file "$root/tests/integration/performance.php" > "$RUNNER_TEMP/admin-evidence/performance.json" || performance_result=$?
 python3 - <<'PY'
 import gzip, json, os, pathlib, subprocess
-paths=[pathlib.Path('assets/admin.css'),pathlib.Path('assets/admin.js'),pathlib.Path('assets/end-image.js')]
+paths=[pathlib.Path('assets/admin.css'),pathlib.Path('assets/admin.js'),pathlib.Path('assets/end-image.js'),pathlib.Path('assets/status.js')]
 report={'source':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'custom_gzip_bytes':{str(p):len(gzip.compress(p.read_bytes(),mtime=0)) for p in paths}}
 report['total_gzip_bytes']=sum(report['custom_gzip_bytes'].values())
 assert report['total_gzip_bytes']<=15*1024
@@ -53,8 +64,8 @@ test "$alt_result" -eq 0
 
 test "$privacy_result" -eq 0
 "${wp[@]}" option update timezone_string Pacific/Chatham
-"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/maintenance.py"
+email_countdown_timer_test_step "Maintenance browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/maintenance.py"
 "${wp[@]}" option update timezone_string Europe/Warsaw
 
-"$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/end-image.py"
+email_countdown_timer_test_step "End-image browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/end-image.py"
 "${wp[@]}" post get "$ECD_BROWSER_END_ID" --field=post_type | grep -qx attachment
