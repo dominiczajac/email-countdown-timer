@@ -7,7 +7,7 @@ replaced by this experiment.
 
 The first tranche has four independent profiles: no external plugin, WP Super
 Cache 3.1.3, W3 Total Cache 2.10.6, and Autoptimize 3.1.16. Exactly one third-party
-plugin is installed/active in a vendor profile. Hold WordPress 7.1.2, PHP 8.4,
+plugin is active in a vendor profile; bundled inactive plugins are recorded. Hold WordPress 7.1.2, PHP 8.4,
 MySQL 8.4 and Twenty Twenty-Five constant. Run OPcache with JIT 1235 and a
 separately labelled JIT-disabled diagnostic cell; neither overrides a failure.
 The existing required 26-job CI and its native JIT matrix remain unchanged.
@@ -71,6 +71,15 @@ flags. This is not accepted as a compatibility pass. Preserve
 The next revision requests HTML explicitly, records fixed early-cache/response
 diagnostics and adds an independent final completeness gate. No page-hit
 assertion, native gate or timeout is relaxed.
+
+The WP Super Cache investigation found a skipped setup step: upstream
+[`inc/admin-ui.php:730`](https://github.com/Automattic/wp-super-cache/blob/a4f8616422b54ccce9db07c0b639b27ed04759bb/inc/admin-ui.php#L730)
+writes `wp_cache_slash_check` from the site's permalink structure. The sample
+configuration lacks it; cache serving rejects trailing-slash URLs while it is
+unset. The fixture now saves the same setting using the vendor's configuration
+function. This diagnosis is checked again with actual off/on page hits; no
+vendor or candidate source is patched. Fixed eligibility fields and synthetic
+anonymous HTML are retained on a miss, without vendor raw cookie/debug logging.
 
 These bounded profiles do not certify every option or environment. FlyingPress
 and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs

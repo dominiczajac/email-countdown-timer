@@ -29,6 +29,8 @@ if ( $mode === 'seed' ) {
         // Upstream 3.1.3: Automattic/wp-super-cache a4f8616 inc/lifecycle.php.
         if ( ! wp_cache_verify_cache_dir() || ! wpsc_check_advanced_cache() || ! wp_cache_verify_config_file() ) { WP_CLI::error( 'WP Super Cache fixture initialization failed.' ); }
         wp_cache_enable(); wp_super_cache_enable();
+        // Match upstream inc/admin-ui.php:730-734 for this site's permalinks.
+        wp_cache_setting( 'wp_cache_slash_check', substr( get_option( 'permalink_structure' ), -1 ) === '/' ? 1 : 0 );
         if ( wpsc_identify_advanced_cache() !== 'WPSC' ) { WP_CLI::error( 'Expected the owned WP Super Cache drop-in.' ); }
     } elseif ( $profile === 'autoptimize' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { update_option( $key, 'on' ); }
@@ -39,9 +41,18 @@ if ( $mode === 'seed' ) {
     if ( function_exists( 'w3tc_flush_all' ) ) { w3tc_flush_all(); }
     if ( class_exists( 'autoptimizeCache' ) ) { autoptimizeCache::clearall(); }
 } elseif ( $mode === 'inventory' ) {
-    global $wpdb, $cache_enabled, $super_cache_enabled, $wp_cache_mod_rewrite, $cache_rebuild_files;
+    global $wpdb;
     $configuration = array();
-    if ( $profile === 'wp-super-cache' ) { $configuration = array( 'cache_enabled' => $cache_enabled ?? null, 'super_cache_enabled' => $super_cache_enabled ?? null, 'wp_cache_mod_rewrite' => $wp_cache_mod_rewrite ?? null, 'cache_rebuild_files' => $cache_rebuild_files ?? null ); }
+    if ( $profile === 'wp-super-cache' ) {
+        // CLI's loader does not export every vendor config variable as a global.
+        // Read only the fixed fields, in an isolated scope; never dump the config.
+        $configuration = ( static function () {
+            include WPCACHECONFIGPATH . '/wp-cache-config.php';
+            return array( 'cache_enabled' => $cache_enabled ?? null, 'super_cache_enabled' => $super_cache_enabled ?? null,
+                'wp_cache_mod_rewrite' => $wp_cache_mod_rewrite ?? null, 'cache_rebuild_files' => $cache_rebuild_files ?? null,
+                'wp_cache_slash_check' => $wp_cache_slash_check ?? null, 'cache_max_time' => $cache_max_time ?? null );
+        } )();
+    }
     if ( $profile === 'w3-total-cache' ) {
         $c = \W3TC\Dispatcher::config();
         foreach ( array( 'pgcache.enabled', 'pgcache.engine', 'browsercache.enabled', 'lazyload.enabled' ) as $key ) { $configuration[ $key ] = $c->get( $key ); }

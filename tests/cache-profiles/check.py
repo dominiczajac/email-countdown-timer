@@ -285,6 +285,12 @@ def main():
                                 current['generations'].append(generation(html))
                             cached = profile in ('wp-super-cache', 'w3-total-cache')
                             if not page_evidence(current['generations'], cached):
+                                (evidence / (key + '-public.html')).write_text(html)
+                                eligibility = evidence / 'cache-eligibility.jsonl'
+                                if eligibility.is_file():
+                                    current['cache_eligibility'] = [x for line in eligibility.read_text().splitlines()
+                                        if (x := json.loads(line)).get('state') == key]
+                                    annotation('error', 'Cache eligibility', json.dumps(current['cache_eligibility'][-1:]))
                                 annotation('error', 'Cache page details', json.dumps({'profile': profile, 'state': key,
                                     'unique_generations': len(set(current['generations'])), 'accept': current['page_accept'],
                                     'headers': current['page_response_headers'][-1],

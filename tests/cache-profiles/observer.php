@@ -21,6 +21,24 @@ add_action( 'wp', static function () {
     header( 'X-Ecd-Lab-Cache-Buffer: ' . ( in_array( 'wp_cache_ob_callback', ob_list_handlers(), true ) ? 'yes' : 'no' ) );
     header( 'X-Ecd-Lab-Cache-Page: ' . ( is_page() ? 'yes' : 'no' ) );
 } );
+add_filter( 'wp_cache_ob_callback_filter', static function ( $body ) {
+    // Fixed synthetic eligibility fields only. Never enable vendor raw debug
+    // logging, which can include cookies or request arguments.
+    if ( PHP_SAPI === 'cli' || ! defined( 'WP_DEBUG_LOG' ) || ! is_string( WP_DEBUG_LOG ) || basename( dirname( WP_DEBUG_LOG ) ) !== 'cache-evidence' ) { return $body; }
+    $path = wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
+    $key = is_string( $path ) && preg_match( '~^/(pair-[1-3]-(?:on|off))/$~', $path, $matches ) ? $matches[1] : 'supplementary';
+    $query = array();
+    foreach ( array( 'is_page', 'is_single', 'is_front_page', 'is_home', 'is_rest', 'is_redirect', 'is_304' ) as $flag ) { $query[ $flag ] = ! empty( $GLOBALS['wp_super_cache_query'][ $flag ] ); }
+    $record = array( 'state' => $key, 'query' => $query,
+        'enabled' => ! empty( $GLOBALS['cache_enabled'] ), 'super_enabled' => ! empty( $GLOBALS['super_cache_enabled'] ),
+        'dontcache' => defined( 'DONOTCACHEPAGE' ), 'max_time' => (int) ( $GLOBALS['cache_max_time'] ?? 0 ),
+        'get_query' => wpsc_is_get_query(), 'uri_rejected' => wp_cache_is_rejected( $GLOBALS['wp_cache_request_uri'] ?? '' ),
+        'agent_rejected' => wp_cache_user_agent_is_rejected(), 'known_user_disabled' => wpsc_is_caching_user_disabled(),
+        'page_rejected' => ! empty( $GLOBALS['wp_cache_pages']['pages'] ), 'headers_sent' => headers_sent(),
+    );
+    file_put_contents( dirname( WP_DEBUG_LOG ) . '/cache-eligibility.jsonl', wp_json_encode( $record ) . "\n", FILE_APPEND | LOCK_EX );
+    return $body;
+}, 999 );
 add_action( 'plugins_loaded', static function () {
     if ( PHP_SAPI === 'cli' ) { return; }
     $status = function_exists( 'opcache_get_status' ) ? opcache_get_status( false ) : false;
