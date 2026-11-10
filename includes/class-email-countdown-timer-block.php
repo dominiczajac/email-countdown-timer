@@ -78,7 +78,7 @@ final class Email_Countdown_Timer_Block {
 
     /** Refresh IDs after creation in another tab, rechecking the original editing context. */
     public static function refresh_campaigns(): void {
-        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
             wp_send_json_error( null, 405 );
             return;
         }
