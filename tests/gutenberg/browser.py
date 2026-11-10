@@ -87,6 +87,36 @@ try:
         first = insert(page, {})
         page.wait_for_function("""() => Array.from(document.querySelectorAll('iframe')).some(f=>f.contentDocument && f.contentDocument.querySelector('.wp-block-easy-countdown-timer')) || document.querySelector('.wp-block-easy-countdown-timer')""")
         frame = block_frame(page)
+        # Empty state -> create in another tab -> explicit authenticated refresh.
+        # Keep the native editor mounted and preserve all block attributes.
+        wp('option', 'update', 'easy_countdown_timers', '{}', '--format=json')
+        frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
+        expect(frame.get_by_text('No campaigns yet', exact=True)).to_be_visible()
+        check(page.evaluate("(id)=>!wp.data.select('core/block-editor').getBlock(id).attributes.timerId", first), 'empty catalog refresh does not select or change a block timer')
+        with context.expect_page() as created:
+            frame.get_by_role('link', name='Create a campaign (new tab)', exact=True).click()
+        campaign = created.value
+        campaign.locator('#ect-quick-id').fill('gutenberg-new')
+        campaign.locator('#ect-quick-deadline').fill('2035-12-31T23:59:59')
+        campaign.locator('#ect-quick-preset').select_option('warm')
+        campaign.get_by_role('button', name='Create campaign', exact=True).click()
+        expect(campaign.get_by_text('Timer saved.', exact=True)).to_be_visible()
+        check(campaign.locator('#ect-dc').input_value() == '#9A3412', 'block empty-state action opens working Quick Create with server presets')
+        campaign.close()
+        page.bring_to_front()
+        frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
+        expect(frame.get_by_text('Campaign list updated.', exact=True)).to_be_visible()
+        new_combo = frame.get_by_role('combobox', name='Timer', exact=True).first
+        new_combo.fill('gutenberg-new')
+        new_combo.press('ArrowDown')
+        new_combo.press('Enter')
+        page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", arg=first)
+        check(True, 'newly created campaign becomes selectable without editor reload')
+        wp('option', 'update', 'easy_countdown_timers', original, '--format=json')
+        frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
+        expect(frame.get_by_text('This timer is no longer in the saved list.', exact=False)).to_be_visible()
+        check(page.evaluate("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", first), 'removed campaign is reported without silently rewriting the saved reference')
+        page.evaluate("(id)=>wp.data.dispatch('core/block-editor').updateBlockAttributes(id,{timerId:''})", first)
         combo = frame.get_by_role('combobox', name='Timer', exact=True).first
         expect(combo).to_be_visible()
         combo.fill('gutenberg-a')

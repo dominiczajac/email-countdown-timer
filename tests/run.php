@@ -14,7 +14,13 @@ class ECD_Test_Stop extends RuntimeException {}
 function add_action(...$args) {}
 function add_shortcode(...$args) {}
 function add_menu_page(...$args) {}
-function current_user_can($cap) { return $GLOBALS['admin']; }
+function current_user_can($cap, ...$args) {
+    if (array_key_exists($cap, $GLOBALS['test_capabilities'] ?? [])) {
+        $allowed = $GLOBALS['test_capabilities'][$cap];
+        return is_array($allowed) ? !empty($allowed[$args[0] ?? 0]) : $allowed;
+    }
+    return $GLOBALS['admin'];
+}
 function check_admin_referer($action) { if (!$GLOBALS['nonce']) throw new ECD_Test_Stop('nonce'); }
 function get_option($key, $default=[]) { return $GLOBALS['options'][$key] ?? $default; }
 function update_option($key, $value, $autoload=false) { $GLOBALS['options'][$key]=$value; return true; }

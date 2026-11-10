@@ -64,6 +64,10 @@ try {
     $settings=Email_Countdown_Timer_Block::editor_settings(array('unrelated'=>'kept'),$context);
     $expect($settings['unrelated']==='kept' && count($settings['easyCountdown']['timers'])===2,'author gets choices for own editable post');
     $expect($settings['easyCountdown']['manageUrl']==='' && !current_user_can('manage_options'),'author gets no settings privilege/link');
+    $expect($settings['easyCountdown']['createUrl'] === '' && (int)$settings['easyCountdown']['refresh']['postId'] === $post_id, 'author has context-bound refresh without a creation privilege/link');
+    $expect(wp_verify_nonce($settings['easyCountdown']['refresh']['nonce'], 'email_countdown_timer_campaigns_' . $post_id) !== false, 'actual core nonce is valid for this post');
+    $expect(wp_verify_nonce($settings['easyCountdown']['refresh']['nonce'], 'email_countdown_timer_campaigns_0') === false, 'post nonce does not authorize a site-editor context');
+    $expect(has_action('wp_ajax_email_countdown_timer_campaigns') !== false && has_action('wp_ajax_nopriv_email_countdown_timer_campaigns') === false, 'catalog action is registered only for authenticated requests');
     $expect(array_keys($settings['easyCountdown']['timers'][0])===array('value','label'),'no raw configuration in choice');
     $expect(!isset(Email_Countdown_Timer_Block::editor_settings(array(),new WP_Block_Editor_Context())['easyCountdown']),'author cannot get site editor settings');
     $other=wp_insert_post(array('post_title'=>'Other author','post_status'=>'publish','post_author'=>$users['administrator']),true);$posts[]=$other;

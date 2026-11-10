@@ -3,8 +3,59 @@
     'use strict';
     var el = wp.element.createElement;
     var __ = wp.i18n.__;
-    var emptySettings = { timers: [], truncated: false, imageUrl: '', manageUrl: '' };
+    var emptySettings = { timers: [], truncated: false, imageUrl: '', manageUrl: '', createUrl: '' };
     var positions = { left: 'flex-start', center: 'center', right: 'flex-end' };
+    // One explicit request updates every mounted timer block, without polling or
+    // changing post attributes. The server rechecks the concrete editor capability.
+    var catalogState = { settings: window.emailCountdownTimerBlock || emptySettings, loading: false, error: false, updated: false };
+    var listeners = new Set();
+
+    function publishCatalog(change) {
+        catalogState = Object.assign({}, catalogState, change);
+        listeners.forEach(function (listener) { listener(catalogState); });
+    }
+
+    function useCatalog() {
+        var state = wp.element.useState(catalogState);
+        wp.element.useEffect(function () {
+            listeners.add(state[1]);
+            state[1](catalogState);
+            return function () { listeners.delete(state[1]); };
+        }, []);
+        return state[0];
+    }
+
+    function validCatalog(data) {
+        return data && Array.isArray(data.timers) && data.timers.length <= 250 &&
+            typeof data.truncated === 'boolean' &&
+            ['imageUrl', 'manageUrl', 'createUrl'].every(function (key) { return typeof data[key] === 'string'; }) &&
+            data.timers.every(function (timer) {
+                return timer && typeof timer.value === 'string' && timer.value.length > 0 && timer.value.length <= 200 && timer.label === timer.value;
+            });
+    }
+
+    function refreshCampaigns() {
+        var config = catalogState.settings.refresh;
+        if (catalogState.loading || !config || !config.url) return;
+        publishCatalog({ loading: true, error: false, updated: false });
+        return Promise.resolve().then(function () {
+            return window.fetch(config.url, {
+                method: 'POST', credentials: 'same-origin', cache: 'no-store',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: 'action=email_countdown_timer_campaigns&post_id=' + encodeURIComponent(config.postId) + '&nonce=' + encodeURIComponent(config.nonce)
+            });
+        }).then(function (response) {
+            if (!response.ok) throw new Error('catalog');
+            return response.json();
+        }).then(function (response) {
+            if (!response.success || !validCatalog(response.data)) throw new Error('catalog');
+            publishCatalog({ settings: Object.assign({}, catalogState.settings, response.data), loading: false, updated: true });
+        }).catch(function () {
+            // Keep the last list and selected ID on expiry, permission loss or a
+            // network error. Only an explicit retry makes another request.
+            publishCatalog({ loading: false, error: true });
+        });
+    }
 
     function Edit(props) {
         var attributes = props.attributes;
@@ -12,7 +63,8 @@
         var alignment = Object.prototype.hasOwnProperty.call(positions, attributes.alignment) ? attributes.alignment : 'left';
         // Core filters custom store keys in some editors. PHP attaches this bounded,
         // capability-checked payload only to our editor script, before it executes.
-        var settings = window.emailCountdownTimerBlock || emptySettings;
+        var catalog = useCatalog();
+        var settings = catalog.settings;
         var timers = Array.isArray(settings.timers) ? settings.timers : [];
         var searchState = wp.element.useState('');
         var search = searchState[0];
@@ -46,7 +98,7 @@
                     ], onChange: function (value) { props.setAttributes({ alignment: value }); }
                 }),
                 settings.truncated ? el(wp.element.Fragment, {},
-                    el('p', {}, __('The first 250 timer IDs are listed. Enter another existing ID below, or reopen the editor to refresh the list.', 'easy-countdown')),
+                    el('p', {}, __('The first 250 timer IDs are listed. Enter another existing ID below.', 'easy-countdown')),
                     el(wp.components.TextControl, { label: __('Timer ID', 'easy-countdown'), value: draft, maxLength: 200, onChange: setDraft }),
                     el(wp.components.Button, { variant: 'secondary', onClick: function () { props.setAttributes({ timerId: draft }); } }, __('Use timer ID', 'easy-countdown'))
                 ) : null,
@@ -59,13 +111,22 @@
                 value: alignment, onChange: function (value) { props.setAttributes({ alignment: value || 'left' }); }
             })),
             el('div', blockProps,
-                el(wp.components.ComboboxControl, {
+                timers.length || timerId ? el(wp.components.ComboboxControl, {
                     label: __('Timer', 'easy-countdown'), value: timerId,
                     options: visibleTimers, onFilterValueChange: function (value) { setSearch(value || ''); }, onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
-                    help: __('Choose a saved timer. Reopen the editor after creating a campaign.', 'easy-countdown')
-                }),
-                !timers.length ? el('p', {}, settings.manageUrl ? __('Create a timer in Easy Countdown, then reopen this editor.', 'easy-countdown') : __('Ask a site administrator to create a timer.', 'easy-countdown')) : null,
-                missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or reopen the editor. A deleted timer displays nothing on the website.', 'easy-countdown')) : null,
+                    help: __('Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns.', 'easy-countdown')
+                }) : null,
+                !timers.length && !timerId ? el(wp.components.Placeholder, {
+                    label: __('No campaigns yet', 'easy-countdown'),
+                    instructions: settings.createUrl ? __('Create your first campaign in Easy Countdown, then return here and refresh the campaign list.', 'easy-countdown') : __('Ask a site administrator to create a campaign, then refresh the campaign list.', 'easy-countdown')
+                }, settings.createUrl ? el('a', { href: settings.createUrl, target: '_blank', rel: 'noopener noreferrer' }, __('Create a campaign (new tab)', 'easy-countdown')) : null) : null,
+                settings.refresh && settings.refresh.url ? el(wp.components.Button, {
+                    variant: 'secondary', disabled: catalog.loading, isBusy: catalog.loading, onClick: refreshCampaigns
+                }, __('Refresh campaigns', 'easy-countdown')) : null,
+                catalog.loading ? el('p', { role: 'status' }, __('Refreshing campaigns…', 'easy-countdown')) : null,
+                catalog.updated ? el('p', { role: 'status' }, __('Campaign list updated.', 'easy-countdown')) : null,
+                catalog.error ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The campaign list could not refresh. Check your connection and editor access, then try again. Your selection has been kept. If your session expired, save your work before reopening the editor.', 'easy-countdown')) : null,
+                missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or refresh campaigns. A deleted timer displays nothing on the website.', 'easy-countdown')) : null,
                 failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The static preview could not load. Check the timer and image cache settings.', 'easy-countdown')) : null,
                 previewUrl && !missing ? el('div', { style: { display: 'flex', justifyContent: positions[alignment] } },
                     el('img', {

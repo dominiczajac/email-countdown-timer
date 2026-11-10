@@ -26,6 +26,8 @@ final class Email_Countdown_Timer_Block {
             } )
         );
         add_filter( 'block_editor_settings_all', array( self::class, 'editor_settings' ), 10, 2 );
+        // Authenticated editor refresh only: deliberately no wp_ajax_nopriv action.
+        add_action( 'wp_ajax_email_countdown_timer_campaigns', array( self::class, 'refresh_campaigns' ) );
     }
 
     /** A campaign reference is not a free-form URL, filename or configuration. */
@@ -64,6 +66,44 @@ final class Email_Countdown_Timer_Block {
         } elseif ( ! current_user_can( 'edit_theme_options' ) ) {
             return self::expose_settings( $settings );
         }
+        $post_id = $post instanceof WP_Post ? $post->ID : 0;
+        $settings['easyCountdown'] = self::catalog();
+        $settings['easyCountdown']['refresh'] = array(
+            'url' => admin_url( 'admin-ajax.php' ),
+            'postId' => $post_id,
+            'nonce' => wp_create_nonce( 'email_countdown_timer_campaigns_' . $post_id ),
+        );
+        return self::expose_settings( $settings );
+    }
+
+    /** Refresh IDs after creation in another tab, rechecking the original editing context. */
+    public static function refresh_campaigns(): void {
+        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+            wp_send_json_error( null, 405 );
+            return;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read only to choose the context-bound nonce; capability and nonce are checked before reading campaign data.
+        $post_id = filter_var( Email_Countdown_Timer_Config::text( $_POST, 'post_id' ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) );
+        if ( false === $post_id ) {
+            wp_send_json_error( null, 400 );
+            return;
+        }
+        check_ajax_referer( 'email_countdown_timer_campaigns_' . $post_id, 'nonce' );
+        if ( $post_id > 0 ) {
+            $post = get_post( $post_id );
+            $allowed = $post instanceof WP_Post && current_user_can( 'edit_post', $post->ID );
+        } else {
+            $allowed = current_user_can( 'edit_theme_options' );
+        }
+        if ( ! $allowed ) {
+            wp_send_json_error( null, 403 );
+            return;
+        }
+        wp_send_json_success( self::catalog() );
+    }
+
+    /** Bounded IDs only; used after authorization for both bootstrap and explicit refresh. */
+    private static function catalog(): array {
         $timers = get_option( 'easy_countdown_timers', array() );
         $choices = array();
         $truncated = false;
@@ -82,13 +122,13 @@ final class Email_Countdown_Timer_Block {
             }
         }
         usort( $choices, static fn( $a, $b ) => strnatcasecmp( $a['label'], $b['label'] ) );
-        $settings['easyCountdown'] = array(
+        return array(
             'timers' => $choices,
             'truncated' => $truncated,
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
             'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
+            'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',
         );
-        return self::expose_settings( $settings );
     }
 
     /** Core may whitelist store settings; attach the authorized data to our editor-only script. */

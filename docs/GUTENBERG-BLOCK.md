@@ -4,7 +4,9 @@
 
 Insert **Easy Countdown** in the block editor and choose a saved timer. Set left, center or right alignment in the block sidebar. Administrators can open the selected campaign settings in a new tab; users who can edit a post may embed a campaign but do not gain `manage_options`. Create and configure campaigns in the existing Easy Countdown panel.
 
-The preview is one static image, without background polling. Reopen the editor to refresh the saved list. At most 250 IDs are supplied to an authorized editor; when truncated, the sidebar also accepts another known ID with an explicit Apply action. Missing or deleted references show an editor warning and produce no public image. The block stores only `timerId` and `alignment`, not copied deadlines, font settings or image data. Changes to campaigns apply when the page is rendered again; purge page HTML caches after changing alt or geometry.
+The preview is one static image, without background polling. With no campaigns, the block shows an explicit empty state. Administrators can open Quick Create in a new tab; other editors are asked to contact a site administrator. On return, **Refresh campaigns** updates the shared list in all mounted timer blocks without reloading the editor or rewriting selected IDs/alignment. **Refresh preview** independently updates the selected static image. A failed list request retains the previous list and selection, with explicit retry guidance; it never retries automatically. Save work before reopening an editor with an expired session.
+
+At most 250 IDs are supplied to an authorized editor; when truncated, the sidebar also accepts another known ID with an explicit Apply action. Missing or deleted references show an editor warning and produce no public image. The block stores only `timerId` and `alignment`, not copied deadlines, font settings or image data. Changes to campaigns apply when the page is rendered again; purge page HTML caches after changing alt or geometry.
 
 Shortcodes and classic-editor usage are unchanged. Dynamic blocks are empty when the plugin is inactive and resume when reactivated. Existing posts are not migrated.
 
@@ -14,7 +16,9 @@ Shortcodes and classic-editor usage are unchanged. Dynamic blocks are empty when
 
 Native `block_editor_settings_all` supplies bounded IDs only after checking edit access to the concrete post, or site-editor capability for contexts without a post. It omits raw settings, attachment IDs, paths and deadlines. Administrator links do not replace authorization in the destination form. Native WordPress escaping and the existing image-publication policy remain in effect.
 
-Preserve existing URLs, shortcode, saved data, renderer pixels and timing, font paths, password-protected media handling and uninstall behavior. User privacy and mail-cache limitations in README still apply. No automatic fonts, telemetry, network importer or sender is added.
+Explicit refresh uses the authenticated `wp_ajax_email_countdown_timer_campaigns` action, with no `nopriv` action. POST carries only the action, post ID (0 for the site editor) and a core nonce bound to that context. The handler validates the ID, verifies the nonce and rechecks `edit_post` for an existing concrete post, or `edit_theme_options` for the site editor, before reading the list. It returns bounded IDs and editor URLs, never raw campaign configurations or campaign writes. The nonce does not replace capability checks. The manual same-origin request is the sole narrow exception in the browser-network privacy guardrails; new calls remain prohibited pending review.
+
+Preserve existing URLs, shortcode, saved data, renderer pixels and timing, font paths, password-protected media handling and uninstall behavior. User privacy and mail-cache limitations in README still apply. No font downloads, telemetry, network importer or sender is added.
 
 ## Verification
 
