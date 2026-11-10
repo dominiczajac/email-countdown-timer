@@ -1,7 +1,7 @@
 """Small, dependency-free acceptance gate for the isolated lab's evidence."""
 from html.parser import HTMLParser
 import re
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16'}
 PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php'}
@@ -58,10 +58,13 @@ def core_avatar(url, resource_type):
 
 def navigation_cancel(failure, url, phase, navigating):
     parts = urlsplit(url)
+    query = parse_qs(parts.query)
     return (failure == 'net::ERR_ABORTED' and navigating and phase in ADMIN_PHASES
             and parts.scheme == 'http' and parts.netloc == 'localhost:8095'
             and parts.path.startswith(('/wp-includes/', '/wp-admin/', '/wp-json/'))
-            and 'ecd_action=render' not in url and '/easy-countdown/' not in url
+            and 'render' not in query.get('ecd_action', [])
+            and not any(action.startswith('email_countdown_timer_') for action in query.get('action', []))
+            and '/easy-countdown/' not in url
             and '/cache/autoptimize/' not in url)
 
 

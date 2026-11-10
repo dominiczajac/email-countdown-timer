@@ -147,6 +147,8 @@ class Contracts(unittest.TestCase):
         for candidate, phase, navigating, code in ((url, 'live-browser', True, 'net::ERR_ABORTED'),
                 (url, 'dashboard', False, 'net::ERR_ABORTED'), (url, 'dashboard', True, 'net::ERR_FAILED'),
                 ('http://localhost:8095/?ecd_action=render', 'dashboard', True, 'net::ERR_ABORTED'),
+                ('http://localhost:8095/wp-admin/admin-ajax.php?ecd_action=%72ender', 'dashboard', True, 'net::ERR_ABORTED'),
+                ('http://localhost:8095/wp-admin/admin-ajax.php?action=email_countdown_timer_campaigns', 'timer-editor', True, 'net::ERR_ABORTED'),
                 ('http://localhost:8095/wp-content/cache/autoptimize/main.js', 'timer-editor', True, 'net::ERR_ABORTED'),
                 ('https://external.invalid/wp-includes/script.js', 'dashboard', True, 'net::ERR_ABORTED')):
             self.assertFalse(navigation_cancel(code, candidate, phase, navigating))
