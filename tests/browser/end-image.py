@@ -1,6 +1,7 @@
 """Native Media Library selection, saving, removal and no-JS fallback in local WP."""
 import json,os,pathlib,shutil
 from playwright.sync_api import sync_playwright,expect
+from wordpress import log_in
 assert os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('ECD_INTEGRATION_DISPOSABLE')=='1'
 base='http://localhost:8081';checks=[];errors=[];aid=os.environ['ECD_BROWSER_END_ID'].strip()
 def check(v,n):
@@ -11,7 +12,7 @@ def submit(page):
     with page.expect_navigation(wait_until='load'):
         page.locator('#ect-editor button[type=submit]').click()
 def login(page):
-    page.goto(base+'/wp-login.php');page.locator('#user_login').fill('ci-admin');page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD']);page.locator('#wp-submit').click();page.wait_for_url('**/wp-admin/**')
+    log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
 with sync_playwright() as p:
     browser=p.chromium.launch(executable_path=shutil.which('google-chrome') or shutil.which('chromium'),args=['--no-sandbox'])
     ctx=browser.new_context();page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
