@@ -2,6 +2,8 @@
 
 ## WordPress
 
+In **Embed Codes > Website**, choose the native Easy Countdown block in Gutenberg or copy **Website Shortcode** for other editors. Create campaigns with Quick Create in the plugin panel or the Easy Countdown dashboard widget; the widget also links to existing timers and is limited to users who already have `manage_options`. If you create a campaign in another tab while using Gutenberg, select **Refresh campaigns** to update the list without reloading your post.
+
 ```text
 [ecd_timer id="promotion"]
 ```
@@ -10,7 +12,7 @@ The shortcode creates a responsive `img` element and loads one shared script. Wh
 
 ## Email HTML
 
-Copy **Link do mailingu (GIF)** (the email GIF link) from the admin panel and use it as the image's `src`. Example using a placeholder domain:
+In **Embed Codes > Email**, copy **Email HTML** into your mailing platform's HTML editor, or use **Image URL** as the image's `src`. Each field has its own copy button with selected-text fallback. The code fields are always available for manual copying without JavaScript. Example using a placeholder domain:
 
 ```html
 <p>The promotion ends on December 31, 2027, at 23:59:59 in the Europe/Warsaw time zone.</p>

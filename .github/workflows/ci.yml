@@ -55,6 +55,7 @@ jobs:
           php tests/cache-bootstrap.php array
           python3 tests/privacy-contracts.py
           node tests/countdown.test.cjs
+          node tests/admin-unit.cjs
       - name: Persistent fonts and layout preflight
         run: |
           php tests/font-defaults.php

@@ -105,19 +105,17 @@
         animation.addEventListener('click', () => { if (playing) return stop(); playing = true; image.src = image.dataset.animated; animation.textContent = animation.dataset.stop; animation.setAttribute('aria-pressed', 'true'); });
         document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
     }
-    const code = root.querySelector('#ect-embed-code');
-    if (code) {
-        root.querySelector('[data-ect-manual]').open = false;
-        const formats = { url: code.value, html: root.querySelector('#ect-manual-html').value, shortcode: root.querySelector('#ect-manual-shortcode').value };
-        const select = root.querySelector('#ect-embed-format'); const button = root.querySelector('#ect-copy'); const result = root.querySelector('#ect-copy-result');
-        root.querySelector('[data-ect-embed-tools]').hidden = false; button.hidden = false;
-        select.addEventListener('change', () => { code.value = formats[select.value]; root.querySelector('#ect-embed-label').textContent = select.selectedOptions[0].textContent; result.textContent = ''; });
+    root.querySelectorAll('[data-ect-copy]').forEach(button => {
+        const code = document.getElementById(button.dataset.ectCopy);
+        const result = document.getElementById(`${button.dataset.ectCopy}-result`);
+        if (!code || !result) return;
+        button.hidden = false;
         button.addEventListener('click', async () => {
             try { if (!navigator.clipboard || !window.isSecureContext) throw new Error('manual'); await navigator.clipboard.writeText(code.value); result.textContent = button.dataset.success; }
             catch (_) { code.focus(); code.select(); result.textContent = button.dataset.fallback; }
             announce(result.textContent);
         });
-    }
+    });
     const deletion = root.querySelector('#ect-delete'); const dialog = root.querySelector('#ect-delete-dialog');
     if (deletion && dialog && typeof dialog.showModal === 'function') {
         let trigger;
