@@ -48,4 +48,8 @@ The included Chromium tests verify selected interactions on real WordPress, not 
 
 ## Fonts
 
+Quick Create and the dashboard can create English, Polish, German, Spanish or French countdown labels without JavaScript. In the full editor, expand **Custom Labels**, choose a language and select **Apply label preset** to replace only the four label fields. Review and save explicitly. Selecting a language alone changes no campaign, and the WordPress admin locale never changes saved labels. Without JavaScript, use the native Quick Create language selector or edit the four text fields manually.
+
+Accented labels require a suitable local font. The included Lato face covers the supplied presets when FreeType is available. Active bitmap fallback accepts printable ASCII only; an accented preset produces a recoverable save error rather than changing the text. Empty and handcrafted labels remain supported. No font is downloaded and a preset does not switch an existing campaign's font.
+
 The selector currently reads installed local TTF/OTF files from the plugin's existing `fonts/` directory. It does not connect to Google Fonts. A future downloader must use persistent per-site storage, explicit installation and scoped cleanup; it must not download fonts as part of public image rendering.

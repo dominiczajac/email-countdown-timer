@@ -17,7 +17,7 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 **Features**
 
 * Native Easy Countdown block with a timer selector, static preview and alignment.
-* Timers with private admin names, suggested IDs, deadlines and time zones.
+* Private campaign names, suggested IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
@@ -25,7 +25,8 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 * Reserved website image space without another frontend library or polling.
 * Saved previews, animation on request and copyable embed codes.
 * Quick Create presets and a dashboard widget for users who manage timers.
-* English, translation-ready administration using WordPress controls.
+* English, Polish, German, Spanish and French label presets.
+* Translation-ready English admin with WordPress controls.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
 **Requirements and limitations**
@@ -45,7 +46,7 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 == Installation ==
 
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone and preset. Create Timer opens all settings.
+2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone, appearance and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
 4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
 5. Check the public image while logged out and send a test using your actual mailing platform.
@@ -59,19 +60,19 @@ Insert Easy Countdown and select a timer. Administrators can open Quick Create i
 
 
 = Does the timer start separately for each recipient? =
-No. Each timer uses one fixed deadline shared by the campaign. It does not identify recipients, maintain individual sessions or count email opens.
+Each campaign has one shared, fixed deadline. It does not identify recipients, maintain individual sessions or count email opens.
 
 = How does the image after expiry work? =
-Choose a local image in After Countdown and save. Requests after expiry, and GIF frames crossing expiry, show it instead of zeros. Accepts JPEG/PNG/GIF/WebP up to 4 MiB, 4096px per side and 4 million pixels. Output is re-encoded and proportionally fitted; animated sources supply their first frame. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images fall back to zeros; media files are never deleted. Already-downloaded or proxy-cached images cannot be revoked or refreshed by the plugin.
+Choose a local expiry image and save. New expired requests and GIF frames crossing the deadline use it. JPEG/PNG/GIF/WebP only: max 4 MiB, 4096px per side, 4 million pixels. Output is re-encoded and fitted proportionally; animated sources use frame one. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images use zeros. Media is never deleted. Previously downloaded/cached images cannot be revoked or refreshed.
 
 = Why is the GIF not animated? =
-Imagick may be missing, the timer may have ended, or the lock may be busy/unavailable. Requests wait up to one second; a slower render can make simultaneous requests receive a current static frame, without overwriting animation cache. Use Data Settings > Rendering Diagnostics and test host capacity. Client animation and image-blocking preferences also apply.
+Animation needs Imagick, an unexpired timer and an available lock. Requests wait up to one second; a slow render can return a current static frame without replacing the animation cache. Check Data Settings > Rendering Diagnostics and host capacity. Client animation and image-blocking preferences still apply.
 
 = What should I enter in Alternative Text? =
-Describe both countdown and expired states: alt cannot change during GIF playback. Leave it empty only with equivalent nearby text. Recopy Email HTML and clear affected website HTML caches after editing. Sent HTML cannot be rewritten by changing image bytes.
+Describe countdown and expiry: alt stays fixed during GIF playback. Use empty alt only with equivalent nearby text. Recopy Email HTML and purge website HTML caches after edits; changing image bytes cannot rewrite sent HTML.
 
 = Will the timer move my page layout? =
-Shortcodes reserve measured, proportional space before images load; themes can override it. Purge page HTML after geometry/font changes and recopy manual/email embeds. This is not a whole-page Core Web Vitals guarantee.
+Shortcodes reserve measured, proportional image space; themes can override it. After font/geometry changes, purge page HTML and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
 New timers use included Lato with FreeType, otherwise bitmap. Saved timers are unchanged. Lato is SIL OFL 1.1 (fonts/OFL.txt). Keep custom TTF/OTF in Data Settings’ persistent directory; no Google importer. [Font storage](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
@@ -94,7 +95,7 @@ Repeated GETs to the same timer URL should return an actual image, not HTML. Che
 Recorded profiles cover caching, SEO and builder plugins. Intermittent admin/PHP failures remain documented, including cases without Easy Countdown. This is not universal certification. [Versions and results](https://github.com/dominiczajac/email-countdown-timer/pull/13). Local Thunderbird testing covered image blocking, playback and expiry; Gmail, Outlook, Apple Mail and real delivery remain unverified. Test your sender/clients and retain a visible deadline.
 
 = What happens when I deactivate or uninstall? =
-Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes only owned options/cache and unchanged font-copy-tool files. Media, manual/replaced fonts, unrelated data/cron, backups and infrastructure logs remain. Font-access rules remain; no cron is scheduled.
+Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned options/cache and unchanged files created by the font-copy tool. It keeps media, manual/replaced fonts, unrelated data/cron, backups, infrastructure logs and font-access rules. No cron is scheduled.
 
 == Screenshots ==
 
@@ -110,6 +111,7 @@ Deactivation retains data. Uninstall cleanup is opt-in, per site, and removes on
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
 * Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.
+* Add label presets independent of admin locale. Keep custom/empty labels and validate accented output.
 
 = 12.5.3 =
 * Bundle optional local Lato Regular under SIL OFL 1.1, with integrity-checked font and license notices.

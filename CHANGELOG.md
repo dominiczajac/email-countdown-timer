@@ -2,6 +2,7 @@
 
 ## 12.6.0 (review candidate)
 
+- Add English, Polish, German, Spanish and French label presets independent of the administrator locale. Quick Create supports explicit language selection without JavaScript; the full editor applies labels only on request and saves explicitly. Preserve custom/empty saved labels and existing bitmap/font validation.
 - Add duplicate-to-new-draft, archive and restore actions. Copies preserve the source schedule/style with a new immutable ID; archiving hides administration shortcuts while keeping public images, URLs and Gutenberg selections working. Old edit forms retain archive metadata, and deletion still requires its separate confirmation.
 - Add a native IANA time-zone selector to the editor, Quick Create and dashboard. Keep saved aliases and fixed offsets selected, use the site zone only for new campaigns, and confirm saved deadlines with their numeric offset and UTC equivalent. No deadline or renderer interpretation is migrated.
 - Add optional private campaign names and opaque suggested IDs for new timers. Search administration by name or ID, preserve old forms and immutable saved IDs, and keep names out of public rendering, email HTML and the editor catalog.

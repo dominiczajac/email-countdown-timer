@@ -72,6 +72,17 @@ final class Email_Countdown_Timer_Admin {
         );
     }
 
+    /** Output labels are saved data, independent of translations of the admin UI. */
+    public static function label_presets(): array {
+        return array(
+            'en' => array( 'label' => __( 'English', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds' ) ),
+            'pl' => array( 'label' => __( 'Polish', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Dni', 'label_h' => 'Godziny', 'label_m' => 'Minuty', 'label_s' => 'Sekundy' ) ),
+            'de' => array( 'label' => __( 'German', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Tage', 'label_h' => 'Stunden', 'label_m' => 'Minuten', 'label_s' => 'Sekunden' ) ),
+            'es' => array( 'label' => __( 'Spanish', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Días', 'label_h' => 'Horas', 'label_m' => 'Minutos', 'label_s' => 'Segundos' ) ),
+            'fr' => array( 'label' => __( 'French', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Jours', 'label_h' => 'Heures', 'label_m' => 'Minutes', 'label_s' => 'Secondes' ) ),
+        );
+    }
+
     /** One native POST form for the timer list and dashboard; no JavaScript required. */
     public static function quick_create_form( string $prefix = 'ect-quick' ): void {
         if ( ! current_user_can( 'manage_options' ) ) {
@@ -100,6 +111,12 @@ final class Email_Countdown_Timer_Admin {
                             <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
                         <?php endforeach; ?>
                     </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Four high-contrast color combinations. New timers use included Lato when FreeType is available, otherwise bitmap.', 'easy-countdown' ); ?></p></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-language"><?php echo esc_html__( 'Countdown label language', 'easy-countdown' ); ?></label>
+                    <select id="<?php echo esc_attr( $prefix ); ?>-language" name="label_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-language-help">
+                        <?php foreach ( self::label_presets() as $language => $labels ) : ?>
+                            <option value="<?php echo esc_attr( $language ); ?>"><?php echo esc_html( $labels['label'] ); ?></option>
+                        <?php endforeach; ?>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-language-help"><?php echo esc_html__( 'Stored with this campaign, independently of the WordPress language. Accented labels need a font with those characters, such as included Lato with FreeType.', 'easy-countdown' ); ?></p></div>
             </div>
             <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create campaign', 'easy-countdown' ); ?></button>
                 <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'easy-countdown' ); ?></a></div>
@@ -187,6 +204,14 @@ final class Email_Countdown_Timer_Admin {
             } else {
                 foreach ( array( 'bg', 'dc', 'lc' ) as $color ) {
                     $defaults[ $color ] = $presets[ $preset ][ $color ];
+                }
+                $label_presets = self::label_presets();
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Capability, POST and nonce checked above; only code-owned presets may supply labels.
+                $language = array_key_exists( 'label_preset', $_POST ) ? self::posted( 'label_preset' ) : 'en';
+                if ( ! isset( $label_presets[ $language ] ) ) {
+                    $errors['form'] = __( 'Choose one of the listed countdown label languages.', 'easy-countdown' );
+                } else {
+                    $defaults = array_replace( $defaults, $label_presets[ $language ]['labels'] );
                 }
             }
         }

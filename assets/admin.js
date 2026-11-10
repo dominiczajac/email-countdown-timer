@@ -88,6 +88,26 @@
                 });
             });
         }
+        const labelBox = root.querySelector('[data-ect-label-presets]');
+        if (labelBox) {
+            const language = labelBox.querySelector('#ect-label-language');
+            const apply = labelBox.querySelector('#ect-apply-labels');
+            const result = labelBox.querySelector('[data-ect-label-result]');
+            labelBox.hidden = false;
+            language.addEventListener('change', () => { apply.disabled = !language.value; result.textContent = ''; });
+            apply.addEventListener('click', () => {
+                const option = language.selectedOptions[0];
+                if (!option || !option.dataset.labels) return;
+                const labels = JSON.parse(option.dataset.labels);
+                ['label_d', 'label_h', 'label_m', 'label_s'].forEach(key => {
+                    const field = form.elements[key];
+                    field.value = labels[key];
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                result.textContent = result.dataset.applied;
+                announce(result.textContent);
+            });
+        }
     }
     const image = root.querySelector('#ect-preview');
     const animation = root.querySelector('#ect-animation');
