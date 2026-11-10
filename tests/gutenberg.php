@@ -21,7 +21,7 @@ class ECD_Block_Response extends RuntimeException {
 function wp_send_json_error( $data = null, $status = 200 ) { throw new ECD_Block_Response( false, $data, $status ); }
 function wp_send_json_success( $data, $status = 200 ) { throw new ECD_Block_Response( true, $data, $status ); }
 $start = $checks;
-$options['easy_countdown_timers'] = array( 'block-test' => $base + array( 'campaign_name' => 'Private campaign sentinel' ) );
+$options['easy_countdown_timers'] = array( 'block-test' => $base + array( 'campaign_name' => 'Private campaign sentinel', 'archived' => true ) );
 $before = $options;
 $admin = false;
 $context = (object) array( 'post' => new WP_Post( 1 ) );
@@ -39,6 +39,7 @@ $bootstrap = substr( $GLOBALS['block_bootstrap'][1], strlen( 'window.emailCountd
 ok( json_decode( $bootstrap, true ) === $data, 'native script bridge carries the authorized list without relying on store keys' );
 ok( !str_contains( $bootstrap, '<' ) && !str_contains( $bootstrap, 'deadline' ), 'bootstrap excludes raw HTML and campaign configuration' );
 ok( ! str_contains( $bootstrap, 'Private campaign sentinel' ) && ! str_contains( $bootstrap, 'campaign_name' ), 'editor catalog excludes private campaign names even for administrators' );
+ok( ! str_contains( $bootstrap, 'archived' ) && str_contains( $bootstrap, 'block-test' ), 'archived timer IDs remain selectable without exposing private archive metadata' );
 foreach ( array( '', null, array(), 'unknown', 'BLOCK-TEST', 'block-test ', str_repeat( 'a', 201 ) ) as $invalid ) {
     ok( Email_Countdown_Timer_Block::render( array( 'timerId' => $invalid ), $plugin ) === '', 'invalid or missing reference has no public image' );
 }

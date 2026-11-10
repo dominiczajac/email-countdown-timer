@@ -187,6 +187,7 @@ require __DIR__.'/english-ui.php';
 require __DIR__.'/internationalization.php';
 require __DIR__.'/admin-ui.php';
 require __DIR__.'/timezone-ui.php';
+require __DIR__.'/campaign-management.php';
 require __DIR__.'/alt-privacy-lock.php';
 $summary='PASS '.$checks.' assertions on PHP '.PHP_VERSION.$skip."\n";
 ob_end_clean(); echo $summary;

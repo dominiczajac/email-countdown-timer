@@ -30,6 +30,10 @@ The unsaved-change badge tracks changes locally; browsers may warn before leavin
 
 ## Delete a timer
 
+Choose **Duplicate** in the timer list to open a new, unsaved campaign with the source deadline, time zone, style and labels. Review the new suggested ID and deadline, then create it. The original remains unchanged; nothing is copied into storage until the normal save succeeds. A duplicate of an archived timer starts unarchived.
+
+**Archive** removes a campaign from the default list and dashboard shortcuts. It keeps the record, existing public image URLs and Gutenberg selections available, including already sent email links. Use **Archived** to search archived campaigns, edit, duplicate or restore them. Saving an archived timer keeps it archived. Archiving is not deletion and does not revoke a published URL.
+
 Expand **Delete Timer**, review the ID and campaign warning, and check the irreversible-deletion confirmation. The JavaScript-enhanced dialog initially focuses **Cancel**, supports Escape, and returns focus to its trigger. The server still requires nonce and confirmation if JavaScript is unavailable or bypassed. Deletion removes that timer and invalidates its cache; sent emails using its URL can no longer fetch a fresh countdown.
 
 This is separate from **Data Settings**, which controls optional full cleanup during WordPress uninstall. That preference remains off by default. See [Data removal](Data-Removal.md).
