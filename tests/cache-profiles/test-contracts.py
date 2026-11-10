@@ -8,11 +8,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contracts import ACTIVE_REQUIRED, ORDER, REQUIRED, Page, accept, core_avatar, generation, navigation_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, page_evidence
 
 
 def good(profile='baseline'):
-    report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': []}
+    report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': [], 'source_commit': 'a' * 40,
+              'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}]}
     for key in ORDER:
         active = key.endswith('-on')
         checks = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
@@ -22,7 +23,12 @@ def good(profile='baseline'):
         if profile in ('wp-super-cache', 'w3-total-cache'):
             markers[-1] = markers[-2]
             checks |= {'cache-artifact'}
-        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks), 'failures': [], 'generations': markers, 'engine_cache_files': [{'path': 'cache/control', 'generation': markers[-1], 'sha256': 'b' * 64}]})
+        path = 'cache/supercache/control' if profile == 'wp-super-cache' else 'cache/page/control'
+        runtime = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': '1235', 'x-ecd-lab-jit-active': 'on',
+                   'x-ecd-lab-gd': 'yes', 'x-ecd-lab-active': 'on' if active else 'off', 'x-ecd-lab-php': '8.4.27'}
+        env = {'active_plugins': sorted(expected_plugins(profile, active)), 'wordpress': '7.1.2', 'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': 'twentytwentyfive'}}
+        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks) + ['anonymous-page-http'] * 4, 'failures': [], 'generations': markers,
+            'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}]})
     return report
 
 
@@ -78,6 +84,21 @@ class Contracts(unittest.TestCase):
     def test_missing_cache_artifact_fails(self):
         report = good('w3-total-cache')
         report['states'][1]['engine_cache_files'] = []
+        self.assertFalse(accept(report))
+
+    def test_wrong_runtime_or_plugin_versions_cannot_pass_by_label(self):
+        for field, value in (('x-ecd-lab-jit', 'disable'), ('x-ecd-lab-active', 'off'), ('x-ecd-lab-php', '8.3.1'), ('x-ecd-lab-sapi', 'cli-server')):
+            report = good()
+            report['states'][1]['runtime'][field] = value
+            self.assertFalse(accept(report))
+        report = good('autoptimize'); report['plugins'][0]['version'] = '0.0.0'
+        self.assertFalse(accept(report))
+        report = good(); report['states'][1]['environment']['active_plugins'] = []
+        self.assertFalse(accept(report))
+
+    def test_unrelated_cache_file_cannot_count_as_page_cache_proof(self):
+        report = good('w3-total-cache')
+        report['states'][1]['engine_cache_files'][0]['path'] = 'cache/db/control'
         self.assertFalse(accept(report))
 
     def test_stale_cache_artifact_fails(self):

@@ -4,9 +4,10 @@ import re
 from urllib.parse import urlsplit
 
 PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16'}
+PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php'}
 ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pair-3-on']
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
-ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser'}
+ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser', 'gif-policy', 'static-policy', 'front-browser-http', 'front-browser-image', 'live-pauses', 'no-per-second-image-requests'}
 ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
 
 
@@ -64,12 +65,45 @@ def navigation_cancel(failure, url, phase, navigating):
             and '/cache/autoptimize/' not in url)
 
 
+def expected_plugins(profile, active):
+    plugins = {'easy-countdown/email-countdown-timer.php'} if active else set()
+    if profile != 'baseline':
+        plugins.add(PLUGIN_FILES[profile])
+    return plugins
+
+
+def metadata_matches(profile, jit, state):
+    env, runtime = state.get('environment'), state.get('runtime')
+    if not isinstance(env, dict) or not isinstance(runtime, dict):
+        return False
+    plugins, theme = env.get('active_plugins'), env.get('theme')
+    if (not isinstance(plugins, list) or not all(isinstance(x, str) for x in plugins)
+            or set(plugins) != expected_plugins(profile, state['active'])
+            or env.get('wordpress') != '7.1.2' or not isinstance(theme, dict)
+            or theme.get('name') != 'twentytwentyfive'
+            or not str(env.get('mysql', '')).startswith('8.4.')
+            or not str(env.get('php_cli', '')).startswith('8.4.')):
+        return False
+    expected = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': jit,
+                'x-ecd-lab-jit-active': 'off' if jit == 'disable' else 'on', 'x-ecd-lab-gd': 'yes',
+                'x-ecd-lab-active': 'on' if state['active'] else 'off'}
+    return all(runtime.get(k) == value for k, value in expected.items()) and str(runtime.get('x-ecd-lab-php', '')).startswith('8.4.')
+
+
 def accept(report):
     if (not isinstance(report, dict) or report.get('complete') is not True
             or report.get('profile') not in PROFILES or report.get('jit') not in ('1235', 'disable')
             or report.get('failures') != [] or report.get('page_errors') != [] or report.get('browser_errors') != []):
         return False
     states = report.get('states')
+    installed = report.get('plugins')
+    if (not isinstance(report.get('source_commit'), str) or not re.fullmatch('[a-f0-9]{40}', report['source_commit'])
+            or not isinstance(installed, list) or not all(isinstance(row, dict) for row in installed)):
+        return False
+    if report['profile'] != 'baseline':
+        versions = [row.get('version') for row in installed if row.get('name') == report['profile']]
+        if versions != [PROFILES[report['profile']]]:
+            return False
     if not isinstance(states, list) or len(states) != len(ORDER) or not all(isinstance(s, dict) for s in states):
         return False
     if [s.get('key') for s in states] != ORDER:
@@ -77,6 +111,8 @@ def accept(report):
     for state in states:
         active = state['key'].endswith('-on')
         if state.get('active') is not active or state.get('complete') is not True or state.get('failures') != []:
+            return False
+        if not metadata_matches(report['profile'], report['jit'], state):
             return False
         markers = state.get('generations')
         if not page_evidence(markers, report['profile'] in ('wp-super-cache', 'w3-total-cache')):
@@ -93,7 +129,12 @@ def accept(report):
             if any(not isinstance(item, dict) or item.get('generation') != markers[-1]
                    or not isinstance(item.get('sha256'), str) or not re.fullmatch('[a-f0-9]{64}', item['sha256']) for item in artifacts):
                 return False
+            prefixes = ('cache/supercache/',) if report['profile'] == 'wp-super-cache' else ('cache/page/', 'cache/page_enhanced/')
+            if any(not isinstance(item.get('path'), str) or not item['path'].startswith(prefixes) for item in artifacts):
+                return False
         if not isinstance(checks, list) or not all(isinstance(x, str) for x in checks) or not required.issubset(checks):
+            return False
+        if checks.count('anonymous-page-http') != 4:
             return False
     return True
 

@@ -69,7 +69,7 @@ in all off/on controls, despite an identified installed drop-in and enabled
 flags. This is not accepted as a compatibility pass. Preserve
 [run 42900124590](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42900124590).
 The next revision requests HTML explicitly, records fixed early-cache/response
-diagnostics and adds an independent final completeness gate. No page-hit
+diagnostics and adds a separate final completeness check. No page-hit
 assertion, native gate or timeout is relaxed.
 
 The WP Super Cache investigation found a skipped setup step: upstream
@@ -80,6 +80,14 @@ unset. The fixture now saves the same setting using the vendor's configuration
 function. This diagnosis is checked again with actual off/on page hits; no
 vendor or candidate source is patched. Fixed eligibility fields and synthetic
 anonymous HTML are retained on a miss, without vendor raw cookie/debug logging.
+
+The final gate re-validates the harness's own report; it is not a second browser
+observer or independent audit. It checks the six counterbalanced states, actual
+plugin versions/state, recorded native PHP/JIT/SAPI and completed behavioral
+checks. Native logs are inspected separately after the servers stop. Cache
+artifacts are limited to the engine's page-cache directories, not object/DB
+caches. Apt provides the disposable native server; observed patch versions are
+recorded rather than assuming the runner has an immutable OS image.
 
 These bounded profiles do not certify every option or environment. FlyingPress
 and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs

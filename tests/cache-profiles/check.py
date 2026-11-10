@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, core_avatar, generation, navigation_cancel, page_evidence
+from contracts import ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -134,13 +134,17 @@ def main():
     def cache_files(marker):
         cache = wpdir / 'wp-content/cache'
         found = []
-        for path in sorted(cache.rglob('*')):
+        directories = ['supercache'] if profile == 'wp-super-cache' else ['page', 'page_enhanced']
+        paths = [path for directory in directories for path in (cache / directory).rglob('*')]
+        for path in sorted(paths):
             if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(cache.resolve()) or path.stat().st_size > 2 * 1024 * 1024:
                 continue
             data = path.read_bytes()
             if data.startswith(b'\x1f\x8b'):
                 with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream:
                     data = stream.read(2 * 1024 * 1024 + 1)
+                if len(data) > 2 * 1024 * 1024:
+                    raise ValueError('decoded_cache_file_exceeds_bound')
             if marker.encode() in data:
                 found.append({'path': path.relative_to(wpdir / 'wp-content').as_posix(), 'sha256': hashlib.sha256(data).hexdigest(), 'generation': marker})
         return found
@@ -261,11 +265,10 @@ def main():
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'purge')
                         inventory = json.loads(wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory'))
                         current['environment'] = inventory
-                        annotation('notice', 'Cache environment', json.dumps({'profile': profile, 'jit': jit, 'state': key, **inventory}))
+                        if key == ORDER[0]:
+                            annotation('notice', 'Cache environment', json.dumps({'profile': profile, 'jit': jit, 'state': key, **inventory}))
                         active_plugins = inventory['active_plugins']
-                        expected = {'easy-countdown/email-countdown-timer.php'} if current['active'] else set()
-                        if profile != 'baseline':
-                            expected.add({'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php'}[profile])
+                        expected = expected_plugins(profile, current['active'])
                         check(set(active_plugins) == expected and inventory['wordpress'] == '7.1.2'
                               and inventory['theme']['name'] == 'twentytwentyfive', 'plugin-state')
                         url = fixture['pages'][key]['url']
@@ -343,6 +346,8 @@ def main():
     finally:
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
+        annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
+            'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states'])}))
     return 0 if report['passed'] else 1
 
 
