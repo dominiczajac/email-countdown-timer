@@ -112,6 +112,11 @@ final class Email_Countdown_Timer_Admin {
         return is_array( $timers ) ? array_filter( $timers, 'is_array' ) : array();
     }
 
+    /** Administration metadata only; public rendering continues to use the record. */
+    public static function archived( array $timer ): bool {
+        return true === ( $timer['archived'] ?? false );
+    }
+
     public static function register_dashboard_widget(): void {
         if ( current_user_can( 'manage_options' ) ) {
             wp_add_dashboard_widget( 'email_countdown_timer_quick_access', __( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
@@ -123,7 +128,7 @@ final class Email_Countdown_Timer_Admin {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        $timers = array_filter( self::timers(), static fn( $id ) => '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_KEY );
+        $timers = array_filter( self::timers(), static fn( $timer, $id ) => ! self::archived( $timer ) && '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_BOTH );
         uksort( $timers, 'strnatcasecmp' );
         ?>
         <div id="email-countdown-timer-dashboard">
@@ -218,7 +223,18 @@ final class Email_Countdown_Timer_Admin {
             }
         }
 
-        if ( 'email_countdown_timer_delete' === $action ) {
+        $metadata_only = in_array( $action, array( 'email_countdown_timer_archive', 'email_countdown_timer_restore' ), true );
+        if ( $metadata_only ) {
+            if ( '' === $id || ! isset( $timers[ $id ] ) || ! is_array( $timers[ $id ] ) ) {
+                wp_die( esc_html__( 'Choose an existing timer to archive or restore.', 'easy-countdown' ), '', array( 'response' => 400 ) );
+                return;
+            }
+            if ( 'email_countdown_timer_archive' === $action ) {
+                $timers[ $id ]['archived'] = true;
+            } else {
+                unset( $timers[ $id ]['archived'] );
+            }
+        } elseif ( 'email_countdown_timer_delete' === $action ) {
             if ( '' === $id || ! isset( $timers[ $id ] ) || '1' !== self::posted( 'confirm_delete' ) ) {
                 wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'easy-countdown' ), '', array( 'response' => 400 ) );
                 return;
@@ -238,7 +254,7 @@ final class Email_Countdown_Timer_Admin {
             }
             if ( '' === $id ) {
                 $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'easy-countdown' );
-            } elseif ( '' === $original && isset( $timers[ $id ] ) ) {
+            } elseif ( '' === $original && array_key_exists( $id, $timers ) ) {
                 $errors['timer_id'] = __( 'This ID already exists. Edit the existing timer or choose a different ID.', 'easy-countdown' );
             } elseif ( '' !== $original && ( $original !== $id || ! isset( $timers[ $original ] ) ) ) {
                 $errors['timer_id'] = __( 'The original timer no longer exists or its ID was changed. Return to Timers.', 'easy-countdown' );
@@ -303,6 +319,9 @@ final class Email_Countdown_Timer_Admin {
             if ( '' !== $data['campaign_name'] ) {
                 $normalized['campaign_name'] = $data['campaign_name'];
             }
+            if ( '' !== $original && self::archived( $timers[ $original ] ?? array() ) ) {
+                $normalized['archived'] = true;
+            }
             $timers[ $id ] = $normalized;
         } else {
             return;
@@ -311,11 +330,18 @@ final class Email_Countdown_Timer_Admin {
             wp_die( esc_html__( 'The database could not save this change. No success has been recorded.', 'easy-countdown' ), '', array( 'response' => 500 ) );
             return;
         }
-        foreach ( array( 'png', 'gif', 'webp' ) as $format ) {
-            delete_transient( 'ecd_v1211_' . hash( 'sha256', $id . '|' . $format ) );
+        if ( ! $metadata_only ) {
+            foreach ( array( 'png', 'gif', 'webp' ) as $format ) {
+                delete_transient( 'ecd_v1211_' . hash( 'sha256', $id . '|' . $format ) );
+            }
         }
-        $args = 'email_countdown_timer_delete' === $action
-            ? array( 'status' => 'deleted' ) : array( 'edit' => $id, 'status' => 'saved' );
+        if ( $metadata_only ) {
+            $args = array( 'filter' => 'email_countdown_timer_archive' === $action ? 'active' : 'archived',
+                'status' => 'email_countdown_timer_archive' === $action ? 'archived' : 'restored' );
+        } else {
+            $args = 'email_countdown_timer_delete' === $action
+                ? array( 'status' => 'deleted' ) : array( 'edit' => $id, 'status' => 'saved' );
+        }
         wp_safe_redirect( self::url( $args ) );
         exit;
     }
@@ -355,22 +381,27 @@ final class Email_Countdown_Timer_Admin {
 
     public static function state(): array {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin navigation; capability checked in render, identifiers are normalized, and output is escaped.
-        $query = array_intersect_key( $_GET, array_flip( array( 'edit', 'view', 's', 'paged', 'status' ) ) );
+        $query = array_intersect_key( $_GET, array_flip( array( 'edit', 'duplicate', 'view', 'filter', 's', 'paged', 'status' ) ) );
         $timers = self::timers();
         $edit = Email_Countdown_Timer_Config::id( wp_unslash( Email_Countdown_Timer_Config::text( $query, 'edit' ) ) );
         $pending = self::$pending;
-        $view = $pending || '' !== $edit || 'new' === Email_Countdown_Timer_Config::text( $query, 'view' ) ? 'editor' : 'list';
+        $duplicate = '' === $edit && ! $pending ? Email_Countdown_Timer_Config::id( wp_unslash( Email_Countdown_Timer_Config::text( $query, 'duplicate' ) ) ) : '';
+        $source = '' !== $duplicate ? ( $timers[ $duplicate ] ?? null ) : null;
+        $view = $pending || '' !== $edit || '' !== $duplicate || 'new' === Email_Countdown_Timer_Config::text( $query, 'view' ) ? 'editor' : 'list';
         $original = $pending ? $pending['original'] : $edit;
         $saved = '' !== $original && isset( $timers[ $original ] ) ? $timers[ $original ] : null;
-        $data = array_replace( self::defaults( null === $saved ), $saved ?? array() );
-        $data['campaign_name'] = self::campaign_name( $saved ?? array() );
+        $data = array_replace( self::defaults( null === $saved && null === $source ), $saved ?? $source ?? array() );
+        $data['campaign_name'] = self::campaign_name( $saved ?? $source ?? array() );
         $errors = $pending['errors'] ?? array();
         if ( '' !== $original && null === $saved ) {
             $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'easy-countdown' );
         }
-        if ( $saved ) {
+        if ( '' !== $duplicate && null === $source ) {
+            $errors['form'] = __( 'The source timer no longer exists. Return to Timers and choose another campaign.', 'easy-countdown' );
+        }
+        if ( $saved || $source ) {
             try {
-                Email_Countdown_Timer_Config::normalize( $saved );
+                Email_Countdown_Timer_Config::normalize( $saved ?? $source );
             } catch ( InvalidArgumentException $exception ) {
                 $errors['form'] = __( 'The saved configuration contains invalid values. Review the fields before saving.', 'easy-countdown' );
             }
@@ -379,13 +410,17 @@ final class Email_Countdown_Timer_Admin {
             $data = $pending['data'];
         }
         $search = sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $query, 's' ) ) );
-        $filtered = '' === $search ? $timers : array_filter( $timers, static fn( $timer, $id ) => false !== stripos( (string) $id, $search ) || false !== stripos( self::campaign_name( $timer ), $search ), ARRAY_FILTER_USE_BOTH );
+        $filter = 'archived' === Email_Countdown_Timer_Config::text( $query, 'filter' ) ? 'archived' : 'active';
+        $archived_count = count( array_filter( $timers, array( self::class, 'archived' ) ) );
+        $visible = array_filter( $timers, static fn( $timer ) => self::archived( $timer ) === ( 'archived' === $filter ) );
+        $filtered = '' === $search ? $visible : array_filter( $visible, static fn( $timer, $id ) => false !== stripos( (string) $id, $search ) || false !== stripos( self::campaign_name( $timer ), $search ), ARRAY_FILTER_USE_BOTH );
         $pages = max( 1, (int) ceil( count( $filtered ) / 25 ) );
         $page = min( $pages, max( 1, (int) Email_Countdown_Timer_Config::text( $query, 'paged', '1' ) ) );
         $id = $pending ? $pending['id'] : ( '' === $edit && 'editor' === $view ? self::suggested_id() : $edit );
         return array( 'view' => $view, 'id' => $id, 'original' => $original,
             'data' => $data, 'errors' => $errors, 'saved' => $saved, 'search' => $search, 'page' => $page, 'pages' => $pages,
             'total' => count( $filtered ), 'timers' => array_slice( $filtered, ( $page - 1 ) * 25, 25, true ),
+            'filter' => $filter, 'active_count' => count( $timers ) - $archived_count, 'archived_count' => $archived_count, 'duplicate_source' => $duplicate,
             'status' => Email_Countdown_Timer_Config::text( $query, 'status' ) );
     }
 

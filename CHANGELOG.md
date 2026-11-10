@@ -2,6 +2,7 @@
 
 ## 12.6.0 (review candidate)
 
+- Add duplicate-to-new-draft, archive and restore actions. Copies preserve the source schedule/style with a new immutable ID; archiving hides administration shortcuts while keeping public images, URLs and Gutenberg selections working. Old edit forms retain archive metadata, and deletion still requires its separate confirmation.
 - Add a native IANA time-zone selector to the editor, Quick Create and dashboard. Keep saved aliases and fixed offsets selected, use the site zone only for new campaigns, and confirm saved deadlines with their numeric offset and UTC equivalent. No deadline or renderer interpretation is migrated.
 - Add optional private campaign names and opaque suggested IDs for new timers. Search administration by name or ID, preserve old forms and immutable saved IDs, and keep names out of public rendering, email HTML and the editor catalog.
 - Add a native dynamic Gutenberg block for existing timers, with a static preview, manual refresh and alignment controls. Reuse the existing shortcode renderer and permission-checked campaign references.

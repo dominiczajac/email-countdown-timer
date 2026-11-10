@@ -16,8 +16,9 @@ if ( ! current_user_can( 'manage_options' ) ) {
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=email-countdown-timer-data' ) ); ?>"><?php echo esc_html__( 'Data Settings', 'easy-countdown' ); ?></a>
         </nav>
     </div>
-    <?php if ( in_array( $email_countdown_timer_ui['status'], array( 'saved', 'deleted' ), true ) && empty( $email_countdown_timer_ui['errors'] ) ) : ?>
-        <div class="notice notice-success"><p><?php echo esc_html( 'deleted' === $email_countdown_timer_ui['status'] ? __( 'Timer deleted.', 'easy-countdown' ) : __( 'Timer saved.', 'easy-countdown' ) ); ?></p></div>
+    <?php $email_countdown_timer_messages = array( 'saved' => __( 'Timer saved.', 'easy-countdown' ), 'deleted' => __( 'Timer deleted.', 'easy-countdown' ), 'archived' => __( 'Timer archived. Existing website and email links still work.', 'easy-countdown' ), 'restored' => __( 'Timer restored to the main list.', 'easy-countdown' ) ); ?>
+    <?php if ( isset( $email_countdown_timer_messages[ $email_countdown_timer_ui['status'] ] ) && empty( $email_countdown_timer_ui['errors'] ) ) : ?>
+        <div class="notice notice-success"><p><?php echo esc_html( $email_countdown_timer_messages[ $email_countdown_timer_ui['status'] ] ); ?></p></div>
     <?php endif; ?>
     <?php if ( ! function_exists( 'imagecreatetruecolor' ) ) : ?>
         <div class="notice notice-error"><p><?php echo esc_html__( 'GD is unavailable. Settings can be saved, but image generation and geometry validation are unavailable until GD is enabled.', 'easy-countdown' ); ?></p></div>
@@ -33,17 +34,23 @@ if ( ! current_user_can( 'manage_options' ) ) {
         <section class="ect-card" aria-labelledby="ect-list-title">
             <div class="ect-heading-row"><h2 id="ect-list-title"><?php echo esc_html__( 'Your Timers', 'easy-countdown' ); ?></h2>
                 <a class="button button-primary" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Create Timer', 'easy-countdown' ); ?></a></div>
+            <nav class="ect-row-actions" aria-label="<?php echo esc_attr__( 'Campaign lists', 'easy-countdown' ); ?>">
+                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url() ); ?>" <?php if ( 'active' === $email_countdown_timer_ui['filter'] ) : ?>aria-current="page"<?php endif; ?>><?php echo esc_html( sprintf( /* translators: %d: number of unarchived timers. */ __( 'Timers (%d)', 'easy-countdown' ), $email_countdown_timer_ui['active_count'] ) ); ?></a>
+                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'filter' => 'archived' ) ) ); ?>" <?php if ( 'archived' === $email_countdown_timer_ui['filter'] ) : ?>aria-current="page"<?php endif; ?>><?php echo esc_html( sprintf( /* translators: %d: number of archived timers. */ __( 'Archived (%d)', 'easy-countdown' ), $email_countdown_timer_ui['archived_count'] ) ); ?></a>
+            </nav>
+            <p class="description"><?php echo esc_html__( 'Archiving hides a campaign from this list and the dashboard. Existing links and Gutenberg selections still work. Restore it from Archived; deletion remains a separate action.', 'easy-countdown' ); ?></p>
             <form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="ect-search">
                 <input type="hidden" name="page" value="ecd-timers">
+                <input type="hidden" name="filter" value="<?php echo esc_attr( $email_countdown_timer_ui['filter'] ); ?>">
                 <label for="ect-search"><?php echo esc_html__( 'Search names or timer IDs', 'easy-countdown' ); ?></label>
                 <div class="ect-inline"><input id="ect-search" name="s" type="search" value="<?php echo esc_attr( $email_countdown_timer_ui['search'] ); ?>"><button class="button" type="submit"><?php echo esc_html__( 'Search', 'easy-countdown' ); ?></button></div>
             </form>
             <?php if ( empty( $email_countdown_timer_ui['timers'] ) ) : ?>
-                <p class="ect-empty"><?php echo esc_html( '' === $email_countdown_timer_ui['search'] ? __( 'No timers yet. Use Quick Create above, or open the full editor with Create Timer.', 'easy-countdown' ) : __( 'No timers match this search.', 'easy-countdown' ) ); ?></p>
+                <p class="ect-empty"><?php echo esc_html( '' !== $email_countdown_timer_ui['search'] ? __( 'No timers match this search.', 'easy-countdown' ) : ( 'archived' === $email_countdown_timer_ui['filter'] ? __( 'No archived timers.', 'easy-countdown' ) : __( 'No timers yet. Use Quick Create above, or open the full editor with Create Timer.', 'easy-countdown' ) ) ); ?></p>
             <?php else : ?>
                 <div class="ect-table-wrap" role="region" aria-labelledby="ect-list-title" tabindex="0">
                     <table class="widefat striped"><caption class="screen-reader-text"><?php echo esc_html__( 'Saved timers, deadlines and actions', 'easy-countdown' ); ?></caption>
-                        <thead><tr><th scope="col"><?php echo esc_html__( 'Timer ID', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Deadline / Time Zone', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Status', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Actions', 'easy-countdown' ); ?></th></tr></thead>
+                        <thead><tr><th scope="col"><?php echo esc_html__( 'Campaign / Timer ID', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Deadline / Time Zone', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Status', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Actions', 'easy-countdown' ); ?></th></tr></thead>
                         <tbody>
                         <?php foreach ( $email_countdown_timer_ui['timers'] as $email_countdown_timer_id => $email_countdown_timer_timer ) : ?>
                             <?php
@@ -52,25 +59,41 @@ if ( ! current_user_can( 'manage_options' ) ) {
                             } catch ( Exception $email_countdown_timer_exception ) {
                                 $email_countdown_timer_status = __( 'Needs attention', 'easy-countdown' );
                             }
+                            if ( Email_Countdown_Timer_Admin::archived( $email_countdown_timer_timer ) ) {
+                                $email_countdown_timer_status = __( 'Archived', 'easy-countdown' );
+                            }
                             $email_countdown_timer_edit_url = Email_Countdown_Timer_Admin::url( array( 'edit' => $email_countdown_timer_id ) );
                             ?>
                             <tr><th scope="row"><?php if ( '' !== Email_Countdown_Timer_Admin::campaign_name( $email_countdown_timer_timer ) ) : ?><div><?php echo esc_html( Email_Countdown_Timer_Admin::campaign_name( $email_countdown_timer_timer ) ); ?></div><?php endif; ?><code><?php echo esc_html( $email_countdown_timer_id ); ?></code></th>
                                 <td><?php echo esc_html( Email_Countdown_Timer_Admin::deadline_text( $email_countdown_timer_timer ) ); ?></td>
                                 <td><span class="ect-badge"><?php echo esc_html( $email_countdown_timer_status ); ?></span></td>
                                 <td><div class="ect-row-actions"><a class="button" href="<?php echo esc_url( $email_countdown_timer_edit_url ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html__( 'Edit', 'easy-countdown' ); ?></a>
-                                    <a href="<?php echo esc_url( $email_countdown_timer_edit_url . '#ect-embed' ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Get embed code for %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html__( 'Get Embed Code', 'easy-countdown' ); ?></a></div></td></tr>
+                                    <a href="<?php echo esc_url( $email_countdown_timer_edit_url . '#ect-embed' ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Get embed code for %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html__( 'Get Embed Code', 'easy-countdown' ); ?></a>
+                                    <a class="button" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'duplicate' => $email_countdown_timer_id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Duplicate %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html__( 'Duplicate', 'easy-countdown' ); ?></a>
+                                    <form method="post" action="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'filter' => $email_countdown_timer_ui['filter'] ) ) ); ?>">
+                                        <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
+                                        <input type="hidden" name="timer_id" value="<?php echo esc_attr( $email_countdown_timer_id ); ?>">
+                                        <input type="hidden" name="ecd_action" value="<?php echo esc_attr( 'archived' === $email_countdown_timer_ui['filter'] ? 'email_countdown_timer_restore' : 'email_countdown_timer_archive' ); ?>">
+                                        <button type="submit" class="button" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ 'archived' === $email_countdown_timer_ui['filter'] ? __( 'Restore %s', 'easy-countdown' ) : __( 'Archive %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html( 'archived' === $email_countdown_timer_ui['filter'] ? __( 'Restore', 'easy-countdown' ) : __( 'Archive', 'easy-countdown' ) ); ?></button>
+                                    </form>
+                                </div></td></tr>
                         <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
                 <nav class="ect-pagination" aria-label="<?php echo esc_attr__( 'Timer pages', 'easy-countdown' ); ?>">
                     <span><?php echo esc_html( sprintf( /* translators: 1: current page, 2: total pages. */ __( 'Page %1$d of %2$d', 'easy-countdown' ), $email_countdown_timer_ui['page'], $email_countdown_timer_ui['pages'] ) ); ?></span>
-                    <?php if ( $email_countdown_timer_ui['page'] > 1 ) : ?><a class="button" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 's' => $email_countdown_timer_ui['search'], 'paged' => $email_countdown_timer_ui['page'] - 1 ) ) ); ?>"><?php echo esc_html__( 'Previous', 'easy-countdown' ); ?></a><?php endif; ?>
-                    <?php if ( $email_countdown_timer_ui['page'] < $email_countdown_timer_ui['pages'] ) : ?><a class="button" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 's' => $email_countdown_timer_ui['search'], 'paged' => $email_countdown_timer_ui['page'] + 1 ) ) ); ?>"><?php echo esc_html__( 'Next', 'easy-countdown' ); ?></a><?php endif; ?>
+                    <?php if ( $email_countdown_timer_ui['page'] > 1 ) : ?><a class="button" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'filter' => $email_countdown_timer_ui['filter'], 's' => $email_countdown_timer_ui['search'], 'paged' => $email_countdown_timer_ui['page'] - 1 ) ) ); ?>"><?php echo esc_html__( 'Previous', 'easy-countdown' ); ?></a><?php endif; ?>
+                    <?php if ( $email_countdown_timer_ui['page'] < $email_countdown_timer_ui['pages'] ) : ?><a class="button" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'filter' => $email_countdown_timer_ui['filter'], 's' => $email_countdown_timer_ui['search'], 'paged' => $email_countdown_timer_ui['page'] + 1 ) ) ); ?>"><?php echo esc_html__( 'Next', 'easy-countdown' ); ?></a><?php endif; ?>
                 </nav>
             <?php endif; ?>
         </section>
     <?php else : ?>
+        <?php if ( '' !== $email_countdown_timer_ui['duplicate_source'] ) : ?>
+            <div class="notice notice-info"><p><?php echo esc_html( sprintf( /* translators: %s: source timer ID. */ __( 'Copying %s into a new, unsaved campaign. Review the new ID and deadline, then create it. The original campaign is unchanged.', 'easy-countdown' ), $email_countdown_timer_ui['duplicate_source'] ) ); ?></p></div>
+        <?php elseif ( $email_countdown_timer_ui['saved'] && Email_Countdown_Timer_Admin::archived( $email_countdown_timer_ui['saved'] ) ) : ?>
+            <div class="notice notice-info"><p><?php echo esc_html__( 'This campaign is archived. Existing links still work. Saving changes keeps it archived; restore it from the Archived list.', 'easy-countdown' ); ?></p></div>
+        <?php endif; ?>
         <div class="ect-heading-row"><h2><?php echo esc_html( '' === $email_countdown_timer_ui['original'] ? __( 'New Timer', 'easy-countdown' ) : sprintf( /* translators: %s: timer ID. */ __( 'Edit: %s', 'easy-countdown' ), $email_countdown_timer_ui['original'] ) ); ?></h2>
             <span id="ect-save-state" class="ect-badge" data-dirty="<?php echo esc_attr__( 'Unsaved changes', 'easy-countdown' ); ?>" data-clean="<?php echo esc_attr__( 'Saved configuration', 'easy-countdown' ); ?>"><?php echo esc_html( $email_countdown_timer_ui['saved'] && empty( $email_countdown_timer_ui['errors'] ) ? __( 'Saved configuration', 'easy-countdown' ) : __( 'Not saved', 'easy-countdown' ) ); ?></span></div>
         <div id="ect-errors" class="notice notice-error" tabindex="-1" <?php if ( empty( $email_countdown_timer_ui['errors'] ) ) : ?>hidden<?php endif; ?>>

@@ -36,7 +36,7 @@ class Email_Countdown_Timer_Plugin {
     }
     public function handleFormSave(): void {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Routing only; the admin controller verifies capability, POST and nonce before reading form data.
-        if (in_array(Email_Countdown_Timer_Config::text($_POST, 'ecd_action'), ['email_countdown_timer_save', 'email_countdown_timer_delete'], true)) {
+        if (in_array(Email_Countdown_Timer_Config::text($_POST, 'ecd_action'), ['email_countdown_timer_save', 'email_countdown_timer_delete', 'email_countdown_timer_archive', 'email_countdown_timer_restore'], true)) {
             require_once __DIR__.'/class-email-countdown-timer-admin.php';
             Email_Countdown_Timer_Admin::handle_post();
             return;
