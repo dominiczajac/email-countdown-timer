@@ -15,9 +15,10 @@ codes, severity, explanation and recommended action. It is generated only on
 request and retained only in the current page, with manual copying available.
 
 A separate **Test public image** button makes one browser request to that
-campaign's existing static image route, omitting credentials. No server-side
+campaign's existing static image route with an explicit cache-busting parameter,
+omitting credentials. No server-side
 remote fetch, automatic probe, polling, visitor telemetry or external dependency.
-It reports HTTP/decode failure without echoing a response body or URL into the
+It reports fixed timeout/network-or-CORS/HTTP/MIME/decode/error-pixel codes without echoing a response body or URL into the
 report. Success verifies this browser's anonymous access only; real email
 providers, remote networks, caches and recipient clients still need acceptance.
 

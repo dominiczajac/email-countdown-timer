@@ -41,7 +41,7 @@ foreach ( array( 'private-id-sentinel', 'private-font-sentinel.ttf', 'PRIVATE NA
     ok( ! str_contains( $json, $secret ), 'report excludes private/configuration sentinel: ' . $secret );
 }
 ok( str_contains( $html, 'data-ect-image-url=' ) && str_contains( $html, 'mode=static' ) && str_contains( $html, ' hidden ' ), 'valid selected campaign enables only an explicit static browser test' );
-ok( $report['image_test'] === array( 'status' => 'not_run', 'http_status' => null ), 'local POST never automatically tests an image' );
+ok( $report['image_test'] === array( 'status' => 'not_run', 'code' => 'not_run', 'http_status' => null ), 'local POST never automatically tests an image' );
 foreach ( array( '', 'missing', '../private-id-sentinel', array(), str_repeat( 'a', 201 ) ) as $id ) {
     $html = $render_status( 'POST', $id );
     ok( ! str_contains( $html, 'data-ect-image-url=' ), 'empty/unknown/malformed campaign cannot produce an image target' );
@@ -66,6 +66,16 @@ $options['easy_countdown_timers'] = array_fill_keys( array_map( static fn( $n ) 
 $html = $render_status( 'GET' );
 ok( substr_count( $html, '<option value=' ) === 250, 'admin campaign suggestions are bounded' );
 ok( str_contains( $render_status( 'POST', 'status-251' ), 'data-ect-image-url=' ), 'known IDs beyond suggestions may be entered explicitly' );
+$options = $before[0];
+if ( function_exists( 'imagefontwidth' ) ) {
+    foreach ( array( '', 'private-font-sentinel.ttf', Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ) as $choice ) {
+        $config = array_replace( $base, array( 'font' => $choice ) );
+        $options['easy_countdown_timers']['renderer-parity'] = $config;
+        $native = ( new Email_Countdown_Timer_Renderer() )->measure( $config, Email_Countdown_Timer_Config::deadline( $config ), time() );
+        $expected = '' === $choice ? 'bitmap' : ( null !== $native['font'] ? 'local_font_available' : 'bitmap_fallback' );
+        ok( $decode_status( $render_status( 'POST', 'renderer-parity' ) )['checks'][4]['code'] === $expected, 'font diagnosis matches the native renderer decision for bitmap, missing and bundled font' );
+    }
+}
 $options = $before[0];
 ok( array( $options, $transients, $writes ) === $before, 'all diagnostics leave options and image caches unchanged' );
 Email_Countdown_Timer_Status::add_menu();
