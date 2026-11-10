@@ -52,7 +52,9 @@
                     var remaining = Math.max(0, deadline - Math.floor(Date.now() / 1000));
                     var values = { d: Math.floor(remaining / 86400), h: Math.floor(remaining % 86400 / 3600), m: Math.floor(remaining % 3600 / 60), s: remaining % 60 };
                     digits.querySelectorAll('[data-ecd-unit]').forEach(function (node) {
-                        node.textContent = String(values[node.getAttribute('data-ecd-unit')]).padStart(2, '0');
+                        var text = String(values[node.getAttribute('data-ecd-unit')]).padStart(2, '0');
+                        node.textContent = text;
+                        node.style.setProperty('--ecd-length', String(text.length));
                     });
                     var hideDays = root.getAttribute('data-ecd-hide-days') === '1' && values.d === 0;
                     var day = digits.querySelector('[data-ecd-unit="d"]');

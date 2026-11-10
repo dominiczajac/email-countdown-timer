@@ -25,7 +25,8 @@
 .ecd-live__number {
     display: block;
     font: inherit;
-    font-size: clamp(.625rem, 5cqi, 2rem);
+    font-size: 1.25rem;
+    font-size: clamp(.625rem, calc(26cqi / var(--ecd-length, 2)), 2rem);
     font-variant-numeric: tabular-nums;
     line-height: 1.5;
     white-space: nowrap;
@@ -35,6 +36,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-height: 1.5em;
     color: var(--ecd-label);
     font-size: .875rem;
     line-height: 1.5;

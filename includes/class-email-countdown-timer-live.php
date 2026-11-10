@@ -29,7 +29,7 @@ final class Email_Countdown_Timer_Live {
                 <div class="ecd-live__digits<?php echo $omit_days ? ' ecd-live__digits--three' : ''; ?>" aria-hidden="true">
                     <?php foreach ( $values as $unit => $value ) : ?>
                         <div class="ecd-live__unit"<?php echo 'd' === $unit && $omit_days ? ' hidden' : ''; ?>>
-                            <span class="ecd-live__number" data-ecd-unit="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $value, 2, '0', STR_PAD_LEFT ) ); ?></span>
+                            <span class="ecd-live__number" data-ecd-unit="<?php echo esc_attr( $unit ); ?>" style="--ecd-length:<?php echo esc_attr( (string) max( 2, strlen( (string) $value ) ) ); ?>;"><?php echo esc_html( str_pad( (string) $value, 2, '0', STR_PAD_LEFT ) ); ?></span>
                             <span class="ecd-live__label" title="<?php echo esc_attr( $config[ 'label_' . $unit ] ); ?>"><?php echo esc_html( $config[ 'label_' . $unit ] ); ?></span>
                         </div>
                     <?php endforeach; ?>

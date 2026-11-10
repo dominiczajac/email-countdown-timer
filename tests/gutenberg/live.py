@@ -75,6 +75,7 @@ def verify_live(page, browser, wp, base, evidence, check, open_editor, insert):
     check(len([url for url in requests if 'ecd_action=render' in url]) == 1 and first_root.locator('[data-ecd-unit="m"]').inner_text() == '01', 'live text keeps updating beyond 60 seconds without polling images')
     for width in [320, 375, 768, 1440]:
         front.set_viewport_size({'width': width, 'height': 1000})
+        if width == 320: front.screenshot(path=str(evidence / 'live-running-narrow.png'), full_page=True)
         check(first_root.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1 && el.getBoundingClientRect().width<=el.parentElement.getBoundingClientRect().width+1'), 'live component fits viewport ' + str(width))
     height = first_root.locator('.ecd-live__stage').bounding_box()['height']
     instant += timedelta(seconds=120)

@@ -10,7 +10,7 @@ function harness({ remaining = 90061, reduced = false, loading = false, end = ''
     let now = 2000000000000, next = 0;
     const events = {}, mediaEvents = {}, timers = new Map(), images = [];
     const roots = Array.from({ length: count }, () => {
-        const values = Object.fromEntries(['d', 'h', 'm', 's'].map(unit => [unit, { textContent: '99', parentElement: { hidden: false }, getAttribute: () => unit }]));
+        const values = Object.fromEntries(['d', 'h', 'm', 's'].map(unit => [unit, { textContent: '99', style: { setProperty() {} }, parentElement: { hidden: false }, getAttribute: () => unit }]));
         const classes = new Set();
         const digits = { hidden: false, classes, classList: { toggle(name, enabled) { if (enabled) classes.add(name); else classes.delete(name); } }, querySelector: () => values.d, querySelectorAll: () => Object.values(values) };
         const button = { style: { visibility: 'hidden' }, disabled: false, textContent: '', events: {}, addEventListener(name, fn) { this.events[name] = fn; }, getAttribute(name) { return { 'data-ecd-pause': 'Pause', 'data-ecd-resume': 'Resume', 'data-ecd-ended': 'Ended' }[name]; } };
