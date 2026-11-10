@@ -250,6 +250,9 @@ def main():
             raise RuntimeError('vendor_version_mismatch')
         report['plugins'] = installed
         report['source_commit'] = (evidence / 'source-commit.txt').read_text().strip()
+        report['distribution'] = json.loads((evidence / 'distribution.json').read_text())
+        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
+        report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
         with sync_playwright() as playwright:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             if not executable:
@@ -347,7 +350,9 @@ def main():
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
-            'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states'])}))
+            'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states']),
+            'source_commit': report.get('source_commit'), 'zip_sha256': report.get('distribution', {}).get('zip_sha256'),
+            'native_packages': report.get('native_packages')}))
     return 0 if report['passed'] else 1
 
 

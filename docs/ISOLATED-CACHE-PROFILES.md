@@ -12,6 +12,41 @@ MySQL 8.4 and Twenty Twenty-Five constant. Run OPcache with JIT 1235 and a
 separately labelled JIT-disabled diagnostic cell; neither overrides a failure.
 The existing required 26-job CI and its native JIT matrix remain unchanged.
 
+## Observed integrated-candidate results — 2026-11-10
+
+At source head `7ae3ce138c3c4977e2c8654ca6cc596628fee853`,
+[run 42903096446](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42903096446)
+passed **8/8 jobs**, with **48 complete states and 1,230 recorded checks**.
+Both the behavior/report gate and the separate post-shutdown native-log gate
+executed in every cell. API step results and all six state annotations per cell
+were read back; the full artifact download for that run is separately subject
+to the cloud network policy.
+
+| Profile | JIT 1235 | JIT disabled diagnostic | Recorded checks per cell |
+| --- | --- | --- | --- |
+| Baseline | Pass | Pass | 147 |
+| WP Super Cache 3.1.3 | Pass | Pass | 153 |
+| W3 Total Cache 2.10.6 | Pass | Pass | 153 |
+| Autoptimize 3.1.16 | Pass | Pass | 162 |
+
+Observed WordPress 7.1.2, PHP 8.4.27, MySQL 8.4.13 and Twenty Twenty-Five 1.5.
+WP Super Cache used Simple/PHP mode (`wp_cache_mod_rewrite=0`), enabled cache
+and supercache, rebuild=1, slash-check=1 and TTL=1800s. W3 used `pgcache.engine=file`
+with page cache, browser cache and lazyload enabled. Autoptimize's HTML/JS/CSS
+and JS/CSS aggregation options were on; the enforced optimizer proof is the
+served live-JavaScript bundle and actual browser behavior, not all CSS/lazyload
+variants. Subsequent reports also expose the tested checkout SHA, ZIP hash and
+actual nginx/FPM package versions in their bounded CI result annotation.
+
+No distributed runtime file changed from integrated main `a1ae837`; the
+32-file development ZIP has SHA256
+`7182f910731443e56a2c5d9ebab84838f7a2f966a5be865af0d8113e372d8c55`.
+It is development evidence, not the Gate A canonical release artifact.
+The historical PR #13 used different PHP/MySQL patch versions and workloads;
+these results do not diagnose or erase its native failures.
+
+## Method and retained negative evidence
+
 Each cell owns a new loopback-only WordPress/MySQL fixture, verifies package
 checksums, builds the installation ZIP from the tested commit and records actual
 versions, runtime SAPI/JIT, plugin state and effective configuration. Runtime
