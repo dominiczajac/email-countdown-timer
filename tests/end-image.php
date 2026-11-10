@@ -91,6 +91,24 @@ try {
             $colors=[];foreach($all as $frame){$colors[]=$frame->getImagePixelColor(intdiv($frame->getImageWidth(),2),intdiv($frame->getImageHeight(),2))->getColor();}
             $ref=new Imagick();$ref->readImageBlob($renderer->render_static($c,$deadline,$deadline,'gif',$asset));$color=$ref->getImagePixelColor(intdiv($ref->getImageWidth(),2),intdiv($ref->getImageHeight(),2))->getColor();ok($colors[2]===$color && $colors[59]===$color,'exact deadline and final GIF frame show selected raster');$ref->clear();$a->clear();$all->clear();
         }
+        // Client/server clock skew: an explicit end-only request must never
+        // return a pre-deadline countdown or contaminate the normal PNG cache.
+        $_GET=['ecd'=>'ended','mode'=>'static'];
+        ob_start();$method->invoke($plugin,false,$deadline-3);$earlyStatic=ob_get_clean();
+        $_GET['mode']='end';
+        ob_start();$method->invoke($plugin,false,$deadline-3);$earlyEnd=ob_get_clean();
+        ok($earlyEnd===$ended && $earlyEnd!==$earlyStatic,'end-only mode returns selected end pixels even when server time precedes browser expiry');
+        $_GET['mode']='static';
+        ob_start();$method->invoke($plugin,false,$deadline-3);$normalAgain=ob_get_clean();
+        ok($normalAgain===$earlyStatic,'end-only cache cannot replace normal pre-deadline PNG output');
+        $_GET['mode']='end';$end_posts[7]->post_password='protected';
+        ob_start();$method->invoke($plugin,false,$deadline-3);$privateEnd=ob_get_clean();
+        ok($statusCode===404 && getimagesizefromstring($privateEnd)[0]===1,'warm end-only cache never grants access to newly private media');
+        $end_posts[7]->post_password='';
+        $options['easy_countdown_timers']['no-end']=$ordinary;$_GET['ecd']='no-end';
+        ob_start();$method->invoke($plugin,false,$deadline-3);$noEnd=ob_get_clean();
+        ok($statusCode===404 && getimagesizefromstring($noEnd)[0]===1,'end-only mode without a configured image fails instead of showing an ordinary timer');
+        $_GET=['ecd'=>'ended','mode'=>'email'];$statusCode=200;
         unlink($end_root.'/sample.png');
         ok(Email_Countdown_Timer_End_Image::resolve(7)===null,'deleted selection not reused');
         ob_start();$method->invoke($plugin,false,$deadline+31);$missing=ob_get_clean();

@@ -6,7 +6,9 @@
 
     function install() {
         document.querySelectorAll('.ecd-live[data-ecd-deadline]').forEach(function (root) {
-            var deadline = Number(root.getAttribute('data-ecd-deadline'));
+            var rawDeadline = root.getAttribute('data-ecd-deadline');
+            if (!/^-?\d+$/.test(rawDeadline || '')) return;
+            var deadline = Number(rawDeadline);
             var digits = root.querySelector('.ecd-live__digits');
             var button = root.querySelector('button');
             if (!Number.isSafeInteger(deadline) || !digits || !button) return;
@@ -23,7 +25,7 @@
                 imageAttempted = true;
                 try {
                     var url = new URL(source, document.baseURI);
-                    if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.searchParams.get('ecd_action') !== 'render' || url.searchParams.get('mode') !== 'static' || !url.searchParams.get('ecd')) return;
+                    if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.searchParams.get('ecd_action') !== 'render' || url.searchParams.get('mode') !== 'end' || !url.searchParams.get('ecd')) return;
                     var image = document.createElement('img');
                     image.className = 'ecd-live__end-image';
                     image.alt = root.getAttribute('aria-label') || '';

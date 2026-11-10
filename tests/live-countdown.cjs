@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const code = fs.readFileSync('assets/live-countdown.js', 'utf8');
 let checks = 0;
 function check(value, name) { assert.ok(value, name); checks++; }
-function harness({ remaining = 90061, reduced = false, loading = false, end = '', count = 1 } = {}) {
+function harness({ remaining = 90061, reduced = false, loading = false, end = '', count = 1, rawDeadline } = {}) {
     let now = 2000000000000, next = 0;
     const events = {}, mediaEvents = {}, timers = new Map(), images = [];
     const roots = Array.from({ length: count }, () => {
@@ -15,7 +15,7 @@ function harness({ remaining = 90061, reduced = false, loading = false, end = ''
         const button = { style: { visibility: 'hidden' }, disabled: false, textContent: '', events: {}, addEventListener(name, fn) { this.events[name] = fn; }, getAttribute(name) { return { 'data-ecd-pause': 'Pause', 'data-ecd-resume': 'Resume', 'data-ecd-ended': 'Ended' }[name]; } };
         const stage = { children: [], appendChild(image) { this.children.push(image); } };
         return { values, digits, button, stage,
-            getAttribute(name) { return { 'data-ecd-deadline': String(now / 1000 + remaining), 'data-ecd-end-image': end, 'aria-label': 'Saved alt' }[name]; },
+            getAttribute(name) { return { 'data-ecd-deadline': rawDeadline === undefined ? String(now / 1000 + remaining) : rawDeadline, 'data-ecd-end-image': end, 'aria-label': 'Saved alt' }[name]; },
             querySelector(selector) { return { '.ecd-live__digits': digits, button, '.ecd-live__stage': stage }[selector]; }
         };
     });
@@ -58,7 +58,7 @@ const reduced = harness({ reduced: true });
 check(reduced.timers.size === 0 && reduced.roots[0].values.s.textContent === '01' && reduced.roots[0].button.textContent === 'Resume', 'reduced motion starts paused with a current snapshot even from cached markup');
 reduced.roots[0].button.events.click();
 check(reduced.timers.size === 1, 'reduced-motion user can explicitly resume');
-const expiry = harness({ remaining: 2, end: '/?ecd_action=render&ecd=example&mode=static' });
+const expiry = harness({ remaining: 2, end: '/?ecd_action=render&ecd=example&mode=end' });
 check(expiry.images.length === 0, 'no image request before expiry');
 expiry.advance(3000);
 check(expiry.images.length === 1 && expiry.timers.size === 0 && expiry.roots[0].button.disabled, 'expiry stops ticking and requests the static end image once');
@@ -67,10 +67,10 @@ expiry.visibility('hidden'); expiry.visibility('visible'); expiry.execute();
 check(expiry.images.length === 1, 'expiry and visibility cannot repeat the end-image request');
 expiry.images[0].naturalWidth = 400; expiry.images[0].onload();
 check(expiry.roots[0].digits.hidden && expiry.images[0].alt === 'Saved alt' && expiry.images[0].referrerPolicy === 'no-referrer', 'loaded end image replaces zero digits with saved accessible name');
-const broken = harness({ remaining: -1, end: '/?ecd_action=render&ecd=example&mode=static' });
+const broken = harness({ remaining: -1, end: '/?ecd_action=render&ecd=example&mode=end' });
 broken.images[0].onerror();
 check(!broken.roots[0].digits.hidden && broken.images[0].removed, 'missing end image retains readable zero digits');
-const pixel = harness({ remaining: -1, end: '/?ecd_action=render&ecd=example&mode=static' });
+const pixel = harness({ remaining: -1, end: '/?ecd_action=render&ecd=example&mode=end' });
 pixel.images[0].naturalWidth = 1; pixel.images[0].onload();
 check(!pixel.roots[0].digits.hidden && pixel.images[0].removed, 'renderer error pixel does not hide fallback digits');
 const unsafe = harness({ remaining: -1, end: 'javascript:alert(1)' });
@@ -79,4 +79,8 @@ const head = harness({ loading: true, count: 2 });
 check(head.timers.size === 0, 'optimizer head execution waits for the DOM');
 head.fire('DOMContentLoaded');
 check(head.timers.size === 2 && head.roots.every(root => root.button.style.visibility === 'visible'), 'multiple block instances initialize independently');
+for (const rawDeadline of ['', 'NaN', 'Infinity', '1e3', '9007199254740992']) {
+    const invalid = harness({ rawDeadline });
+    check(invalid.timers.size === 0 && invalid.roots[0].button.style.visibility === 'hidden', 'malformed deadline remains an unenhanced snapshot: ' + rawDeadline);
+}
 console.log(`LIVE COUNTDOWN DOUBLES PASS: ${checks} assertions`);

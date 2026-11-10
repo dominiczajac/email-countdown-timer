@@ -37,6 +37,7 @@ Your email editor must preserve the external URL. Importing the image into the e
 | `ecd_action=render` | Activates the image endpoint |
 | `ecd=ID` | Selects an existing configuration |
 | `mode=email` or `mode=anim` | GIF: 60 frames with Imagick, a static GIF without Imagick |
+| `mode=end` | Static configured end image only, including before the deadline; missing/private media returns 404. Separate cache slots; used by live website blocks |
 | Any other or missing `mode` | PNG; WebP when GD supports it and the `Accept` header contains `image/webp` |
 | `_t` | Browser refresh parameter; it does not create a separate plugin-side cache entry |
 

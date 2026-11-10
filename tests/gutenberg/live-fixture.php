@@ -11,6 +11,7 @@ if ( is_wp_error( $attachment ) ) { WP_CLI::error( 'Disposable attachment could 
 $config = Email_Countdown_Timer_Config::normalize( array( 'deadline' => '2035-12-31T23:59:59', 'tz' => 'UTC', 'fixed_width' => 400, 'alt' => 'Synthetic live campaign', 'label_d' => 'Very long custom day label', 'label_s' => '', 'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#555555' ) );
 $timers = get_option( 'easy_countdown_timers', array() );
 $timers['gutenberg-live'] = $config + array( 'campaign_name' => 'PRIVATE-LIVE-NAME' );
+$timers['gutenberg-live-end'] = array_replace( $config, array( 'expiry_image_id' => $attachment ) );
 $timers['gutenberg-ended'] = array_replace( $config, array( 'deadline' => '2000-01-01T00:00:00', 'expiry_image_id' => $attachment ) );
 update_option( 'easy_countdown_timers', $timers, false );
 $post = wp_insert_post( array( 'post_type' => 'post', 'post_title' => 'Synthetic live website block', 'post_status' => 'publish', 'post_author' => 1, 'post_content' => '' ), true );

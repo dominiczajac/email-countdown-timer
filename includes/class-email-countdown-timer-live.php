@@ -18,7 +18,7 @@ final class Email_Countdown_Timer_Live {
         $remaining = max( 0, $deadline - time() );
         // Match the image: hiding days omits that column, without adding days to hours.
         $values = array( 'd' => intdiv( $remaining, 86400 ), 'h' => intdiv( $remaining % 86400, 3600 ), 'm' => intdiv( $remaining % 3600, 60 ), 's' => $remaining % 60 );
-        $end_url = empty( $config['expiry_image_id'] ) ? '' : add_query_arg( array( 'ecd_action' => 'render', 'ecd' => $id, 'mode' => 'static' ), home_url( '/' ) );
+        $end_url = empty( $config['expiry_image_id'] ) ? '' : add_query_arg( array( 'ecd_action' => 'render', 'ecd' => $id, 'mode' => 'end' ), home_url( '/' ) );
         $alt = Email_Countdown_Timer_Config::alt( $config, __( 'Countdown', 'easy-countdown' ) );
         $style = '--ecd-bg:' . $config['bg'] . ';--ecd-digit:' . $config['dc'] . ';--ecd-label:' . $config['lc'] . ';';
         ob_start();
@@ -37,7 +37,7 @@ final class Email_Countdown_Timer_Live {
             </div>
             <p class="ecd-live__deadline"><?php echo esc_html__( 'Deadline:', 'easy-countdown' ); ?> <time datetime="<?php echo esc_attr( $date->format( DATE_ATOM ) ); ?>"><?php echo esc_html( $date->format( 'Y-m-d H:i:s P' ) . ' (' . $config['tz'] . ')' ); ?></time></p>
             <div class="ecd-live__controls"><button type="button" style="visibility:hidden" data-ecd-pause="<?php echo esc_attr__( 'Pause countdown', 'easy-countdown' ); ?>" data-ecd-resume="<?php echo esc_attr__( 'Resume countdown', 'easy-countdown' ); ?>" data-ecd-ended="<?php echo esc_attr__( 'Countdown ended', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Pause countdown', 'easy-countdown' ); ?></button></div>
-            <noscript><p><?php echo esc_html__( 'Snapshot only. Enable JavaScript to update the digits; use the deadline above for the exact end time.', 'easy-countdown' ); ?></p></noscript>
+            <p class="ecd-live__help"><?php echo esc_html__( 'Without JavaScript, these digits are a snapshot. Use the deadline above for the exact end time.', 'easy-countdown' ); ?></p>
         </div>
         <?php
         return (string) ob_get_clean();

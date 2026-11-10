@@ -23,8 +23,8 @@ Visitors can pause/resume; reduced-motion visitors start paused with a current
 snapshot. Hidden pages suspend ticking and catch up when visible. Digits are
 silent to screen readers; the exact deadline remains accessible. Without
 JavaScript the component labels itself a snapshot. A configured end image makes
-one existing static image request at expiry and fits the reserved stage; failure
-leaves zero digits visible. Browser clocks must be accurate. Purge page caches
+one static `mode=end` image request at expiry and fits the reserved stage; failure
+leaves zero digits visible. Browser clocks must be accurate. End-only output cannot return a pre-deadline countdown if the visitor clock runs ahead. A paused snapshot stays frozen until resumed. Purge page caches
 after campaign changes; cached HTML does not poll for new settings. See the
 [decision and limits](LIVE-WEBSITE-COUNTDOWN.md).
 

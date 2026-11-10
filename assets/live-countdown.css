@@ -49,7 +49,7 @@
     object-fit: contain;
     border: 0;
 }
-.ecd-live .ecd-live__deadline { margin: .5rem 0; font-size: .875rem; overflow-wrap: anywhere; }
+.ecd-live .ecd-live__deadline, .ecd-live .ecd-live__help { margin: .5rem 0; font-size: .875rem; overflow-wrap: anywhere; }
 .ecd-live__controls { min-height: 2.75rem; }
 .ecd-live__controls button { max-width: 100%; min-height: 2.75rem; font: inherit; white-space: normal; }
 .ecd-live [hidden] { display: none !important; }
