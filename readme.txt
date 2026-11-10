@@ -17,7 +17,7 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 **Features**
 
 * Native Easy Countdown block with a timer selector, static preview and alignment.
-* Timers with private admin names, suggested IDs, deadlines and time zones.
+* Private campaign names, suggested IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
@@ -25,8 +25,8 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 * Reserved website image space without another frontend library or polling.
 * Saved previews, animation on request and copyable embed codes.
 * Quick Create presets and a dashboard widget for users who manage timers.
-* Explicit English, Polish, German, Spanish and French countdown label presets.
-* English, translation-ready administration using WordPress controls.
+* English, Polish, German, Spanish and French label presets.
+* Translation-ready English admin with WordPress controls.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
 **Requirements and limitations**
@@ -60,7 +60,7 @@ Insert Easy Countdown and select a timer. Administrators can open Quick Create i
 
 
 = Does the timer start separately for each recipient? =
-No. Each timer uses one fixed deadline shared by the campaign. It does not identify recipients, maintain individual sessions or count email opens.
+Each campaign has one shared, fixed deadline. It does not identify recipients, maintain individual sessions or count email opens.
 
 = How does the image after expiry work? =
 Choose a local expiry image and save. New expired requests and GIF frames crossing the deadline use it. JPEG/PNG/GIF/WebP only: max 4 MiB, 4096px per side, 4 million pixels. Output is re-encoded and fitted proportionally; animated sources use frame one. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images use zeros. Media is never deleted. Previously downloaded/cached images cannot be revoked or refreshed.
@@ -111,7 +111,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
 * Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.
-* Add explicit label-language presets independent of admin locale; preserve existing custom/empty labels and validate accents against font capability.
+* Add label presets independent of admin locale. Keep custom/empty labels and validate accented output.
 
 = 12.5.3 =
 * Bundle optional local Lato Regular under SIL OFL 1.1, with integrity-checked font and license notices.
