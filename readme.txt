@@ -17,7 +17,7 @@ Create fixed-deadline images locally. Copy Email HTML or an Image URL into your 
 **Features**
 
 * Native Easy Countdown block with a timer selector, static preview and alignment.
-* Multiple timers with independent deadlines and time zones.
+* Timers with private admin names, suggested IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.

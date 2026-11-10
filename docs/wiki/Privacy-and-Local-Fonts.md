@@ -30,6 +30,8 @@ Uninstall with the existing opt-in removes plugin-owned data; it does not erase 
 
 ## Editor and dashboard access
 
+Optional campaign names are stored with each timer for administrator-only display and search. Public IDs are suggested independently of those names. Names are excluded from renderer normalization, binary caches, shortcode/email HTML and Gutenberg's ID catalog. They are not image alternative text. An older form preserves a saved name, while an explicit empty name removes it. Opt-in uninstall removes names together with the timer option.
+
 The editor's explicit **Refresh campaigns** action makes one authenticated request to this site's WordPress admin AJAX handler. It sends a post-context ID and nonce and receives at most 250 campaign IDs and editor URLs. Permissions are rechecked on each request; there is no anonymous catalog, visitor polling or persistent client storage. The dashboard widget uses a native form and links, with no background requests or image generation. These editor/admin actions do not collect email opens or visitor analytics.
 
 ## Manual fonts and persistent storage
