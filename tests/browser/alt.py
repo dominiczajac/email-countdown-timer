@@ -66,7 +66,7 @@ with sync_playwright() as p:
     check(image.headers.get('x-content-type-options') == 'nosniff', 'binary response keeps nosniff')
     check('set-cookie' not in image.headers, 'isolated image endpoint sets no cookie')
     anonymous.dispose()
-    page.locator('#ect-tz').fill('invalid/time-zone')
+    page.locator('#ect-tz').evaluate("e => { e.add(new Option('Invalid test zone', 'invalid/time-zone')); e.value = 'invalid/time-zone'; e.dispatchEvent(new Event('change', {bubbles: true})); }")
     page.locator('#ect-editor button[type=submit]').click()
     expect(page.locator('#ect-tz')).to_have_attribute('aria-invalid', 'true')
     check(page.locator('#ect-alt').input_value() == custom_alt, 'alt survives server-side validation errors')

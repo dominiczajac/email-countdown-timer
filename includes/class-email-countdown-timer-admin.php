@@ -420,6 +420,8 @@ final class Email_Countdown_Timer_Admin {
     /** PHP identifiers match the renderer; WordPress's manual-offset option values do not. */
     public static function timezone_input( string $id, string $value, string $error = '' ): void {
         $zones = DateTimeZone::listIdentifiers( DateTimeZone::ALL );
+        $help_id = 'ect-tz' === $id ? 'ect-help-tz' : $id . '-help';
+        $error_id = 'ect-tz' === $id ? 'ect-error-tz' : $id . '-error';
         // Keep exact saved aliases, fixed offsets and offending input selected.
         // Never silently substitute the first IANA zone on an edit or failed save.
         if ( ! in_array( $value, $zones, true ) ) {
@@ -428,13 +430,13 @@ final class Email_Countdown_Timer_Admin {
         ?>
         <div class="ect-field">
             <label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html__( 'Time Zone', 'easy-countdown' ); ?></label>
-            <select id="<?php echo esc_attr( $id ); ?>" name="tz" class="widefat" required aria-describedby="<?php echo esc_attr( $id ); ?>-help <?php echo esc_attr( $id ); ?>-error" <?php if ( '' !== $error ) : ?>aria-invalid="true"<?php endif; ?>>
+            <select id="<?php echo esc_attr( $id ); ?>" name="tz" class="widefat" required aria-describedby="<?php echo esc_attr( $help_id . ' ' . $error_id ); ?>" <?php if ( '' !== $error ) : ?>aria-invalid="true"<?php endif; ?>>
                 <?php foreach ( $zones as $zone ) : ?>
                     <option value="<?php echo esc_attr( $zone ); ?>" <?php selected( $value, $zone ); ?>><?php echo esc_html( '' === $zone ? __( 'Choose a time zone', 'easy-countdown' ) : str_replace( '_', ' ', $zone ) ); ?></option>
                 <?php endforeach; ?>
             </select>
-            <p class="description" id="<?php echo esc_attr( $id ); ?>-help"><?php echo esc_html__( 'New campaigns start in the WordPress site time zone. Named zones follow daylight saving changes; fixed offsets do not. Check the saved deadline and its UTC equivalent before sharing.', 'easy-countdown' ); ?></p>
-            <p class="ect-error" id="<?php echo esc_attr( $id ); ?>-error"><?php echo esc_html( $error ); ?></p>
+            <p class="description" id="<?php echo esc_attr( $help_id ); ?>"><?php echo esc_html__( 'New campaigns start in the WordPress site time zone. Named zones follow daylight saving changes; fixed offsets do not. Check the saved deadline and its UTC equivalent before sharing.', 'easy-countdown' ); ?></p>
+            <p class="ect-error" id="<?php echo esc_attr( $error_id ); ?>"><?php echo esc_html( $error ); ?></p>
         </div>
         <?php
     }
