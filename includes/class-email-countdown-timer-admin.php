@@ -91,6 +91,40 @@ final class Email_Countdown_Timer_Admin {
         return is_array( $timers ) ? array_filter( $timers, 'is_array' ) : array();
     }
 
+    public static function register_dashboard_widget(): void {
+        if ( current_user_can( 'manage_options' ) ) {
+            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', __( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
+        }
+    }
+
+    /** Core dashboard styles only; no preview generation, script or background request. */
+    public static function render_dashboard_widget(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $timers = array_filter( self::timers(), static fn( $id ) => '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_KEY );
+        uksort( $timers, 'strnatcasecmp' );
+        ?>
+        <div id="email-countdown-timer-dashboard">
+            <h3><?php echo esc_html__( 'Quick Create', 'easy-countdown' ); ?></h3>
+            <p><?php echo esc_html__( 'Create a timer from a color preset, then fine-tune it and copy your embeds in the full editor.', 'easy-countdown' ); ?></p>
+            <?php self::quick_create_form( 'ect-dashboard' ); ?>
+            <h3><?php echo esc_html__( 'Edit an existing timer', 'easy-countdown' ); ?></h3>
+            <?php if ( empty( $timers ) ) : ?>
+                <p><?php echo esc_html__( 'No timers yet. Create your first campaign above.', 'easy-countdown' ); ?></p>
+            <?php else : ?>
+                <ul>
+                    <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $id ) ); ?>"><?php echo esc_html( (string) $id ); ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+                <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>
+            <?php endif; ?>
+            <p><a href="<?php echo esc_url( self::url() ); ?>"><?php echo esc_html__( 'All timers', 'easy-countdown' ); ?></a></p>
+        </div>
+        <?php
+    }
+
     private static function posted( string $key, string $default = '' ): string {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only called after capability/method/nonce checks; scalar values are bounded here, validated before writes, and escaped by the view.
         return substr( wp_unslash( Email_Countdown_Timer_Config::text( $_POST, $key, $default ) ), 0, 4096 );
