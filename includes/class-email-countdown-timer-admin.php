@@ -32,6 +32,25 @@ final class Email_Countdown_Timer_Admin {
         return add_query_arg( array_merge( array( 'page' => 'ecd-timers' ), $args ), admin_url( 'admin.php' ) );
     }
 
+    /** Opaque suggestions never derive a public ID from an administrator's private name. */
+    public static function suggested_id(): string {
+        $timers = get_option( self::OPTION, array() );
+        for ( $attempt = 0; $attempt < 10; ++$attempt ) {
+            $id = 'timer-' . substr( str_replace( '-', '', wp_generate_uuid4() ), 0, 12 );
+            if ( ! is_array( $timers ) || ! array_key_exists( $id, $timers ) ) {
+                return $id;
+            }
+        }
+        // Leave the required field editable rather than guessing an occupied ID.
+        return '';
+    }
+
+    /** Names are administrator-only metadata, never alt text or renderer input. */
+    public static function campaign_name( array $config ): string {
+        $name = $config['campaign_name'] ?? '';
+        return is_string( $name ) && strlen( $name ) <= 200 ? sanitize_text_field( $name ) : '';
+    }
+
     public static function defaults( bool $new_timer = true ): array {
         // New campaigns use the included font only when FreeType can render it.
         // Saved campaigns keep their original selection and missing values.
@@ -66,9 +85,12 @@ final class Email_Countdown_Timer_Admin {
             <input type="hidden" name="creation_mode" value="quick">
             <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
             <div class="ect-two-fields">
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-name"><?php echo esc_html__( 'Campaign name (optional)', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-name" name="campaign_name" class="widefat" type="text" maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-name-help">
+                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-name-help"><?php echo esc_html__( 'For your administration only. Not used in public images, embeds or the generated ID. Up to 200 bytes.', 'easy-countdown' ); ?></p></div>
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-id"><?php echo esc_html__( 'Timer ID', 'easy-countdown' ); ?></label>
-                    <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" class="widefat" type="text" required maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-id-help">
-                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'For example summer-sale. Use a unique ID; it cannot be changed after creation.', 'easy-countdown' ); ?></p></div>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" class="widefat" type="text" required maxlength="200" value="<?php echo esc_attr( self::suggested_id() ); ?>" aria-describedby="<?php echo esc_attr( $prefix ); ?>-id-help">
+                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'Suggested unique ID for public embed URLs. You can change it before creation; afterwards it stays fixed.', 'easy-countdown' ); ?></p></div>
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'easy-countdown' ); ?></label>
                     <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
                 <?php self::timezone_input( $prefix . '-tz', $quick['tz'] ); ?>
@@ -114,7 +136,7 @@ final class Email_Countdown_Timer_Admin {
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $id ) ); ?>"><?php echo esc_html( (string) $id ); ?></a></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::campaign_name( $timer ) ?: (string) $id ) ); ?>"><?php echo esc_html( self::campaign_name( $timer ) ?: (string) $id ); ?></a><?php if ( '' !== self::campaign_name( $timer ) ) : ?> <code><?php echo esc_html( (string) $id ); ?></code><?php endif; ?></li>
                     <?php endforeach; ?>
                 </ul>
                 <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>
@@ -203,6 +225,17 @@ final class Email_Countdown_Timer_Admin {
             }
             unset( $timers[ $id ] );
         } elseif ( 'email_countdown_timer_save' === $action ) {
+            // Missing fields in older forms preserve optional administration metadata.
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- POST/capability/nonce checked above; bounded, sanitized and escaped in admin views only.
+            if ( array_key_exists( 'campaign_name', $_POST ) ) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked above; reject non-string names before reading the value.
+                if ( ! is_string( $_POST['campaign_name'] ) || strlen( self::posted( 'campaign_name' ) ) > 200 ) {
+                    $errors['campaign_name'] = __( 'Use plain text for the campaign name, up to 200 bytes.', 'easy-countdown' );
+                }
+                $data['campaign_name'] = sanitize_text_field( self::posted( 'campaign_name' ) );
+            } else {
+                $data['campaign_name'] = self::campaign_name( $timers[ $original ] ?? array() );
+            }
             if ( '' === $id ) {
                 $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'easy-countdown' );
             } elseif ( '' === $original && isset( $timers[ $id ] ) ) {
@@ -266,6 +299,10 @@ final class Email_Countdown_Timer_Admin {
                 self::$pending = array( 'id' => self::posted( 'timer_id' ), 'original' => $original, 'data' => $data, 'errors' => $errors );
                 return;
             }
+            // The renderer normalizer deliberately excludes this private metadata.
+            if ( '' !== $data['campaign_name'] ) {
+                $normalized['campaign_name'] = $data['campaign_name'];
+            }
             $timers[ $id ] = $normalized;
         } else {
             return;
@@ -326,6 +363,7 @@ final class Email_Countdown_Timer_Admin {
         $original = $pending ? $pending['original'] : $edit;
         $saved = '' !== $original && isset( $timers[ $original ] ) ? $timers[ $original ] : null;
         $data = array_replace( self::defaults( null === $saved ), $saved ?? array() );
+        $data['campaign_name'] = self::campaign_name( $saved ?? array() );
         $errors = $pending['errors'] ?? array();
         if ( '' !== $original && null === $saved ) {
             $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'easy-countdown' );
@@ -341,10 +379,11 @@ final class Email_Countdown_Timer_Admin {
             $data = $pending['data'];
         }
         $search = sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $query, 's' ) ) );
-        $filtered = '' === $search ? $timers : array_filter( $timers, static fn( $id ) => false !== stripos( (string) $id, $search ), ARRAY_FILTER_USE_KEY );
+        $filtered = '' === $search ? $timers : array_filter( $timers, static fn( $timer, $id ) => false !== stripos( (string) $id, $search ) || false !== stripos( self::campaign_name( $timer ), $search ), ARRAY_FILTER_USE_BOTH );
         $pages = max( 1, (int) ceil( count( $filtered ) / 25 ) );
         $page = min( $pages, max( 1, (int) Email_Countdown_Timer_Config::text( $query, 'paged', '1' ) ) );
-        return array( 'view' => $view, 'id' => $pending ? $pending['id'] : $edit, 'original' => $original,
+        $id = $pending ? $pending['id'] : ( '' === $edit && 'editor' === $view ? self::suggested_id() : $edit );
+        return array( 'view' => $view, 'id' => $id, 'original' => $original,
             'data' => $data, 'errors' => $errors, 'saved' => $saved, 'search' => $search, 'page' => $page, 'pages' => $pages,
             'total' => count( $filtered ), 'timers' => array_slice( $filtered, ( $page - 1 ) * 25, 25, true ),
             'status' => Email_Countdown_Timer_Config::text( $query, 'status' ) );

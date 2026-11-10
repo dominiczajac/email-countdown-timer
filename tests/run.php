@@ -52,6 +52,12 @@ function add_query_arg($args, $arg2=null, $arg3=null) {
 }
 function shortcode_atts($defaults, $atts) { return array_merge($defaults, array_intersect_key($atts, $defaults)); }
 function wp_unique_id($prefix) { static $id=0; return $prefix.(++$id); }
+function wp_generate_uuid4() {
+    if (!empty($GLOBALS['test_uuid_sequence'])) return array_shift($GLOBALS['test_uuid_sequence']);
+    static $sequence=0;
+    $hex=hash('sha256','uuid-fixture-'.++$sequence);
+    return substr($hex,0,8).'-'.substr($hex,8,4).'-4'.substr($hex,13,3).'-8'.substr($hex,17,3).'-'.substr($hex,20,12);
+}
 function wp_enqueue_script($handle, ...$args) { $GLOBALS['scripts'][$handle]=$args; }
 function wp_nonce_field($action) { echo '<input type="hidden" name="_wpnonce" value="test">'; }
 function selected($a, $b) { if ($a===$b) echo 'selected'; }

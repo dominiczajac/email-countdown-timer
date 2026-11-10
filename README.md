@@ -46,6 +46,8 @@ New timers inherit the WordPress site time zone, including UTC offsets; existing
 
 ## Display and accessibility
 
+An optional **Campaign name** helps identify timers in the panel and dashboard. Search by name or ID. Quick Create and the full editor suggest a unique opaque ID, which you can change before creation. Saved IDs and existing embed URLs remain fixed when a campaign is renamed. Names are private administration metadata: they are not used as image alternative text, sent in email HTML, included in generated IDs or exposed in the Gutenberg catalog. Existing unnamed records remain valid; older forms preserve a saved name. Clearing the name removes only that metadata.
+
 The editor supports colors, dimensions, custom labels, local fonts and **Image alternative text (alt)**. The combined geometry is validated before saving without encoding a preview. Native bitmap text has fixed sizes; new saves require printable ASCII labels when no usable FreeType font is present. A TTF/OTF file must contain the glyphs required by your labels.
 
 Saved `alt` is escaped in the website shortcode, preview and newly copied email HTML. Explicit empty text remains `alt=""`; use it only when surrounding content already conveys the information. Missing legacy metadata uses a contextual fallback. Editing a timer cannot change the HTML of an already sent email. Recopy email HTML, or set alt in your email editor when using only an image URL. Purge affected HTML page caches after a shortcode description changes.
