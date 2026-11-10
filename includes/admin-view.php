@@ -35,7 +35,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                 <a class="button button-primary" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Create Timer', 'easy-countdown' ); ?></a></div>
             <form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="ect-search">
                 <input type="hidden" name="page" value="ecd-timers">
-                <label for="ect-search"><?php echo esc_html__( 'Search timer IDs', 'easy-countdown' ); ?></label>
+                <label for="ect-search"><?php echo esc_html__( 'Search names or timer IDs', 'easy-countdown' ); ?></label>
                 <div class="ect-inline"><input id="ect-search" name="s" type="search" value="<?php echo esc_attr( $email_countdown_timer_ui['search'] ); ?>"><button class="button" type="submit"><?php echo esc_html__( 'Search', 'easy-countdown' ); ?></button></div>
             </form>
             <?php if ( empty( $email_countdown_timer_ui['timers'] ) ) : ?>
@@ -54,7 +54,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                             }
                             $email_countdown_timer_edit_url = Email_Countdown_Timer_Admin::url( array( 'edit' => $email_countdown_timer_id ) );
                             ?>
-                            <tr><th scope="row"><code><?php echo esc_html( $email_countdown_timer_id ); ?></code></th>
+                            <tr><th scope="row"><?php if ( '' !== Email_Countdown_Timer_Admin::campaign_name( $email_countdown_timer_timer ) ) : ?><div><?php echo esc_html( Email_Countdown_Timer_Admin::campaign_name( $email_countdown_timer_timer ) ); ?></div><?php endif; ?><code><?php echo esc_html( $email_countdown_timer_id ); ?></code></th>
                                 <td><?php echo esc_html( Email_Countdown_Timer_Admin::deadline_text( $email_countdown_timer_timer ) ); ?></td>
                                 <td><span class="ect-badge"><?php echo esc_html( $email_countdown_timer_status ); ?></span></td>
                                 <td><div class="ect-row-actions"><a class="button" href="<?php echo esc_url( $email_countdown_timer_edit_url ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $email_countdown_timer_id ) ); ?>"><?php echo esc_html__( 'Edit', 'easy-countdown' ); ?></a>
@@ -84,6 +84,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                     <input type="hidden" name="original_id" value="<?php echo esc_attr( $email_countdown_timer_ui['original'] ); ?>">
                     <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
                     <section class="ect-card" aria-labelledby="ect-schedule-title"><h3 id="ect-schedule-title"><?php echo esc_html__( 'Schedule', 'easy-countdown' ); ?></h3>
+                        <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'campaign_name', __( 'Campaign name (optional)', 'easy-countdown' ), 'text', __( 'For your administration only. Not used in public images, embeds or the generated ID. Up to 200 bytes.', 'easy-countdown' ), array( 'maxlength' => '200' ) ); ?>
                         <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'timer_id', __( 'Timer ID', 'easy-countdown' ), 'text', __( 'Used in embed URLs. It cannot be changed after creation.', 'easy-countdown' ), array_merge( array( 'required' => 'required', 'maxlength' => '200' ), '' !== $email_countdown_timer_ui['original'] ? array( 'readonly' => 'readonly' ) : array() ) ); ?>
                         <?php $email_countdown_timer_ui['data']['deadline'] = str_replace( ' ', 'T', Email_Countdown_Timer_Admin::value( $email_countdown_timer_ui, 'deadline' ) ); ?>
                         <?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, 'deadline', __( 'Deadline', 'easy-countdown' ), isset( $email_countdown_timer_ui['errors']['deadline'] ) ? 'text' : 'datetime-local', __( 'Date and time in the time zone below, including seconds.', 'easy-countdown' ), array( 'required' => 'required', 'step' => '1' ) ); ?>
