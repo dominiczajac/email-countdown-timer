@@ -96,7 +96,7 @@
                         { label: __('Image (default)', 'easy-countdown'), value: 'image' },
                         { label: __('Live text', 'easy-countdown'), value: 'live' }
                     ], onChange: function (value) { props.setAttributes({ displayMode: value === 'live' ? 'live' : 'image' }); },
-                    help: __('Live text uses the saved deadline, colors and labels with theme typography. It updates locally without image polling and includes a Pause control. Reduced-motion visitors start paused. Image fonts and dimensions apply to Image mode.', 'easy-countdown')
+                    help: __('Live text uses the saved deadline, colors and labels with theme typography. It updates locally without image polling and includes a Pause control. Reduced-motion visitors start paused. Image fonts and dimensions apply to Image mode. End-image URLs are public before expiry.', 'easy-countdown')
                 }),
                 el(wp.components.SelectControl, {
                     label: __('Alignment', 'easy-countdown'), value: alignment,

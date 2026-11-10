@@ -62,7 +62,7 @@ Insert Easy Countdown and select a timer. Administrators can open Quick Create i
 Each campaign has one shared, fixed deadline. It does not identify recipients, maintain individual sessions or count email opens.
 
 = How does the image after expiry work? =
-Choose a local expiry image and save. New expired requests and GIF frames crossing the deadline use it. JPEG/PNG/GIF/WebP only: max 4 MiB, 4096px per side, 4 million pixels. Output is re-encoded and fitted proportionally; animated sources use frame one. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images use zeros. Media is never deleted. Previously downloaded/cached images cannot be revoked or refreshed.
+Choose a local expiry image and save. End-only URLs are public before expiry. New expired requests and GIF frames crossing the deadline use it. JPEG/PNG/GIF/WebP only: max 4 MiB, 4096px per side, 4 million pixels. Output is re-encoded and fitted proportionally; animated sources use frame one. SVG, remote files, symlinks and restricted media are rejected. Attachment/immediate-parent passwords prevent publication regardless of viewer cookies. Missing/restricted images use zeros. Media is never deleted. Previously downloaded/cached images cannot be revoked or refreshed.
 
 = Why is the GIF not animated? =
 Animation needs Imagick, an unexpired timer and an available lock. Requests wait up to one second; a slow render can return a current static frame without replacing the animation cache. Check Data Settings > Rendering Diagnostics and host capacity. Client animation and image-blocking preferences still apply.
