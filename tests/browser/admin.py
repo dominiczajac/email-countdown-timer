@@ -4,6 +4,7 @@ import os
 import pathlib
 import re
 import shutil
+import sys
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 from wordpress import log_in
@@ -16,6 +17,15 @@ evidence = pathlib.Path(os.environ['RUNNER_TEMP']) / 'admin-evidence'
 evidence.mkdir(exist_ok=True)
 checks = []
 errors = []
+_original_exception_hook = sys.excepthook
+
+def report_native_failure(exc_type, exc_value, traceback):
+    # Only type/count enter annotations; no exception text, credentials or input.
+    if os.environ.get('GITHUB_ACTIONS') == 'true':
+        print(f'::error title=Native admin browser::{exc_type.__name__} after {len(checks)} completed checks. See retained evidence.', flush=True)
+    _original_exception_hook(exc_type, exc_value, traceback)
+
+sys.excepthook = report_native_failure
 
 def check(value, name):
     if not value:
