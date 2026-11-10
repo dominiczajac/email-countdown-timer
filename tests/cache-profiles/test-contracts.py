@@ -16,7 +16,7 @@ def good(profile='baseline'):
         if profile in ('wp-super-cache', 'w3-total-cache'):
             markers[-1] = markers[-2]
             checks |= {'cache-artifact'}
-        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks), 'failures': [], 'generations': markers, 'engine_cache_files': [{'path': 'cache/control'}]})
+        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks), 'failures': [], 'generations': markers, 'engine_cache_files': [{'path': 'cache/control', 'generation': markers[-1], 'sha256': 'b' * 64}]})
     return report
 
 
@@ -74,9 +74,15 @@ class Contracts(unittest.TestCase):
         report['states'][1]['engine_cache_files'] = []
         self.assertFalse(accept(report))
 
+    def test_stale_cache_artifact_fails(self):
+        report = good('w3-total-cache')
+        report['states'][1]['engine_cache_files'][0]['generation'] = 'c' * 24
+        self.assertFalse(accept(report))
+
     def test_only_known_core_avatar_is_expected(self):
         url = 'https://secure.gravatar.com/avatar/' + 'a' * 32
         self.assertTrue(core_avatar(url, 'image'))
+        self.assertTrue(core_avatar('https://secure.gravatar.com/avatar/' + 'b' * 64, 'image'))
         for candidate, resource in ((url, 'script'), (url.replace('https:', 'http:'), 'image'), (url.replace('gravatar.com', 'gravatar.com.evil.invalid'), 'image')):
             self.assertFalse(core_avatar(candidate, resource))
 

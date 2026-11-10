@@ -24,7 +24,13 @@ if ( $mode === 'seed' ) {
     }
     echo wp_json_encode( array( 'pages' => $pages, 'deadline' => Email_Countdown_Timer_Config::deadline( $config ) ) );
 } elseif ( $mode === 'configure' ) {
-    if ( $profile === 'autoptimize' ) {
+    if ( $profile === 'wp-super-cache' ) {
+        // Use the installed vendor's activation checks, not a fabricated drop-in.
+        // Upstream 3.1.3: Automattic/wp-super-cache a4f8616 inc/lifecycle.php.
+        if ( ! wp_cache_verify_cache_dir() || ! wpsc_check_advanced_cache() || ! wp_cache_verify_config_file() ) { WP_CLI::error( 'WP Super Cache fixture initialization failed.' ); }
+        wp_cache_enable(); wp_super_cache_enable();
+        if ( wpsc_identify_advanced_cache() !== 'WPSC' ) { WP_CLI::error( 'Expected the owned WP Super Cache drop-in.' ); }
+    } elseif ( $profile === 'autoptimize' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { update_option( $key, 'on' ); }
     }
 } elseif ( $mode === 'purge' ) {

@@ -12,6 +12,7 @@ printf '::add-mask::%s\n' "$ECD_CACHE_PASSWORD"
 mkdir -p "$ECD_CACHE_EVIDENCE"
 touch "$ECD_CACHE_EVIDENCE/php-errors.log"
 exec > >(tee "$ECD_CACHE_EVIDENCE/provision-and-test.log") 2>&1
+git -C "$root" rev-parse HEAD > "$ECD_CACHE_EVIDENCE/source-commit.txt"
 phase=provision
 finish() {
   result=$?
@@ -77,8 +78,6 @@ if [[ "$ECD_CACHE_PROFILE" == wp-super-cache || "$ECD_CACHE_PROFILE" == w3-total
 fi
 if [[ "$ECD_CACHE_PROFILE" == wp-super-cache ]]; then
   "${wp[@]}" config set WPCACHEHOME "$ECD_CACHE_WP/wp-content/plugins/wp-super-cache/"
-  "${wp[@]}" super-cache enable
-  "${wp[@]}" super-cache status
 fi
 if [[ "$ECD_CACHE_PROFILE" == w3-total-cache ]]; then
   "${wp[@]}" w3-total-cache option set pgcache.enabled true --type=boolean

@@ -20,6 +20,13 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
 from wordpress import log_in
 
+ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
+
+
+def annotation(level, title, message):
+    message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+    print(f'::{level} title={title}::{message}', flush=True)
+
 
 class LabFailure(Exception):
     """Only fixed check labels are copied into public CI annotations."""
@@ -105,7 +112,10 @@ def main():
                 if request.url in expected_aborted:
                     return
                 item = {'state': current['key'], 'phase': phase, 'path': urlsplit(request.url).path}
-                if request.failure == 'net::ERR_ABORTED':
+                if (request.failure == 'net::ERR_ABORTED' and phase in ADMIN_PHASES
+                        and request.resource_type in ('xhr', 'fetch') and local(request.url)
+                        and 'ecd_action=render' not in request.url
+                        and '/easy-countdown/' not in request.url and '/cache/autoptimize/' not in request.url):
                     # Navigating between real admin pages can cancel outstanding AJAX.
                     # Required image/script behavior is separately checked before leaving.
                     report['navigation_cancellations'].append(item)
@@ -131,7 +141,7 @@ def main():
                 with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream:
                     data = stream.read(2 * 1024 * 1024 + 1)
             if marker.encode() in data:
-                found.append({'path': path.relative_to(wpdir / 'wp-content').as_posix(), 'sha256': hashlib.sha256(data).hexdigest()})
+                found.append({'path': path.relative_to(wpdir / 'wp-content').as_posix(), 'sha256': hashlib.sha256(data).hexdigest(), 'generation': marker})
         return found
 
     def images(request):
@@ -228,6 +238,7 @@ def main():
         if profile != 'baseline' and not any(p['name'] == profile and p['version'] == PROFILES[profile] for p in installed):
             raise RuntimeError('vendor_version_mismatch')
         report['plugins'] = installed
+        report['source_commit'] = (evidence / 'source-commit.txt').read_text().strip()
         with sync_playwright() as playwright:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             if not executable:
@@ -243,6 +254,7 @@ def main():
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'purge')
                         inventory = json.loads(wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory'))
                         current['environment'] = inventory
+                        annotation('notice', 'Cache environment', json.dumps({'profile': profile, 'jit': jit, 'state': key, **inventory}))
                         active_plugins = inventory['active_plugins']
                         expected = {'easy-countdown/email-countdown-timer.php'} if current['active'] else set()
                         if profile != 'baseline':
@@ -291,15 +303,18 @@ def main():
                                 check(response.status == 200 and not response.headers.get('content-type', '').startswith('image/'), 'inactive-endpoint')
                         browser_state(browser, url)
                         phase = 'browser-network'
+                        state_errors = [x for x in report['browser_errors'] + report['page_errors'] if x['state'] == key]
+                        if state_errors:
+                            annotation('error', 'Cache browser details', json.dumps(state_errors[:12]))
                         check(not any(x['state'] == key for x in report['browser_errors'] + report['page_errors']), 'browser-network')
                         current['complete'] = True
-                        print(f'::notice title=Cache state::{profile} JIT {jit} {key}: {len(current["checks"])} checks passed', flush=True)
+                        annotation('notice', 'Cache state', f'{profile} JIT {jit} {key}: {len(current["checks"])} checks passed')
                     except Exception as error:
                         reason = str(error) if isinstance(error, LabFailure) else type(error).__name__
                         failure = {'state': key, 'phase': phase, 'reason': reason}
                         current['failures'].append(failure)
                         report['failures'].append(failure)
-                        print(f'::error title=Cache state::{profile} JIT {jit} {key}: {phase} / {reason}', flush=True)
+                        annotation('error', 'Cache state', f'{profile} JIT {jit} {key}: {phase} / {reason}')
                     finally:
                         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
                 report['complete'] = True

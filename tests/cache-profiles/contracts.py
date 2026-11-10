@@ -51,7 +51,7 @@ def core_avatar(url, resource_type):
     parts = urlsplit(url)
     return (resource_type == 'image' and parts.scheme == 'https'
             and parts.netloc == 'secure.gravatar.com'
-            and re.fullmatch(r'/avatar/[a-f0-9]{32}', parts.path) is not None)
+            and re.fullmatch(r'/avatar/(?:[a-f0-9]{32}|[a-f0-9]{64})', parts.path) is not None)
 
 
 def accept(report):
@@ -76,6 +76,9 @@ def accept(report):
             required |= {'cache-artifact'}
             artifacts = state.get('engine_cache_files')
             if not isinstance(artifacts, list) or not artifacts:
+                return False
+            if any(not isinstance(item, dict) or item.get('generation') != state.get('generations', [None])[-1]
+                   or not isinstance(item.get('sha256'), str) or not re.fullmatch('[a-f0-9]{64}', item['sha256']) for item in artifacts):
                 return False
         if not isinstance(checks, list) or not all(isinstance(x, str) for x in checks) or not required.issubset(checks):
             return False
