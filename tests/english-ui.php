@@ -43,7 +43,8 @@ ok($options['easy_countdown_timers']['legacy'] === $stored, 'saving existing tim
 // Exercise the actual create path when no label overrides are supplied.
 $_POST = ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'english','original_id'=>'','deadline'=>'2027-12-31T23:59:59'];
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { ok(str_starts_with($e->getMessage(), 'redirect:'), 'English create redirects'); }
-ok($options['easy_countdown_timers']['english'] === $english, 'new saved timer uses English defaults');
+$expected_new = array_replace($english, ['font' => function_exists('imagettftext') && function_exists('imagettfbbox') ? Email_Countdown_Timer_Fonts::BUNDLED_CHOICE : '']);
+ok($options['easy_countdown_timers']['english'] === $expected_new, 'new saved timer keeps English labels and chooses Lato only with FreeType');
 $_POST = ['ecd_action'=>'email_countdown_timer_save','timer_id'=>'','original_id'=>''];
 $message = '';
 try { $plugin->handleFormSave(); } catch (ECD_Test_Stop $e) { $message = $e->getMessage(); }
