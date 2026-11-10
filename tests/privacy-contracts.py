@@ -16,6 +16,9 @@ for path in js:
     # editor catalog refresh. No visitor request, persistence or external host.
     if path.name == 'block-editor.js':
         code = code.replace('return window.fetch(config.url, {', 'return reviewed_editor_request(config.url, {', 1)
+    if path.name == 'status.js':
+        # Explicit administrator image test of the existing public route, no cookies.
+        code = code.replace("return window.fetch(url.href, { credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer', signal: controller.signal });", 'return reviewed_admin_image_test();', 1)
     for pattern in [r'\b(?:fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon|eval)\b', r'\b(?:localStorage|sessionStorage|indexedDB)\b', r'document\s*\.\s*cookie', r'navigator\s*\.\s*(?:userAgent|geolocation|hardwareConcurrency|deviceMemory)']:
         assert not re.search(pattern, code), f'New browser data/network API requires review: {path.name}'
 print(f'PASS privacy source tripwire: {len(php)} PHP and {len(js)} JavaScript runtime files')

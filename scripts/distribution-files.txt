@@ -29,3 +29,5 @@ includes/class-email-countdown-timer-block.php
 assets/live-countdown.js
 assets/live-countdown.css
 includes/class-email-countdown-timer-live.php
+includes/class-email-countdown-timer-status.php
+assets/status.js

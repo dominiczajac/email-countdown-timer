@@ -28,6 +28,12 @@ foreach (glob($root.'/assets/*.js') as $file) {
         $offset = strpos($code, $call);
         if (false !== $offset) $code = substr_replace($code, 'return reviewed_editor_request(config.url, {', $offset, strlen($call));
     }
+    if (basename($file) === 'status.js') {
+        // Explicit administrator image test; fixed public route, omitted credentials.
+        $call = "return window.fetch(url.href, { credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer', signal: controller.signal });";
+        $offset = strpos($code, $call);
+        if (false !== $offset) $code = substr_replace($code, 'return reviewed_admin_image_test();', $offset, strlen($call));
+    }
     if (preg_match('/\b(localStorage|sessionStorage|indexedDB|sendBeacon|XMLHttpRequest|WebSocket)\b|document\.cookie|\bfetch\s*\(/',$code)) throw new RuntimeException('Client persistence or network API needs review');
 }
 echo 'PASS privacy-sensitive API guardrail for '.count($files)." runtime PHP files and local JS; not a GDPR or security certification\n";

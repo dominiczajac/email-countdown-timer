@@ -150,3 +150,17 @@ The build uses an explicit runtime manifest, verifies metadata and refuses symli
 [Wiki sources](docs/wiki/Home.md) · [Changelog](CHANGELOG.md) · [Directory readiness](docs/WORDPRESS-ORG-READINESS.md) · [Static fallback](docs/STATIC-FALLBACK.md)
 
 GitHub is the development repository. This README is not a claim of WordPress.org acceptance, native GitHub Wiki publication or production deployment. Historical verification reports identify their actual revisions; do not treat their measurements as benchmarks of your host or of later code.
+
+
+## On-demand troubleshooting
+
+Open **Easy Countdown > Status & Troubleshooting** and choose **Run local checks**
+for GD, FreeType, Imagick and zero-wait database locking. An optional saved campaign
+ID adds its font-resolution check. Nothing runs on page opening or changes saved
+data. Each result has a severity and next action. **Copy report** includes only
+versions and fixed diagnostic results, excluding site/campaign details, paths,
+credentials and raw errors; inspect it before sharing. Manual copying works
+without JavaScript. **Test public image** separately requests that campaign's
+static image from your browser without cookies, with a 15-second timeout and no
+polling. Cross-host tests need CORS. Success does not verify real senders, clients,
+remote networks or proxy caches. [Scope and report policy](docs/STATUS-TROUBLESHOOTING.md).
