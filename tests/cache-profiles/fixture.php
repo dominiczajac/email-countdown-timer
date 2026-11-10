@@ -5,7 +5,7 @@ $mode = $args[0] ?? '';
 $profile = getenv( 'ECD_CACHE_PROFILE' );
 if ( $mode === 'seed' ) {
     require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-admin.php';
-    $config = Email_Countdown_Timer_Config::normalize( array_replace( Email_Countdown_Timer_Admin::defaults(), array( 'deadline' => '2035-12-31T23:59:59', 'tz' => 'UTC', 'fixed_width' => 400, 'alt' => 'Cache lab countdown' ) ) );
+    $config = Email_Countdown_Timer_Config::normalize( array_replace( Email_Countdown_Timer_Admin::defaults(), array( 'deadline' => '2035-12-31T23:59:59', 'tz' => 'UTC', 'fixed_width' => 600, 'alt' => 'Cache lab countdown' ) ) );
     update_option( 'easy_countdown_timers', array( 'cache-lab' => $config + array( 'campaign_name' => 'PRIVATE-CACHE-LAB-NAME' ) ), false );
     $upload = wp_upload_dir();
     $file = $upload['path'] . '/cache-control.png';
@@ -24,9 +24,7 @@ if ( $mode === 'seed' ) {
     }
     echo wp_json_encode( array( 'pages' => $pages, 'deadline' => Email_Countdown_Timer_Config::deadline( $config ) ) );
 } elseif ( $mode === 'configure' ) {
-    if ( $profile === 'wp-super-cache' ) {
-        wp_cache_enable(); wp_super_cache_enable();
-    } elseif ( $profile === 'autoptimize' ) {
+    if ( $profile === 'autoptimize' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { update_option( $key, 'on' ); }
     }
 } elseif ( $mode === 'purge' ) {
@@ -45,5 +43,5 @@ if ( $mode === 'seed' ) {
     if ( $profile === 'autoptimize' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { $configuration[ $key ] = get_option( $key ); }
     }
-    echo wp_json_encode( array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => array_values( get_option( 'active_plugins', array() ) ), 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE ) );
+    echo wp_json_encode( array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => array_values( get_option( 'active_plugins', array() ) ), 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ) ) );
 } else { exit( 1 ); }

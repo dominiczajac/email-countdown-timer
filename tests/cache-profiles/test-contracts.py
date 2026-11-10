@@ -2,20 +2,21 @@
 """Negative controls for cache-hit evidence and complete off/on/browser acceptance."""
 import copy
 import unittest
-from contracts import ACTIVE_REQUIRED, ORDER, REQUIRED, Page, accept, generation, page_evidence
+from contracts import ACTIVE_REQUIRED, ORDER, REQUIRED, Page, accept, core_avatar, generation, page_evidence
 
 
 def good(profile='baseline'):
-    report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'states': []}
+    report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': []}
     for key in ORDER:
         active = key.endswith('-on')
         checks = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
         if profile == 'autoptimize' and active:
-            checks |= {'optimized-asset'}
+            checks |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}
         markers = [f'{x:024x}' for x in range(4)]
         if profile in ('wp-super-cache', 'w3-total-cache'):
             markers[-1] = markers[-2]
-        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks), 'failures': [], 'generations': markers})
+            checks |= {'cache-artifact'}
+        report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks), 'failures': [], 'generations': markers, 'engine_cache_files': [{'path': 'cache/control'}]})
     return report
 
 
@@ -58,7 +59,7 @@ class Contracts(unittest.TestCase):
         self.assertFalse(accept(report))
 
     def test_browser_exception_or_incomplete_run_fails(self):
-        for field, value in (('complete', False), ('page_errors', [{'type': 'Error'}]), ('failures', [{'phase': 'renderer'}])):
+        for field, value in (('complete', False), ('page_errors', [{'type': 'Error'}]), ('failures', [{'phase': 'renderer'}]), ('browser_errors', [{'reason': 'http_error'}])):
             report = good()
             report[field] = value
             self.assertFalse(accept(report))
@@ -67,6 +68,17 @@ class Contracts(unittest.TestCase):
         report = good('autoptimize')
         report['states'][1]['checks'].remove('optimized-asset')
         self.assertFalse(accept(report))
+
+    def test_missing_cache_artifact_fails(self):
+        report = good('w3-total-cache')
+        report['states'][1]['engine_cache_files'] = []
+        self.assertFalse(accept(report))
+
+    def test_only_known_core_avatar_is_expected(self):
+        url = 'https://secure.gravatar.com/avatar/' + 'a' * 32
+        self.assertTrue(core_avatar(url, 'image'))
+        for candidate, resource in ((url, 'script'), (url.replace('https:', 'http:'), 'image'), (url.replace('gravatar.com', 'gravatar.com.evil.invalid'), 'image')):
+            self.assertFalse(core_avatar(candidate, resource))
 
     def test_missing_duplicate_or_malformed_origin_marker_fails(self):
         duplicate = ('<span id="ecd-cache-origin" data-generation="' + 'a' * 24 + '"></span>') * 2

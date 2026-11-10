@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Six counterbalanced states on the owned loopback PHP-FPM fixture, never production."""
 import io
+import gzip
+import hashlib
 from contextlib import ExitStack
 import json
 import os
@@ -12,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, generation, page_evidence
+from contracts import ORDER, PROFILES, Page, accept, core_avatar, generation, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -36,7 +38,7 @@ def main():
         raise RuntimeError('invalid_profile')
     base = 'http://localhost:8095'
     fixture = json.loads((evidence / 'fixture.json').read_text())
-    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': []}
+    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
 
@@ -77,14 +79,60 @@ def main():
         return response
 
     def isolate(context):
+        expected_aborted = set()
         def route(request_route):
-            if local(request_route.request.url):
+            request = request_route.request
+            if local(request.url):
                 request_route.continue_()
             else:
+                known_avatar = core_avatar(request.url, request.resource_type)
+                item = {'state': current['key'], 'phase': phase, 'host': urlsplit(request.url).hostname,
+                        'resource_type': request.resource_type, 'expected_core_avatar': known_avatar}
+                report['blocked_external'].append(item)
+                if known_avatar:
+                    expected_aborted.add(request.url)
+                else:
+                    report['browser_errors'].append({**item, 'reason': 'unexpected_external_request'})
                 request_route.abort()
         context.route('**/*', route)
-        context.on('page', lambda page: page.on('pageerror', lambda error: report['page_errors'].append({
-            'state': current['key'], 'phase': phase, 'type': type(error).__name__})))
+        def observe(page):
+            page.on('pageerror', lambda error: report['page_errors'].append({
+                'state': current['key'], 'phase': phase, 'type': type(error).__name__}))
+            def console(message):
+                if message.type == 'error' and message.location.get('url') not in expected_aborted:
+                    report['browser_errors'].append({'state': current['key'], 'phase': phase, 'reason': 'console_error'})
+            def failed(request):
+                if request.url in expected_aborted:
+                    return
+                item = {'state': current['key'], 'phase': phase, 'path': urlsplit(request.url).path}
+                if request.failure == 'net::ERR_ABORTED':
+                    # Navigating between real admin pages can cancel outstanding AJAX.
+                    # Required image/script behavior is separately checked before leaving.
+                    report['navigation_cancellations'].append(item)
+                else:
+                    report['browser_errors'].append({**item, 'reason': 'request_failed'})
+            def response_received(response):
+                if response.status >= 400 and local(response.url):
+                    report['browser_errors'].append({'state': current['key'], 'phase': phase,
+                        'path': urlsplit(response.url).path, 'status': response.status, 'reason': 'http_error'})
+            page.on('console', console)
+            page.on('requestfailed', failed)
+            page.on('response', response_received)
+        context.on('page', observe)
+
+    def cache_files(marker):
+        cache = wpdir / 'wp-content/cache'
+        found = []
+        for path in sorted(cache.rglob('*')):
+            if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(cache.resolve()) or path.stat().st_size > 2 * 1024 * 1024:
+                continue
+            data = path.read_bytes()
+            if data.startswith(b'\x1f\x8b'):
+                with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream:
+                    data = stream.read(2 * 1024 * 1024 + 1)
+            if marker.encode() in data:
+                found.append({'path': path.relative_to(wpdir / 'wp-content').as_posix(), 'sha256': hashlib.sha256(data).hexdigest()})
+        return found
 
     def images(request):
         endpoint = base + '/?' + urlencode({'ecd_action': 'render', 'ecd': 'cache-lab', 'mode': 'email'})
@@ -100,7 +148,7 @@ def main():
                 image.seek(frame)
                 image.load()
                 durations.append(image.info.get('duration'))
-            check(image.format == 'GIF' and image.width == 400 and image.height > 1
+            check(image.format == 'GIF' and image.width == 600 and image.height > 1
                   and len(durations) == 60 and durations == [1000] * 60, 'image-gif')
         still = request.get(base + '/?ecd_action=render&ecd=cache-lab&mode=static', headers={'Accept': 'image/png'}, timeout=45000)
         runtime(still)
@@ -108,7 +156,7 @@ def main():
               and 'no-store' in still.headers.get('cache-control', ''), 'static-policy')
         with Image.open(io.BytesIO(still.body())) as image:
             image.load()
-            check(image.format == 'PNG' and image.width == 400 and image.height > 1, 'image-static')
+            check(image.format == 'PNG' and image.width == 600 and image.height > 1, 'image-static')
 
     def browser_state(browser, url):
         nonlocal phase
@@ -124,7 +172,7 @@ def main():
             check(True, 'dashboard')
             phase = 'media-library'
             navigate(page, '/wp-admin/upload.php')
-            expect(page.locator('.wrap h1')).to_be_visible()
+            expect(page.locator('#wp-media-grid .media-frame-content')).to_be_visible()
             check(True, 'media-library')
             phase = 'core-media-control'
             runtime(navigate(page, '/wp-admin/admin.php?page=ecd-cache-media-control'))
@@ -215,6 +263,9 @@ def main():
                                 current['generations'].append(generation(html))
                             cached = profile in ('wp-super-cache', 'w3-total-cache')
                             check(page_evidence(current['generations'], cached), 'page-generation')
+                            if cached:
+                                current['engine_cache_files'] = cache_files(current['generations'][-1])
+                                check(bool(current['engine_cache_files']), 'cache-artifact')
                             phase = 'public-output'
                             parsed = Page(html)
                             check(len(parsed.images) == int(current['active']) and len(parsed.live) == int(current['active'])
@@ -227,9 +278,11 @@ def main():
                                 check(local(asset), 'local-optimized-asset')
                                 response = request.get(asset, timeout=45000)
                                 check(response.status == 200 and len(response.body()) > 0, 'served-optimized-asset')
-                                current['optimized_assets'].append({'path': urlsplit(asset).path, 'status': response.status, 'bytes': len(response.body())})
+                                current['optimized_assets'].append({'path': urlsplit(asset).path, 'status': response.status, 'bytes': len(response.body()),
+                                    'contains_live_script': b'emailCountdownTimerLiveInstalled' in response.body()})
                             if profile == 'autoptimize' and current['active']:
-                                check(bool(assets), 'optimized-asset')
+                                standalone_live = [x for x in parsed.assets if '/easy-countdown/assets/live-countdown.js' in x]
+                                check(not standalone_live and any(x['contains_live_script'] for x in current['optimized_assets']), 'optimized-asset')
                             phase = 'renderer'
                             if current['active']:
                                 images(request)
@@ -237,6 +290,8 @@ def main():
                                 response = request.get(base + '/?ecd_action=render&ecd=cache-lab&mode=static', timeout=45000)
                                 check(response.status == 200 and not response.headers.get('content-type', '').startswith('image/'), 'inactive-endpoint')
                         browser_state(browser, url)
+                        phase = 'browser-network'
+                        check(not any(x['state'] == key for x in report['browser_errors'] + report['page_errors']), 'browser-network')
                         current['complete'] = True
                         print(f'::notice title=Cache state::{profile} JIT {jit} {key}: {len(current["checks"])} checks passed', flush=True)
                     except Exception as error:

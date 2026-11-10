@@ -34,6 +34,15 @@ plugin array after deactivation. These are test-harness failures, not evidence
 for or against plugin compatibility. Their original CI/artifacts remain at
 [run 42896894744](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42896894744).
 
+The next harness run at `b84cf36` also failed. Its 400px assertion misunderstood
+the renderer's minimum-width contract: the valid four-digit-day image was 410px.
+The fixture now requests 600px, without changing the renderer. The Media Library
+assertion selected multiple headings after core mounted its grid; it now checks
+the actual grid. WP Super Cache did not produce page hits even with Easy
+Countdown off, so the lab now uses its CLI enable/status commands and records
+the drop-in, rather than treating enabled flags as proof. Preserve
+[run 42897700295](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42897700295).
+
 These bounded profiles do not certify every option or environment. FlyingPress
 and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs
 a separately verified LiteSpeed server. Elementor, WooCommerce, additional
