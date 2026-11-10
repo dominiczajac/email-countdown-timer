@@ -58,13 +58,16 @@ final class Email_Countdown_Timer_Status {
         } elseif ( null !== $raw ) {
             try {
                 $config = Email_Countdown_Timer_Config::normalize( $raw );
-                $path = Email_Countdown_Timer_Config::fontPath( $config['font'] );
+                // Use the renderer's actual choice/metrics without allocating or encoding an image.
+                $path = $gd
+                    ? ( new Email_Countdown_Timer_Renderer() )->measure( $config, Email_Countdown_Timer_Config::deadline( $config ), time() )['font']
+                    : Email_Countdown_Timer_Config::fontPath( $config['font'] );
                 $valid_campaign = true;
                 $builtin = '' === $config['font'];
                 $usable = $builtin || ( $freetype && null !== $path );
                 $font = self::row( __( 'Campaign font', 'easy-countdown' ), $usable ? 'pass' : 'warning', $builtin ? 'bitmap' : ( $usable ? 'local_font_available' : 'bitmap_fallback' ), $builtin ? __( 'The campaign selects built-in bitmap text.', 'easy-countdown' ) : ( $usable ? __( 'The selected local font resolves to a readable file with FreeType support.', 'easy-countdown' ) : __( 'The selected font is missing or FreeType is unavailable. Images fall back to bitmap text.', 'easy-countdown' ) ), $usable ? __( 'Inspect the actual image: file availability does not certify glyph coverage or layout.', 'easy-countdown' ) : __( 'Restore the selected local font or choose an available font in the campaign editor, then inspect the image.', 'easy-countdown' ) );
             } catch ( Throwable $error ) {
-                $font = self::row( __( 'Campaign font', 'easy-countdown' ), 'warning', 'invalid_configuration', __( 'The saved campaign could not be validated.', 'easy-countdown' ), __( 'Open the campaign editor and correct its settings before testing the image.', 'easy-countdown' ) );
+                $font = self::row( __( 'Campaign font', 'easy-countdown' ), 'warning', 'invalid_configuration', __( 'The saved campaign could not be validated.', 'easy-countdown' ), __( 'Open the campaign editor, check its settings and restore or reselect its font before testing the image.', 'easy-countdown' ) );
             }
         }
         $rows[] = $font;
@@ -121,7 +124,18 @@ final class Email_Countdown_Timer_Status {
                     <section class="ect-card" aria-labelledby="ect-status-image-title" data-ect-image-test>
                         <h2 id="ect-status-image-title"><?php echo esc_html__( 'Public image test', 'easy-countdown' ); ?></h2>
                         <p><?php echo esc_html__( 'The button makes one anonymous request from this browser, without WordPress cookies. It does not test a remote network, email provider or recipient client. A different image hostname must allow browser CORS access for this test.', 'easy-countdown' ); ?></p>
-                        <button type="button" class="button" hidden data-ect-image-url="<?php echo esc_url( $url ); ?>" data-loading="<?php echo esc_attr__( 'Testing public image…', 'easy-countdown' ); ?>" data-success="<?php echo esc_attr__( 'The anonymous image request loaded successfully. Test your real sender and recipients separately.', 'easy-countdown' ); ?>" data-failure="<?php echo esc_attr__( 'The anonymous image test failed.', 'easy-countdown' ); ?>" data-timeout="<?php echo esc_attr__( 'The 15-second limit was reached. Check host responsiveness and retry.', 'easy-countdown' ); ?>" data-network="<?php echo esc_attr__( 'The browser could not reach or read the response. Check the network, firewall and cross-host CORS access; this alone does not indicate a GD failure.', 'easy-countdown' ); ?>" data-http="<?php echo esc_attr__( 'The public server rejected the request. Check the HTTP status in the report, public URL and firewall rules.', 'easy-countdown' ); ?>" data-mime="<?php echo esc_attr__( 'The response is not a supported image. Check redirects, caching and firewall challenge pages.', 'easy-countdown' ); ?>" data-decode="<?php echo esc_attr__( 'The browser could not decode the image. Check GD, image conversion and proxy caching.', 'easy-countdown' ); ?>" data-pixel="<?php echo esc_attr__( 'The endpoint returned an error pixel. Check the campaign configuration, GD and host capacity.', 'easy-countdown' ); ?>" data-target="<?php echo esc_attr__( 'The image target is invalid. Reload this screen and check the site home URL.', 'easy-countdown' ); ?>><?php echo esc_html__( 'Test public image', 'easy-countdown' ); ?></button>
+                        <button type="button" class="button" hidden
+                            data-ect-image-url="<?php echo esc_url( $url ); ?>"
+                            data-loading="<?php echo esc_attr__( 'Testing public image…', 'easy-countdown' ); ?>"
+                            data-success="<?php echo esc_attr__( 'The anonymous image request loaded successfully. Test your real sender and recipients separately.', 'easy-countdown' ); ?>"
+                            data-failure="<?php echo esc_attr__( 'The anonymous image test failed.', 'easy-countdown' ); ?>"
+                            data-timeout="<?php echo esc_attr__( 'The 15-second limit was reached. Check host responsiveness and retry.', 'easy-countdown' ); ?>"
+                            data-network="<?php echo esc_attr__( 'The browser could not reach or read the response. Check the network, firewall and cross-host CORS access; this alone does not indicate a GD failure.', 'easy-countdown' ); ?>"
+                            data-http="<?php echo esc_attr__( 'The public server rejected the request. Check the HTTP status in the report, public URL and firewall rules.', 'easy-countdown' ); ?>"
+                            data-mime="<?php echo esc_attr__( 'The response is not a supported image. Check redirects, caching and firewall challenge pages.', 'easy-countdown' ); ?>"
+                            data-decode="<?php echo esc_attr__( 'The browser could not decode the image. Check GD, image conversion and proxy caching.', 'easy-countdown' ); ?>"
+                            data-pixel="<?php echo esc_attr__( 'The endpoint returned an error pixel. Check the campaign configuration, GD and host capacity.', 'easy-countdown' ); ?>"
+                            data-target="<?php echo esc_attr__( 'The image target is invalid. Reload this screen and check the site home URL.', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Test public image', 'easy-countdown' ); ?></button>
                         <p><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'Open image manually (new tab)', 'easy-countdown' ); ?></a></p>
                         <p data-ect-image-result role="status"></p>
                         <img hidden alt="<?php echo esc_attr__( 'Result of the requested public image test.', 'easy-countdown' ); ?>" style="max-width:100%;height:auto;" referrerpolicy="no-referrer">
