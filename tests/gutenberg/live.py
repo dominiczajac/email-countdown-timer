@@ -32,7 +32,7 @@ def verify_live(page, browser, wp, base, evidence, check, open_editor, insert):
     front.on('request', lambda request: requests.append(request.url))
     # Much newer than PHP's rendered snapshot, exercising stale page HTML without
     # clock synchronization or server polling. This future campaign has no image.
-    instant = datetime(2035, 12, 31, 23, 57, 1, tzinfo=timezone.utc)
+    instant = datetime(2035, 12, 30, 23, 59, 55, tzinfo=timezone.utc)
     # Patch only Date.now. Playwright's Clock also replaces Performance and
     # removes navigation entries consumed by WordPress Interactivity API.
     front.add_init_script('window.emailCountdownTestNow = ' + str(int(instant.timestamp() * 1000)) + '; Date.now = () => window.emailCountdownTestNow;')
@@ -42,6 +42,16 @@ def verify_live(page, browser, wp, base, evidence, check, open_editor, insert):
     first_root = roots.first
     pause = first_root.get_by_role('button', name='Pause countdown', exact=True)
     expect(pause).to_be_visible()
+    day = first_root.locator('[data-ecd-unit="d"]')
+    expect(day).to_have_text('01'); expect(day).to_be_visible()
+    check(True, 'hide-days keeps the day column above 24 hours in cached markup')
+    instant += timedelta(seconds=6)
+    front.evaluate('(value) => { window.emailCountdownTestNow = value; }', int(instant.timestamp() * 1000))
+    expect(day).to_be_hidden()
+    check(first_root.locator('.ecd-live__digits--three').count() == 1, 'native live layout hides days only when crossing below 24 hours')
+    instant = datetime(2035, 12, 31, 23, 57, 1, tzinfo=timezone.utc)
+    front.evaluate('(value) => { window.emailCountdownTestNow = value; }', int(instant.timestamp() * 1000))
+    expect(first_root.locator('[data-ecd-unit="m"]')).to_have_text('02')
     expect(first_root.locator('[data-ecd-unit="d"]')).to_have_text('00')
     check(first_root.locator('time').get_attribute('datetime') == '2035-12-31T23:59:59+00:00', 'cached snapshot catches up using the PHP-parsed absolute deadline')
     check(first_root.locator('.ecd-live__digits').get_attribute('aria-hidden') == 'true' and first_root.locator('[aria-live]').count() == 0, 'screen readers get the static deadline without repeating announcements')
@@ -80,7 +90,9 @@ def verify_live(page, browser, wp, base, evidence, check, open_editor, insert):
         const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
         return Array.from(ctx.getImageData(Math.floor(canvas.width/2), Math.floor(canvas.height/2), 1, 1).data).slice(0,3);
     }''')
-    check(color == [20, 90, 120], 'browser ahead of server receives real end-image pixels instead of a pre-deadline timer')
+    # Browser Accept can negotiate lossy WebP; allow small codec rounding.
+    (evidence / 'live-skew-pixel.json').write_text(json.dumps({'center_rgb': color}))
+    check(max(abs(a-b) for a,b in zip(color, [20, 90, 120])) <= 5, 'browser ahead of server receives real end-image pixels instead of a pre-deadline timer')
     (evidence / 'live-events.json').write_text(json.dumps({'errors': errors, 'image_requests': [url for url in requests if 'ecd_action=render' in url]}, indent=2))
     check(len([url for url in requests if 'ecd_action=render' in url]) == 2 and not errors, 'expiry introduces no polling or uncaught JavaScript errors')
     check('PRIVATE-LIVE-NAME' not in front.content() and not any('block-editor.js' in url for url in requests), 'live frontend excludes private names and editor scripts')

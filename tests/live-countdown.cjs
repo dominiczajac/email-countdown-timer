@@ -6,16 +6,17 @@ const vm = require('node:vm');
 const code = fs.readFileSync('assets/live-countdown.js', 'utf8');
 let checks = 0;
 function check(value, name) { assert.ok(value, name); checks++; }
-function harness({ remaining = 90061, reduced = false, loading = false, end = '', count = 1, rawDeadline } = {}) {
+function harness({ remaining = 90061, reduced = false, loading = false, end = '', count = 1, rawDeadline, hideDays = false } = {}) {
     let now = 2000000000000, next = 0;
     const events = {}, mediaEvents = {}, timers = new Map(), images = [];
     const roots = Array.from({ length: count }, () => {
-        const values = Object.fromEntries(['d', 'h', 'm', 's'].map(unit => [unit, { textContent: '99', getAttribute: () => unit }]));
-        const digits = { hidden: false, querySelectorAll: () => Object.values(values) };
+        const values = Object.fromEntries(['d', 'h', 'm', 's'].map(unit => [unit, { textContent: '99', parentElement: { hidden: false }, getAttribute: () => unit }]));
+        const classes = new Set();
+        const digits = { hidden: false, classes, classList: { toggle(name, enabled) { if (enabled) classes.add(name); else classes.delete(name); } }, querySelector: () => values.d, querySelectorAll: () => Object.values(values) };
         const button = { style: { visibility: 'hidden' }, disabled: false, textContent: '', events: {}, addEventListener(name, fn) { this.events[name] = fn; }, getAttribute(name) { return { 'data-ecd-pause': 'Pause', 'data-ecd-resume': 'Resume', 'data-ecd-ended': 'Ended' }[name]; } };
         const stage = { children: [], appendChild(image) { this.children.push(image); } };
         return { values, digits, button, stage,
-            getAttribute(name) { return { 'data-ecd-deadline': rawDeadline === undefined ? String(now / 1000 + remaining) : rawDeadline, 'data-ecd-end-image': end, 'aria-label': 'Saved alt' }[name]; },
+            getAttribute(name) { return { 'data-ecd-deadline': rawDeadline === undefined ? String(now / 1000 + remaining) : rawDeadline, 'data-ecd-hide-days': hideDays ? '1' : '0', 'data-ecd-end-image': end, 'aria-label': 'Saved alt' }[name]; },
             querySelector(selector) { return { '.ecd-live__digits': digits, button, '.ecd-live__stage': stage }[selector]; }
         };
     });
@@ -79,6 +80,14 @@ const head = harness({ loading: true, count: 2 });
 check(head.timers.size === 0, 'optimizer head execution waits for the DOM');
 head.fire('DOMContentLoaded');
 check(head.timers.size === 2 && head.roots.every(root => root.button.style.visibility === 'visible'), 'multiple block instances initialize independently');
+const threshold = harness({ remaining: 86401, hideDays: true });
+check(threshold.roots[0].values.d.textContent === '01' && !threshold.roots[0].values.d.parentElement.hidden, 'hide days preserves whole days above the 24-hour threshold');
+threshold.advance(2000);
+check(threshold.roots[0].values.d.parentElement.hidden && threshold.roots[0].digits.classes.has('ecd-live__digits--three') && threshold.roots[0].values.h.textContent === '23', 'crossing below 24 hours updates the days column and layout exactly as images');
+threshold.advance(-3000);
+check(!threshold.roots[0].values.d.parentElement.hidden && !threshold.roots[0].digits.classes.has('ecd-live__digits--three'), 'clock correction can restore a cached hidden days column');
+const visibleZero = harness({ remaining: 1 });
+check(!visibleZero.roots[0].values.d.parentElement.hidden, 'zero days remain visible when hide-days is off');
 for (const rawDeadline of ['', 'NaN', 'Infinity', '1e3', '9007199254740992']) {
     const invalid = harness({ rawDeadline });
     check(invalid.timers.size === 0 && invalid.roots[0].button.style.visibility === 'hidden', 'malformed deadline remains an unenhanced snapshot: ' + rawDeadline);

@@ -54,6 +54,10 @@
                     digits.querySelectorAll('[data-ecd-unit]').forEach(function (node) {
                         node.textContent = String(values[node.getAttribute('data-ecd-unit')]).padStart(2, '0');
                     });
+                    var hideDays = root.getAttribute('data-ecd-hide-days') === '1' && values.d === 0;
+                    var day = digits.querySelector('[data-ecd-unit="d"]');
+                    if (day) day.parentElement.hidden = hideDays;
+                    digits.classList.toggle('ecd-live__digits--three', hideDays);
                     ended = remaining === 0;
                     if (ended) endImage();
                 }

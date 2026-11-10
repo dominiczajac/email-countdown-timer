@@ -16,7 +16,11 @@ ok( ! str_contains( $html, '<img' ) && str_contains( $html, 'mode=end' ), 'end i
 ok( $options === $before, 'live render never writes or migrates campaign settings' );
 $options['easy_countdown_timers']['live-test']['hide_days'] = 1;
 $html = Email_Countdown_Timer_Block::render( array( 'timerId' => 'live-test', 'displayMode' => 'live' ), $plugin );
-ok( ! str_contains( $html, 'data-ecd-unit="d"' ) && str_contains( $html, 'data-ecd-unit="h"' ), 'hide-days live layout omits days exactly as the image' );
+ok( str_contains( $html, 'data-ecd-hide-days="1"' ) && ! str_contains( $html, 'class="ecd-live__unit" hidden' ), 'hide-days retains the days column when at least 24 hours remain' );
+$options['easy_countdown_timers']['live-test']['deadline'] = gmdate( 'Y-m-d\TH:i:s', time() + 3600 );
+$options['easy_countdown_timers']['live-test']['tz'] = 'UTC';
+$html = Email_Countdown_Timer_Block::render( array( 'timerId' => 'live-test', 'displayMode' => 'live' ), $plugin );
+ok( str_contains( $html, 'class="ecd-live__unit" hidden' ) && str_contains( $html, 'ecd-live__digits--three' ), 'hide-days omits days only below 24 hours, retaining the node for cached-HTML correction' );
 foreach ( array( null, '', array(), 'LIVE', 'unknown', 'image' ) as $mode ) {
     $scripts = $styles = array();
     $html = Email_Countdown_Timer_Block::render( array( 'timerId' => 'live-test', 'displayMode' => $mode ), $plugin );

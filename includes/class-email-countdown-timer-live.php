@@ -16,19 +16,19 @@ final class Email_Countdown_Timer_Live {
         wp_enqueue_script( 'email-countdown-timer-live', plugins_url( 'assets/live-countdown.js', EMAIL_COUNTDOWN_TIMER_FILE ), array(), EMAIL_COUNTDOWN_TIMER_VERSION, true );
         wp_enqueue_style( 'email-countdown-timer-live', plugins_url( 'assets/live-countdown.css', EMAIL_COUNTDOWN_TIMER_FILE ), array(), EMAIL_COUNTDOWN_TIMER_VERSION );
         $remaining = max( 0, $deadline - time() );
-        // Match the image: hiding days omits that column, without adding days to hours.
+        // Match the image: omit days only below 24 hours, without adding days to hours.
         $values = array( 'd' => intdiv( $remaining, 86400 ), 'h' => intdiv( $remaining % 86400, 3600 ), 'm' => intdiv( $remaining % 3600, 60 ), 's' => $remaining % 60 );
+        $omit_days = $config['hide_days'] && 0 === $values['d'];
         $end_url = empty( $config['expiry_image_id'] ) ? '' : add_query_arg( array( 'ecd_action' => 'render', 'ecd' => $id, 'mode' => 'end' ), home_url( '/' ) );
         $alt = Email_Countdown_Timer_Config::alt( $config, __( 'Countdown', 'easy-countdown' ) );
         $style = '--ecd-bg:' . $config['bg'] . ';--ecd-digit:' . $config['dc'] . ';--ecd-label:' . $config['lc'] . ';';
         ob_start();
         ?>
-        <div class="ecd-live" role="group" aria-label="<?php echo esc_attr( $alt ); ?>" style="<?php echo esc_attr( $style ); ?>" data-ecd-deadline="<?php echo esc_attr( (string) $deadline ); ?>" data-ecd-end-image="<?php echo esc_url( $end_url ); ?>">
+        <div class="ecd-live" role="group" aria-label="<?php echo esc_attr( $alt ); ?>" style="<?php echo esc_attr( $style ); ?>" data-ecd-hide-days="<?php echo esc_attr( (string) $config['hide_days'] ); ?>" data-ecd-deadline="<?php echo esc_attr( (string) $deadline ); ?>" data-ecd-end-image="<?php echo esc_url( $end_url ); ?>">
             <div class="ecd-live__stage">
-                <div class="ecd-live__digits<?php echo $config['hide_days'] ? ' ecd-live__digits--three' : ''; ?>" aria-hidden="true">
+                <div class="ecd-live__digits<?php echo $omit_days ? ' ecd-live__digits--three' : ''; ?>" aria-hidden="true">
                     <?php foreach ( $values as $unit => $value ) : ?>
-                        <?php if ( 'd' === $unit && $config['hide_days'] ) { continue; } ?>
-                        <div class="ecd-live__unit">
+                        <div class="ecd-live__unit"<?php echo 'd' === $unit && $omit_days ? ' hidden' : ''; ?>>
                             <span class="ecd-live__number" data-ecd-unit="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( str_pad( (string) $value, 2, '0', STR_PAD_LEFT ) ); ?></span>
                             <span class="ecd-live__label" title="<?php echo esc_attr( $config[ 'label_' . $unit ] ); ?>"><?php echo esc_html( $config[ 'label_' . $unit ] ); ?></span>
                         </div>

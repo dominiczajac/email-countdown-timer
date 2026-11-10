@@ -3,7 +3,7 @@
 The website block currently embeds the same 60-frame GIF used by email. A page
 left open can outlive that animation. Offer an explicit **Live text** block mode
 which updates digits locally, while retaining **Image** as the default for every
-existing block and keeping email URLs, image rendering and shortcodes unchanged.
+existing block and keeping documented email/image modes and shortcodes unchanged.
 
 The saved campaign remains authoritative. Resolve its deadline with the existing
 PHP parser, send only the public deadline/labels/colors to the page, and calculate
@@ -11,25 +11,24 @@ remaining seconds from the absolute deadline on each tick. There is no campaign
 API, polling, visitor storage, external font or per-second network request.
 Changing a campaign still requires purging any cached page which embeds it.
 
-Use theme typography, the saved colors, labels and hide-days choice. The image
+Use theme typography, the saved colors, labels and hide-days choice (hide only below 24 hours, exactly like images). The image
 font, image sizes and fixed image width remain image settings. Reserve the digit
 stage and control space; an optional saved end image uses the existing static
 image route once at expiry, within the same stage. The explicit `mode=end`
 returns only a configured public end image, even when the browser clock is ahead;
 its cache slots are separate from normal PNG/WebP output. Missing or restricted
 media returns an error pixel. This image is publicly accessible before the
-campaign deadline, like the underlying eligible Media Library attachment. An unavailable image leaves
-zero digits visible. Long labels may truncate visually with their full text in
+campaign deadline, like the underlying eligible Media Library attachment. An
+unavailable image leaves zero digits visible. Long labels may truncate visually with their full text in
 the title attribute. Campaign names and archive metadata remain private.
 
 No digit animation or repeating screen-reader announcements. Show the exact
 saved deadline as accessible text, provide a keyboard-operable Pause/Resume
 control, start paused for reduced-motion users and suspend timers while the page
 is hidden. JavaScript-disabled visitors receive a clearly identified snapshot
-and the deadline. A paused snapshot may remain frozen past expiry until resumed. Cached HTML can
-contain an old no-JS snapshot; the exact deadline is always the reference.
-Browser clock accuracy is required; no network clock sync is
-introduced. A paused snapshot may be stale until resumed.
+and the deadline. A paused snapshot remains frozen past expiry until resumed.
+Cached HTML can contain an old no-JS snapshot; the exact deadline is always the
+reference. Browser clock accuracy is required; no network clock sync is introduced.
 
 Verification must cover default/invalid modes, hostile or malformed configuration,
 DST and hidden-day parity, no-GD rendering, pause/resume, reduced motion, expiry,
