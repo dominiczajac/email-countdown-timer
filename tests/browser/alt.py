@@ -5,6 +5,7 @@ import pathlib
 import shutil
 from html.parser import HTMLParser
 from playwright.sync_api import sync_playwright, expect
+from wordpress import log_in
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -33,11 +34,7 @@ with sync_playwright() as p:
     context = browser.new_context(viewport={'width': 1440, 'height': 1000})
     page = context.new_page()
     page.on('dialog', lambda d: d.accept() if d.type == 'beforeunload' else d.dismiss())
-    page.goto(base + '/wp-login.php')
-    page.locator('#user_login').fill('ci-admin')
-    page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD'])
-    page.locator('#wp-submit').click()
-    page.wait_for_url('**/wp-admin/**')
+    log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
     page.goto(base + '/wp-admin/admin.php?page=ecd-timers&view=new')
     custom_alt = 'Offer "summer" & deadline — 2030'
     page.get_by_label('Image alternative text (alt)', exact=True).fill(custom_alt)
@@ -69,7 +66,7 @@ with sync_playwright() as p:
     check(image.headers.get('x-content-type-options') == 'nosniff', 'binary response keeps nosniff')
     check('set-cookie' not in image.headers, 'isolated image endpoint sets no cookie')
     anonymous.dispose()
-    page.locator('#ect-tz').fill('invalid/time-zone')
+    page.locator('#ect-tz').evaluate("e => { e.add(new Option('Invalid test zone', 'invalid/time-zone')); e.value = 'invalid/time-zone'; e.dispatchEvent(new Event('change', {bubbles: true})); }")
     page.locator('#ect-editor button[type=submit]').click()
     expect(page.locator('#ect-tz')).to_have_attribute('aria-invalid', 'true')
     check(page.locator('#ect-alt').input_value() == custom_alt, 'alt survives server-side validation errors')

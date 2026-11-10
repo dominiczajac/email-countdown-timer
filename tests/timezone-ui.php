@@ -16,7 +16,7 @@ $GLOBALS['ect_site_tz'] = 'Pacific/Auckland';
 $options['easy_countdown_timers'] = array( 'legacy-zone' => array( 'deadline' => '2030-12-31T23:59:59' ) );
 $_GET = array( 'edit' => 'legacy-zone' );
 ok( Email_Countdown_Timer_Admin::state()['data']['tz'] === 'Europe/Warsaw', 'legacy missing zone never inherits a new site zone' );
-foreach ( array( '+05:30', 'US/Eastern', 'Etc/GMT+3' ) as $saved_zone ) {
+foreach ( array( '+05:30', 'GMT', 'Etc/GMT+3' ) as $saved_zone ) {
     $options['easy_countdown_timers']['legacy-zone']['tz'] = $saved_zone;
     $state = Email_Countdown_Timer_Admin::state();
     ok( $state['data']['tz'] === $saved_zone, 'editing retains saved zone or alias ' . $saved_zone );
@@ -31,6 +31,7 @@ ok( str_contains( Email_Countdown_Timer_Admin::deadline_text( array_replace( $su
 $bad_zone = '"><script>bad</script>';
 ob_start(); Email_Countdown_Timer_Admin::timezone_input( 'ect-tz', $bad_zone, 'Invalid zone' ); $zone_markup = ob_get_clean();
 ok( ! str_contains( $zone_markup, '<script>' ) && str_contains( $zone_markup, '&lt;script&gt;' ) && str_contains( $zone_markup, 'aria-invalid="true"' ), 'invalid selected input and error are escaped and recoverable' );
+ok( str_contains( $zone_markup, 'id="ect-error-tz"' ) && str_contains( $zone_markup, 'ect-help-tz ect-error-tz' ), 'selector retains existing client-validation error and description IDs' );
 $options = $zone_options_before;
 unset( $GLOBALS['ect_site_tz'] );
 $reset_admin(); $_GET = $_POST = array();

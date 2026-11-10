@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import shutil
 from playwright.sync_api import sync_playwright
+from wordpress import log_in
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -15,11 +16,7 @@ with sync_playwright() as p:
     assert executable, 'A real browser is required'
     browser = p.chromium.launch(executable_path=executable, args=['--no-sandbox'])
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
-    page.goto(base + '/wp-login.php')
-    page.locator('#user_login').fill('ci-admin')
-    page.locator('#user_pass').fill(os.environ['ECD_BROWSER_PASSWORD'])
-    page.locator('#wp-submit').click()
-    page.wait_for_url('**/wp-admin/**')
+    log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
     response = page.goto(base + '/wp-admin/privacy-policy-guide.php')
     assert response.status == 200
     checks.append('Privacy Policy Guide is accessible')
