@@ -189,7 +189,9 @@ with sync_playwright() as p:
     page.locator('#ect-delete-confirm').click()
     page.wait_for_url('**status=deleted**')
     expect(page.get_by_text('Timer deleted.', exact=True)).to_be_visible()
-    check(page.locator('code', has_text='browser-test').count() == 0, 'confirmed delete actually removes timer')
+    # Quick Create also saved quick-browser-test; match the deleted ID exactly.
+    check(page.get_by_role('rowheader', name='browser-test', exact=True).count() == 0, 'confirmed delete actually removes timer')
+    check(page.get_by_role('rowheader', name='quick-browser-test', exact=True).count() == 1, 'deleting one campaign preserves the Quick Create campaign')
     page.goto(base + '/wp-admin/admin.php?page=email-countdown-timer-data')
     check(page.locator('[href*="assets/admin.css"]').count() == 1, 'Data Settings shares scoped styling')
     check(not page.locator('[name=delete_data_on_uninstall]').is_checked(), 'uninstall opt-in remains off')
