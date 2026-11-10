@@ -7,8 +7,9 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
-from contracts import ACTIVE_REQUIRED, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
 
 
 def good(profile='baseline'):
@@ -159,6 +160,26 @@ class Contracts(unittest.TestCase):
         self.assertTrue(core_avatar('https://secure.gravatar.com/avatar/' + 'b' * 64, 'image'))
         for candidate, resource in ((url, 'script'), (url.replace('https:', 'http:'), 'image'), (url.replace('gravatar.com', 'gravatar.com.evil.invalid'), 'image')):
             self.assertFalse(core_avatar(candidate, resource))
+
+    def test_actual_post_campaign_refresh_shape_is_never_a_navigation_exemption(self):
+        request = SimpleNamespace(method='POST', url='http://localhost:8095/wp-admin/admin-ajax.php',
+            headers={'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+            post_data='action=email_countdown_timer_campaigns&nonce=synthetic-private-value', failure='net::ERR_ABORTED')
+        self.assertFalse(navigation_request_cancel(request, 'timer-editor', True))
+        request.post_data = 'act%69on=email_countdown_timer_campaigns&nonce=synthetic-private-value'
+        self.assertFalse(navigation_request_cancel(request, 'timer-editor', True))
+        request.post_data = 'action=query-attachments&_ajax_nonce=synthetic-private-value'
+        self.assertTrue(navigation_request_cancel(request, 'core-media-control', True))
+        self.assertFalse(navigation_request_cancel(request, 'core-media-control', False))
+
+    def test_unsupported_or_oversized_post_cannot_be_excused(self):
+        request = SimpleNamespace(method='POST', url='http://localhost:8095/wp-admin/admin-ajax.php',
+            headers={'content-type': 'multipart/form-data'}, post_data='action=query-attachments', failure='net::ERR_ABORTED')
+        self.assertFalse(navigation_request_cancel(request, 'core-media-control', True))
+        request.headers['content-type'] = 'application/x-www-form-urlencoded'
+        for body in (None, '', 'action=query-attachments&x=' + 'a' * 65536, 'action=%FF', '&'.join('x=1' for _ in range(65))):
+            request.post_data = body
+            self.assertFalse(navigation_request_cancel(request, 'core-media-control', True))
 
     def test_missing_duplicate_or_malformed_origin_marker_fails(self):
         duplicate = ('<span id="ecd-cache-origin" data-generation="' + 'a' * 24 + '"></span>') * 2

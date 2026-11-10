@@ -56,9 +56,27 @@ def core_avatar(url, resource_type):
             and re.fullmatch(r'/avatar/(?:[a-f0-9]{32}|[a-f0-9]{64})', parts.path) is not None)
 
 
-def navigation_cancel(failure, url, phase, navigating):
+def navigation_cancel(failure, url, phase, navigating, method='GET', post_data=None, content_type=''):
     parts = urlsplit(url)
-    query = parse_qs(parts.query)
+    try:
+        query = parse_qs(parts.query, max_num_fields=64, errors='strict')
+        if method == 'POST':
+            # Only core AJAX may be interrupted during these read-only admin
+            # visits. Never excuse saves, unsupported bodies or candidate AJAX.
+            if (parts.path != '/wp-admin/admin-ajax.php'
+                    or content_type.split(';', 1)[0].strip().lower() != 'application/x-www-form-urlencoded'
+                    or not isinstance(post_data, str) or len(post_data) > 65536):
+                return False
+            posted = parse_qs(post_data, max_num_fields=64, errors='strict')
+            actions = posted.get('action', [])
+            if not actions and not query.get('action'):
+                return False
+            if any(action.startswith('email_countdown_timer_') for action in actions):
+                return False
+        elif method != 'GET':
+            return False
+    except (ValueError, UnicodeError):
+        return False
     return (failure == 'net::ERR_ABORTED' and navigating and phase in ADMIN_PHASES
             and parts.scheme == 'http' and parts.netloc == 'localhost:8095'
             and parts.path.startswith(('/wp-includes/', '/wp-admin/', '/wp-json/'))
@@ -66,6 +84,19 @@ def navigation_cancel(failure, url, phase, navigating):
             and not any(action.startswith('email_countdown_timer_') for action in query.get('action', []))
             and '/easy-countdown/' not in url
             and '/cache/autoptimize/' not in url)
+
+
+def navigation_request_cancel(request, phase, navigating):
+    """Inspect the actual Playwright request without retaining its body/nonce."""
+    method = request.method
+    content_type = request.headers.get('content-type', '')
+    body = None
+    if method == 'POST' and content_type.split(';', 1)[0].strip().lower() == 'application/x-www-form-urlencoded':
+        try:
+            body = request.post_data
+        except (ValueError, UnicodeError):
+            return False
+    return navigation_cancel(request.failure, request.url, phase, navigating, method, body, content_type)
 
 
 def expected_plugins(profile, active):

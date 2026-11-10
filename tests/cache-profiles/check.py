@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, page_evidence
+from contracts import ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -115,8 +115,8 @@ def main():
                 if request.url in expected_aborted:
                     return
                 item = {'state': current['key'], 'phase': phase, 'path': urlsplit(request.url).path,
-                        'resource_type': request.resource_type, 'failure': request.failure}
-                if navigation_cancel(request.failure, request.url, phase, navigating):
+                        'resource_type': request.resource_type, 'failure': request.failure, 'method': request.method}
+                if navigation_request_cancel(request, phase, navigating):
                     # Navigating between real admin pages can cancel outstanding AJAX.
                     # Required image/script behavior is separately checked before leaving.
                     report['navigation_cancellations'].append(item)

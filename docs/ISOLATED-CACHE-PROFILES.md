@@ -37,6 +37,8 @@ and JS/CSS aggregation options were on; the enforced optimizer proof is the
 served live-JavaScript bundle and actual browser behavior, not all CSS/lazyload
 variants. Subsequent reports also expose the tested checkout SHA, ZIP hash and
 actual nginx/FPM package versions in their bounded CI result annotation.
+`source_commit` is the actual checkout SHA: on pull requests this is normally
+GitHub's synthetic merge commit, distinct from the PR head named in this table.
 
 No distributed runtime file changed from integrated main `a1ae837`; the
 32-file development ZIP has SHA256
@@ -93,6 +95,10 @@ small fixture and 2 MiB per file; an oversized or unreadable required artifact
 fails closed. Frontend image/script cancellations fail; only recorded core/admin
 requests aborted while the harness navigates or closes admin pages can be
 non-failing. Countdown and optimized assets remain protected.
+The classifier also inspects bounded URL-encoded POST data for core AJAX;
+campaign-refresh actions cannot be excused simply because their action is in
+the body rather than the query. Bodies and nonces are never retained. Unknown
+body formats, oversized forms and saves fail closed instead of being excused.
 
 At `0bc7777`, W3 Total Cache and Autoptimize passed both JIT cells; baseline
 passed JIT-disabled (5/8 successful jobs). The JIT-enabled baseline recorded an
