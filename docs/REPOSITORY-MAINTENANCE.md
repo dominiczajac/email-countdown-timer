@@ -45,6 +45,46 @@ Keep Actions permissions at `contents: read`, pin actions to full commit SHAs, a
 
 Dependabot is already configured for GitHub Actions; review its proposals rather than merging them solely because they are automated. Inspect the Security settings for secret scanning and push protection. Enable private vulnerability reporting where available, then verify the actual reporting entry point. Until verified, SECURITY.md remains conditional about that channel.
 
+## Claude pull-request reviews
+
+The `Claude Review` workflow responds to a new `@claude review` comment in the
+conversation of an open PR. It does not listen to issues, edited comments or
+inline review threads. The commenter must be an owner, member or collaborator;
+the action also checks repository write access. Bots are not enabled.
+
+Before the first review:
+
+1. Install or configure the official [Claude GitHub app](https://github.com/apps/claude)
+   for `dominiczajac/email-countdown-timer`. Select this repository when granting
+   repository access. Adding a workflow does not install the app.
+2. Store a valid Claude Code token as the repository Actions secret
+   `CLAUDE_CODE_OAUTH_TOKEN`. Never paste its value into a PR, issue or workflow.
+3. Merge the reviewed workflow PR only with the maintainer's authorization.
+   GitHub loads `issue_comment` workflows from the default branch; a draft PR
+   alone cannot activate the integration.
+4. Post a fresh `@claude review` comment. Earlier mentions are not replayed.
+
+The workflow uses the existing OAuth secret and the official app's OIDC token
+exchange. Its app token explicitly requests `contents: read`, while allowing
+review comments and CI inspection. File-editing tools are denied and the prompt
+asks for static review without executing project scripts. Review-only git tools
+are allowed; the action's default git write tools are denied or cannot push with
+the read-only contents token. No merge or release tools are configured.
+
+The action is pinned to a full commit SHA and receives a fixed review prompt.
+The initial checkout uses the trusted default branch; the action resolves the PR
+head/base and restores its supported Claude configuration paths from the base.
+Keep executable Claude hooks and MCP configuration out of untrusted changes.
+Do not enable full-output/debug logging in this public repository.
+
+Verify an actual Actions run and a written Claude result naming the reviewed head
+SHA. An eyes reaction alone is an acknowledgement, not a completed review. A
+successful static workflow/YAML check does not validate the OAuth token or app
+installation. If no run appears, confirm the workflow is on `main` and the
+comment matches the trigger. If the authentication step fails, check the secret's
+repository access. If app-token exchange fails, check app installation/access and
+the `id-token: write` permission. Never expose credential values when diagnosing.
+
 ## Releases and documentation
 
 Build an installable ZIP from an explicitly selected, reviewed commit with `git archive`, retain the license, and inspect archive contents. Do not include `.git`, CI configuration, tests, agent instructions, secrets, or font files. Run a real WordPress smoke test before claiming a release is production-ready. A green stub-based test suite does not verify a complete WordPress installation.
