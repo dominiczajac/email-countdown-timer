@@ -105,14 +105,18 @@ class Email_Countdown_Timer_Plugin {
         if (!function_exists('imagecreatetruecolor')) { $this->pixel(503, $head); return; }
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
         $mode = Email_Countdown_Timer_Config::text($_GET, 'mode');
+        $endOnly = $mode === 'end';
+        // Explicit opt-in end-image output is independent of the visitor clock.
+        // Missing/private/unavailable assets never become an ordinary countdown.
+        if ($endOnly && Email_Countdown_Timer_End_Image::resolve((int)($config['expiry_image_id'] ?? 0)) === null) { $this->pixel(404, $head); return; }
         $fmt = in_array($mode, ['email','anim'], true) ? 'gif' : 'png';
         if ($fmt === 'png' && function_exists('imagewebp') && strpos(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'), 'image/webp') !== false) $fmt = 'webp';
         if ($head) { $this->outputHeaders($fmt); return; }
         $deadline = Email_Countdown_Timer_Config::deadline($config);
-        $fixedTime = $now;
-        $now = $now ?? time();
+        $fixedTime = $endOnly ? $deadline : $now;
+        $now = $fixedTime ?? time();
         [$signature, $bucket, $ending] = $this->imageState($config, $deadline, $now, $fmt);
-        $key = $this->cacheKey($id, $fmt);
+        $key = $this->cacheKey($id, $endOnly ? $fmt.'-end' : $fmt);
         $blob = $this->cachedImage($key, $signature, $bucket);
         if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
         require_once __DIR__.'/class-email-countdown-timer-render-lock.php';

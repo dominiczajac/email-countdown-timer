@@ -26,6 +26,14 @@
         "right"
       ],
       "default": "left"
+    },
+    "displayMode": {
+      "type": "string",
+      "enum": [
+        "image",
+        "live"
+      ],
+      "default": "image"
     }
   },
   "supports": {

@@ -10,6 +10,13 @@ In **Embed Codes > Website**, choose the native Easy Countdown block in Gutenber
 
 The shortcode creates a responsive `img` element and loads one shared script. When document visibility changes to `visible`, the images are fetched again with the `_t` parameter. There is no continuous server polling or new request for each frame.
 
+For a continuously updating website block, select **Website display > Live text**
+in its sidebar. This explicit choice uses theme typography with the saved colors,
+labels and deadline. It includes Pause/Resume, starts paused for reduced motion,
+and makes no repeated image requests. Without JavaScript it shows a labeled
+snapshot and the exact deadline. Image mode and the shortcode keep GIF behavior.
+Clear page caches after campaign changes; browser clock accuracy matters.
+
 ## Email HTML
 
 In **Embed Codes > Email**, copy **Email HTML** into your mailing platform's HTML editor, or use **Image URL** as the image's `src`. Each field has its own copy button with selected-text fallback. The code fields are always available for manual copying without JavaScript. Example using a placeholder domain:
@@ -30,6 +37,7 @@ Your email editor must preserve the external URL. Importing the image into the e
 | `ecd_action=render` | Activates the image endpoint |
 | `ecd=ID` | Selects an existing configuration |
 | `mode=email` or `mode=anim` | GIF: 60 frames with Imagick, a static GIF without Imagick |
+| `mode=end` | Static configured end image only, including before the deadline; missing/private media returns 404. Separate cache slots; used by live website blocks |
 | Any other or missing `mode` | PNG; WebP when GD supports it and the `Accept` header contains `image/webp` |
 | `_t` | Browser refresh parameter; it does not create a separate plugin-side cache entry |
 

@@ -6,6 +6,7 @@ import re
 import shutil
 import subprocess
 from playwright.sync_api import sync_playwright, expect
+from live import verify_live
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -31,8 +32,8 @@ def block_frame(page):
             return frame
     raise AssertionError('No rendered native block in the editor or its iframe')
 
-def open_editor(page):
-    page.goto(base + '/wp-admin/post.php?post=' + str(post_id) + '&action=edit')
+def open_editor(page, target=post_id):
+    page.goto(base + '/wp-admin/post.php?post=' + str(target) + '&action=edit')
     page.wait_for_function("window.wp && wp.blocks && wp.blocks.getBlockType('easy-countdown/timer') && wp.data.select('core/editor').getCurrentPostId()")
     page.evaluate("""() => {
         wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
@@ -207,6 +208,7 @@ try:
         frame=block_frame(page)
         expect(frame.get_by_text('This timer is no longer in the saved list.',exact=False)).to_be_visible()
         check(True,'missing saved timer shows editor warning')
+        verify_live(page, browser, wp, base, evidence, check, open_editor, insert)
         check(not errors,'no uncaught editor JavaScript errors')
         complete = True
         browser.close()

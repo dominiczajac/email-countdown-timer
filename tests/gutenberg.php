@@ -95,4 +95,5 @@ Email_Countdown_Timer_Block::register( $plugin );
 ok( str_ends_with( $GLOBALS['block_type'][0], 'blocks/timer' ), 'native metadata registration' );
 ok( in_array( 'wp-block-editor', $GLOBALS['block_script'][2], true ), 'uses core editor dependency' );
 $options = $before;
+require __DIR__ . '/live-block.php';
 echo 'GUTENBERG DOUBLES PASS: ' . ( $checks - $start ) . " assertions\n";

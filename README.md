@@ -56,6 +56,14 @@ The admin interface is English and translation-ready. It uses native WordPress c
 
 ## Embedding
 
+The block sidebar offers opt-in **Website display > Live text** for continuous
+local ticking, theme typography and Pause/Resume. It shares campaign colors,
+labels, hidden days and the PHP-parsed deadline; image mode remains the default.
+Reduced-motion visitors start paused, screen readers get the exact deadline
+without per-second announcements, and no-JS output identifies its snapshot.
+Only a configured end image needs one static request at expiry. Purge page caches
+after campaign changes; live text trusts the visitor clock. [Behavior and limits](docs/LIVE-WEBSITE-COUNTDOWN.md).
+
 In the WordPress block editor, insert **Easy Countdown**, choose an existing timer and set alignment in the sidebar. The block uses the saved campaign and offers a static editor preview with manual refresh. See the [block guide](docs/GUTENBERG-BLOCK.md). Classic-editor and shortcode use remain supported.
 
 ```text
