@@ -71,8 +71,7 @@ final class Email_Countdown_Timer_Admin {
                     <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'For example summer-sale. Use a unique ID; it cannot be changed after creation.', 'easy-countdown' ); ?></p></div>
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'easy-countdown' ); ?></label>
                     <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-tz"><?php echo esc_html__( 'Time Zone', 'easy-countdown' ); ?></label>
-                    <input id="<?php echo esc_attr( $prefix ); ?>-tz" name="tz" class="widefat" type="text" required value="<?php echo esc_attr( $quick['tz'] ); ?>"></div>
+                <?php self::timezone_input( $prefix . '-tz', $quick['tz'] ); ?>
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Appearance preset', 'easy-countdown' ); ?></label>
                     <select id="<?php echo esc_attr( $prefix ); ?>-preset" name="appearance_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-preset-help">
                         <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
@@ -379,11 +378,35 @@ final class Email_Countdown_Timer_Admin {
         <?php
     }
 
+    /** PHP identifiers match the renderer; WordPress's manual-offset option values do not. */
+    public static function timezone_input( string $id, string $value, string $error = '' ): void {
+        $zones = DateTimeZone::listIdentifiers( DateTimeZone::ALL );
+        // Keep exact saved aliases, fixed offsets and offending input selected.
+        // Never silently substitute the first IANA zone on an edit or failed save.
+        if ( ! in_array( $value, $zones, true ) ) {
+            array_unshift( $zones, $value );
+        }
+        ?>
+        <div class="ect-field">
+            <label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html__( 'Time Zone', 'easy-countdown' ); ?></label>
+            <select id="<?php echo esc_attr( $id ); ?>" name="tz" class="widefat" required aria-describedby="<?php echo esc_attr( $id ); ?>-help <?php echo esc_attr( $id ); ?>-error" <?php if ( '' !== $error ) : ?>aria-invalid="true"<?php endif; ?>>
+                <?php foreach ( $zones as $zone ) : ?>
+                    <option value="<?php echo esc_attr( $zone ); ?>" <?php selected( $value, $zone ); ?>><?php echo esc_html( '' === $zone ? __( 'Choose a time zone', 'easy-countdown' ) : str_replace( '_', ' ', $zone ) ); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="description" id="<?php echo esc_attr( $id ); ?>-help"><?php echo esc_html__( 'New campaigns start in the WordPress site time zone. Named zones follow daylight saving changes; fixed offsets do not. Check the saved deadline and its UTC equivalent before sharing.', 'easy-countdown' ); ?></p>
+            <p class="ect-error" id="<?php echo esc_attr( $id ); ?>-error"><?php echo esc_html( $error ); ?></p>
+        </div>
+        <?php
+    }
+
     public static function deadline_text( array $data ): string {
         try {
             $timestamp = Email_Countdown_Timer_Config::deadline( $data );
             $data['tz'] = Email_Countdown_Timer_Config::text( $data, 'tz', 'Europe/Warsaw' );
-            return ( new DateTimeImmutable( '@' . $timestamp ) )->setTimezone( new DateTimeZone( $data['tz'] ?: 'Europe/Warsaw' ) )->format( 'Y-m-d H:i:s T' ) . ' (' . ( $data['tz'] ?: 'Europe/Warsaw' ) . ')';
+            $utc = new DateTimeImmutable( '@' . $timestamp );
+            return $utc->setTimezone( new DateTimeZone( $data['tz'] ?: 'Europe/Warsaw' ) )->format( 'Y-m-d H:i:s P' )
+                . ' (' . ( $data['tz'] ?: 'Europe/Warsaw' ) . ') / ' . $utc->format( 'Y-m-d H:i:s \U\T\C' );
         } catch ( Exception $exception ) {
             return __( 'Invalid deadline or time zone', 'easy-countdown' );
         }

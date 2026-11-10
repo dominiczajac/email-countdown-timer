@@ -2,6 +2,7 @@
 
 ## 12.6.0 (review candidate)
 
+- Add a native IANA time-zone selector to the editor, Quick Create and dashboard. Keep saved aliases and fixed offsets selected, use the site zone only for new campaigns, and confirm saved deadlines with their numeric offset and UTC equivalent. No deadline or renderer interpretation is migrated.
 - Add a native dynamic Gutenberg block for existing timers, with a static preview, manual refresh and alignment controls. Reuse the existing shortcode renderer and permission-checked campaign references.
 - Integrate main's local Lato font and original OFL notices with the block distribution. Preserve existing campaign fonts, URLs, shortcode behavior and renderer defaults.
 - Record the upstream PHP #23991 JIT diagnosis and keep the required native acceptance matrix intact. This candidate is not a published release.
