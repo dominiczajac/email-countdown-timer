@@ -5,6 +5,7 @@
 .email-countdown-admin h1 { font-size:1.5rem; line-height:1.35; padding:0; }
 .email-countdown-admin h2 { font-size:1.25rem; line-height:1.4; margin:0 0 1rem; }
 .email-countdown-admin h3 { font-size:1.0625rem; line-height:1.4; margin:0 0 1rem; }
+.email-countdown-admin h4 { font-size:1rem; line-height:1.4; margin:1rem 0 .75rem; }
 .email-countdown-admin p { font-size:inherit; line-height:inherit; }
 .email-countdown-admin label, .email-countdown-admin legend { display:block; font-weight:600; margin-block-end:.375rem; }
 .email-countdown-admin .description { color:#50575e; font-size:.875rem; margin:.375rem 0; font-style:normal; }

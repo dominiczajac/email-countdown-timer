@@ -28,6 +28,10 @@ Suggested site-policy wording, only after checking the complete deployment:
 
 Uninstall with the existing opt-in removes plugin-owned data; it does not erase backups, cached email copies, other plugins' data or infrastructure logs. See [Data removal](Data-Removal.md).
 
+## Editor and dashboard access
+
+The editor's explicit **Refresh campaigns** action makes one authenticated request to this site's WordPress admin AJAX handler. It sends a post-context ID and nonce and receives at most 250 campaign IDs and editor URLs. Permissions are rechecked on each request; there is no anonymous catalog, visitor polling or persistent client storage. The dashboard widget uses a native form and links, with no background requests or image generation. These editor/admin actions do not collect email opens or visitor analytics.
+
 ## Manual fonts and persistent storage
 
 Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint is provided. One optional Lato Regular example is bundled under SIL OFL 1.1 and used locally, without remote font requests.

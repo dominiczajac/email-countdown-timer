@@ -11,6 +11,7 @@ class Email_Countdown_Timer_Plugin {
             add_filter('flying_press_is_cacheable', '__return_false');
         }
         add_action('admin_menu', [$this, 'registerAdminMenu']);
+        add_action('wp_dashboard_setup', [$this, 'registerDashboardWidget']);
         add_action('admin_init', [$this, 'handleFormSave']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('init', [$this, 'listenForImageRequest']);
@@ -23,6 +24,11 @@ class Email_Countdown_Timer_Plugin {
     }
     public function enqueueAdminAssets(string $hook): void {
         if (class_exists('Email_Countdown_Timer_Admin', false)) Email_Countdown_Timer_Admin::enqueue($hook);
+    }
+    public function registerDashboardWidget(): void {
+        if (!current_user_can('manage_options')) return;
+        require_once __DIR__.'/class-email-countdown-timer-admin.php';
+        Email_Countdown_Timer_Admin::register_dashboard_widget();
     }
     private function getTimers(): array {
         $timers = get_option(self::OPTION_KEY, []);

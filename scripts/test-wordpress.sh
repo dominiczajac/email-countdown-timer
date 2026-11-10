@@ -35,6 +35,7 @@ network=()
 "${wp[@]}" plugin activate easy-countdown "${network[@]}"
 "${wp[@]}" eval-file "$root/tests/integration/bundled-font.php"
 "${wp[@]}" eval-file "$root/tests/integration/embed-geometry.php"
+"${wp[@]}" eval-file "$root/tests/integration/gutenberg.php"
 "${wp[@]}" eval-file "$root/tests/integration/end-image.php"
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version

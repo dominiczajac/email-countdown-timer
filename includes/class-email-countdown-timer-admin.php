@@ -33,16 +33,96 @@ final class Email_Countdown_Timer_Admin {
     }
 
     public static function defaults( bool $new_timer = true ): array {
-        // Campaign labels are saved data, deliberately independent of the admin locale.
+        // New campaigns use the included font only when FreeType can render it.
+        // Saved campaigns keep their original selection and missing values.
+        $included = $new_timer && function_exists( 'imagettftext' ) && function_exists( 'imagettfbbox' )
+            && null !== Email_Countdown_Timer_Config::fontPath( Email_Countdown_Timer_Fonts::BUNDLED_CHOICE );
         return array( 'deadline' => wp_date( 'Y-12-31\T23:59:59' ), 'tz' => $new_timer ? wp_timezone_string() : 'Europe/Warsaw',
-            'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => '',
+            'bg' => '#FFFFFF', 'dc' => '#000000', 'lc' => '#666666', 'font' => $included ? Email_Countdown_Timer_Fonts::BUNDLED_CHOICE : '',
             'size_digit' => 40, 'size_label' => 12, 'fixed_width' => 0, 'hide_days' => 0,
             'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown', 'expiry_image_id' => 0 );
+    }
+
+    /** Code-owned colors, shared by quick creation and the optional editor buttons. */
+    public static function presets(): array {
+        return array(
+            'classic' => array( 'label' => __( 'Classic', 'easy-countdown' ), 'bg' => '#FFFFFF', 'dc' => '#111827', 'lc' => '#475569' ),
+            'midnight' => array( 'label' => __( 'Midnight', 'easy-countdown' ), 'bg' => '#111827', 'dc' => '#F9FAFB', 'lc' => '#CBD5E1' ),
+            'ocean' => array( 'label' => __( 'Ocean', 'easy-countdown' ), 'bg' => '#F8FAFC', 'dc' => '#1D4ED8', 'lc' => '#334155' ),
+            'warm' => array( 'label' => __( 'Warm', 'easy-countdown' ), 'bg' => '#FFF7ED', 'dc' => '#9A3412', 'lc' => '#713F12' ),
+        );
+    }
+
+    /** One native POST form for the timer list and dashboard; no JavaScript required. */
+    public static function quick_create_form( string $prefix = 'ect-quick' ): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $quick = self::defaults();
+        ?>
+        <form id="<?php echo esc_attr( $prefix ); ?>-create" method="post" action="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>">
+            <input type="hidden" name="ecd_action" value="email_countdown_timer_save">
+            <input type="hidden" name="original_id" value="">
+            <input type="hidden" name="creation_mode" value="quick">
+            <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
+            <div class="ect-two-fields">
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-id"><?php echo esc_html__( 'Timer ID', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" class="widefat" type="text" required maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-id-help">
+                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'For example summer-sale. Use a unique ID; it cannot be changed after creation.', 'easy-countdown' ); ?></p></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-tz"><?php echo esc_html__( 'Time Zone', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-tz" name="tz" class="widefat" type="text" required value="<?php echo esc_attr( $quick['tz'] ); ?>"></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Appearance preset', 'easy-countdown' ); ?></label>
+                    <select id="<?php echo esc_attr( $prefix ); ?>-preset" name="appearance_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-preset-help">
+                        <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
+                            <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
+                        <?php endforeach; ?>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Four high-contrast color combinations. New timers use included Lato when FreeType is available, otherwise bitmap.', 'easy-countdown' ); ?></p></div>
+            </div>
+            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create campaign', 'easy-countdown' ); ?></button>
+                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'easy-countdown' ); ?></a></div>
+        </form>
+        <?php
     }
 
     private static function timers(): array {
         $timers = get_option( self::OPTION, array() );
         return is_array( $timers ) ? array_filter( $timers, 'is_array' ) : array();
+    }
+
+    public static function register_dashboard_widget(): void {
+        if ( current_user_can( 'manage_options' ) ) {
+            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', __( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
+        }
+    }
+
+    /** Core dashboard styles only; no preview generation, script or background request. */
+    public static function render_dashboard_widget(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $timers = array_filter( self::timers(), static fn( $id ) => '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_KEY );
+        uksort( $timers, 'strnatcasecmp' );
+        ?>
+        <div id="email-countdown-timer-dashboard">
+            <h3><?php echo esc_html__( 'Quick Create', 'easy-countdown' ); ?></h3>
+            <p><?php echo esc_html__( 'Create a timer from a color preset, then fine-tune it and copy your embeds in the full editor.', 'easy-countdown' ); ?></p>
+            <?php self::quick_create_form( 'ect-dashboard' ); ?>
+            <h3><?php echo esc_html__( 'Edit an existing timer', 'easy-countdown' ); ?></h3>
+            <?php if ( empty( $timers ) ) : ?>
+                <p><?php echo esc_html__( 'No timers yet. Create your first campaign above.', 'easy-countdown' ); ?></p>
+            <?php else : ?>
+                <ul>
+                    <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: timer ID. */ __( 'Edit %s', 'easy-countdown' ), $id ) ); ?>"><?php echo esc_html( (string) $id ); ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+                <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>
+            <?php endif; ?>
+            <p><a href="<?php echo esc_url( self::url() ); ?>"><?php echo esc_html__( 'All timers', 'easy-countdown' ); ?></a></p>
+        </div>
+        <?php
     }
 
     private static function posted( string $key, string $default = '' ): string {
@@ -72,6 +152,18 @@ final class Email_Countdown_Timer_Admin {
         $errors = array();
         $data = array();
         $defaults = self::defaults( '' === $original );
+        $quick_create = 'email_countdown_timer_save' === $action && 'quick' === self::posted( 'creation_mode' );
+        if ( $quick_create ) {
+            $presets = self::presets();
+            $preset = self::posted( 'appearance_preset' );
+            if ( '' !== $original || ! isset( $presets[ $preset ] ) ) {
+                $errors['form'] = __( 'Quick Create needs a new timer and one of the listed appearance presets. Review the fields below before saving.', 'easy-countdown' );
+            } else {
+                foreach ( array( 'bg', 'dc', 'lc' ) as $color ) {
+                    $defaults[ $color ] = $presets[ $preset ][ $color ];
+                }
+            }
+        }
         // Missing fields in old edit forms keep that campaign's interpretation.
         if ( '' !== $original ) {
             $defaults['tz'] = Email_Countdown_Timer_Config::text( $timers[ $original ] ?? array(), 'tz', 'Europe/Warsaw' );
@@ -89,7 +181,7 @@ final class Email_Countdown_Timer_Admin {
         }
         // Preserve old forms and existing metadata when the field is absent.
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
-        if ( ! array_key_exists( 'alt', $_POST ) ) {
+        if ( ! $quick_create && ! array_key_exists( 'alt', $_POST ) ) {
             unset( $data['alt'] );
             if ( isset( $timers[ $original ]['alt'] ) ) {
                 $data['alt'] = $timers[ $original ]['alt'];

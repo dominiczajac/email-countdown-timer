@@ -45,12 +45,12 @@ def sources(root: Path) -> dict[str, bytes]:
     if len(names) != len(set(names)) or not (ROOT_FILES | FONT_FILES).issubset(names):
         raise ValueError("Duplicate manifest entry or missing required root file")
     for name in names:
-        valid = name in ROOT_FILES | FONT_FILES or re.fullmatch(r"includes/[a-z0-9-]+\.php|assets/[a-z0-9-]+\.(?:css|js)", name)
+        valid = name in ROOT_FILES | FONT_FILES or name == "blocks/timer/block.json" or re.fullmatch(r"includes/[a-z0-9-]+\.php|assets/[a-z0-9-]+\.(?:css|js)", name)
         if not valid:
             raise ValueError(f"Unsupported distribution path: {name}")
     # A newly added runtime file must be deliberately added to the same manifest.
     discovered = ROOT_FILES | FONT_FILES
-    for directory in ("includes", "assets"):
+    for directory in ("includes", "assets", "blocks"):
         base = root / directory
         if base.is_symlink() or not base.is_dir():
             raise ValueError(f"Invalid runtime directory: {directory}")
@@ -90,6 +90,9 @@ def metadata(files: dict[str, bytes]) -> str:
             raise ValueError("Inconsistent metadata: " + field)
     if len(readme.encode("utf-8")) > 10000:
         raise ValueError("Keep the user-facing readme below 10,000 bytes")
+    block = json.loads(files["blocks/timer/block.json"])
+    if block.get("name") != "easy-countdown/timer" or block.get("version") != version or block.get("textdomain") != SLUG:
+        raise ValueError("Block metadata must match the plugin")
     return version
 
 

@@ -25,6 +25,11 @@ if ( ! current_user_can( 'manage_options' ) ) {
         <div class="notice notice-info"><p><?php echo esc_html__( 'The active renderer uses the bitmap fallback: fixed text sizes and printable ASCII labels. Select an available local TTF/OTF for scalable or multilingual text.', 'easy-countdown' ); ?></p></div>
     <?php endif; ?>
     <?php if ( 'list' === $email_countdown_timer_ui['view'] ) : ?>
+        <section class="ect-card" aria-labelledby="ect-quick-title">
+            <h2 id="ect-quick-title"><?php echo esc_html__( 'Quick Create', 'easy-countdown' ); ?></h2>
+            <p><?php echo esc_html__( 'Choose an ID, deadline and preset. Create the timer to get website and email embeds; you can fine-tune every setting afterwards.', 'easy-countdown' ); ?></p>
+            <?php Email_Countdown_Timer_Admin::quick_create_form(); ?>
+        </section>
         <section class="ect-card" aria-labelledby="ect-list-title">
             <div class="ect-heading-row"><h2 id="ect-list-title"><?php echo esc_html__( 'Your Timers', 'easy-countdown' ); ?></h2>
                 <a class="button button-primary" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Create Timer', 'easy-countdown' ); ?></a></div>
@@ -34,7 +39,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                 <div class="ect-inline"><input id="ect-search" name="s" type="search" value="<?php echo esc_attr( $email_countdown_timer_ui['search'] ); ?>"><button class="button" type="submit"><?php echo esc_html__( 'Search', 'easy-countdown' ); ?></button></div>
             </form>
             <?php if ( empty( $email_countdown_timer_ui['timers'] ) ) : ?>
-                <p class="ect-empty"><?php echo esc_html( '' === $email_countdown_timer_ui['search'] ? __( 'No timers yet. Create your first timer to get started.', 'easy-countdown' ) : __( 'No timers match this search.', 'easy-countdown' ) ); ?></p>
+                <p class="ect-empty"><?php echo esc_html( '' === $email_countdown_timer_ui['search'] ? __( 'No timers yet. Use Quick Create above, or open the full editor with Create Timer.', 'easy-countdown' ) : __( 'No timers match this search.', 'easy-countdown' ) ); ?></p>
             <?php else : ?>
                 <div class="ect-table-wrap" role="region" aria-labelledby="ect-list-title" tabindex="0">
                     <table class="widefat striped"><caption class="screen-reader-text"><?php echo esc_html__( 'Saved timers, deadlines and actions', 'easy-countdown' ); ?></caption>
@@ -87,6 +92,15 @@ if ( ! current_user_can( 'manage_options' ) ) {
                         <p class="ect-error" id="ect-error-hide_days"><?php echo esc_html( $email_countdown_timer_ui['errors']['hide_days'] ?? '' ); ?></p>
                     </section>
                     <section class="ect-card" aria-labelledby="ect-appearance-title"><h3 id="ect-appearance-title"><?php echo esc_html__( 'Appearance', 'easy-countdown' ); ?></h3>
+                        <div data-ect-presets hidden>
+                            <p class="description"><?php echo esc_html__( 'Start with a ready-made, high-contrast color combination. Presets change only colors and do not save automatically.', 'easy-countdown' ); ?></p>
+                            <div class="ect-inline" role="group" aria-label="<?php echo esc_attr__( 'Appearance presets', 'easy-countdown' ); ?>">
+                                <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
+                                    <button class="button" type="button" data-ect-preset="<?php echo esc_attr( $email_countdown_timer_key ); ?>" data-bg="<?php echo esc_attr( $email_countdown_timer_preset['bg'] ); ?>" data-dc="<?php echo esc_attr( $email_countdown_timer_preset['dc'] ); ?>" data-lc="<?php echo esc_attr( $email_countdown_timer_preset['lc'] ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></button>
+                                <?php endforeach; ?>
+                            </div>
+                            <p class="description" data-ect-preset-result role="status" aria-live="polite" data-applied="<?php echo esc_attr__( 'Colors applied. Review the preview after saving.', 'easy-countdown' ); ?>"></p>
+                        </div>
                         <fieldset><legend><?php echo esc_html__( 'Colors', 'easy-countdown' ); ?></legend><div class="ect-colors">
                         <?php foreach ( array( 'bg' => __( 'Background', 'easy-countdown' ), 'dc' => __( 'Digits', 'easy-countdown' ), 'lc' => __( 'Labels', 'easy-countdown' ) ) as $email_countdown_timer_key => $email_countdown_timer_label ) : ?>
                             <div><?php Email_Countdown_Timer_Admin::input( $email_countdown_timer_ui, $email_countdown_timer_key, $email_countdown_timer_label, 'text', __( 'HEX color', 'easy-countdown' ), array( 'pattern' => '#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})', 'required' => 'required' ) ); ?>
@@ -157,15 +171,21 @@ if ( ! current_user_can( 'manage_options' ) ) {
                         $email_countdown_timer_email_html = Email_Countdown_Timer_Embed::reserve( $email_countdown_timer_email_html, $email_countdown_timer_ui['saved'], true );
                         $email_countdown_timer_shortcode = '[ecd_timer id="' . esc_attr( $email_countdown_timer_ui['original'] ) . '"]';
                         ?>
-                        <div data-ect-embed-tools hidden><label for="ect-embed-format"><?php echo esc_html__( 'Embed format', 'easy-countdown' ); ?></label><select id="ect-embed-format"><option value="url"><?php echo esc_html__( 'Image URL', 'easy-countdown' ); ?></option><option value="html"><?php echo esc_html__( 'Email HTML', 'easy-countdown' ); ?></option><option value="shortcode"><?php echo esc_html__( 'Website Shortcode', 'easy-countdown' ); ?></option></select></div>
-                        <label for="ect-embed-code" id="ect-embed-label"><?php echo esc_html__( 'Image URL', 'easy-countdown' ); ?></label>
-                        <textarea id="ect-embed-code" rows="4" readonly spellcheck="false"><?php echo esc_textarea( $email_countdown_timer_image_url ); ?></textarea>
-                        <button type="button" class="button" id="ect-copy" hidden data-success="<?php echo esc_attr__( 'Copied to clipboard.', 'easy-countdown' ); ?>" data-fallback="<?php echo esc_attr__( 'Copy was unavailable. The code is selected; use your keyboard or device copy command.', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Copy Code', 'easy-countdown' ); ?></button><p id="ect-copy-result" class="description"></p>
-                        <details data-ect-manual open><summary><?php echo esc_html__( 'All formats (manual copy)', 'easy-countdown' ); ?></summary>
+                        <section class="ect-disclosure" aria-labelledby="ect-website-title">
+                            <h4 id="ect-website-title"><?php echo esc_html__( 'Website', 'easy-countdown' ); ?></h4>
+                            <p><?php echo esc_html__( 'In the block editor, add the Easy Countdown block and select this timer. In other editors, paste the shortcode below. Website embeds refresh when the page becomes visible again.', 'easy-countdown' ); ?></p>
+                            <label for="ect-manual-shortcode"><?php echo esc_html__( 'Website Shortcode', 'easy-countdown' ); ?></label><textarea id="ect-manual-shortcode" rows="2" readonly spellcheck="false"><?php echo esc_textarea( $email_countdown_timer_shortcode ); ?></textarea>
+                            <button type="button" class="button" data-ect-copy="ect-manual-shortcode" hidden data-success="<?php echo esc_attr__( 'Copied to clipboard.', 'easy-countdown' ); ?>" data-fallback="<?php echo esc_attr__( 'Copy was unavailable. The code is selected; use your keyboard or device copy command.', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Copy shortcode', 'easy-countdown' ); ?></button><p id="ect-manual-shortcode-result" class="description"></p>
+                        </section>
+                        <section class="ect-disclosure" aria-labelledby="ect-email-title">
+                            <h4 id="ect-email-title"><?php echo esc_html__( 'Email', 'easy-countdown' ); ?></h4>
+                            <p><?php echo esc_html__( 'Paste Email HTML into your mailing platform’s HTML editor, or use the Image URL in an image block. WordPress shortcodes do not work in email.', 'easy-countdown' ); ?></p>
                             <label for="ect-manual-html"><?php echo esc_html__( 'Email HTML', 'easy-countdown' ); ?></label><textarea id="ect-manual-html" rows="6" readonly><?php echo esc_textarea( $email_countdown_timer_email_html ); ?></textarea>
-                            <label for="ect-manual-shortcode"><?php echo esc_html__( 'Website Shortcode', 'easy-countdown' ); ?></label><textarea id="ect-manual-shortcode" rows="2" readonly><?php echo esc_textarea( $email_countdown_timer_shortcode ); ?></textarea>
-                        </details>
-                        <p class="description"><?php echo esc_html__( 'Email clients may cache, prefetch or block images. Include the absolute deadline as text in your message.', 'easy-countdown' ); ?></p>
+                            <button type="button" class="button" data-ect-copy="ect-manual-html" hidden data-success="<?php echo esc_attr__( 'Copied to clipboard.', 'easy-countdown' ); ?>" data-fallback="<?php echo esc_attr__( 'Copy was unavailable. The code is selected; use your keyboard or device copy command.', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Copy Email HTML', 'easy-countdown' ); ?></button><p id="ect-manual-html-result" class="description"></p>
+                            <label for="ect-embed-code"><?php echo esc_html__( 'Image URL', 'easy-countdown' ); ?></label><textarea id="ect-embed-code" rows="4" readonly spellcheck="false"><?php echo esc_textarea( $email_countdown_timer_image_url ); ?></textarea>
+                            <button type="button" class="button" data-ect-copy="ect-embed-code" hidden data-success="<?php echo esc_attr__( 'Copied to clipboard.', 'easy-countdown' ); ?>" data-fallback="<?php echo esc_attr__( 'Copy was unavailable. The code is selected; use your keyboard or device copy command.', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Copy image URL', 'easy-countdown' ); ?></button><p id="ect-embed-code-result" class="description"></p>
+                            <p class="description"><?php echo esc_html__( 'Email GIFs play for 60 seconds; an already downloaded image cannot refresh itself. Clients may cache, prefetch or block images. Always include the absolute deadline as visible text, and send a test email.', 'easy-countdown' ); ?></p>
+                        </section>
                     <?php else : ?><p><?php echo esc_html__( 'Embed codes are available after the first successful save.', 'easy-countdown' ); ?></p><?php endif; ?>
                 </section>
             </aside>

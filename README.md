@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.5.3 · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.6.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -40,7 +40,9 @@ Use the installation ZIP, not a working directory containing developer/test file
 
 **Before the first update from 12.3.1 or older, copy/back up plugin-local fonts before WordPress replaces the old directory.** New code cannot recover files removed before it runs. Preserve font filenames and license notices. Persistent storage normally lives at `wp-content/uploads/email-countdown-timer/fonts/`; multisite adds `site-ID/`, and custom uploads paths can differ. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
 
-Open **Easy Countdown > Create Timer**, select a unique ID, set the deadline and time zone, and save. New timers inherit the WordPress site time zone, including UTC offsets; existing campaigns and legacy missing-zone records keep their original interpretation. Reload older editor tabs after updating: obsolete `save_timer` submissions are rejected without changing data. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
+Use **Quick Create** in Easy Countdown or the **Easy Countdown dashboard widget**: choose a unique ID, deadline, time zone and color preset, then create the campaign. Both forms work without JavaScript and open the saved timer in the full editor. The widget also links to five existing timers in ID order and **All timers** for search; only users with the existing `manage_options` permission see it. WordPress Screen Options can hide the widget. **Create Timer** opens the full editor directly.
+
+New timers inherit the WordPress site time zone, including UTC offsets; existing campaigns and legacy missing-zone records keep their original interpretation. Reload older editor tabs after updating: obsolete `save_timer` submissions are rejected without changing data. The editor offers **Embed Codes**, saved static preview and explicit **Preview Animation / Stop Preview** controls. Send a test message through the actual email platform and check your page while logged out.
 
 ## Display and accessibility
 
@@ -52,9 +54,15 @@ The admin interface is English and translation-ready. It uses native WordPress c
 
 ## Embedding
 
+In the WordPress block editor, insert **Easy Countdown**, choose an existing timer and set alignment in the sidebar. The block uses the saved campaign and offers a static editor preview with manual refresh. See the [block guide](docs/GUTENBERG-BLOCK.md). Classic-editor and shortcode use remain supported.
+
 ```text
 [ecd_timer id="promotion"]
 ```
+
+**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
+
+**Embed Codes > Email** provides separate **Email HTML** and **Image URL** copy actions. All three code fields remain available for manual copying without JavaScript. WordPress shortcodes do not run in email.
 
 Email HTML can be copied from the editor with an image description and visible absolute deadline. Images are generated from the current server time, with 15-second shared freshness buckets. Animated GIFs contain 60 one-second frames. A single downloaded GIF does not recalculate forever: email providers can prefetch, cache or block it, and some clients only display the first frame. **Always include the actual deadline as visible text.** Do not insert recipient IDs, email addresses or confidential information into public timer fields or URLs.
 
@@ -66,7 +74,7 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 
 Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
 
-**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. Bitmap and existing selections are unchanged. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
+**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. New timers select Lato when FreeType is available; saved campaigns and renderer defaults are unchanged. Four high-contrast color presets apply to the edit form without saving automatically. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
 
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
