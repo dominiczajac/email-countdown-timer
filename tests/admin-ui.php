@@ -34,6 +34,36 @@ $submit_admin( array_replace( $valid_post, array( 'timer_id' => 'renamed' ) ) );
 ok( isset( Email_Countdown_Timer_Admin::state()['errors']['timer_id'] ) && $options === $before, 'read-only ID enforced server-side' );
 ok( str_starts_with( $submit_admin( $valid_post ), 'redirect:' ), 'valid modern form redirects only after saving' );
 ok( $options['easy_countdown_timers']['existing'] === $ui_config, 'modern form preserves campaign configuration' );
+$quick = array( 'ecd_action' => 'email_countdown_timer_save', 'creation_mode' => 'quick', 'original_id' => '', 'timer_id' => 'quick-new', 'deadline' => '2031-08-20T12:30:00', 'tz' => 'America/New_York', 'appearance_preset' => 'midnight' );
+$before_quick = $options;
+$admin = false;
+ok( str_starts_with( $submit_admin( $quick ), 'die:' ) && $options === $before_quick, 'quick creation requires administrator capability' );
+$admin = true; $nonce = false;
+ok( 'nonce' === $submit_admin( $quick ) && $options === $before_quick, 'quick creation requires the existing form nonce' );
+$nonce = true; $_SERVER['REQUEST_METHOD'] = 'GET';
+ok( str_starts_with( $submit_admin( $quick ), 'die:' ) && $options === $before_quick, 'quick creation requires POST' );
+$_SERVER['REQUEST_METHOD'] = 'POST';
+foreach ( array( 'unknown', array( 'midnight' ) ) as $bad_preset ) {
+    $submit_admin( array_replace( $quick, array( 'appearance_preset' => $bad_preset ) ) );
+    ok( isset( Email_Countdown_Timer_Admin::state()['errors']['form'] ) && $options === $before_quick, 'unknown or array preset never creates a timer' );
+}
+$submit_admin( array_replace( $quick, array( 'timer_id' => 'existing' ) ) );
+ok( isset( Email_Countdown_Timer_Admin::state()['errors']['timer_id'] ) && $options === $before_quick, 'quick creation cannot overwrite a duplicate ID' );
+$submit_admin( array_replace( $quick, array( 'timer_id' => 'existing', 'original_id' => 'existing' ) ) );
+ok( isset( Email_Countdown_Timer_Admin::state()['errors']['form'] ) && $options === $before_quick, 'quick creation cannot modify an existing campaign' );
+$submit_admin( array_replace( $quick, array( 'tz' => 'not/a-zone' ) ) );
+$quick_error = Email_Countdown_Timer_Admin::state();
+ok( isset( $quick_error['errors']['tz'] ) && $options === $before_quick, 'quick creation validates the deadline time zone without a write' );
+ok( $quick_error['id'] === 'quick-new' && $quick_error['data']['dc'] === '#F9FAFB' && $quick_error['data']['deadline'] === $quick['deadline'], 'failed quick create retains identity, preset colors and deadline in the full editor' );
+foreach ( array( 'classic' => array( '#FFFFFF', '#111827', '#475569' ), 'midnight' => array( '#111827', '#F9FAFB', '#CBD5E1' ), 'ocean' => array( '#F8FAFC', '#1D4ED8', '#334155' ), 'warm' => array( '#FFF7ED', '#9A3412', '#713F12' ) ) as $preset => $colors ) {
+    $post = array_replace( $quick, array( 'timer_id' => 'quick-' . $preset, 'appearance_preset' => $preset ) );
+    ok( str_starts_with( $submit_admin( $post ), 'redirect:' ), 'quick creation saves ' . $preset );
+    $created = $options['easy_countdown_timers'][ 'quick-' . $preset ];
+    ok( array( $created['bg'], $created['dc'], $created['lc'] ) === $colors, 'server applies the selected colors without JavaScript: ' . $preset );
+    ok( $created['deadline'] === $quick['deadline'] && $created['tz'] === $quick['tz'] && $created['alt'] === 'Countdown', 'quick creation retains schedule and accessible default text' );
+    ok( ! isset( $created['creation_mode'], $created['appearance_preset'] ) && $options['easy_countdown_timers']['existing'] === $ui_config, 'presets add no saved fields or existing-campaign changes' );
+}
+$options = $before_quick;
 $delete_post = array( 'ecd_action' => 'email_countdown_timer_delete', 'timer_id' => 'existing' );
 ok( str_starts_with( $submit_admin( $delete_post ), 'die:' ) && isset( $options['easy_countdown_timers']['existing'] ), 'delete requires explicit confirmation' );
 $nonce = false;

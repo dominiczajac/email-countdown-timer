@@ -43,6 +43,49 @@ final class Email_Countdown_Timer_Admin {
             'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds', 'alt' => 'Countdown', 'expiry_image_id' => 0 );
     }
 
+    /** Code-owned colors, shared by quick creation and the optional editor buttons. */
+    public static function presets(): array {
+        return array(
+            'classic' => array( 'label' => __( 'Classic', 'easy-countdown' ), 'bg' => '#FFFFFF', 'dc' => '#111827', 'lc' => '#475569' ),
+            'midnight' => array( 'label' => __( 'Midnight', 'easy-countdown' ), 'bg' => '#111827', 'dc' => '#F9FAFB', 'lc' => '#CBD5E1' ),
+            'ocean' => array( 'label' => __( 'Ocean', 'easy-countdown' ), 'bg' => '#F8FAFC', 'dc' => '#1D4ED8', 'lc' => '#334155' ),
+            'warm' => array( 'label' => __( 'Warm', 'easy-countdown' ), 'bg' => '#FFF7ED', 'dc' => '#9A3412', 'lc' => '#713F12' ),
+        );
+    }
+
+    /** One native POST form for the timer list and dashboard; no JavaScript required. */
+    public static function quick_create_form( string $prefix = 'ect-quick' ): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $quick = self::defaults();
+        ?>
+        <form id="<?php echo esc_attr( $prefix ); ?>-create" method="post" action="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>">
+            <input type="hidden" name="ecd_action" value="email_countdown_timer_save">
+            <input type="hidden" name="original_id" value="">
+            <input type="hidden" name="creation_mode" value="quick">
+            <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
+            <div class="ect-two-fields">
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-id"><?php echo esc_html__( 'Timer ID', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" class="widefat" type="text" required maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-id-help">
+                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'For example summer-sale. Use a unique ID; it cannot be changed after creation.', 'easy-countdown' ); ?></p></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-tz"><?php echo esc_html__( 'Time Zone', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-tz" name="tz" class="widefat" type="text" required value="<?php echo esc_attr( $quick['tz'] ); ?>"></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Appearance preset', 'easy-countdown' ); ?></label>
+                    <select id="<?php echo esc_attr( $prefix ); ?>-preset" name="appearance_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-preset-help">
+                        <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
+                            <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
+                        <?php endforeach; ?>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Four high-contrast color combinations. New timers use included Lato when FreeType is available, otherwise bitmap.', 'easy-countdown' ); ?></p></div>
+            </div>
+            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create campaign', 'easy-countdown' ); ?></button>
+                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'easy-countdown' ); ?></a></div>
+        </form>
+        <?php
+    }
+
     private static function timers(): array {
         $timers = get_option( self::OPTION, array() );
         return is_array( $timers ) ? array_filter( $timers, 'is_array' ) : array();
@@ -75,6 +118,18 @@ final class Email_Countdown_Timer_Admin {
         $errors = array();
         $data = array();
         $defaults = self::defaults( '' === $original );
+        $quick_create = 'email_countdown_timer_save' === $action && 'quick' === self::posted( 'creation_mode' );
+        if ( $quick_create ) {
+            $presets = self::presets();
+            $preset = self::posted( 'appearance_preset' );
+            if ( '' !== $original || ! isset( $presets[ $preset ] ) ) {
+                $errors['form'] = __( 'Quick Create needs a new timer and one of the listed appearance presets. Review the fields below before saving.', 'easy-countdown' );
+            } else {
+                foreach ( array( 'bg', 'dc', 'lc' ) as $color ) {
+                    $defaults[ $color ] = $presets[ $preset ][ $color ];
+                }
+            }
+        }
         // Missing fields in old edit forms keep that campaign's interpretation.
         if ( '' !== $original ) {
             $defaults['tz'] = Email_Countdown_Timer_Config::text( $timers[ $original ] ?? array(), 'tz', 'Europe/Warsaw' );
@@ -92,7 +147,7 @@ final class Email_Countdown_Timer_Admin {
         }
         // Preserve old forms and existing metadata when the field is absent.
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
-        if ( ! array_key_exists( 'alt', $_POST ) ) {
+        if ( ! $quick_create && ! array_key_exists( 'alt', $_POST ) ) {
             unset( $data['alt'] );
             if ( isset( $timers[ $original ]['alt'] ) ) {
                 $data['alt'] = $timers[ $original ]['alt'];

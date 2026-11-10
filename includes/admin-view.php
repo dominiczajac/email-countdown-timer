@@ -25,6 +25,11 @@ if ( ! current_user_can( 'manage_options' ) ) {
         <div class="notice notice-info"><p><?php echo esc_html__( 'The active renderer uses the bitmap fallback: fixed text sizes and printable ASCII labels. Select an available local TTF/OTF for scalable or multilingual text.', 'easy-countdown' ); ?></p></div>
     <?php endif; ?>
     <?php if ( 'list' === $email_countdown_timer_ui['view'] ) : ?>
+        <section class="ect-card" aria-labelledby="ect-quick-title">
+            <h2 id="ect-quick-title"><?php echo esc_html__( 'Quick Create', 'easy-countdown' ); ?></h2>
+            <p><?php echo esc_html__( 'Choose an ID, deadline and preset. Create the timer to get website and email embeds; you can fine-tune every setting afterwards.', 'easy-countdown' ); ?></p>
+            <?php Email_Countdown_Timer_Admin::quick_create_form(); ?>
+        </section>
         <section class="ect-card" aria-labelledby="ect-list-title">
             <div class="ect-heading-row"><h2 id="ect-list-title"><?php echo esc_html__( 'Your Timers', 'easy-countdown' ); ?></h2>
                 <a class="button button-primary" href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Create Timer', 'easy-countdown' ); ?></a></div>
@@ -34,7 +39,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                 <div class="ect-inline"><input id="ect-search" name="s" type="search" value="<?php echo esc_attr( $email_countdown_timer_ui['search'] ); ?>"><button class="button" type="submit"><?php echo esc_html__( 'Search', 'easy-countdown' ); ?></button></div>
             </form>
             <?php if ( empty( $email_countdown_timer_ui['timers'] ) ) : ?>
-                <p class="ect-empty"><?php echo esc_html( '' === $email_countdown_timer_ui['search'] ? __( 'No timers yet. Select Create Timer, choose your deadline and a color preset, then save to copy a website or email embed.', 'easy-countdown' ) : __( 'No timers match this search.', 'easy-countdown' ) ); ?></p>
+                <p class="ect-empty"><?php echo esc_html( '' === $email_countdown_timer_ui['search'] ? __( 'No timers yet. Use Quick Create above, or open the full editor with Create Timer.', 'easy-countdown' ) : __( 'No timers match this search.', 'easy-countdown' ) ); ?></p>
             <?php else : ?>
                 <div class="ect-table-wrap" role="region" aria-labelledby="ect-list-title" tabindex="0">
                     <table class="widefat striped"><caption class="screen-reader-text"><?php echo esc_html__( 'Saved timers, deadlines and actions', 'easy-countdown' ); ?></caption>
@@ -90,10 +95,9 @@ if ( ! current_user_can( 'manage_options' ) ) {
                         <div data-ect-presets hidden>
                             <p class="description"><?php echo esc_html__( 'Start with a ready-made, high-contrast color combination. Presets change only colors and do not save automatically.', 'easy-countdown' ); ?></p>
                             <div class="ect-inline" role="group" aria-label="<?php echo esc_attr__( 'Appearance presets', 'easy-countdown' ); ?>">
-                                <button class="button" type="button" data-ect-preset="classic" data-bg="#FFFFFF" data-dc="#111827" data-lc="#475569"><?php echo esc_html__( 'Classic', 'easy-countdown' ); ?></button>
-                                <button class="button" type="button" data-ect-preset="midnight" data-bg="#111827" data-dc="#F9FAFB" data-lc="#CBD5E1"><?php echo esc_html__( 'Midnight', 'easy-countdown' ); ?></button>
-                                <button class="button" type="button" data-ect-preset="ocean" data-bg="#F8FAFC" data-dc="#1D4ED8" data-lc="#334155"><?php echo esc_html__( 'Ocean', 'easy-countdown' ); ?></button>
-                                <button class="button" type="button" data-ect-preset="warm" data-bg="#FFF7ED" data-dc="#9A3412" data-lc="#713F12"><?php echo esc_html__( 'Warm', 'easy-countdown' ); ?></button>
+                                <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
+                                    <button class="button" type="button" data-ect-preset="<?php echo esc_attr( $email_countdown_timer_key ); ?>" data-bg="<?php echo esc_attr( $email_countdown_timer_preset['bg'] ); ?>" data-dc="<?php echo esc_attr( $email_countdown_timer_preset['dc'] ); ?>" data-lc="<?php echo esc_attr( $email_countdown_timer_preset['lc'] ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></button>
+                                <?php endforeach; ?>
                             </div>
                             <p class="description" data-ect-preset-result role="status" aria-live="polite" data-applied="<?php echo esc_attr__( 'Colors applied. Review the preview after saving.', 'easy-countdown' ); ?>"></p>
                         </div>

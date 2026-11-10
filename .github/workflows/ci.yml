@@ -56,7 +56,9 @@ jobs:
           python3 tests/privacy-contracts.py
           node tests/countdown.test.cjs
       - name: Persistent fonts and layout preflight
-        run: php tests/font-storage.php
+        run: |
+          php tests/font-defaults.php
+          php tests/font-storage.php
       - name: Lock outcome and current static fallback
         run: php tests/lock-outcomes.php
       - name: Font access and approved maintenance contracts
