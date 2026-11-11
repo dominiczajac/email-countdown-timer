@@ -42,6 +42,48 @@ class Page(HTMLParser):
             self.assets.append(attrs['href'])
 
 
+class VendorPage(Page):
+    """Require the countdown inside the native widget/long-description subtree."""
+    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
+
+    def __init__(self, html, profile, post_id):
+        self.profile, self.post_id = profile, str(post_id)
+        self.stack, self.scoped_images, self.scope_text = [], [], []
+        self.scope_found = False
+        super().__init__(html)
+        self.literal_shortcode = re.search(r'\[ecd_timer\b', ' '.join(self.scope_text)) is not None
+
+    def handle_starttag(self, tag, attributes):
+        super().handle_starttag(tag, attributes)
+        attrs = dict(attributes)
+        classes = attrs.get('class', '').split()
+        flags = set(self.stack[-1][1]) if self.stack else set()
+        if self.profile == 'elementor':
+            if attrs.get('data-elementor-id') == self.post_id:
+                flags.add('document')
+            if 'elementor-widget-shortcode' in classes and 'document' in flags:
+                flags.add('content')
+        elif (attrs.get('id') == 'tab-description' or 'woocommerce-Tabs-panel--description' in classes
+              or 'wp-block-woocommerce-product-description' in classes):
+            flags.add('content')
+        if 'content' in flags:
+            self.scope_found = True
+            if tag == 'img' and 'email-countdown-timer-image' in classes:
+                self.scoped_images.append(attrs)
+        if tag not in self.VOID:
+            self.stack.append((tag, flags))
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                del self.stack[index:]
+                break
+
+    def handle_data(self, data):
+        if self.stack and 'content' in self.stack[-1][1] and not any(tag in ('script', 'style') for tag, _ in self.stack):
+            self.scope_text.append(data)
+
+
 def generation(html):
     markers = Page(html).generations
     if len(markers) != 1 or not re.fullmatch('[a-f0-9]{24}', markers[0]):
@@ -129,6 +171,14 @@ def metadata_matches(profile, jit, state):
     expected = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': jit,
                 'x-ecd-lab-jit-active': 'off' if jit == 'disable' else 'on', 'x-ecd-lab-gd': 'yes',
                 'x-ecd-lab-active': 'on' if state['active'] else 'off'}
+    config = env.get('configuration')
+    if profile in CONTENT_PROFILES:
+        if not isinstance(config, dict) or config.get('version') != PROFILES[profile] or env.get('wp_cache') is not False or env.get('advanced_cache_dropin') is not False:
+            return False
+        if profile == 'elementor' and config.get('print_google_fonts') is not False:
+            return False
+        if profile == 'woocommerce' and (config.get('coming_soon') != 'no' or config.get('allow_tracking') != 'no'):
+            return False
     return all(runtime.get(k) == value for k, value in expected.items()) and str(runtime.get('x-ecd-lab-php', '')).startswith('8.4.')
 
 
@@ -150,6 +200,15 @@ def accept(report):
         return False
     if [s.get('key') for s in states] != ORDER:
         return False
+    vendor_fixtures = report.get('vendor_fixtures')
+    if report['profile'] in CONTENT_PROFILES:
+        if not isinstance(vendor_fixtures, dict) or set(vendor_fixtures) != set(ORDER):
+            return False
+        if any(not isinstance(f, dict) or f.get('profile') != report['profile'] or type(f.get('post_id')) is not int
+               or f['post_id'] <= 0 or not isinstance(f.get('path'), str) or not f['path'].startswith('/') for f in vendor_fixtures.values()):
+            return False
+        if len({f['post_id'] for f in vendor_fixtures.values()}) != 6 or len({f['path'] for f in vendor_fixtures.values()}) != 6:
+            return False
     for state in states:
         active = state['key'].endswith('-on')
         if state.get('active') is not active or state.get('complete') is not True or state.get('failures') != []:
@@ -169,6 +228,11 @@ def accept(report):
                     or proof.get('status') != 200 or proof.get('native_structure') is not True
                     or type(proof.get('post_id')) is not int or proof['post_id'] <= 0
                     or type(proof.get('timer_images')) is not int or proof['timer_images'] != int(active)):
+                return False
+            fixture = vendor_fixtures[state['key']]
+            if (proof['post_id'] != fixture['post_id'] or proof.get('path') != fixture['path']
+                    or proof.get('scoped_timer_images') != int(active) or proof.get('scope_found') is not True
+                    or proof.get('literal_shortcode') is not (not active)):
                 return False
         if active and report['profile'] == 'autoptimize':
             required |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}

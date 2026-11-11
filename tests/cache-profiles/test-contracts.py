@@ -9,13 +9,14 @@ import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
-from contracts import ACTIVE_REQUIRED, CONTENT_PROFILES, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, CONTENT_PROFILES, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
 
 
 def good(profile='baseline'):
     report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': [], 'source_commit': 'a' * 40,
               'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}]}
-    for key in ORDER:
+    report['vendor_fixtures'] = {key: {'profile': profile, 'post_id': 42 + i, 'path': '/' + key + '-vendor/'} for i, key in enumerate(ORDER)}
+    for index, key in enumerate(ORDER):
         active = key.endswith('-on')
         checks = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
         if profile in CONTENT_PROFILES:
@@ -31,9 +32,12 @@ def good(profile='baseline'):
         runtime = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': '1235', 'x-ecd-lab-jit-active': 'on',
                    'x-ecd-lab-gd': 'yes', 'x-ecd-lab-active': 'on' if active else 'off', 'x-ecd-lab-php': '8.4.27'}
         env = {'active_plugins': sorted(expected_plugins(profile, active)), 'wordpress': '7.1.2', 'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': 'twentytwentyfive'}}
+        env.update(wp_cache=False, advanced_cache_dropin=False,
+            configuration={'version': PROFILES[profile], 'print_google_fonts': False, 'coming_soon': 'no', 'allow_tracking': 'no'})
         report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks) + ['anonymous-page-http'] * 4, 'failures': [], 'generations': markers,
             'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}],
-            'vendor_proof': {'profile': profile, 'post_id': 42, 'status': 200, 'native_structure': True, 'timer_images': int(active)}})
+            'vendor_proof': {'profile': profile, 'post_id': 42 + index, 'path': '/' + key + '-vendor/', 'status': 200,
+                'native_structure': True, 'timer_images': int(active), 'scoped_timer_images': int(active), 'scope_found': True, 'literal_shortcode': not active}})
     return report
 
 
@@ -55,6 +59,34 @@ class Contracts(unittest.TestCase):
             for field, value in (('status', 403), ('native_structure', False), ('timer_images', 0), ('post_id', True), ('profile', 'baseline')):
                 report = good(profile); report['states'][1]['vendor_proof'][field] = value
                 self.assertFalse(accept(report))
+
+    def test_copied_vendor_proof_or_reused_fixture_is_rejected(self):
+        for profile in CONTENT_PROFILES:
+            report = good(profile); report['states'][2]['vendor_proof'] = copy.deepcopy(report['states'][1]['vendor_proof'])
+            self.assertFalse(accept(report))
+            report = good(profile); report['vendor_fixtures'][ORDER[2]] = copy.deepcopy(report['vendor_fixtures'][ORDER[1]])
+            self.assertFalse(accept(report))
+
+    def test_vendor_configuration_is_enforced(self):
+        for profile, field, value in (('elementor', 'print_google_fonts', True), ('woocommerce', 'coming_soon', 'yes'), ('woocommerce', 'allow_tracking', 'yes')):
+            report = good(profile); report['states'][1]['environment']['configuration'][field] = value
+            self.assertFalse(accept(report))
+
+    def test_timer_outside_native_vendor_container_is_not_proof(self):
+        image = '<img class="email-countdown-timer-image" src="/timer">'
+        html = '<div data-elementor-id="42"><div class="elementor-widget-shortcode"></div></div>' + image
+        page = VendorPage(html, 'elementor', 42)
+        self.assertEqual(len(page.images), 1); self.assertEqual(len(page.scoped_images), 0)
+        page = VendorPage('<body class="single-product"><div id="tab-description"></div>' + image + '</body>', 'woocommerce', 42)
+        self.assertEqual(len(page.images), 1); self.assertEqual(len(page.scoped_images), 0)
+
+    def test_scoped_native_output_and_unprocessed_off_control(self):
+        for profile, prefix, suffix in (('elementor', '<div data-elementor-id="42"><div class="elementor-widget-shortcode">', '</div></div>'),
+                ('woocommerce', '<body class="single-product"><div class="wp-block-woocommerce-product-description">', '</div></body>')):
+            page = VendorPage(prefix + '<br><img class="email-countdown-timer-image" src="/timer">' + suffix, profile, 42)
+            self.assertEqual(len(page.scoped_images), 1); self.assertFalse(page.literal_shortcode)
+            page = VendorPage(prefix + '[ecd_timer id=&quot;cache-lab&quot;]' + suffix, profile, 42)
+            self.assertEqual(len(page.scoped_images), 0); self.assertTrue(page.literal_shortcode)
 
     def test_noop_cached_profile_fails(self):
         report = good('wp-super-cache')

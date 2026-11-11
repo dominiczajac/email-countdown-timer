@@ -32,3 +32,19 @@ Elementor drag-and-drop editing or every experiment, WooCommerce cart/checkout,
 all theme/multisite combinations, external services or email clients. The full
 C3 item and Gate A maintainer/artifact acceptance remain open. No release, tag,
 production deployment, ruleset or environment publication is proposed.
+
+The report must bind each vendor result to its own seeded post ID/path, with
+six distinct documents/products. The HTTP parser and browser both require the
+image inside the native Elementor shortcode widget or WooCommerce long
+description. The off control retains the unprocessed shortcode there; the on
+control replaces it with a decoded countdown. Empty containers or a timer
+elsewhere on the page do not satisfy this proof. The selected no-tracking,
+coming-soon and local-font settings are also checked in recorded metadata.
+
+Initial run at `f04a491`:
+[42965221589](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42965221589)
+passed 10/12 jobs, including both WooCommerce cells with the initial broader
+page-level checks. Both Elementor cells failed before recorded state outcomes.
+Their precise cause is unconfirmed while the cloud policy blocks the logs on
+`productionresultssa19.blob.core.windows.net`. Preserve that negative result;
+stronger scoped checks and fixture binding require fresh current-head evidence.

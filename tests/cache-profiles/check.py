@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
+from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -41,7 +41,6 @@ def main():
     if profile not in PROFILES or jit not in ('1235', 'disable'):
         raise RuntimeError('invalid_profile')
     base = 'http://localhost:8095'
-    fixture = json.loads((evidence / 'fixture.json').read_text())
     report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
@@ -252,13 +251,16 @@ def main():
         response = request.get(fixture_page['url'], headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
         check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'vendor-http')
         html = response.text()
-        parsed = Page(html)
+        parsed = VendorPage(html, profile, fixture_page['post_id'])
         structure = ((str(fixture_page['post_id']) in parsed.elementor_documents and len(parsed.elementor_widgets) == 1)
                      if profile == 'elementor' else parsed.product_body)
         check(structure, 'vendor-structure')
-        check(len(parsed.images) == int(current['active']) and 'PRIVATE-CACHE-LAB-NAME' not in html, 'vendor-output')
         current['vendor_proof'] = {'profile': profile, 'post_id': fixture_page['post_id'], 'status': response.status,
-            'native_structure': structure, 'timer_images': len(parsed.images), 'path': urlsplit(fixture_page['url']).path}
+            'native_structure': structure, 'timer_images': len(parsed.images), 'path': urlsplit(fixture_page['url']).path,
+            'scoped_timer_images': len(parsed.scoped_images), 'scope_found': parsed.scope_found, 'literal_shortcode': parsed.literal_shortcode}
+        check(len(parsed.images) == len(parsed.scoped_images) == int(current['active'])
+              and parsed.scope_found and parsed.literal_shortcode is (not current['active'])
+              and 'PRIVATE-CACHE-LAB-NAME' not in html, 'vendor-output')
 
     def vendor_browser(browser, fixture_page):
         nonlocal phase
@@ -269,16 +271,22 @@ def main():
             response = page.goto(fixture_page['url'], wait_until='load', timeout=45000)
             check(response is not None and response.status == 200, 'vendor-browser-http')
             if profile == 'elementor':
-                expect(page.locator('[data-elementor-id="' + str(fixture_page['post_id']) + '"]')).to_have_count(1)
-                expect(page.locator('.elementor-widget-shortcode')).to_be_visible()
+                document = page.locator('[data-elementor-id="' + str(fixture_page['post_id']) + '"]')
+                expect(document).to_have_count(1)
+                scope = document.locator('.elementor-widget-shortcode')
+                expect(scope).to_be_visible()
             else:
-                expect(page.get_by_role('heading', name=fixture_page['title'], exact=True)).to_be_visible()
+                expect(page.get_by_role('heading', level=1, name=fixture_page['title'], exact=True)).to_be_visible()
                 expect(page.get_by_role('button', name='Add to cart', exact=True)).to_be_visible()
                 # Classic and block product templates can expose the description as a tab.
                 description = page.get_by_role('tab', name='Description', exact=True)
                 if description.count() and description.is_visible():
                     description.click()
-            image = page.locator('img.email-countdown-timer-image')
+                scope = page.locator('#tab-description')
+                if not scope.count():
+                    scope = page.locator('.wp-block-woocommerce-product-description')
+                expect(scope).to_be_visible()
+            image = scope.locator('img.email-countdown-timer-image')
             expect(image).to_have_count(int(current['active']))
             if current['active']:
                 expect(image).to_be_visible()
@@ -290,6 +298,12 @@ def main():
             page.screenshot(path=str(evidence / (current['key'] + '-' + profile + '.png')))
 
     try:
+        phase = 'fixture-json'
+        fixture = json.loads((evidence / 'fixture.json').read_text())
+        if profile in CONTENT_PROFILES:
+            report['vendor_fixtures'] = {key: {'profile': fixture['pages'][key]['vendor']['profile'],
+                'post_id': fixture['pages'][key]['vendor']['post_id'], 'path': urlsplit(fixture['pages'][key]['vendor']['url']).path} for key in ORDER}
+        phase = 'installed-package-json'
         installed = json.loads((evidence / 'plugins.json').read_text())
         if profile != 'baseline' and not any(p['name'] == profile and p['version'] == PROFILES[profile] for p in installed):
             raise RuntimeError('vendor_version_mismatch')
@@ -395,6 +409,11 @@ def main():
                     finally:
                         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
                 report['complete'] = True
+    except Exception as error:
+        failure = {'phase': phase, 'reason': type(error).__name__}
+        report['failures'].append(failure)
+        annotation('error', 'Profile initialization', json.dumps(failure))
+        raise
     finally:
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
