@@ -69,10 +69,12 @@ on blue does not require the runtime bootstrap. The existing renderer's `_t`
 cache-buster is validated alongside `data-ecd-src`; no renderer URL changed.
 Both Codex P1 findings were fixture defects and require fresh hosted results.
 
-A doc-only Gutenberg run was blocked by core's late welcome-guide overlay. The
-editor fixture now waits for initial resources, dismisses only that native guide
-through its real close control, and checks it is hidden. Native block assertions
-remain required. Local CLI inventory in off/site-only states, all three actual
+A doc-only Gutenberg run was blocked by core's late welcome-guide overlay. An
+initial global network-idle wait also failed with core background traffic; that
+attempt remains negative. A scoped Playwright locator handler now dismisses only
+the known native guide through its real close control whenever it blocks an
+action, and waits for dismissal. Other dialogs and native block assertions retain
+normal actionability checks. Local CLI inventory in off/site-only states, all three actual
 image references, distinct decoded widths and blue-only form save/restore were
 observed. The local browser preflight uses its true `cli-server` SAPI and does
 not replace the eight native FPM cells or the required editor matrix.
