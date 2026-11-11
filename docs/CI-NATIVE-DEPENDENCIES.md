@@ -49,3 +49,15 @@ its font/license bytes. Keep the named Gate A package and maintainer acceptance
 receipt; separately record validation of the updated CI toolchain. Current-head
 CI and the cache/multisite/LSAPI workflows must finish successfully, and their
 actual uploaded evidence must remain downloadable and parseable before merge.
+
+
+All nine evidence uploads pin **upload-artifact 7.0.2** to upstream commit
+`cf430e030ddbb5b0abf93d22962f4752f3646cd9`. Set `archive: true` explicitly,
+including the single-file font HTTP result, so the named artifact remains a ZIP
+with the existing internal paths and REST download contract. Node 24 requires
+runner 2.327.1 or newer; the workflows use GitHub-hosted runners, not GHES or an
+unverified self-hosted runtime. Artifact names, retention, hidden-file defaults,
+missing-file errors and read-only repository permissions remain unchanged.
+The action's [pinned input contract](https://github.com/actions/upload-artifact/blob/cf430e030ddbb5b0abf93d22962f4752f3646cd9/action.yml)
+is the reference for archive mode. Upload completion is not evidence acceptance:
+read the actual reports, source/ZIP hashes and native gates as before.
