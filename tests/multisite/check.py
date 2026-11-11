@@ -194,8 +194,12 @@ def main():
         report['distribution'] = json.loads((out / 'distribution.json').read_text())
         fixture = json.loads((out / 'fixture.json').read_text())['sites']
         report['fixture'] = {x['role']: x for x in fixture}
-        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
+        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx'], text=True)
         report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
+        # setup-php's cached FPM is executable but need not be registered in dpkg.
+        fpm = Path('/usr/sbin/php-fpm8.4')
+        report['native_binaries'] = {'php-fpm8.4': {'path': str(fpm), 'sha256': hashlib.sha256(fpm.read_bytes()).hexdigest(),
+            'version_output': subprocess.check_output([str(fpm), '-v'], text=True).strip()}}
         with sync_playwright() as p:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             check(executable, 'chromium_missing')

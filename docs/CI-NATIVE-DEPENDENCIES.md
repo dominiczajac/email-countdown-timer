@@ -6,6 +6,11 @@ runs the required binaries before provisioning. The actual HTTP/native tests,
 runtime context checks, package version evidence and post-stop log gates remain
 mandatory; a missing binary fails the job.
 
+The cache profile and multisite reports keep nginx's `dpkg` version under
+`native_packages`. FPM can be a cached binary without a matching `dpkg` record;
+`native_binaries` therefore records its exact executable path, SHA256 and
+version output. The actual HTTP SAPI/PHP/JIT/GD context checks are unchanged.
+
 The runner image already contains the web servers, and setup-php's cached PHP
 build contains FPM. Adding `ppa:ondrej/php` again unnecessarily contacts the
 Launchpad API. PR #34 runs `43065825704`, `43068529733` and `43068529671`
