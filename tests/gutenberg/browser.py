@@ -39,10 +39,6 @@ def block_frame(page):
 def open_editor(page, target=post_id):
     page.goto(base + '/wp-admin/post.php?post=' + str(target) + '&action=edit')
     page.wait_for_function("window.wp && wp.blocks && wp.blocks.getBlockType('easy-countdown/timer') && wp.data.select('core/editor').getCurrentPostId()")
-    page.evaluate("""() => {
-        wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
-        wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block');
-    }""")
     # Wait for the real, permission-checked inline bootstrap. Never inject test settings.
     try:
         page.wait_for_function("window.emailCountdownTimerBlock")
@@ -55,10 +51,19 @@ def open_editor(page, target=post_id):
         }, indent=2))
         raise
     page.wait_for_function("""() => document.querySelector('.block-editor-block-list__layout') || Array.from(document.querySelectorAll('iframe')).some(f=>f.contentDocument && f.contentDocument.querySelector('.block-editor-block-list__layout'))""")
-    # Dismiss a guide if already mounted; this never skips block assertions.
-    for button in page.get_by_role('button', name=re.compile('Close.*(dialog|guide)', re.I)).all():
-        if button.is_visible():
-            button.click()
+    # Core can hydrate its persisted preferences and mount the welcome guide
+    # after the editor store exists. Wait for initial resources, dismiss only
+    # that native guide, then keep its preference disabled for later reopens.
+    page.wait_for_load_state('networkidle')
+    guide = page.locator('.edit-post-welcome-guide')
+    if guide.is_visible():
+        guide.get_by_role('button', name=re.compile('^Close', re.I)).click()
+    page.evaluate("""() => {
+        wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
+        wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuideTemplate', false);
+        wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block');
+    }""")
+    expect(guide).to_be_hidden()
 
 def insert(page, attributes):
     return page.evaluate("""(attrs) => {
