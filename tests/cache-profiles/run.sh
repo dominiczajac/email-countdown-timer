@@ -2,7 +2,7 @@
 # New loopback fixture per cell. No production URL/database/path is accepted.
 set -euo pipefail
 [[ "${GITHUB_ACTIONS:-}" == true && "${ECD_INTEGRATION_DISPOSABLE:-}" == 1 && -n "${RUNNER_TEMP:-}" ]] || exit 1
-case "${ECD_CACHE_PROFILE:?}" in baseline|wp-super-cache|w3-total-cache|autoptimize) ;; *) exit 1;; esac
+case "${ECD_CACHE_PROFILE:?}" in baseline|wp-super-cache|w3-total-cache|autoptimize|elementor|woocommerce) ;; *) exit 1;; esac
 case "${ECD_CACHE_JIT:?}" in 1235|disable) ;; *) exit 1;; esac
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 export ECD_CACHE_WP="$(mktemp -d "$RUNNER_TEMP/ect-cache.XXXXXX")"
@@ -63,6 +63,8 @@ case "$ECD_CACHE_PROFILE" in
   wp-super-cache) version=3.1.3 ;;
   w3-total-cache) version=2.10.6 ;;
   autoptimize) version=3.1.16 ;;
+  elementor) version=4.3.2 ;;
+  woocommerce) version=11.1.2 ;;
   baseline) version='' ;;
 esac
 if [[ -n "$version" ]]; then
@@ -91,9 +93,12 @@ if [[ "$ECD_CACHE_PROFILE" == w3-total-cache ]]; then
 fi
 "${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" configure
 phase=fixture-seed
-"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" seed > "$ECD_CACHE_EVIDENCE/fixture.json"
-"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" inventory > "$ECD_CACHE_EVIDENCE/environment.json"
-"${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_CACHE_EVIDENCE/plugins.json"
+"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" seed
+if [[ "$ECD_CACHE_PROFILE" == elementor || "$ECD_CACHE_PROFILE" == woocommerce ]]; then
+  "${wp[@]}" rewrite flush
+fi
+"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" inventory
+"${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_CACHE_EVIDENCE/plugins-cli.log"
 service_dir="$(mktemp -d "$RUNNER_TEMP/ect-cache-server.XXXXXX")"
 cat > "$service_dir/fpm.conf" <<CONF
 [global]

@@ -1,10 +1,11 @@
-name: Isolated cache profiles
+name: Isolated plugin profiles
 on:
   pull_request:
     paths:
       - '.github/workflows/cache-profiles.yml'
       - 'tests/cache-profiles/**'
       - 'docs/ISOLATED-CACHE-PROFILES.md'
+      - 'docs/ISOLATED-BUILDER-COMMERCE.md'
       - 'includes/**'
       - 'assets/**'
       - 'blocks/**'
@@ -23,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [baseline, wp-super-cache, w3-total-cache, autoptimize]
+        profile: [baseline, wp-super-cache, w3-total-cache, autoptimize, elementor, woocommerce]
         jit: ['1235', 'disable']
     services:
       mysql:

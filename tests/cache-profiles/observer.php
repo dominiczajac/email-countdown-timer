@@ -2,6 +2,9 @@
 /** Lab-only observer, derived from PR #13. Never shipped or used on production. */
 if ( ! defined( 'ABSPATH' ) || wp_get_environment_type() !== 'local' || $GLOBALS['wpdb']->base_prefix !== 'ectcache_' ) { exit; }
 add_filter( 'pre_wp_mail', '__return_false' );
+// Explicit offline/local-font configuration for the Elementor profile.
+// Public Elementor hook; unexpected external browser attempts still fail.
+add_filter( 'elementor/frontend/print_google_fonts', '__return_false' );
 add_action( 'admin_menu', static function () {
     add_menu_page( 'Cache lab media control', 'Cache lab media control', 'manage_options', 'ecd-cache-media-control', static function () {
         echo '<div id="ecd-cache-media-control">Synthetic core media-enqueue control</div>';

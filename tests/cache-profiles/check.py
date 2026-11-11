@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
+from contracts import ADMIN_PHASES, CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_admin_font, expected_plugins, font_query_facts, generation, navigation_request_cancel, page_evidence, vendor_font_control
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -41,8 +41,7 @@ def main():
     if profile not in PROFILES or jit not in ('1235', 'disable'):
         raise RuntimeError('invalid_profile')
     base = 'http://localhost:8095'
-    fixture = json.loads((evidence / 'fixture.json').read_text())
-    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'navigation_cancellations': []}
+    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'blocked_vendor_fonts': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
     navigating = False
@@ -58,10 +57,11 @@ def main():
 
     def wp(*args):
         result = subprocess.run(['wp', '--path=' + str(wpdir), '--no-color', *args], capture_output=True, text=True, timeout=45)
+        # Successful commands can also emit vendor shutdown diagnostics. Retain
+        # both streams verbatim; fixture data uses a separate, strict JSON file.
+        with (evidence / 'cli-commands.log').open('a') as log:
+            log.write(result.stdout + result.stderr)
         if result.returncode:
-            # No passwords are passed to this helper. Retain the original CLI diagnosis.
-            with (evidence / 'cli-errors.log').open('a') as log:
-                log.write(result.stdout + result.stderr)
             raise RuntimeError('wp_cli_failure')
         return result.stdout.strip()
 
@@ -96,10 +96,16 @@ def main():
                 request_route.continue_()
             else:
                 known_avatar = core_avatar(request.url, request.resource_type)
+                known_font = elementor_admin_font(request.url, request.resource_type, profile, phase)
                 item = {'state': current['key'], 'phase': phase, 'host': urlsplit(request.url).hostname,
-                        'resource_type': request.resource_type, 'expected_core_avatar': known_avatar}
+                        'resource_type': request.resource_type, 'expected_core_avatar': known_avatar, 'expected_vendor_font': known_font}
+                font_facts = font_query_facts(request.url)
+                if font_facts is not None:
+                    item['font_query'] = font_facts
                 report['blocked_external'].append(item)
-                if known_avatar:
+                if known_font:
+                    report['blocked_vendor_fonts'].append({'state': current['key'], 'phase': phase, 'font': 'elementor-admin-roboto-css2', 'blocked': True})
+                if known_avatar or known_font:
                     expected_aborted.add(request.url)
                 else:
                     report['browser_errors'].append({**item, 'reason': 'unexpected_external_request'})
@@ -244,8 +250,70 @@ def main():
             check(True, 'live-browser')
             page.screenshot(path=str(evidence / (current['key'] + '-front.png')))
 
+    def vendor_http(request, fixture_page):
+        nonlocal phase
+        phase = 'vendor-http'
+        check(fixture_page['profile'] == profile and local(fixture_page['url'])
+              and not urlsplit(fixture_page['url']).query, 'vendor-local-url')
+        response = request.get(fixture_page['url'], headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
+        check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'vendor-http')
+        html = response.text()
+        parsed = VendorPage(html, profile, fixture_page['post_id'])
+        structure = ((str(fixture_page['post_id']) in parsed.elementor_documents and len(parsed.elementor_widgets) == 1)
+                     if profile == 'elementor' else parsed.product_body and str(fixture_page['post_id']) in parsed.product_ids)
+        check(structure, 'vendor-structure')
+        current['vendor_proof'] = {'profile': profile, 'post_id': fixture_page['post_id'], 'status': response.status,
+            'native_structure': structure, 'timer_images': len(parsed.images), 'path': urlsplit(fixture_page['url']).path,
+            'rendered_post_ids': parsed.elementor_documents if profile == 'elementor' else parsed.product_ids,
+            'scoped_timer_images': len(parsed.scoped_images), 'scope_found': parsed.scope_found, 'literal_shortcode': parsed.literal_shortcode}
+        check(len(parsed.images) == len(parsed.scoped_images) == int(current['active'])
+              and parsed.scope_found and parsed.literal_shortcode is (not current['active'])
+              and 'PRIVATE-CACHE-LAB-NAME' not in html, 'vendor-output')
+
+    def vendor_browser(browser, fixture_page):
+        nonlocal phase
+        phase = 'vendor-browser'
+        with browser.new_context(viewport={'width': 1280, 'height': 900}) as context:
+            isolate(context)
+            page = context.new_page()
+            response = page.goto(fixture_page['url'], wait_until='load', timeout=45000)
+            check(response is not None and response.status == 200, 'vendor-browser-http')
+            if profile == 'elementor':
+                document = page.locator('[data-elementor-id="' + str(fixture_page['post_id']) + '"]')
+                expect(document).to_have_count(1)
+                scope = document.locator('.elementor-widget-shortcode')
+                expect(scope).to_be_visible()
+            else:
+                expect(page.locator('body.postid-' + str(fixture_page['post_id']))).to_have_count(1)
+                expect(page.get_by_role('heading', level=1, name=fixture_page['title'], exact=True)).to_be_visible()
+                expect(page.get_by_role('button', name='Add to cart', exact=True)).to_be_visible()
+                # Classic and block product templates can expose the description as a tab.
+                description = page.get_by_role('tab', name='Description', exact=True)
+                if description.count() and description.is_visible():
+                    description.click()
+                scope = page.locator('#tab-description')
+                if not scope.count():
+                    scope = page.locator('.wp-block-woocommerce-product-description')
+                expect(scope).to_be_visible()
+            image = scope.locator('img.email-countdown-timer-image')
+            expect(image).to_have_count(int(current['active']))
+            if current['active']:
+                expect(image).to_be_visible()
+                expect(image).to_have_js_property('complete', True)
+                check(image.evaluate('img => img.naturalWidth === 600') and image.get_attribute('data-no-lazy') == '1', 'vendor-browser-image')
+            else:
+                check(True, 'vendor-browser-no-timer')
+            check(True, 'vendor-browser')
+            page.screenshot(path=str(evidence / (current['key'] + '-' + profile + '.png')))
+
     try:
-        installed = json.loads((evidence / 'plugins.json').read_text())
+        phase = 'fixture-json'
+        fixture = json.loads((evidence / 'fixture.json').read_text())
+        if profile in CONTENT_PROFILES:
+            report['vendor_fixtures'] = {key: {'profile': fixture['pages'][key]['vendor']['profile'],
+                'post_id': fixture['pages'][key]['vendor']['post_id'], 'path': urlsplit(fixture['pages'][key]['vendor']['url']).path} for key in ORDER}
+        phase = 'installed-package-json'
+        installed = json.loads((evidence / 'environment.json').read_text())['installed_plugins']
         if profile != 'baseline' and not any(p['name'] == profile and p['version'] == PROFILES[profile] for p in installed):
             raise RuntimeError('vendor_version_mismatch')
         report['plugins'] = installed
@@ -266,7 +334,9 @@ def main():
                         phase = 'plugin-state'
                         wp('plugin', 'activate' if current['active'] else 'deactivate', 'easy-countdown')
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'purge')
-                        inventory = json.loads(wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory'))
+                        (evidence / 'environment.json').unlink()
+                        wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory')
+                        inventory = json.loads((evidence / 'environment.json').read_text())
                         current['environment'] = inventory
                         if key == ORDER[0]:
                             annotation('notice', 'Cache environment', json.dumps({'profile': profile, 'jit': jit, 'state': key, **inventory}))
@@ -329,7 +399,11 @@ def main():
                             else:
                                 response = request.get(base + '/?ecd_action=render&ecd=cache-lab&mode=static', timeout=45000)
                                 check(response.status == 200 and not response.headers.get('content-type', '').startswith('image/'), 'inactive-endpoint')
+                            if profile in CONTENT_PROFILES:
+                                vendor_http(request, fixture['pages'][key]['vendor'])
                         browser_state(browser, url)
+                        if profile in CONTENT_PROFILES:
+                            vendor_browser(browser, fixture['pages'][key]['vendor'])
                         phase = 'browser-network'
                         state_errors = [x for x in report['browser_errors'] + report['page_errors'] if x['state'] == key]
                         if state_errors:
@@ -346,11 +420,21 @@ def main():
                     finally:
                         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
                 report['complete'] = True
+    except Exception as error:
+        failure = {'phase': phase, 'reason': type(error).__name__}
+        report['failures'].append(failure)
+        annotation('error', 'Profile initialization', json.dumps(failure))
+        raise
     finally:
+        report['vendor_font_control'] = vendor_font_control(report)
+        if report['complete'] and not report['vendor_font_control']:
+            annotation('error', 'Vendor font attribution', 'Known blocked imports must match every off/on admin control.')
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
             'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states']),
+            'blocked_vendor_fonts': len(report['blocked_vendor_fonts']), 'vendor_font_control': report['vendor_font_control'],
+            'vendor_font_counts': {phase: [sum(x['state'] == key and x['phase'] == phase for x in report['blocked_vendor_fonts']) for key in ORDER] for phase in sorted(ADMIN_PHASES)} if profile == 'elementor' else None,
             'source_commit': report.get('source_commit'), 'zip_sha256': report.get('distribution', {}).get('zip_sha256'),
             'native_packages': report.get('native_packages')}))
     return 0 if report['passed'] else 1
