@@ -5,6 +5,7 @@ set -euo pipefail
 [[ "$(realpath "$RUNNER_TEMP")" == "$RUNNER_TEMP" && "$(realpath "$ECD_NETWORK_WP")" == "$ECD_NETWORK_WP" ]] || exit 1
 [[ "$(realpath "$ECD_NETWORK_EVIDENCE")" == "$RUNNER_TEMP/network-evidence" ]] || exit 1
 case "$ECD_NETWORK_WP" in "$RUNNER_TEMP"/ect-network.*) ;; *) exit 1;; esac
+case "${ECD_NETWORK_PROFILE:-baseline}" in baseline|wp-super-cache) ;; *) exit 1;; esac
 case "${ECD_NETWORK_THEME:?}" in
   twentytwentyone) theme_version=2.9; theme_hash=51d4ac1dcaef18b0e35a1a313bce8115d3aa4ff315bb1143f95c223c38817d8b ;;
   twentytwentyfour) theme_version=1.6; theme_hash=9128150eff2682bf07ca7fdada2d2ed86a8f0d9210814d5369241e51e7a50baf ;;
@@ -56,6 +57,21 @@ bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown-network.
 "${wp[@]}" plugin install "$RUNNER_TEMP/easy-countdown-network.zip"
 python3 "$root/scripts/verify-distribution.py" "$ECD_NETWORK_EVIDENCE/distribution.json" "$ECD_NETWORK_WP/wp-content/plugins/easy-countdown"
 "${wp[@]}" plugin activate easy-countdown --network
+if [[ "${ECD_NETWORK_PROFILE:-baseline}" == wp-super-cache ]]; then
+  phase=vendor-install
+  vendor_archive="$(mktemp "$RUNNER_TEMP/ect-network-vendor.XXXXXX.zip")"
+  curl --fail --location --retry 2 --proto '=https' --proto-redir '=https' https://downloads.wordpress.org/plugin/wp-super-cache.3.1.5.zip -o "$vendor_archive"
+  printf '%s  %s\n' 5a1af59e8a8289083de64d28ded9fb1dfb56ee996d4a84d3ed1f76c5f2224eb6 "$vendor_archive" | sha256sum --check
+  sha256sum "$vendor_archive" > "$ECD_NETWORK_EVIDENCE/vendor-archive.sha256"
+  "${wp[@]}" plugin install "$vendor_archive"
+  rm -f "$vendor_archive"
+  "${wp[@]}" plugin verify-checksums wp-super-cache
+  "${wp[@]}" config set WP_CACHE true --raw
+  "${wp[@]}" config set WPCACHEHOME "$ECD_NETWORK_WP/wp-content/plugins/wp-super-cache/"
+  "${wp[@]}" plugin activate wp-super-cache --network
+  phase=vendor-configure
+  "${wp[@]}" eval-file "$root/tests/multisite/fixture.php" configure-cache
+fi
 "${wp[@]}" config set WP_HTTP_BLOCK_EXTERNAL true --raw
 "${wp[@]}" config set WP_ACCESSIBLE_HOSTS 'localhost,127.0.0.1'
 phase=fixture-seed
