@@ -2,6 +2,7 @@
 """Negative controls for cache-hit evidence and complete off/on/browser acceptance."""
 import copy
 import json
+import os
 import re
 from pathlib import Path
 import subprocess
@@ -42,6 +43,51 @@ def good(profile='baseline'):
 
 
 class Contracts(unittest.TestCase):
+    def cli_writer(self, temp, name='fixture', evidence=None, invalid=False):
+        code = '''
+function wp_get_environment_type() { return 'local'; }
+function wp_json_encode($value) { return json_encode($value); }
+class WP_CLI { public static function error($message) { fwrite(STDERR, $message); exit(2); } }
+$GLOBALS['wpdb'] = (object) array('base_prefix' => 'ectcache_');
+require $argv[1];
+echo "synthetic CLI startup diagnostic\\n";
+register_shutdown_function(static function() { echo "synthetic CLI shutdown diagnostic\\n"; });
+Email_Countdown_Timer_Lab_CLI::write_json($argv[2], array('proof' => $argv[3] === 'invalid' ? NAN : 42));
+'''
+        return subprocess.run(['php', '-r', code, str(Path(__file__).with_name('cli-evidence.php')), name, 'invalid' if invalid else 'valid'],
+            env={**os.environ, 'RUNNER_TEMP': str(temp), 'ECD_CACHE_EVIDENCE': str(evidence or temp / 'cache-evidence'), 'ECD_INTEGRATION_DISPOSABLE': '1'},
+            capture_output=True, text=True)
+
+    def test_cli_json_is_separate_from_startup_and_shutdown_diagnostics(self):
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory); evidence = temp / 'cache-evidence'; evidence.mkdir()
+            result = self.cli_writer(temp)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads((evidence / 'fixture.json').read_text()), {'proof': 42})
+            self.assertIn('startup diagnostic', result.stdout); self.assertIn('shutdown diagnostic', result.stdout)
+            with self.assertRaises(json.JSONDecodeError):
+                json.loads(result.stdout)
+
+    def test_cli_writer_rejects_stale_files_and_symlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory); evidence = temp / 'cache-evidence'; evidence.mkdir()
+            self.assertEqual(self.cli_writer(temp).returncode, 0)
+            self.assertNotEqual(self.cli_writer(temp).returncode, 0)
+            self.assertEqual(json.loads((evidence / 'fixture.json').read_text()), {'proof': 42})
+            (evidence / 'fixture.json').unlink()
+            outside = temp / 'outside.json'; outside.write_text('unchanged')
+            (evidence / 'fixture.json').symlink_to(outside)
+            self.assertNotEqual(self.cli_writer(temp).returncode, 0)
+            self.assertEqual(outside.read_text(), 'unchanged')
+
+    def test_cli_writer_rejects_other_paths_and_unserializable_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory); evidence = temp / 'cache-evidence'; evidence.mkdir()
+            self.assertNotEqual(self.cli_writer(temp, name='../other').returncode, 0)
+            self.assertNotEqual(self.cli_writer(temp, evidence=temp).returncode, 0)
+            self.assertNotEqual(self.cli_writer(temp, invalid=True).returncode, 0)
+            self.assertEqual(list(temp.rglob('*.json')), [])
+
     def test_all_profiles_have_positive_controls(self):
         for profile in PROFILES:
             self.assertTrue(accept(good(profile)))

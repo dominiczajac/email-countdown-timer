@@ -93,12 +93,12 @@ if [[ "$ECD_CACHE_PROFILE" == w3-total-cache ]]; then
 fi
 "${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" configure
 phase=fixture-seed
-"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" seed > "$ECD_CACHE_EVIDENCE/fixture.json"
+"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" seed
 if [[ "$ECD_CACHE_PROFILE" == elementor || "$ECD_CACHE_PROFILE" == woocommerce ]]; then
   "${wp[@]}" rewrite flush
 fi
-"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" inventory > "$ECD_CACHE_EVIDENCE/environment.json"
-"${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_CACHE_EVIDENCE/plugins.json"
+"${wp[@]}" eval-file "$root/tests/cache-profiles/fixture.php" inventory
+"${wp[@]}" plugin list --fields=name,status,version --format=json > "$ECD_CACHE_EVIDENCE/plugins-cli.log"
 service_dir="$(mktemp -d "$RUNNER_TEMP/ect-cache-server.XXXXXX")"
 cat > "$service_dir/fpm.conf" <<CONF
 [global]

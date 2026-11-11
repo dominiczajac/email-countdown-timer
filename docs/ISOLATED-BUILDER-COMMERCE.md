@@ -48,3 +48,22 @@ page-level checks. Both Elementor cells failed before recorded state outcomes.
 Their precise cause is unconfirmed while the cloud policy blocks the logs on
 `productionresultssa19.blob.core.windows.net`. Preserve that negative result;
 stronger scoped checks and fixture binding require fresh current-head evidence.
+
+The next run, at `a7deacd`
+([42966541646](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42966541646)),
+identified `fixture-json / JSONDecodeError` before either Elementor experiment
+started. The historical PR #13 records CLI shutdown diagnostics mixed into JSON;
+Elementor 4.3.2's upstream `modules/wp-cli/cli-logger.php` sends non-warning
+diagnostics through `WP_CLI::log`. This is a possible mechanism, not an inspected
+diagnosis of the inaccessible original log.
+
+The fixture now writes its structured seed/inventory data directly to new,
+fixed files in the owned evidence directory. CLI stdout/stderr, including
+successful-command shutdown diagnostics, remain verbatim in separate logs.
+Installed-package metadata comes from WordPress's actual `get_plugins()` file
+headers; the raw `wp plugin list` output is also retained. JSON decoding stays
+strict, each state deletes its old inventory before requesting a fresh one,
+and CLI exit codes, HTTP bytes, native logs and all behavior gates are unchanged.
+Controls exercise startup/shutdown output, stale files, symlinks, wrong paths
+and encoding failure. This channel separation still requires a fresh hosted
+run; it is not evidence of an Elementor compatibility pass.

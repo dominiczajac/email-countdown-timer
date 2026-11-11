@@ -57,10 +57,11 @@ def main():
 
     def wp(*args):
         result = subprocess.run(['wp', '--path=' + str(wpdir), '--no-color', *args], capture_output=True, text=True, timeout=45)
+        # Successful commands can also emit vendor shutdown diagnostics. Retain
+        # both streams verbatim; fixture data uses a separate, strict JSON file.
+        with (evidence / 'cli-commands.log').open('a') as log:
+            log.write(result.stdout + result.stderr)
         if result.returncode:
-            # No passwords are passed to this helper. Retain the original CLI diagnosis.
-            with (evidence / 'cli-errors.log').open('a') as log:
-                log.write(result.stdout + result.stderr)
             raise RuntimeError('wp_cli_failure')
         return result.stdout.strip()
 
@@ -304,7 +305,7 @@ def main():
             report['vendor_fixtures'] = {key: {'profile': fixture['pages'][key]['vendor']['profile'],
                 'post_id': fixture['pages'][key]['vendor']['post_id'], 'path': urlsplit(fixture['pages'][key]['vendor']['url']).path} for key in ORDER}
         phase = 'installed-package-json'
-        installed = json.loads((evidence / 'plugins.json').read_text())
+        installed = json.loads((evidence / 'environment.json').read_text())['installed_plugins']
         if profile != 'baseline' and not any(p['name'] == profile and p['version'] == PROFILES[profile] for p in installed):
             raise RuntimeError('vendor_version_mismatch')
         report['plugins'] = installed
@@ -325,7 +326,9 @@ def main():
                         phase = 'plugin-state'
                         wp('plugin', 'activate' if current['active'] else 'deactivate', 'easy-countdown')
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'purge')
-                        inventory = json.loads(wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory'))
+                        (evidence / 'environment.json').unlink()
+                        wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory')
+                        inventory = json.loads((evidence / 'environment.json').read_text())
                         current['environment'] = inventory
                         if key == ORDER[0]:
                             annotation('notice', 'Cache environment', json.dumps({'profile': profile, 'jit': jit, 'state': key, **inventory}))
