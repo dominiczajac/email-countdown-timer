@@ -81,6 +81,9 @@ are shared with the existing harness. Reuse does not change the FPM SAPI/gates.
 The server stops before mandatory OLS/PHP/stderr/container logs and Docker's
 exit/OOM state are assessed. Missing logs, bad startup/worker evidence, server
 errors, native faults, processing timeouts or an unclean stop fail the cell.
+Fatal worker signals are rejected by name or number even without an error-level
+prefix or container failure, including SIGBUS/SIGFPE. Ordinary SIGTERM shutdown
+remains allowed; negative controls cover both cases across every native log.
 The exit trap preserves an original failure and requires successful stop,
 native/report acceptance and cleanup. Local controls cover wrong/missing
 metadata, a cache-enabled baseline, inconsistent hit markers, an image cached

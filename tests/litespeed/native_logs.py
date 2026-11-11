@@ -10,9 +10,10 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('fpm_log_reader', ROOT / 'tests/gutenberg/check-native-logs.py')
 reader = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(reader)
-BAD = re.compile(r'\[(?:ERROR|ALERT|CRIT|FATAL)\]|SIGSEGV|SIGABRT|segmentation fault|core dumped|'
+BAD = re.compile(r'\[(?:ERROR|ALERT|CRIT|FATAL)\]|SIG(?:ILL|TRAP|ABRT|BUS|FPE|KILL|SEGV|XCPU|XFSZ|SYS)\b|'
+                 r'segmentation fault|bus error|floating point exception|illegal instruction|bad system call|core dumped|'
                  r'(?:PHP\s+)?Fatal error|Maximum execution time|Unable to load dynamic library|'
-                 r'signal\s*[:=]?\s*(?:6|9|11|24)\b|timed out|Error Timeout|Not support \[|'
+                 r'signal\s*[:=]?\s*(?:4|5|6|7|8|9|11|24|25|31)\b|timed out|Error Timeout|Not support \[|'
                  r'(?:exceed|reach).*(?:MAX_PROCESS_TIME|processing time|CPU limit)', re.I)
 FILES = ('ols-error.log', 'php-errors.log', 'lsapi-stderr.log', 'server-container.log')
 

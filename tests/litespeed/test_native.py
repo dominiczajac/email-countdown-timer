@@ -29,6 +29,8 @@ class Native(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); clean_logs(root)
             (root / 'php-errors.log').write_text('PHP Deprecated: synthetic vendor notice\n')
+            with (root / 'ols-error.log').open('a') as stream:
+                stream.write('[NOTICE] Child exited with signal 15\nSIGTERM received; stopping\n')
             self.assertTrue(native_logs.inspect(root)['passed'])
 
     def test_crash_timeout_unknown_configuration_or_server_error_fails(self):
@@ -39,6 +41,20 @@ class Native(unittest.TestCase):
                 root = Path(temp); clean_logs(root)
                 with (root / 'ols-error.log').open('a') as stream: stream.write(text + '\n')
                 self.assertFalse(native_logs.inspect(root)['passed'])
+
+    def test_fatal_worker_signals_fail_without_error_prefix_or_container_failure(self):
+        signals = {'SIGILL': 4, 'SIGTRAP': 5, 'SIGABRT': 6, 'SIGBUS': 7, 'SIGFPE': 8,
+                   'SIGKILL': 9, 'SIGSEGV': 11, 'SIGXCPU': 24, 'SIGXFSZ': 25, 'SIGSYS': 31}
+        diagnostics = [text for name, number in signals.items()
+                       for text in (f'worker terminated: {name}', f'worker killed by signal {number}',
+                                    f'worker exited signal: {number}', f'worker signal={number}')]
+        diagnostics += ['Bus error', 'Floating point exception', 'Illegal instruction', 'Bad system call']
+        for file in native_logs.FILES:
+            for text in diagnostics:
+                with self.subTest(file=file, diagnostic=text), tempfile.TemporaryDirectory() as temp:
+                    root = Path(temp); clean_logs(root)
+                    with (root / file).open('a') as stream: stream.write(text + '\n')
+                    self.assertFalse(native_logs.inspect(root)['passed'])
 
     def test_missing_linked_logs_or_startup_evidence_fail(self):
         for name in (*native_logs.FILES, 'server-stop.json'):
