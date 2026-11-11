@@ -13,7 +13,8 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from PIL import Image
 from playwright.sync_api import expect, sync_playwright
-from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, image_reference, local, navigation_abort, page_evidence, runtime
+from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, image_reference, inventory_ok, local, navigation_abort, page_evidence, runtime
+from cache_evidence import HITS, browser_proof, hit_proof, snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -29,9 +30,11 @@ def main():
     if wpdir.parent != temp or not wpdir.name.startswith('ect-network.') or out != temp / 'network-evidence':
         raise RuntimeError('invalid_owned_paths')
     theme, activation, jit = [os.environ[x] for x in ('ECD_NETWORK_THEME', 'ECD_NETWORK_ACTIVATION', 'ECD_NETWORK_JIT')]
-    if theme not in THEMES or activation not in ('site', 'network') or jit not in ('1235', 'disable'):
+    profile = os.environ.get('ECD_NETWORK_PROFILE', 'baseline')
+    cached = profile == 'wp-super-cache'
+    if theme not in THEMES or activation not in ('site', 'network') or jit not in ('1235', 'disable') or profile not in ('baseline', 'wp-super-cache'):
         raise RuntimeError('unsupported_matrix')
-    report = {'theme': theme, 'activation': activation, 'jit': jit, 'complete': False, 'states': [],
+    report = {'theme': theme, 'activation': activation, 'jit': jit, 'profile': profile, 'complete': False, 'states': [],
               'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_avatars': [], 'navigation_cancellations': []}
     current, phase, navigating = None, 'initialization', False
 
@@ -69,6 +72,7 @@ def main():
             result = {'status': response.status, 'content_type': response.headers.get('content-type'),
                       'cache_control': response.headers.get('cache-control'), 'format': decoded.format,
                       'width': decoded.width, 'height': decoded.height, 'frames': decoded.n_frames,
+                      'cache_header': response.headers.get('x-wp-super-cache'),
                       'sha256': hashlib.sha256(body).hexdigest(), 'runtime': response_runtime(response, role, active)}
             if kind == 'gif':
                 result['durations'] = []
@@ -156,7 +160,15 @@ def main():
             page.on('request', lambda r: requests.append(r.url))
             response = page.goto(site['pages'][current['key']], wait_until='load', timeout=45000)
             check(response is not None and response.status == 200, 'public_browser_http')
-            response_runtime(response, role, active)
+            if cached:
+                hit = response.headers.get('x-wp-super-cache')
+                check(hit is None or hit in HITS, 'browser_cache_header')
+                row['browser_cache'] = {'mode': 'hit' if hit in HITS else 'origin', 'header': hit,
+                    'generation': generation(response.text()), 'body_sha256': hashlib.sha256(response.body()).hexdigest(),
+                    'runtime': headers(response), 'file': snapshot(wpdir, out, role, current['key'], browser=True) if hit in HITS else None}
+                check(browser_proof(row, current['key'], lambda h: runtime(h, role, theme, jit, active)), 'browser_cache_context')
+                row['checks'].append('browser-cache-context')
+            else: response_runtime(response, role, active)
             expect(page.locator('img.email-countdown-timer-image')).to_have_count(int(active))
             expect(page.locator('.ecd-live')).to_have_count(int(active))
             if active:
@@ -174,6 +186,7 @@ def main():
                 expect(seconds).not_to_have_text(paused, timeout=4000); row['checks'].append('live-resumes')
                 check(sum('ecd_action=render' in x for x in requests) == count, 'image_polling'); row['checks'].append('no-image-polling')
             row['checks'].append('public-browser')
+            check('PRIVATE-NETWORK-' not in page.content(), 'browser_private_name')
             page.screenshot(path=str(out / (current['key'] + '-' + role + '-front.png')))
 
     try:
@@ -181,8 +194,12 @@ def main():
         report['distribution'] = json.loads((out / 'distribution.json').read_text())
         fixture = json.loads((out / 'fixture.json').read_text())['sites']
         report['fixture'] = {x['role']: x for x in fixture}
-        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
+        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx'], text=True)
         report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
+        # setup-php's cached FPM is executable but need not be registered in dpkg.
+        fpm = Path('/usr/sbin/php-fpm8.4')
+        report['native_binaries'] = {'php-fpm8.4': {'path': str(fpm), 'sha256': hashlib.sha256(fpm.read_bytes()).hexdigest(),
+            'version_output': subprocess.check_output([str(fpm), '-v'], text=True).strip()}}
         with sync_playwright() as p:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             check(executable, 'chromium_missing')
@@ -195,17 +212,33 @@ def main():
                         phase = 'plugin-state'
                         args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'easy-countdown']
                         args += ['--network'] if activation == 'network' else ['--url=' + BASE + PATHS['blue']]
-                        wp(*args); current['inventory_before'] = inventory()
+                        wp(*args)
+                        if cached: wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'purge-cache')
+                        current['inventory_before'] = inventory()
+                        check(inventory_ok(current['inventory_before'], report, key, report['fixture']), 'inventory_before')
                         with ExitStack() as resources:
                             request = p.request.new_context(); resources.callback(request.dispose)
                             for site in fixture:
                                 role = site['role']; active = active_for(activation, key, role)
                                 row = {'role': role, 'active': active, 'complete': False, 'checks': [], 'generations': [], 'page_runtime': []}; current['sites'].append(row)
+                                if cached: row['cache'] = {'response_headers': [], 'body_sha256': []}
                                 phase = 'anonymous-http'
                                 for _ in range(4):
                                     response = request.get(site['pages'][key], headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
-                                    check(response.status == 200, 'public_http'); html = response.text()
-                                    row['page_runtime'].append(response_runtime(response, role, active)); row['generations'].append(generation(html))
+                                    check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'public_http'); html = response.text()
+                                    observed = headers(response)
+                                    if cached:
+                                        hit = response.headers.get('x-wp-super-cache')
+                                        check(hit is None or hit in HITS, 'page_cache_header')
+                                        if hit is None or observed: response_runtime(response, role, active)
+                                        row['cache']['response_headers'].append({k: response.headers.get(k) for k in ('x-wp-super-cache', 'content-type', 'cache-control')})
+                                        row['cache']['body_sha256'].append(hashlib.sha256(response.body()).hexdigest())
+                                    else: response_runtime(response, role, active)
+                                    row['page_runtime'].append(observed); row['generations'].append(generation(html))
+                                if cached:
+                                    phase = 'cache-proof'
+                                    row['cache']['file'] = snapshot(wpdir, out, role, key)
+                                    check(hit_proof(row, key), 'page_cache_hit'); row['checks'].append('page-cache-hit')
                                 parsed = Page(html); image_home = None
                                 if parsed.images:
                                     src = urlsplit(parsed.images[0].get('src', ''))
@@ -223,10 +256,12 @@ def main():
                                 else:
                                     response = request.get(BASE + PATHS[role] + '?ecd_action=render&ecd=shared-timer&mode=static', timeout=45000)
                                     row['inactive_endpoint'] = {'status': response.status, 'is_image': response.headers.get('content-type', '').startswith('image/'),
+                                                                'cache_header': response.headers.get('x-wp-super-cache'),
                                                                 'runtime': response_runtime(response, role, active)}
                                 browser_site(browser, site, row)
                                 row['complete'] = True
                         current['inventory_after'] = inventory()
+                        check(inventory_ok(current['inventory_after'], report, key, report['fixture']), 'inventory_after')
                         current['complete'] = True
                     except Exception as error:
                         failure = {'state': key, 'phase': phase, 'reason': str(error) if isinstance(error, Failure) else type(error).__name__}
@@ -240,7 +275,7 @@ def main():
     finally:
         report['passed'] = accept(report)
         (out / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
-    print('::notice title=Network result::' + json.dumps({'theme': theme, 'activation': activation, 'jit': jit,
+    print('::notice title=Network result::' + json.dumps({'theme': theme, 'activation': activation, 'jit': jit, 'profile': profile,
           'passed': report['passed'], 'states': len(report['states']), 'site_probes': sum(len(s['sites']) for s in report['states'])}), flush=True)
     return 0 if report['passed'] else 1
 

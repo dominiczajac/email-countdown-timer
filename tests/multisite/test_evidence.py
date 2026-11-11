@@ -13,10 +13,17 @@ import unittest
 import zipfile
 
 from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, accept, active_for, assess, image_reference, navigation_abort
+from cache_evidence import SETTINGS, VENDOR, cache_path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-def good(theme='twentytwentyone', activation='network', jit='1235'):
+def cache_body(row):
+    marker = row['generations'][-1]
+    content = ('<img class="email-countdown-timer-image" src="' + BASE + PATHS[row['role']] + '?ecd_action=render&amp;ecd=shared-timer&amp;mode=anim&amp;_t=1794399999">'
+               + '<div class="ecd-live" data-ecd-deadline="' + str(DEADLINES[row['role']]) + '"></div>') if row['active'] else '[ecd_timer id="shared-timer"]'
+    return ('<span id="ecd-cache-origin" data-generation="' + marker + '"></span>' + content).encode()
+
+def good(theme='twentytwentyone', activation='network', jit='1235', profile='baseline'):
     initial = {role: str(i + 1) * 64 for i, role in enumerate(ROLES)}
     fixture = {r: {'campaign_sha256': initial[r], 'pages': {k: BASE + PATHS[r] + k + '/' for k in ORDER}} for r in ROLES}
     report = {'theme': theme, 'activation': activation, 'jit': jit, 'complete': True, 'source_commit': 'a' * 40,
@@ -58,6 +65,26 @@ def good(theme='twentytwentyone', activation='network', jit='1235'):
         if key.endswith('-on'):
             state['mutation'] = {'before': dict(initial), 'edited': {**initial, 'blue': 'f' * 64}, 'restored': dict(initial)}
         report['states'].append(state)
+    if profile != 'baseline':
+        report['profile'] = profile
+        for state in report['states']:
+            for name in ('inventory_before', 'inventory_after'):
+                for site in state[name]:
+                    site['network_plugins'] = sorted(site['network_plugins'] + [VENDOR])
+                    site['wp_cache'] = site['advanced_cache_dropin'] = True
+                    site['cache_configuration'] = copy.deepcopy(SETTINGS)
+            for row in state['sites']:
+                role = row['role']; key = state['key']; marker = hashlib.sha256((key+role).encode()).hexdigest()[:24]
+                row['generations'] = [marker] * 4
+                first = copy.deepcopy(row['page_runtime'][0]); row['page_runtime'] = [first, {}, {}, {}]
+                body = cache_body(row); sha = hashlib.sha256(body).hexdigest()
+                row['cache'] = {'file': {'path': cache_path(role, key), 'snapshot': 'cache-'+key+'-'+role+'.html', 'generation': marker,
+                    'sha256': sha, 'bytes': len(body)}, 'response_headers': [{'x-wp-super-cache': None}] + [{'x-wp-super-cache': 'Served supercache file from PHP'} for _ in range(3)],
+                    'body_sha256': [sha] * 4}
+                browser_file = copy.deepcopy(row['cache']['file']); browser_file['snapshot'] = 'cache-'+key+'-'+role+'-browser.html'
+                row['browser_cache'] = {'mode': 'hit', 'header': 'Served supercache file from PHP', 'generation': marker,
+                    'runtime': {}, 'file': browser_file, 'body_sha256': sha}
+                row['checks'] += ['page-cache-hit', 'browser-cache-context']
     return report
 
 def logs(root):
@@ -68,6 +95,59 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(good()))
 
 class Evidence(unittest.TestCase):
+    def test_cache_profile_passes_all_eight_comparisons_with_real_hit_shape(self):
+        for theme in THEMES:
+            for activation in ('site', 'network'):
+                for jit in ('1235', 'disable'):
+                    with self.subTest(theme=theme, activation=activation, jit=jit): self.assertTrue(accept(good(theme, activation, jit, 'wp-super-cache')))
+
+    def test_cache_cannot_replace_native_origin_or_image_context(self):
+        for field in ('page_runtime', 'images'):
+            r = good(profile='wp-super-cache'); row = r['states'][1]['sites'][1]
+            if field == 'page_runtime': row[field][0] = {}
+            else: row[field]['gif'][1]['cache_header'] = 'Served supercache file from PHP'
+            with self.subTest(field=field): self.assertFalse(accept(r))
+        r=good(profile='wp-super-cache');r['states'][1]['sites'][1]['page_runtime'][2]={'x-ecd-network-blog':'1'};self.assertFalse(accept(r))
+
+    def test_measured_cache_hits_require_exact_headers_hashes_and_site_file(self):
+        for mutation in ('header','hash','marker','path','snapshot','size','label'):
+            r=good(profile='wp-super-cache');row=r['states'][1]['sites'][1]
+            if mutation=='header':row['cache']['response_headers'][2]['x-wp-super-cache']=None
+            elif mutation=='hash':row['cache']['body_sha256'][3]='0'*64
+            elif mutation=='marker':row['generations'][2]='0'*24
+            elif mutation=='path':row['cache']['file']['path']=cache_path('red','pair-1-on')
+            elif mutation=='snapshot':row['cache']['file']['snapshot']='../other.html'
+            elif mutation=='size':row['cache']['file']['bytes']=True
+            else:row['checks'].remove('page-cache-hit')
+            with self.subTest(mutation=mutation):self.assertFalse(accept(r))
+
+    def test_cache_configuration_and_network_plugin_are_mandatory(self):
+        for key,value in [('cache_max_time',60),('wp_cache_mod_rewrite',1),('cache_enabled',1),('wpsc_served_header',False),('version','3.1.3')]:
+            r=good(profile='wp-super-cache');r['states'][0]['inventory_before'][0]['cache_configuration'][key]=value
+            with self.subTest(key=key):self.assertFalse(accept(r))
+        r=good(profile='wp-super-cache');r['states'][0]['inventory_after'][2]['network_plugins']=[];self.assertFalse(accept(r))
+        r=good(profile='wp-super-cache');r['states'][0]['inventory_after'][0]['object_cache_dropin']=True;self.assertFalse(accept(r))
+
+    def test_browser_cache_or_actual_origin_must_remain_site_bound(self):
+        r=good(profile='wp-super-cache');row=r['states'][1]['sites'][1]
+        origin={'mode':'origin','header':None,'file':None,'generation':row['generations'][0],'runtime':copy.deepcopy(row['page_runtime'][0])}
+        row['browser_cache']=origin;self.assertTrue(accept(r))
+        origin['runtime']={};self.assertFalse(accept(r))
+        for key,value in [('body_sha256','0'*64),('header','Served WPCache cache file')]:
+            r=good(profile='wp-super-cache');r['states'][1]['sites'][1]['browser_cache'][key]=value;self.assertFalse(accept(r))
+
+    def test_retained_cache_bodies_are_required_and_cannot_be_copied_or_linked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);logs(root);r=good(profile='wp-super-cache');(root/'checks.json').write_text(json.dumps(r))
+            for state in r['states']:
+                for row in state['sites']:
+                    for file in (row['cache']['file'],row['browser_cache']['file']): (root/file['snapshot']).write_bytes(cache_body(row))
+            self.assertTrue(assess(root)['passed'])
+            target=root/r['states'][0]['sites'][0]['cache']['file']['snapshot'];original=target.read_bytes()
+            target.unlink();self.assertFalse(assess(root)['passed'])
+            target.write_bytes(b'copied sibling HTML');self.assertFalse(assess(root)['passed'])
+            target.unlink();target.symlink_to(root/'checks.json');self.assertFalse(assess(root)['passed'])
+
     def test_rendered_reference_keeps_the_existing_base_and_cache_buster(self):
         for role in ROLES:
             base = BASE + PATHS[role] + '?ecd_action=render&ecd=shared-timer&mode=anim'

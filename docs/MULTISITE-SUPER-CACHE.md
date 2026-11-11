@@ -1,0 +1,63 @@
+# Isolated WP Super Cache multisite profile
+
+Continues roadmap #20 from integrated main `5810988`. Extend the existing
+three-site theme/activation baseline with WP Super Cache, one cache engine at a
+time. Compare the unchanged baseline and the cache profile on Twenty Twenty-One
+and Twenty Twenty-Four, per-site/network timer activation and both JIT modes.
+The vendor stays network-active; only Easy Countdown changes state.
+
+Require actual anonymous page-cache hits with matching per-site origin markers
+and owned cache files, separate URLs for each off/on state, and no sibling data
+or image reuse. Reuse native GIF/PNG decoding, missing-sibling campaign controls,
+admin/media/live-browser probes and real form save/restore. Retain uncached image
+response policy, strict native limits and post-stop log/exit/report gates.
+
+Pin the vendor archive and verify its installed files, record observed normal
+vendor configuration, and keep negative setup/test outcomes. No distributed
+runtime, public endpoint, option schema, font/license or frozen renderer change
+is planned. This is named Simple/PHP cache coverage, not Expert/nginx rewrite,
+CDN, object cache, other cache engines, arbitrary hosting or mail certification.
+Full C3 and Gate A remain open. No release, deployment, native Wiki or environment
+publication is included. Current-head hosted results and Codex/Claude static
+review outcomes are recorded before integration.
+
+## Concrete profile and provenance
+
+The separate vendor profile uses official GPL-2.0-or-later WP Super Cache 3.1.5,
+archive SHA256 `5a1af59e8a8289083de64d28ded9fb1dfb56ee996d4a84d3ed1f76c5f2224eb6`,
+and WordPress.org installed-file checksums. The prior single-site profile's
+3.1.3 results retain their original version and scope. The vendor is a test
+dependency only; all 32 distributed runtime files remain unchanged.
+
+Use the vendor's normal initialization and `wp_cache_setting` APIs: caching and
+supercache enabled, Simple/PHP mode, TTL 3600, slash checks on and known users
+excluded. Compression/CDN/preload/dynamic execution/late initialization/debug
+are off; cache rebuild is on. Its existing served-file response header is enabled
+as fixed cache evidence. WP_CACHE and its genuine advanced-cache drop-in must be
+present; no object-cache drop-in or second cache engine is allowed.
+
+Each controlled state explicitly purges its owned network through the vendor
+API. Two fixed warm requests precede two measurements on each independent page.
+The first must execute the actual origin; both measurements need the normal
+`X-WP-Super-Cache` supercache header, coherent origin markers and response-body
+SHA256 equal to the exact site's cache file. The file's path binds the root/blue/
+red site and state. Fresh native headers are required on origin responses;
+early cache hits legitimately do not bootstrap the observer. Admin and both
+image fetches still require actual PHP/blog/JIT context and no served-cache header.
+
+Copied public cache files are retained under fixed evidence names before later
+admin operations can invalidate them. Post-stop acceptance rechecks their hashes,
+markers, public timer/live context and known paths, rejecting missing/changed or
+linked snapshots. A browser cache hit gets its own bound snapshot; a browser
+origin after a legitimate invalidation must instead prove its native context.
+The original baseline still requires four fresh generations and all four native
+contexts. None of these branches changes the baseline or native log gates.
+
+This tests controlled steady states and private-name save/restore isolation.
+It does not certify automatic cache invalidation after visible schedule/style
+edits, blog-only purge behavior, arbitrary ports/domain mapping or every vendor
+setting. Local WordPress preflight observed separate cold/hit transitions and
+repeated native GIF/PNG bypass for all three sites, with its real `cli-server`
+SAPI reported. Hosted FPM evidence remains separately required. Sources executed
+by pull-request CI are the expected synthetic merge, bound to the reviewed head
+by Actions metadata and Git tree equality before merge.

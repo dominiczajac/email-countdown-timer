@@ -21,6 +21,10 @@ acceptance remain separate. No release, deployment, native Wiki or environment
 publication is included. Exact dependencies, negative outcomes and hosted
 current-head results are recorded before integration.
 
+The workflow also has a separately labelled [WP Super Cache profile](MULTISITE-SUPER-CACHE.md).
+The original eight baseline cells retain their uncached-origin requirements;
+early vendor-cache evidence applies only to that explicit profile.
+
 ## Concrete fixture
 
 WordPress 7.1.2 retains the official archive SHA256 from the earlier profiles.

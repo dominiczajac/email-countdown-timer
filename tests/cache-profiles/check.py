@@ -349,8 +349,12 @@ def main():
                 raise RuntimeError('native_server_mismatch')
             report['native_packages'] = {'openlitespeed_binary': '1.9.4', **report['server_proof']['packages']}
         else:
-            packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
+            packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx'], text=True)
             report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
+            # setup-php's cached FPM is executable but need not be registered in dpkg.
+            fpm = Path('/usr/sbin/php-fpm8.4')
+            report['native_binaries'] = {'php-fpm8.4': {'path': str(fpm), 'sha256': hashlib.sha256(fpm.read_bytes()).hexdigest(),
+                'version_output': subprocess.check_output([str(fpm), '-v'], text=True).strip()}}
         with sync_playwright() as playwright:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             if not executable:

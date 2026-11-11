@@ -5,6 +5,8 @@ set -euo pipefail
 case "${ECD_NETWORK_THEME:?}" in twentytwentyone|twentytwentyfour) ;; *) exit 1;; esac
 case "${ECD_NETWORK_ACTIVATION:?}" in site|network) ;; *) exit 1;; esac
 case "${ECD_NETWORK_JIT:?}" in 1235|disable) ;; *) exit 1;; esac
+export ECD_NETWORK_PROFILE="${ECD_NETWORK_PROFILE:-baseline}"
+case "$ECD_NETWORK_PROFILE" in baseline|wp-super-cache) ;; *) exit 1;; esac
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 export ECD_NETWORK_WP="$(mktemp -d "$RUNNER_TEMP/ect-network.XXXXXX")"
 export ECD_NETWORK_EVIDENCE="$RUNNER_TEMP/network-evidence"

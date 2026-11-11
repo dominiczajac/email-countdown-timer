@@ -5,6 +5,7 @@ if ( PHP_SAPI !== 'cli' || getenv( 'ECD_INTEGRATION_DISPOSABLE' ) !== '1' || wp_
 // Inventory runs while the root plugin is inactive, including site-only on
 // states. Load this pure helper without bootstrapping/registering the plugin.
 require_once WP_PLUGIN_DIR . '/easy-countdown/includes/class-ecd-config.php';
+if ( getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ) { require_once __DIR__ . '/super-cache.php'; }
 
 final class Email_Countdown_Timer_Network_Lab {
     public static function write( string $name, array $value ): void {
@@ -54,15 +55,17 @@ final class Email_Countdown_Timer_Network_Lab {
                     }
                 }
                 $timers = get_option( 'easy_countdown_timers', array() );
+                $network_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) ); sort( $network_plugins );
                 $entry = array( 'role' => $role, 'id' => get_current_blog_id(), 'home' => home_url( '/' ), 'path' => $path,
                     'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ),
                     'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ), 'block' => wp_is_block_theme() ),
                     'site_plugins' => array_values( get_option( 'active_plugins', array() ) ),
-                    'network_plugins' => array_keys( get_site_option( 'active_sitewide_plugins', array() ) ),
+                    'network_plugins' => $network_plugins,
                     'campaign_keys' => array_keys( $timers ), 'campaign_sha256' => hash( 'sha256', wp_json_encode( self::canonical( $timers ) ) ),
                     'width' => $timers['shared-timer']['fixed_width'], 'deadline' => Email_Countdown_Timer_Config::deadline( $timers['shared-timer'] ),
                     'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'object_cache_dropin' => is_file( WP_CONTENT_DIR . '/object-cache.php' ),
-                    'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ) );
+                    'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ),
+                    'cache_configuration' => getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ? Email_Countdown_Timer_Network_Super_Cache::inventory() : null );
                 if ( $seed ) { $entry['pages'] = $pages; }
                 $result[] = $entry;
             } finally { restore_current_blog(); }
@@ -77,4 +80,8 @@ if ( $mode === 'seed' ) {
     Email_Countdown_Timer_Network_Lab::write( 'fixture', array( 'sites' => Email_Countdown_Timer_Network_Lab::sites( true ) ) );
 } elseif ( $mode === 'inventory' ) {
     Email_Countdown_Timer_Network_Lab::write( 'inventory', array( 'sites' => Email_Countdown_Timer_Network_Lab::sites( false ) ) );
+} elseif ( $mode === 'configure-cache' && getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ) {
+    Email_Countdown_Timer_Network_Super_Cache::configure();
+} elseif ( $mode === 'purge-cache' && getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ) {
+    Email_Countdown_Timer_Network_Super_Cache::purge();
 } else { exit( 1 ); }

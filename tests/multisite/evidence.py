@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlsplit, urlunsplit
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/cache-profiles'))
 from contracts import ORDER, Page, core_avatar, generation, navigation_cancel, page_evidence
+from cache_evidence import HITS, SETTINGS, VENDOR, browser_proof, hit_proof, snapshot_replay
 
 BASE = 'http://localhost:8097'
 PLUGIN = 'easy-countdown/email-countdown-timer.php'
@@ -67,24 +68,24 @@ def inventory_ok(sites, report, key, fixture):
     if not isinstance(sites, list) or len(sites) != 3 or not all(isinstance(x, dict) for x in sites):
         return False
     for i, (role, site) in enumerate(zip(ROLES, sites)):
+        cached = report.get('profile', 'baseline') == 'wp-super-cache'
         active = active_for(report['activation'], key, role)
         expected = {'role': role, 'id': i + 1, 'home': BASE + PATHS[role], 'path': PATHS[role],
                     'wordpress': '7.1.2', 'theme': {'name': report['theme'], 'version': THEMES[report['theme']][0], 'block': THEMES[report['theme']][1]},
                     'width': WIDTHS[role], 'deadline': DEADLINES[role], 'campaign_keys': ['shared-timer', 'only-' + role],
                     'site_plugins': [PLUGIN] if active and report['activation'] == 'site' else [],
-                    'network_plugins': [PLUGIN] if active and report['activation'] == 'network' else [],
-                    'wp_cache': False, 'object_cache_dropin': False, 'advanced_cache_dropin': False,
+                    'network_plugins': sorted(([PLUGIN] if active and report['activation'] == 'network' else []) + ([VENDOR] if cached else [])),
+                    'wp_cache': cached, 'object_cache_dropin': False, 'advanced_cache_dropin': cached,
+                    'cache_configuration': SETTINGS if cached else None,
                     'campaign_sha256': fixture[role]['campaign_sha256']}
-        # A network-active plugin also appears in every inactive site's network inventory.
-        if report['activation'] == 'network' and key.endswith('-on'):
-            expected['network_plugins'] = [PLUGIN]
         if (any(site.get(k) != v for k, v in expected.items())
                 or any(type(site.get(k)) is not int for k in ('id', 'width', 'deadline'))
-                or any(site.get(k) is not False for k in ('wp_cache', 'object_cache_dropin', 'advanced_cache_dropin'))
+                or site.get('wp_cache') is not cached or site.get('advanced_cache_dropin') is not cached or site.get('object_cache_dropin') is not False
                 or site['theme'].get('block') is not THEMES[report['theme']][1]):
             return False
         if not str(site.get('php_cli', '')).startswith('8.4.') or site.get('mysql') != '8.4.13':
             return False
+        if cached and any(type(site['cache_configuration'].get(k)) is not type(v) for k, v in SETTINGS.items()): return False
     return True
 
 def image_ok(proof, role, theme, jit, active, kind, missing=False):
@@ -92,6 +93,7 @@ def image_ok(proof, role, theme, jit, active, kind, missing=False):
         return False
     if not runtime(proof.get('runtime'), role, theme, jit, active):
         return False
+    if proof.get('cache_header') is not None: return False
     width, frames, status = (1, 1, 404) if missing else (WIDTHS[role], 60 if kind == 'gif' else 1, 200)
     expected = {'format': kind.upper(), 'status': status, 'width': width, 'frames': frames}
     if any(proof.get(k) != v for k, v in expected.items()) or any(type(proof.get(k)) is not int for k in ('status', 'width', 'frames')):
@@ -110,6 +112,7 @@ def accept(report):
     if (not isinstance(report, dict) or report.get('complete') is not True
             or report.get('theme') not in THEMES or report.get('activation') not in ('site', 'network')
             or report.get('jit') not in ('1235', 'disable') or report.get('failures') != []
+            or report.get('profile', 'baseline') not in ('baseline', 'wp-super-cache')
             or report.get('page_errors') != [] or report.get('browser_errors') != []
             or not isinstance(report.get('source_commit'), str) or not re.fullmatch('[a-f0-9]{40}', report['source_commit'])):
         return False
@@ -128,6 +131,8 @@ def accept(report):
         return False
     if not isinstance(states, list) or len(states) != 6 or not all(isinstance(s, dict) for s in states) or [s.get('key') for s in states] != ORDER:
         return False
+    cached = report.get('profile', 'baseline') == 'wp-super-cache'
+    cached_markers = set()
     for state in states:
         key = state['key']
         if state.get('complete') is not True or state.get('failures') != []:
@@ -139,11 +144,21 @@ def accept(report):
         for role, site in zip(ROLES, state['sites']):
             active = active_for(report['activation'], key, role)
             if (not isinstance(site, dict) or site.get('role') != role or site.get('active') is not active
-                    or site.get('complete') is not True or not page_evidence(site.get('generations'), False)):
+                    or site.get('complete') is not True or not page_evidence(site.get('generations'), cached)):
                 return False
             headers = site.get('page_runtime')
-            if not isinstance(headers, list) or len(headers) != 4 or not all(runtime(x, role, report['theme'], report['jit'], active) for x in headers):
+            runtime_valid = lambda h: runtime(h, role, report['theme'], report['jit'], active)
+            if not isinstance(headers, list) or len(headers) != 4:
                 return False
+            if cached:
+                if not hit_proof(site, key) or not browser_proof(site, key, runtime_valid): return False
+                cache_headers = site['cache']['response_headers']
+                for h, cache_h in zip(headers, cache_headers):
+                    if not (cache_h.get('x-wp-super-cache') in HITS and h == {}) and not runtime_valid(h): return False
+                marker = site['generations'][-1]
+                if marker in cached_markers: return False
+                cached_markers.add(marker)
+            elif not all(runtime_valid(h) for h in headers) or site.get('cache') is not None: return False
             public = site.get('public')
             if (public != {'status': 200, 'images': int(active), 'live': int(active), 'deadline': DEADLINES[role] if active else None,
                           'image_home': BASE + PATHS[role] if active else None, 'image_reference_valid': True if active else None,
@@ -153,6 +168,7 @@ def accept(report):
                     or public['image_reference_valid'] is not (True if active else None)):
                 return False
             required = {'dashboard', 'media-library', 'public-browser'}
+            if cached: required |= {'page-cache-hit', 'browser-cache-context'}
             if active:
                 required |= {'preview', 'live-ticks', 'live-pauses', 'live-resumes', 'no-image-polling'}
                 images = site.get('images')
@@ -166,9 +182,11 @@ def accept(report):
                     return False
                 if not all(image_ok(x, role, report['theme'], report['jit'], active, 'png', missing=True) for x in missing):
                     return False
-            elif site.get('inactive_endpoint') != {'status': 200, 'is_image': False, 'runtime': site['page_runtime'][0]}:
-                # Compare runtime fields only; generation headers are intentionally absent.
-                return False
+            else:
+                inactive = site.get('inactive_endpoint')
+                if (not isinstance(inactive, dict) or type(inactive.get('status')) is not int or inactive['status'] != 200
+                        or inactive.get('is_image') is not False or inactive.get('cache_header') is not None
+                        or inactive.get('runtime') != site['page_runtime'][0]): return False
             checks = site.get('checks')
             if not isinstance(checks, list) or not all(isinstance(x, str) for x in checks) or not required.issubset(checks):
                 return False
@@ -209,6 +227,7 @@ def assess(directory):
         report = json.loads(native.read_regular(directory / 'checks.json'))
         if not accept(report):
             result['errors'].append({'file': 'checks.json', 'reason': 'incomplete_or_failed_report'})
+        result['errors'].extend(snapshot_replay(directory, report))
     except (OSError, ValueError, UnicodeError, TypeError, KeyError) as error:
         result['errors'].append({'file': 'evidence', 'reason': type(error).__name__})
     result['passed'] = not result['errors']
