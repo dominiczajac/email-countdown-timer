@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
+from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -244,6 +244,51 @@ def main():
             check(True, 'live-browser')
             page.screenshot(path=str(evidence / (current['key'] + '-front.png')))
 
+    def vendor_http(request, fixture_page):
+        nonlocal phase
+        phase = 'vendor-http'
+        check(fixture_page['profile'] == profile and local(fixture_page['url'])
+              and not urlsplit(fixture_page['url']).query, 'vendor-local-url')
+        response = request.get(fixture_page['url'], headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
+        check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'vendor-http')
+        html = response.text()
+        parsed = Page(html)
+        structure = ((str(fixture_page['post_id']) in parsed.elementor_documents and len(parsed.elementor_widgets) == 1)
+                     if profile == 'elementor' else parsed.product_body)
+        check(structure, 'vendor-structure')
+        check(len(parsed.images) == int(current['active']) and 'PRIVATE-CACHE-LAB-NAME' not in html, 'vendor-output')
+        current['vendor_proof'] = {'profile': profile, 'post_id': fixture_page['post_id'], 'status': response.status,
+            'native_structure': structure, 'timer_images': len(parsed.images), 'path': urlsplit(fixture_page['url']).path}
+
+    def vendor_browser(browser, fixture_page):
+        nonlocal phase
+        phase = 'vendor-browser'
+        with browser.new_context(viewport={'width': 1280, 'height': 900}) as context:
+            isolate(context)
+            page = context.new_page()
+            response = page.goto(fixture_page['url'], wait_until='load', timeout=45000)
+            check(response is not None and response.status == 200, 'vendor-browser-http')
+            if profile == 'elementor':
+                expect(page.locator('[data-elementor-id="' + str(fixture_page['post_id']) + '"]')).to_have_count(1)
+                expect(page.locator('.elementor-widget-shortcode')).to_be_visible()
+            else:
+                expect(page.get_by_role('heading', name=fixture_page['title'], exact=True)).to_be_visible()
+                expect(page.get_by_role('button', name='Add to cart', exact=True)).to_be_visible()
+                # Classic and block product templates can expose the description as a tab.
+                description = page.get_by_role('tab', name='Description', exact=True)
+                if description.count() and description.is_visible():
+                    description.click()
+            image = page.locator('img.email-countdown-timer-image')
+            expect(image).to_have_count(int(current['active']))
+            if current['active']:
+                expect(image).to_be_visible()
+                expect(image).to_have_js_property('complete', True)
+                check(image.evaluate('img => img.naturalWidth === 600') and image.get_attribute('data-no-lazy') == '1', 'vendor-browser-image')
+            else:
+                check(True, 'vendor-browser-no-timer')
+            check(True, 'vendor-browser')
+            page.screenshot(path=str(evidence / (current['key'] + '-' + profile + '.png')))
+
     try:
         installed = json.loads((evidence / 'plugins.json').read_text())
         if profile != 'baseline' and not any(p['name'] == profile and p['version'] == PROFILES[profile] for p in installed):
@@ -329,7 +374,11 @@ def main():
                             else:
                                 response = request.get(base + '/?ecd_action=render&ecd=cache-lab&mode=static', timeout=45000)
                                 check(response.status == 200 and not response.headers.get('content-type', '').startswith('image/'), 'inactive-endpoint')
+                            if profile in CONTENT_PROFILES:
+                                vendor_http(request, fixture['pages'][key]['vendor'])
                         browser_state(browser, url)
+                        if profile in CONTENT_PROFILES:
+                            vendor_browser(browser, fixture['pages'][key]['vendor'])
                         phase = 'browser-network'
                         state_errors = [x for x in report['browser_errors'] + report['page_errors'] if x['state'] == key]
                         if state_errors:

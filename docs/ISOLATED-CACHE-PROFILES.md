@@ -135,3 +135,7 @@ and WP Rocket need legitimately supplied packages; LiteSpeed server-cache needs
 a separately verified LiteSpeed server. Elementor, WooCommerce, additional
 engines/themes and multisite remain subsequent independent profiles. No release,
 production test, ruleset change or native Wiki publication is included.
+
+The separate [builder/commerce tranche](ISOLATED-BUILDER-COMMERCE.md) extends
+the same harness with Elementor and WooCommerce alone. Its evidence does not
+replace the results or qualifications above.

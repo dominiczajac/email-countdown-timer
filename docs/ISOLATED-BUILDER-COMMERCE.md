@@ -23,6 +23,9 @@ transients are cleared; WooCommerce coming-soon mode and optional tracking are
 disabled and recorded. WordPress HTTP API/mail and external browser attempts
 remain controlled by the existing lab. Use only synthetic data: no real orders,
 customers, subscriptions, payment, shipping, mail or remote service credentials.
+Elementor's public `elementor/frontend/print_google_fonts` hook disables remote
+Google fonts for this explicit offline/local-font profile; other unexpected
+browser attempts remain recorded and fail acceptance.
 
 This is shortcode/widget/product-description coverage. It does not certify
 Elementor drag-and-drop editing or every experiment, WooCommerce cart/checkout,

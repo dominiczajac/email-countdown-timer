@@ -9,7 +9,7 @@ import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
-from contracts import ACTIVE_REQUIRED, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, CONTENT_PROFILES, ORDER, PROFILES, REQUIRED, Page, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
 
 
 def good(profile='baseline'):
@@ -18,6 +18,9 @@ def good(profile='baseline'):
     for key in ORDER:
         active = key.endswith('-on')
         checks = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
+        if profile in CONTENT_PROFILES:
+            checks |= {'vendor-http', 'vendor-structure', 'vendor-output', 'vendor-browser',
+                       'vendor-browser-image' if active else 'vendor-browser-no-timer'}
         if profile == 'autoptimize' and active:
             checks |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}
         markers = [f'{x:024x}' for x in range(4)]
@@ -29,14 +32,29 @@ def good(profile='baseline'):
                    'x-ecd-lab-gd': 'yes', 'x-ecd-lab-active': 'on' if active else 'off', 'x-ecd-lab-php': '8.4.27'}
         env = {'active_plugins': sorted(expected_plugins(profile, active)), 'wordpress': '7.1.2', 'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': 'twentytwentyfive'}}
         report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks) + ['anonymous-page-http'] * 4, 'failures': [], 'generations': markers,
-            'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}]})
+            'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}],
+            'vendor_proof': {'profile': profile, 'post_id': 42, 'status': 200, 'native_structure': True, 'timer_images': int(active)}})
     return report
 
 
 class Contracts(unittest.TestCase):
     def test_all_profiles_have_positive_controls(self):
-        for profile in ('baseline', 'wp-super-cache', 'w3-total-cache', 'autoptimize'):
+        for profile in PROFILES:
             self.assertTrue(accept(good(profile)))
+
+    def test_vendor_activation_without_actual_content_or_browser_proof_fails(self):
+        for profile in CONTENT_PROFILES:
+            for label in ('vendor-structure', 'vendor-output', 'vendor-browser', 'vendor-browser-image'):
+                report = good(profile); report['states'][1]['checks'].remove(label)
+                self.assertFalse(accept(report))
+            report = good(profile); report['states'][1].pop('vendor_proof')
+            self.assertFalse(accept(report))
+
+    def test_missing_or_wrong_vendor_output_cannot_pass_by_label(self):
+        for profile in CONTENT_PROFILES:
+            for field, value in (('status', 403), ('native_structure', False), ('timer_images', 0), ('post_id', True), ('profile', 'baseline')):
+                report = good(profile); report['states'][1]['vendor_proof'][field] = value
+                self.assertFalse(accept(report))
 
     def test_noop_cached_profile_fails(self):
         report = good('wp-super-cache')

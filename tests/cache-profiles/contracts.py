@@ -3,8 +3,9 @@ from html.parser import HTMLParser
 import re
 from urllib.parse import parse_qs, urlsplit
 
-PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16'}
-PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php'}
+PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16', 'elementor': '4.3.2', 'woocommerce': '11.1.2'}
+PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php', 'elementor': 'elementor/elementor.php', 'woocommerce': 'woocommerce/woocommerce.php'}
+CONTENT_PROFILES = {'elementor', 'woocommerce'}
 ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pair-3-on']
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
 ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser', 'gif-policy', 'static-policy', 'front-browser-http', 'front-browser-image', 'live-pauses', 'no-per-second-image-requests'}
@@ -15,11 +16,18 @@ class Page(HTMLParser):
     def __init__(self, html):
         super().__init__()
         self.generations, self.images, self.live, self.assets, self.controls = [], [], [], [], []
+        self.elementor_documents, self.elementor_widgets, self.product_body = [], [], False
         self.feed(html)
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         classes = attrs.get('class', '').split()
+        if tag == 'body' and 'single-product' in classes:
+            self.product_body = True
+        if attrs.get('data-elementor-id'):
+            self.elementor_documents.append(attrs['data-elementor-id'])
+        if 'elementor-widget-shortcode' in classes:
+            self.elementor_widgets.append(attrs)
         if attrs.get('id') == 'ecd-cache-origin':
             self.generations.append(attrs.get('data-generation', ''))
         if tag == 'img' and 'email-countdown-timer-image' in classes:
@@ -153,6 +161,15 @@ def accept(report):
             return False
         checks = state.get('checks')
         required = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
+        if report['profile'] in CONTENT_PROFILES:
+            required |= {'vendor-http', 'vendor-structure', 'vendor-output', 'vendor-browser',
+                         'vendor-browser-image' if active else 'vendor-browser-no-timer'}
+            proof = state.get('vendor_proof')
+            if (not isinstance(proof, dict) or proof.get('profile') != report['profile']
+                    or proof.get('status') != 200 or proof.get('native_structure') is not True
+                    or type(proof.get('post_id')) is not int or proof['post_id'] <= 0
+                    or type(proof.get('timer_images')) is not int or proof['timer_images'] != int(active)):
+                return False
         if active and report['profile'] == 'autoptimize':
             required |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}
         if report['profile'] in ('wp-super-cache', 'w3-total-cache'):
