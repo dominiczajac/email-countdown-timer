@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, font_query_facts, generation, navigation_request_cancel, page_evidence, vendor_font_control
+from contracts import ADMIN_PHASES, CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_admin_font, expected_plugins, font_query_facts, generation, navigation_request_cancel, page_evidence, vendor_font_control
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -96,7 +96,7 @@ def main():
                 request_route.continue_()
             else:
                 known_avatar = core_avatar(request.url, request.resource_type)
-                known_font = elementor_app_font(request.url, request.resource_type, profile, phase)
+                known_font = elementor_admin_font(request.url, request.resource_type, profile, phase)
                 item = {'state': current['key'], 'phase': phase, 'host': urlsplit(request.url).hostname,
                         'resource_type': request.resource_type, 'expected_core_avatar': known_avatar, 'expected_vendor_font': known_font}
                 font_facts = font_query_facts(request.url)
@@ -104,7 +104,7 @@ def main():
                     item['font_query'] = font_facts
                 report['blocked_external'].append(item)
                 if known_font:
-                    report['blocked_vendor_fonts'].append({'state': current['key'], 'phase': phase, 'font': 'elementor-app-roboto-css2', 'blocked': True})
+                    report['blocked_vendor_fonts'].append({'state': current['key'], 'phase': phase, 'font': 'elementor-admin-roboto-css2', 'blocked': True})
                 if known_avatar or known_font:
                     expected_aborted.add(request.url)
                 else:
@@ -427,13 +427,14 @@ def main():
         raise
     finally:
         report['vendor_font_control'] = vendor_font_control(report)
-        if not report['vendor_font_control']:
+        if report['complete'] and not report['vendor_font_control']:
             annotation('error', 'Vendor font attribution', 'Known blocked imports must match every off/on admin control.')
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
             'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states']),
             'blocked_vendor_fonts': len(report['blocked_vendor_fonts']), 'vendor_font_control': report['vendor_font_control'],
+            'vendor_font_counts': {phase: [sum(x['state'] == key and x['phase'] == phase for x in report['blocked_vendor_fonts']) for key in ORDER] for phase in sorted(ADMIN_PHASES)} if profile == 'elementor' else None,
             'source_commit': report.get('source_commit'), 'zip_sha256': report.get('distribution', {}).get('zip_sha256'),
             'native_packages': report.get('native_packages')}))
     return 0 if report['passed'] else 1

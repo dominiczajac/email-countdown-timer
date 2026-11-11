@@ -25,21 +25,26 @@ remain controlled by the existing lab. Use only synthetic data: no real orders,
 customers, subscriptions, payment, shipping, mail or remote service credentials.
 Elementor's public `elementor/frontend/print_google_fonts` hook disables remote
 Google fonts in public widget output. Its stock admin application CSS separately
-imports Roboto from Google, as declared in the pinned upstream
-[app/assets/styles/_base.scss](https://github.com/elementor/elementor/blob/4.3.2/app/assets/styles/_base.scss).
-The browser aborts this exact stylesheet import and records it as
+requests the Roboto stylesheet observed in the hosted pinned profile:
+`family=Roboto:wght@400;500;700&display=swap&ver=1.0.0`. The resource query's
+`ver=1.0.0` is distinct from Elementor's plugin version 4.3.2.
+The browser aborts this exact resource and records it as
 `blocked_vendor_fonts`, alongside the existing blocked core-avatar control.
-Its exact family/weights, `display=swap`, host/path and stylesheet type must
+Its exact family/weights, display/version query, host/path and stylesheet type must
 match, only on the five named admin phases and only in the Elementor profile.
-The HTTP lab permits the HTTP/HTTPS resolutions of the scheme-relative import.
+The owned HTTP lab permits HTTP/HTTPS requests, both aborted before fetching.
 All three off/on pairs must show identical nonempty font-request counts for
-each shared admin page; the active timer editor must match the dashboard
-control. Missing, added or changed observations fail the final report gate.
+each shared admin page, stable across all pairs; the active timer editor must
+match the dashboard control. The font control must reconcile with the actual
+external-request records and their exact bounded query metadata. Missing,
+added or changed observations fail the final report gate.
 Other hosts, fonts, resource types, public-page requests and JavaScript errors
 remain failures. Stock Elementor CSS/scripts are preserved. This establishes
 timer behavior with that optional third-party font blocked; Elementor's own
 external font attempts remain visible. The inventory flag records the public
 filter setting, and browser observations provide the network evidence.
+An Elementor version change requires renewed observation of this resource
+signature and paired controls.
 
 This is shortcode/widget/product-description coverage. It does not certify
 Elementor drag-and-drop editing or every experiment, WooCommerce cart/checkout,
@@ -94,9 +99,15 @@ again passed 10/12 jobs. Both Elementor cells now reached all six experiments
 and failed the browser-network gate for `fonts.googleapis.com/css2` in admin
 pages, including Easy Countdown off controls. A four-font-handle override at
 `e01ea97` ([42967998477](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42967998477))
-also passed 10/12 and did not remove the nested CSS import. That override was
-removed. The exact blocked-import attribution above instead requires fresh
-paired observations without changing vendor styles or accepting arbitrary
-font requests. Both failures remain negative and are not attributed to the
-countdown runtime. Completed current-head results and review revisions are
-recorded in [PR #31](https://github.com/dominiczajac/email-countdown-timer/pull/31).
+also passed 10/12 and did not suppress the observed admin resource. That override
+was removed. An initial classifier at `df6f2d0`
+([42969108362](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42969108362))
+used the Roboto variant in upstream `app/assets/styles/_base.scss`; it correctly
+rejected the different actual request and remained negative. Bounded diagnostics
+at `bb0bc26` ([42969691244](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42969691244))
+recorded the exact `Roboto:wght@400;500;700`, display and resource-version query
+in both JIT cells and off/on states. The measured signature above replaces that
+incorrect source assumption, with stricter cross-record/cross-pair checks.
+These earlier failures stay negative and are not attributed to the countdown
+runtime. Completed current-head results and review revisions are recorded in
+[PR #31](https://github.com/dominiczajac/email-countdown-timer/pull/31).

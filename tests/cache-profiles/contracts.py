@@ -11,7 +11,7 @@ ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pa
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
 ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser', 'gif-policy', 'static-policy', 'front-browser-http', 'front-browser-image', 'live-pauses', 'no-per-second-image-requests'}
 ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
-ELEMENTOR_APP_FONT = 'Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900'
+ELEMENTOR_ADMIN_FONT = 'Roboto:wght@400;500;700'
 
 
 class Page(HTMLParser):
@@ -109,21 +109,21 @@ def core_avatar(url, resource_type):
             and re.fullmatch(r'/avatar/(?:[a-f0-9]{32}|[a-f0-9]{64})', parts.path) is not None)
 
 
-def elementor_app_font(url, resource_type, profile, phase):
-    """One upstream app/_base.scss import, blocked rather than fetched.
+def elementor_admin_font(url, resource_type, profile, phase):
+    """The exact observed 4.3.2 admin font resource, blocked rather than fetched.
 
-    Scheme-relative upstream CSS resolves as HTTP on this HTTP-only fixture.
+    Preserve the resource's observed ver=1.0.0, distinct from plugin version.
     Public pages, other profiles, fonts, scripts and query changes still fail.
     """
     parts = urlsplit(url)
     try:
-        query = parse_qs(parts.query, strict_parsing=True, max_num_fields=2, errors='strict')
+        query = parse_qs(parts.query, strict_parsing=True, max_num_fields=3, errors='strict')
     except (ValueError, UnicodeError):
         return False
     return (profile == 'elementor' and phase in ADMIN_PHASES and resource_type == 'stylesheet'
             and parts.scheme in ('http', 'https') and parts.netloc == 'fonts.googleapis.com'
             and parts.path == '/css2' and not parts.fragment
-            and query == {'family': [ELEMENTOR_APP_FONT], 'display': ['swap']})
+            and query == {'family': [ELEMENTOR_ADMIN_FONT], 'display': ['swap'], 'ver': ['1.0.0']})
 
 
 def font_query_facts(url):
@@ -136,7 +136,7 @@ def font_query_facts(url):
     except (ValueError, UnicodeError):
         return {'unsupported_query': True}
     facts = {'other_fields': bool(set(query) - {'family', 'display', 'ver'})}
-    patterns = {'family': r'(?:Roboto|Poppins|Inter)(?::[A-Za-z0-9,;@._-]{1,240})?',
+    patterns = {'family': r'(?:Roboto|Poppins|Inter)(?::(?:ital,)?(?:opsz,)?wght@[0-9,;.]{1,224})?',
                 'display': r'(?:swap|auto|block|fallback|optional)', 'ver': r'[0-9]{1,3}(?:\.[0-9]{1,3}){1,3}'}
     for key, pattern in patterns.items():
         facts[key] = [value if re.fullmatch(pattern, value) else '<redacted>' for value in query.get(key, [])]
@@ -151,7 +151,17 @@ def vendor_font_control(report):
     if report.get('profile') != 'elementor':
         return blocks == []
     if any(not isinstance(x, dict) or x.get('state') not in ORDER or x.get('phase') not in ADMIN_PHASES
-           or x.get('font') != 'elementor-app-roboto-css2' or x.get('blocked') is not True for x in blocks):
+           or x.get('font') != 'elementor-admin-roboto-css2' or x.get('blocked') is not True for x in blocks):
+        return False
+    external = report.get('blocked_external')
+    if not isinstance(external, list) or not all(isinstance(x, dict) for x in external):
+        return False
+    fonts = [x for x in external if x.get('expected_vendor_font') is True]
+    expected_query = {'family': [ELEMENTOR_ADMIN_FONT], 'display': ['swap'], 'ver': ['1.0.0'], 'other_fields': False}
+    if any(x.get('host') != 'fonts.googleapis.com' or x.get('resource_type') != 'stylesheet'
+           or x.get('font_query') != expected_query for x in fonts):
+        return False
+    if Counter((x['state'], x['phase']) for x in blocks) != Counter((x.get('state'), x.get('phase')) for x in fonts):
         return False
     def counts(state, phase):
         return Counter(x['font'] for x in blocks if x['state'] == state and x['phase'] == phase)
@@ -159,7 +169,7 @@ def vendor_font_control(report):
         off, on = f'pair-{pair}-off', f'pair-{pair}-on'
         for phase in ADMIN_PHASES - {'timer-editor'}:
             expected = counts(off, phase)
-            if not expected or counts(on, phase) != expected:
+            if not expected or counts(on, phase) != expected or counts('pair-1-off', phase) != expected:
                 return False
         if counts(off, 'timer-editor') or counts(on, 'timer-editor') != counts(off, 'dashboard'):
             return False
