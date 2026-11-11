@@ -16,7 +16,7 @@ class Page(HTMLParser):
     def __init__(self, html):
         super().__init__()
         self.generations, self.images, self.live, self.assets, self.controls = [], [], [], [], []
-        self.elementor_documents, self.elementor_widgets, self.product_body = [], [], False
+        self.elementor_documents, self.elementor_widgets, self.product_body, self.product_ids = [], [], False, []
         self.feed(html)
 
     def handle_starttag(self, tag, attributes):
@@ -24,6 +24,7 @@ class Page(HTMLParser):
         classes = attrs.get('class', '').split()
         if tag == 'body' and 'single-product' in classes:
             self.product_body = True
+            self.product_ids = [x.removeprefix('postid-') for x in classes if re.fullmatch(r'postid-[1-9][0-9]*', x)]
         if attrs.get('data-elementor-id'):
             self.elementor_documents.append(attrs['data-elementor-id'])
         if 'elementor-widget-shortcode' in classes:
@@ -63,7 +64,7 @@ class VendorPage(Page):
                 flags.add('document')
             if 'elementor-widget-shortcode' in classes and 'document' in flags:
                 flags.add('content')
-        elif (attrs.get('id') == 'tab-description' or 'woocommerce-Tabs-panel--description' in classes
+        elif self.profile == 'woocommerce' and self.post_id in self.product_ids and (attrs.get('id') == 'tab-description' or 'woocommerce-Tabs-panel--description' in classes
               or 'wp-block-woocommerce-product-description' in classes):
             flags.add('content')
         if 'content' in flags:
@@ -173,7 +174,7 @@ def metadata_matches(profile, jit, state):
                 'x-ecd-lab-active': 'on' if state['active'] else 'off'}
     config = env.get('configuration')
     if profile in CONTENT_PROFILES:
-        if not isinstance(config, dict) or config.get('version') != PROFILES[profile] or env.get('wp_cache') is not False or env.get('advanced_cache_dropin') is not False:
+        if not isinstance(config, dict) or config.get('version') != PROFILES[profile] or config.get('activation_redirect_pending') is not False or env.get('wp_cache') is not False or env.get('advanced_cache_dropin') is not False:
             return False
         if profile == 'elementor' and config.get('print_google_fonts') is not False:
             return False
@@ -232,7 +233,8 @@ def accept(report):
             fixture = vendor_fixtures[state['key']]
             if (proof['post_id'] != fixture['post_id'] or proof.get('path') != fixture['path']
                     or proof.get('scoped_timer_images') != int(active) or proof.get('scope_found') is not True
-                    or proof.get('literal_shortcode') is not (not active)):
+                    or proof.get('literal_shortcode') is not (not active)
+                    or not isinstance(proof.get('rendered_post_ids'), list) or str(fixture['post_id']) not in proof['rendered_post_ids']):
                 return False
         if active and report['profile'] == 'autoptimize':
             required |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}

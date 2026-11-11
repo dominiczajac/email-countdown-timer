@@ -254,10 +254,11 @@ def main():
         html = response.text()
         parsed = VendorPage(html, profile, fixture_page['post_id'])
         structure = ((str(fixture_page['post_id']) in parsed.elementor_documents and len(parsed.elementor_widgets) == 1)
-                     if profile == 'elementor' else parsed.product_body)
+                     if profile == 'elementor' else parsed.product_body and str(fixture_page['post_id']) in parsed.product_ids)
         check(structure, 'vendor-structure')
         current['vendor_proof'] = {'profile': profile, 'post_id': fixture_page['post_id'], 'status': response.status,
             'native_structure': structure, 'timer_images': len(parsed.images), 'path': urlsplit(fixture_page['url']).path,
+            'rendered_post_ids': parsed.elementor_documents if profile == 'elementor' else parsed.product_ids,
             'scoped_timer_images': len(parsed.scoped_images), 'scope_found': parsed.scope_found, 'literal_shortcode': parsed.literal_shortcode}
         check(len(parsed.images) == len(parsed.scoped_images) == int(current['active'])
               and parsed.scope_found and parsed.literal_shortcode is (not current['active'])
@@ -277,6 +278,7 @@ def main():
                 scope = document.locator('.elementor-widget-shortcode')
                 expect(scope).to_be_visible()
             else:
+                expect(page.locator('body.postid-' + str(fixture_page['post_id']))).to_have_count(1)
                 expect(page.get_by_role('heading', level=1, name=fixture_page['title'], exact=True)).to_be_visible()
                 expect(page.get_by_role('button', name='Add to cart', exact=True)).to_be_visible()
                 # Classic and block product templates can expose the description as a tab.

@@ -34,11 +34,11 @@ def good(profile='baseline'):
                    'x-ecd-lab-gd': 'yes', 'x-ecd-lab-active': 'on' if active else 'off', 'x-ecd-lab-php': '8.4.27'}
         env = {'active_plugins': sorted(expected_plugins(profile, active)), 'wordpress': '7.1.2', 'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': 'twentytwentyfive'}}
         env.update(wp_cache=False, advanced_cache_dropin=False,
-            configuration={'version': PROFILES[profile], 'print_google_fonts': False, 'coming_soon': 'no', 'allow_tracking': 'no'})
+            configuration={'version': PROFILES[profile], 'print_google_fonts': False, 'coming_soon': 'no', 'allow_tracking': 'no', 'activation_redirect_pending': False})
         report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks) + ['anonymous-page-http'] * 4, 'failures': [], 'generations': markers,
             'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}],
             'vendor_proof': {'profile': profile, 'post_id': 42 + index, 'path': '/' + key + '-vendor/', 'status': 200,
-                'native_structure': True, 'timer_images': int(active), 'scoped_timer_images': int(active), 'scope_found': True, 'literal_shortcode': not active}})
+                'native_structure': True, 'timer_images': int(active), 'scoped_timer_images': int(active), 'scope_found': True, 'literal_shortcode': not active, 'rendered_post_ids': [str(42 + index)]}})
     return report
 
 
@@ -114,7 +114,7 @@ Email_Countdown_Timer_Lab_CLI::write_json($argv[2], array('proof' => $argv[3] ==
             self.assertFalse(accept(report))
 
     def test_vendor_configuration_is_enforced(self):
-        for profile, field, value in (('elementor', 'print_google_fonts', True), ('woocommerce', 'coming_soon', 'yes'), ('woocommerce', 'allow_tracking', 'yes')):
+        for profile, field, value in (('elementor', 'print_google_fonts', True), ('woocommerce', 'coming_soon', 'yes'), ('woocommerce', 'allow_tracking', 'yes'), ('elementor', 'activation_redirect_pending', True), ('woocommerce', 'activation_redirect_pending', True)):
             report = good(profile); report['states'][1]['environment']['configuration'][field] = value
             self.assertFalse(accept(report))
 
@@ -123,16 +123,44 @@ Email_Countdown_Timer_Lab_CLI::write_json($argv[2], array('proof' => $argv[3] ==
         html = '<div data-elementor-id="42"><div class="elementor-widget-shortcode"></div></div>' + image
         page = VendorPage(html, 'elementor', 42)
         self.assertEqual(len(page.images), 1); self.assertEqual(len(page.scoped_images), 0)
-        page = VendorPage('<body class="single-product"><div id="tab-description"></div>' + image + '</body>', 'woocommerce', 42)
+        page = VendorPage('<body class="single-product postid-42"><div id="tab-description"></div>' + image + '</body>', 'woocommerce', 42)
         self.assertEqual(len(page.images), 1); self.assertEqual(len(page.scoped_images), 0)
 
     def test_scoped_native_output_and_unprocessed_off_control(self):
         for profile, prefix, suffix in (('elementor', '<div data-elementor-id="42"><div class="elementor-widget-shortcode">', '</div></div>'),
-                ('woocommerce', '<body class="single-product"><div class="wp-block-woocommerce-product-description">', '</div></body>')):
+                ('woocommerce', '<body class="single-product postid-42"><div class="wp-block-woocommerce-product-description">', '</div></body>')):
             page = VendorPage(prefix + '<br><img class="email-countdown-timer-image" src="/timer">' + suffix, profile, 42)
             self.assertEqual(len(page.scoped_images), 1); self.assertFalse(page.literal_shortcode)
             page = VendorPage(prefix + '[ecd_timer id=&quot;cache-lab&quot;]' + suffix, profile, 42)
             self.assertEqual(len(page.scoped_images), 0); self.assertTrue(page.literal_shortcode)
+
+    def test_wrong_rendered_product_id_cannot_satisfy_fixture_binding(self):
+        page = VendorPage('<body class="single-product postid-99"><div id="tab-description"><img class="email-countdown-timer-image"></div></body>', 'woocommerce', 42)
+        self.assertTrue(page.product_body); self.assertEqual(page.product_ids, ['99'])
+        self.assertFalse(page.scope_found); self.assertEqual(page.scoped_images, [])
+        for profile in CONTENT_PROFILES:
+            report = good(profile); report['states'][1]['vendor_proof']['rendered_post_ids'] = ['99']
+            self.assertFalse(accept(report))
+
+    def test_local_font_configuration_leaves_other_styles_and_unknown_hosts_intact(self):
+        code = '''
+define('ABSPATH', '/unused/'); define('ELEMENTOR_VERSION', '4.3.2');
+function wp_get_environment_type() { return 'local'; }
+function wp_parse_url($url, $component) { return parse_url($url, $component); }
+function add_filter($name, $callback, ...$args) { $GLOBALS['filters'][$name] = $callback; }
+function add_action(...$args) {} function add_shortcode(...$args) {}
+$GLOBALS['wpdb'] = (object) array('base_prefix' => 'ectcache_');
+require $argv[1];
+$filter = $GLOBALS['filters']['style_loader_src'];
+$font = 'https://fonts.googleapis.com/css2?family=Poppins';
+echo json_encode(array($filter($font, 'elementor-home-screen-fonts'),
+    $filter($font, 'unrecognized-font'), $filter('https://unknown.invalid/font.css', 'elementor-home-screen-fonts'),
+    $filter('http://localhost:8095/style.css', 'elementor-admin-top-bar')));
+'''
+        result = subprocess.run(['php', '-r', code, str(Path(__file__).with_name('observer.php'))], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), ['', 'https://fonts.googleapis.com/css2?family=Poppins',
+            'https://unknown.invalid/font.css', 'http://localhost:8095/style.css'])
 
     def test_noop_cached_profile_fails(self):
         report = good('wp-super-cache')

@@ -24,8 +24,15 @@ disabled and recorded. WordPress HTTP API/mail and external browser attempts
 remain controlled by the existing lab. Use only synthetic data: no real orders,
 customers, subscriptions, payment, shipping, mail or remote service credentials.
 Elementor's public `elementor/frontend/print_google_fonts` hook disables remote
-Google fonts for this explicit offline/local-font profile; other unexpected
-browser attempts remain recorded and fail acceptance.
+Google fonts in public widget output for this explicit offline/local-font
+profile. Its pinned 4.3.2 admin/home/promotion font-only handles additionally use
+system font fallbacks through WordPress `style_loader_src`: admin-top-bar,
+home-screen, onboarding and atomic-widgets-promotion fonts. Their UI scripts
+and styles remain active. Only these exact handles with `fonts.googleapis.com`
+are affected; overrides are recorded in `local-font-overrides.jsonl`. Unknown
+handles/hosts remain unchanged and still fail browser network acceptance.
+Inventory records the frontend filter setting; the real anonymous/admin browser
+network observations establish whether the tested pages avoid remote fonts.
 
 This is shortcode/widget/product-description coverage. It does not certify
 Elementor drag-and-drop editing or every experiment, WooCommerce cart/checkout,
@@ -36,7 +43,9 @@ production deployment, ruleset or environment publication is proposed.
 The report must bind each vendor result to its own seeded post ID/path, with
 six distinct documents/products. The HTTP parser and browser both require the
 image inside the native Elementor shortcode widget or WooCommerce long
-description. The off control retains the unprocessed shortcode there; the on
+description. Elementor's `data-elementor-id` or WooCommerce's actual
+`body.postid-<N>` must match the seeded ID in HTTP and browser markup. The off
+control retains the unprocessed shortcode there; the on
 control replaces it with a decoded countdown. Empty containers or a timer
 elsewhere on the page do not satisfy this proof. The selected no-tracking,
 coming-soon and local-font settings are also checked in recorded metadata.
@@ -65,5 +74,16 @@ headers; the raw `wp plugin list` output is also retained. JSON decoding stays
 strict, each state deletes its old inventory before requesting a fresh one,
 and CLI exit codes, HTTP bytes, native logs and all behavior gates are unchanged.
 Controls exercise startup/shutdown output, stale files, symlinks, wrong paths
-and encoding failure. This channel separation still requires a fresh hosted
-run; it is not evidence of an Elementor compatibility pass.
+and encoding failure. Retained CLI notices/deprecations are diagnostic evidence,
+not a new zero-warning gate; nonzero CLI exits and the existing FPM/PHP/nginx
+fatal/native gates remain mandatory. No compatibility conclusion follows from
+channel separation alone; only fresh hosted evidence can establish behavior.
+
+At `8165482`, [42967321693](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42967321693)
+again passed 10/12 jobs. Both Elementor cells now reached all six experiments
+and failed the browser-network gate for `fonts.googleapis.com/css2` in admin
+pages, including Easy Countdown off controls. Public-widget font configuration
+does not govern Elementor's separate admin font handles. The explicit bounded
+font-only configuration above follows that observed result; the failure is
+retained and is not attributed to the countdown runtime. Completed current-head
+results and review revisions are recorded in [PR #31](https://github.com/dominiczajac/email-countdown-timer/pull/31).
