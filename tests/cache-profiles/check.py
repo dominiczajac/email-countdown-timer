@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, expected_plugins, generation, navigation_request_cancel, page_evidence
+from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, generation, navigation_request_cancel, page_evidence, vendor_font_control
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -41,7 +41,7 @@ def main():
     if profile not in PROFILES or jit not in ('1235', 'disable'):
         raise RuntimeError('invalid_profile')
     base = 'http://localhost:8095'
-    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'navigation_cancellations': []}
+    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'blocked_vendor_fonts': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
     navigating = False
@@ -96,10 +96,13 @@ def main():
                 request_route.continue_()
             else:
                 known_avatar = core_avatar(request.url, request.resource_type)
+                known_font = elementor_app_font(request.url, request.resource_type, profile, phase)
                 item = {'state': current['key'], 'phase': phase, 'host': urlsplit(request.url).hostname,
-                        'resource_type': request.resource_type, 'expected_core_avatar': known_avatar}
+                        'resource_type': request.resource_type, 'expected_core_avatar': known_avatar, 'expected_vendor_font': known_font}
                 report['blocked_external'].append(item)
-                if known_avatar:
+                if known_font:
+                    report['blocked_vendor_fonts'].append({'state': current['key'], 'phase': phase, 'font': 'elementor-app-roboto-css2', 'blocked': True})
+                if known_avatar or known_font:
                     expected_aborted.add(request.url)
                 else:
                     report['browser_errors'].append({**item, 'reason': 'unexpected_external_request'})
@@ -420,10 +423,14 @@ def main():
         annotation('error', 'Profile initialization', json.dumps(failure))
         raise
     finally:
+        report['vendor_font_control'] = vendor_font_control(report)
+        if not report['vendor_font_control']:
+            annotation('error', 'Vendor font attribution', 'Known blocked imports must match every off/on admin control.')
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
             'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states']),
+            'blocked_vendor_fonts': len(report['blocked_vendor_fonts']), 'vendor_font_control': report['vendor_font_control'],
             'source_commit': report.get('source_commit'), 'zip_sha256': report.get('distribution', {}).get('zip_sha256'),
             'native_packages': report.get('native_packages')}))
     return 0 if report['passed'] else 1

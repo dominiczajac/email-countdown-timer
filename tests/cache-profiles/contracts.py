@@ -1,5 +1,6 @@
 """Small, dependency-free acceptance gate for the isolated lab's evidence."""
 from html.parser import HTMLParser
+from collections import Counter
 import re
 from urllib.parse import parse_qs, urlsplit
 
@@ -10,6 +11,7 @@ ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pa
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
 ACTIVE_REQUIRED = {'image-gif', 'image-static', 'timer-editor', 'live-browser', 'gif-policy', 'static-policy', 'front-browser-http', 'front-browser-image', 'live-pauses', 'no-per-second-image-requests'}
 ADMIN_PHASES = {'admin-login', 'dashboard', 'media-library', 'core-media-control', 'timer-editor'}
+ELEMENTOR_APP_FONT = 'Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900'
 
 
 class Page(HTMLParser):
@@ -107,6 +109,46 @@ def core_avatar(url, resource_type):
             and re.fullmatch(r'/avatar/(?:[a-f0-9]{32}|[a-f0-9]{64})', parts.path) is not None)
 
 
+def elementor_app_font(url, resource_type, profile, phase):
+    """One upstream app/_base.scss import, blocked rather than fetched.
+
+    Scheme-relative upstream CSS resolves as HTTP on this HTTP-only fixture.
+    Public pages, other profiles, fonts, scripts and query changes still fail.
+    """
+    parts = urlsplit(url)
+    try:
+        query = parse_qs(parts.query, strict_parsing=True, max_num_fields=2, errors='strict')
+    except (ValueError, UnicodeError):
+        return False
+    return (profile == 'elementor' and phase in ADMIN_PHASES and resource_type == 'stylesheet'
+            and parts.scheme in ('http', 'https') and parts.netloc == 'fonts.googleapis.com'
+            and parts.path == '/css2' and not parts.fragment
+            and query == {'family': [ELEMENTOR_APP_FONT], 'display': ['swap']})
+
+
+def vendor_font_control(report):
+    """Require the known blocked import identically in each off/on admin pair."""
+    blocks = report.get('blocked_vendor_fonts', [])
+    if not isinstance(blocks, list):
+        return False
+    if report.get('profile') != 'elementor':
+        return blocks == []
+    if any(not isinstance(x, dict) or x.get('state') not in ORDER or x.get('phase') not in ADMIN_PHASES
+           or x.get('font') != 'elementor-app-roboto-css2' or x.get('blocked') is not True for x in blocks):
+        return False
+    def counts(state, phase):
+        return Counter(x['font'] for x in blocks if x['state'] == state and x['phase'] == phase)
+    for pair in (1, 2, 3):
+        off, on = f'pair-{pair}-off', f'pair-{pair}-on'
+        for phase in ADMIN_PHASES - {'timer-editor'}:
+            expected = counts(off, phase)
+            if not expected or counts(on, phase) != expected:
+                return False
+        if counts(off, 'timer-editor') or counts(on, 'timer-editor') != counts(off, 'dashboard'):
+            return False
+    return True
+
+
 def navigation_cancel(failure, url, phase, navigating, method='GET', post_data=None, content_type=''):
     parts = urlsplit(url)
     try:
@@ -186,7 +228,8 @@ def metadata_matches(profile, jit, state):
 def accept(report):
     if (not isinstance(report, dict) or report.get('complete') is not True
             or report.get('profile') not in PROFILES or report.get('jit') not in ('1235', 'disable')
-            or report.get('failures') != [] or report.get('page_errors') != [] or report.get('browser_errors') != []):
+            or report.get('failures') != [] or report.get('page_errors') != [] or report.get('browser_errors') != []
+            or not vendor_font_control(report)):
         return False
     states = report.get('states')
     installed = report.get('plugins')

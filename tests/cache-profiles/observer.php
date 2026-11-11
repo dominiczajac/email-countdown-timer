@@ -5,18 +5,6 @@ add_filter( 'pre_wp_mail', '__return_false' );
 // Explicit offline/local-font configuration for the Elementor profile.
 // Public Elementor hook; unexpected external browser attempts still fail.
 add_filter( 'elementor/frontend/print_google_fonts', '__return_false' );
-// Pinned Elementor 4.3.2 admin/home/promotion font-only handles bypass the
-// frontend switch. Keep their UI/CSS/scripts, using system font fallbacks.
-// Unknown handles/hosts are untouched and still fail the browser network gate.
-add_filter( 'style_loader_src', static function ( $src, $handle ) {
-    $fonts = array( 'elementor-admin-top-bar-fonts', 'elementor-home-screen-fonts', 'elementor-onboarding-fonts', 'elementor-atomic-widgets-promotion-fonts' );
-    if ( ! defined( 'ELEMENTOR_VERSION' ) || ELEMENTOR_VERSION !== '4.3.2' || ! in_array( $handle, $fonts, true )
-        || wp_parse_url( $src, PHP_URL_HOST ) !== 'fonts.googleapis.com' ) { return $src; }
-    if ( PHP_SAPI !== 'cli' && defined( 'WP_DEBUG_LOG' ) && is_string( WP_DEBUG_LOG ) && basename( dirname( WP_DEBUG_LOG ) ) === 'cache-evidence' ) {
-        file_put_contents( dirname( WP_DEBUG_LOG ) . '/local-font-overrides.jsonl', wp_json_encode( array( 'handle' => $handle, 'admin' => is_admin() ) ) . "\n", FILE_APPEND | LOCK_EX );
-    }
-    return '';
-}, 10, 2 );
 add_action( 'admin_menu', static function () {
     add_menu_page( 'Cache lab media control', 'Cache lab media control', 'manage_options', 'ecd-cache-media-control', static function () {
         echo '<div id="ecd-cache-media-control">Synthetic core media-enqueue control</div>';

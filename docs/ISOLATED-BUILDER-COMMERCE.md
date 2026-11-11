@@ -24,15 +24,22 @@ disabled and recorded. WordPress HTTP API/mail and external browser attempts
 remain controlled by the existing lab. Use only synthetic data: no real orders,
 customers, subscriptions, payment, shipping, mail or remote service credentials.
 Elementor's public `elementor/frontend/print_google_fonts` hook disables remote
-Google fonts in public widget output for this explicit offline/local-font
-profile. Its pinned 4.3.2 admin/home/promotion font-only handles additionally use
-system font fallbacks through WordPress `style_loader_src`: admin-top-bar,
-home-screen, onboarding and atomic-widgets-promotion fonts. Their UI scripts
-and styles remain active. Only these exact handles with `fonts.googleapis.com`
-are affected; overrides are recorded in `local-font-overrides.jsonl`. Unknown
-handles/hosts remain unchanged and still fail browser network acceptance.
-Inventory records the frontend filter setting; the real anonymous/admin browser
-network observations establish whether the tested pages avoid remote fonts.
+Google fonts in public widget output. Its stock admin application CSS separately
+imports Roboto from Google, as declared in the pinned upstream
+[app/assets/styles/_base.scss](https://github.com/elementor/elementor/blob/4.3.2/app/assets/styles/_base.scss).
+The browser aborts this exact stylesheet import and records it as
+`blocked_vendor_fonts`, alongside the existing blocked core-avatar control.
+Its exact family/weights, `display=swap`, host/path and stylesheet type must
+match, only on the five named admin phases and only in the Elementor profile.
+The HTTP lab permits the HTTP/HTTPS resolutions of the scheme-relative import.
+All three off/on pairs must show identical nonempty font-request counts for
+each shared admin page; the active timer editor must match the dashboard
+control. Missing, added or changed observations fail the final report gate.
+Other hosts, fonts, resource types, public-page requests and JavaScript errors
+remain failures. Stock Elementor CSS/scripts are preserved. This establishes
+timer behavior with that optional third-party font blocked; Elementor's own
+external font attempts remain visible. The inventory flag records the public
+filter setting, and browser observations provide the network evidence.
 
 This is shortcode/widget/product-description coverage. It does not certify
 Elementor drag-and-drop editing or every experiment, WooCommerce cart/checkout,
@@ -54,17 +61,20 @@ Initial run at `f04a491`:
 [42965221589](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42965221589)
 passed 10/12 jobs, including both WooCommerce cells with the initial broader
 page-level checks. Both Elementor cells failed before recorded state outcomes.
-Their precise cause is unconfirmed while the cloud policy blocks the logs on
-`productionresultssa19.blob.core.windows.net`. Preserve that negative result;
-stronger scoped checks and fixture binding require fresh current-head evidence.
+After `productionresultssa19.blob.core.windows.net` was allowed, the original
+artifact was inspected: valid fixture JSON is immediately followed by an
+Elementor shutdown deprecation notice about the implicitly nullable `$key` in
+`Atomic_Global_Styles::get_cache_root_key()`, producing JSON `Extra data`.
+Preserve that negative result; stronger scoped checks and fixture binding
+require fresh current-head evidence.
 
 The next run, at `a7deacd`
 ([42966541646](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42966541646)),
 identified `fixture-json / JSONDecodeError` before either Elementor experiment
 started. The historical PR #13 records CLI shutdown diagnostics mixed into JSON;
 Elementor 4.3.2's upstream `modules/wp-cli/cli-logger.php` sends non-warning
-diagnostics through `WP_CLI::log`. This is a possible mechanism, not an inspected
-diagnosis of the inaccessible original log.
+diagnostics through `WP_CLI::log`, consistent with the subsequently inspected
+original artifact.
 
 The fixture now writes its structured seed/inventory data directly to new,
 fixed files in the owned evidence directory. CLI stdout/stderr, including
@@ -72,7 +82,7 @@ successful-command shutdown diagnostics, remain verbatim in separate logs.
 Installed-package metadata comes from WordPress's actual `get_plugins()` file
 headers; the raw `wp plugin list` output is also retained. JSON decoding stays
 strict, each state deletes its old inventory before requesting a fresh one,
-and CLI exit codes, HTTP bytes, native logs and all behavior gates are unchanged.
+and CLI exit codes, HTTP bytes and native log gates are unchanged.
 Controls exercise startup/shutdown output, stale files, symlinks, wrong paths
 and encoding failure. Retained CLI notices/deprecations are diagnostic evidence,
 not a new zero-warning gate; nonzero CLI exits and the existing FPM/PHP/nginx
@@ -82,8 +92,11 @@ channel separation alone; only fresh hosted evidence can establish behavior.
 At `8165482`, [42967321693](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42967321693)
 again passed 10/12 jobs. Both Elementor cells now reached all six experiments
 and failed the browser-network gate for `fonts.googleapis.com/css2` in admin
-pages, including Easy Countdown off controls. Public-widget font configuration
-does not govern Elementor's separate admin font handles. The explicit bounded
-font-only configuration above follows that observed result; the failure is
-retained and is not attributed to the countdown runtime. Completed current-head
-results and review revisions are recorded in [PR #31](https://github.com/dominiczajac/email-countdown-timer/pull/31).
+pages, including Easy Countdown off controls. A four-font-handle override at
+`e01ea97` ([42967998477](https://github.com/dominiczajac/email-countdown-timer/actions/runs/42967998477))
+also passed 10/12 and did not remove the nested CSS import. That override was
+removed. The exact blocked-import attribution above instead requires fresh
+paired observations without changing vendor styles or accepting arbitrary
+font requests. Both failures remain negative and are not attributed to the
+countdown runtime. Completed current-head results and review revisions are
+recorded in [PR #31](https://github.com/dominiczajac/email-countdown-timer/pull/31).

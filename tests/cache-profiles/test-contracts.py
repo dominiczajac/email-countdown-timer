@@ -9,13 +9,14 @@ import subprocess
 import sys
 import tempfile
 from types import SimpleNamespace
+from urllib.parse import urlencode
 import unittest
-from contracts import ACTIVE_REQUIRED, CONTENT_PROFILES, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, ADMIN_PHASES, CONTENT_PROFILES, ELEMENTOR_APP_FONT, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
 
 
 def good(profile='baseline'):
     report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': [], 'source_commit': 'a' * 40,
-              'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}]}
+              'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}], 'blocked_vendor_fonts': []}
     report['vendor_fixtures'] = {key: {'profile': profile, 'post_id': 42 + i, 'path': '/' + key + '-vendor/'} for i, key in enumerate(ORDER)}
     for index, key in enumerate(ORDER):
         active = key.endswith('-on')
@@ -39,6 +40,9 @@ def good(profile='baseline'):
             'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}],
             'vendor_proof': {'profile': profile, 'post_id': 42 + index, 'path': '/' + key + '-vendor/', 'status': 200,
                 'native_structure': True, 'timer_images': int(active), 'scoped_timer_images': int(active), 'scope_found': True, 'literal_shortcode': not active, 'rendered_post_ids': [str(42 + index)]}})
+        if profile == 'elementor':
+            report['blocked_vendor_fonts'].extend({'state': key, 'phase': phase, 'font': 'elementor-app-roboto-css2', 'blocked': True}
+                for phase in ADMIN_PHASES if active or phase != 'timer-editor')
     return report
 
 
@@ -142,25 +146,36 @@ Email_Countdown_Timer_Lab_CLI::write_json($argv[2], array('proof' => $argv[3] ==
             report = good(profile); report['states'][1]['vendor_proof']['rendered_post_ids'] = ['99']
             self.assertFalse(accept(report))
 
-    def test_local_font_configuration_leaves_other_styles_and_unknown_hosts_intact(self):
-        code = '''
-define('ABSPATH', '/unused/'); define('ELEMENTOR_VERSION', '4.3.2');
-function wp_get_environment_type() { return 'local'; }
-function wp_parse_url($url, $component) { return parse_url($url, $component); }
-function add_filter($name, $callback, ...$args) { $GLOBALS['filters'][$name] = $callback; }
-function add_action(...$args) {} function add_shortcode(...$args) {}
-$GLOBALS['wpdb'] = (object) array('base_prefix' => 'ectcache_');
-require $argv[1];
-$filter = $GLOBALS['filters']['style_loader_src'];
-$font = 'https://fonts.googleapis.com/css2?family=Poppins';
-echo json_encode(array($filter($font, 'elementor-home-screen-fonts'),
-    $filter($font, 'unrecognized-font'), $filter('https://unknown.invalid/font.css', 'elementor-home-screen-fonts'),
-    $filter('http://localhost:8095/style.css', 'elementor-admin-top-bar')));
-'''
-        result = subprocess.run(['php', '-r', code, str(Path(__file__).with_name('observer.php'))], capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads(result.stdout), ['', 'https://fonts.googleapis.com/css2?family=Poppins',
-            'https://unknown.invalid/font.css', 'http://localhost:8095/style.css'])
+    def test_only_exact_upstream_elementor_admin_font_import_is_known(self):
+        url = 'https://fonts.googleapis.com/css2?' + urlencode({'family': ELEMENTOR_APP_FONT, 'display': 'swap'})
+        self.assertTrue(elementor_app_font(url, 'stylesheet', 'elementor', 'dashboard'))
+        self.assertTrue(elementor_app_font(url.replace('https:', 'http:'), 'stylesheet', 'elementor', 'dashboard'))
+        for candidate, resource, profile, phase in ((url, 'script', 'elementor', 'dashboard'),
+                (url, 'image', 'elementor', 'dashboard'), (url, 'stylesheet', 'baseline', 'dashboard'),
+                (url, 'stylesheet', 'elementor', 'vendor-browser'), (url, 'stylesheet', 'elementor', 'live-browser'),
+                (url.replace('googleapis.com', 'googleapis.com.evil.invalid'), 'stylesheet', 'elementor', 'dashboard'),
+                (url.replace('Roboto', 'OtherFont'), 'stylesheet', 'elementor', 'dashboard'),
+                (url + '&extra=1', 'stylesheet', 'elementor', 'dashboard'),
+                (url + '#fragment', 'stylesheet', 'elementor', 'dashboard')):
+            self.assertFalse(elementor_app_font(candidate, resource, profile, phase))
+
+    def test_font_attribution_requires_actual_balanced_off_on_controls(self):
+        for change in ('missing', 'extra-on', 'wrong-font', 'wrong-phase', 'not-blocked'):
+            report = good('elementor')
+            blocks = report['blocked_vendor_fonts']
+            if change == 'missing':
+                report['blocked_vendor_fonts'] = []
+            elif change == 'extra-on':
+                blocks.append({'state': 'pair-1-on', 'phase': 'dashboard', 'font': 'elementor-app-roboto-css2', 'blocked': True})
+            else:
+                blocks[0][{'wrong-font': 'font', 'wrong-phase': 'phase', 'not-blocked': 'blocked'}[change]] = {'wrong-font': 'other', 'wrong-phase': 'vendor-browser', 'not-blocked': False}[change]
+            self.assertFalse(accept(report), change)
+
+    def test_other_profiles_cannot_claim_elementor_font_exemptions(self):
+        for profile in PROFILES.keys() - {'elementor'}:
+            report = good(profile)
+            report['blocked_vendor_fonts'] = good('elementor')['blocked_vendor_fonts']
+            self.assertFalse(accept(report))
 
     def test_noop_cached_profile_fails(self):
         report = good('wp-super-cache')
