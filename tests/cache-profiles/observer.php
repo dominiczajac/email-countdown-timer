@@ -51,5 +51,15 @@ add_action( 'plugins_loaded', static function () {
     header( 'X-Ecd-Lab-JIT: ' . ini_get( 'opcache.jit' ) );
     header( 'X-Ecd-Lab-JIT-Active: ' . ( ! empty( $status['jit']['on'] ) ? 'on' : 'off' ) );
     header( 'X-Ecd-Lab-GD: ' . ( function_exists( 'imagecreatetruecolor' ) ? 'yes' : 'no' ) );
+    if ( PHP_SAPI === 'litespeed' ) {
+        foreach ( array( 'memory_limit' => '512M', 'max_execution_time' => '60' ) as $setting => $attempt ) {
+            $before = ini_get( $setting );
+            $changed = ini_set( $setting, $attempt );
+            if ( $changed !== false ) { ini_set( $setting, $before ); }
+            header( 'X-Ecd-Lab-Locked-' . str_replace( '_', '-', $setting ) . ': ' . ( $changed === false && ini_get( $setting ) === $before ? 'yes' : 'no' ) );
+        }
+        header( 'X-Ecd-Lab-Memory-Limit: ' . ini_get( 'memory_limit' ) );
+        header( 'X-Ecd-Lab-Execution-Limit: ' . ini_get( 'max_execution_time' ) );
+    }
     header( 'X-Ecd-Lab-Active: ' . ( class_exists( 'Email_Countdown_Timer_Plugin', false ) ? 'on' : 'off' ) );
 }, 999 );

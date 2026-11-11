@@ -5,8 +5,12 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 from playwright.sync_api import sync_playwright, expect
 from live import verify_live
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'browser'))
+from wordpress import log_in
 
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
 assert os.environ.get('ECD_INTEGRATION_DISPOSABLE') == '1'
@@ -74,11 +78,7 @@ try:
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('request', lambda request: requests.append(request.url))
         page.on('dialog', lambda dialog: dialog.accept() if dialog.type == 'beforeunload' else dialog.dismiss())
-        page.goto(base + '/wp-login.php')
-        page.locator('#user_login').fill('ci-admin')
-        page.locator('#user_pass').fill(os.environ['ECD_BLOCK_PASSWORD'])
-        page.locator('#wp-submit').click()
-        page.wait_for_url('**/wp-admin/**')
+        log_in(page, base, 'ci-admin', os.environ['ECD_BLOCK_PASSWORD'])
         check(page.locator('script[src*="assets/block-editor.js"]').count()==0,'block editor code absent on dashboard')
         open_editor(page)
         data = page.evaluate("window.emailCountdownTimerBlock")

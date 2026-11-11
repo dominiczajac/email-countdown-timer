@@ -3,9 +3,10 @@ from html.parser import HTMLParser
 from collections import Counter
 import re
 from urllib.parse import parse_qs, urlsplit
+from server_contracts import LSC_SETTINGS, litespeed_page_hits, lsapi_baseline_uncached, lsapi_renderer_bypass, lsapi_runtime, server_proof_matches
 
-PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16', 'elementor': '4.3.2', 'woocommerce': '11.1.2'}
-PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php', 'elementor': 'elementor/elementor.php', 'woocommerce': 'woocommerce/woocommerce.php'}
+PROFILES = {'baseline': None, 'wp-super-cache': '3.1.3', 'w3-total-cache': '2.10.6', 'autoptimize': '3.1.16', 'elementor': '4.3.2', 'woocommerce': '11.1.2', 'litespeed-cache': '7.9.3'}
+PLUGIN_FILES = {'wp-super-cache': 'wp-super-cache/wp-cache.php', 'w3-total-cache': 'w3-total-cache/w3-total-cache.php', 'autoptimize': 'autoptimize/autoptimize.php', 'elementor': 'elementor/elementor.php', 'woocommerce': 'woocommerce/woocommerce.php', 'litespeed-cache': 'litespeed-cache/litespeed-cache.php'}
 CONTENT_PROFILES = {'elementor', 'woocommerce'}
 ORDER = ['pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pair-3-on']
 REQUIRED = {'plugin-state', 'page-generation', 'public-output', 'dashboard', 'media-library', 'core-media-control', 'runtime', 'browser-network'}
@@ -226,7 +227,7 @@ def expected_plugins(profile, active):
     return plugins
 
 
-def metadata_matches(profile, jit, state):
+def metadata_matches(profile, jit, state, server='nginx-fpm'):
     env, runtime = state.get('environment'), state.get('runtime')
     if not isinstance(env, dict) or not isinstance(runtime, dict):
         return False
@@ -238,10 +239,17 @@ def metadata_matches(profile, jit, state):
             or not str(env.get('mysql', '')).startswith('8.4.')
             or not str(env.get('php_cli', '')).startswith('8.4.')):
         return False
-    expected = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': jit,
+    expected = {'x-ecd-lab-sapi': 'litespeed' if server == 'openlitespeed' else 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': jit,
                 'x-ecd-lab-jit-active': 'off' if jit == 'disable' else 'on', 'x-ecd-lab-gd': 'yes',
                 'x-ecd-lab-active': 'on' if state['active'] else 'off'}
     config = env.get('configuration')
+    if server == 'openlitespeed':
+        if not lsapi_runtime(runtime) or env.get('object_cache_dropin') is not False:
+            return False
+        if profile == 'baseline' and (env.get('wp_cache') is not False or env.get('advanced_cache_dropin') is not False):
+            return False
+    if profile == 'litespeed-cache' and (config != LSC_SETTINGS or env.get('wp_cache') is not True or env.get('advanced_cache_dropin') is not False):
+        return False
     if profile in CONTENT_PROFILES:
         if not isinstance(config, dict) or config.get('version') != PROFILES[profile] or config.get('activation_redirect_pending') is not False or env.get('wp_cache') is not False or env.get('advanced_cache_dropin') is not False:
             return False
@@ -256,7 +264,7 @@ def accept(report):
     if (not isinstance(report, dict) or report.get('complete') is not True
             or report.get('profile') not in PROFILES or report.get('jit') not in ('1235', 'disable')
             or report.get('failures') != [] or report.get('page_errors') != [] or report.get('browser_errors') != []
-            or not vendor_font_control(report)):
+            or not vendor_font_control(report) or not server_proof_matches(report)):
         return False
     states = report.get('states')
     installed = report.get('plugins')
@@ -284,13 +292,26 @@ def accept(report):
         active = state['key'].endswith('-on')
         if state.get('active') is not active or state.get('complete') is not True or state.get('failures') != []:
             return False
-        if not metadata_matches(report['profile'], report['jit'], state):
+        server = report.get('server', 'nginx-fpm')
+        if not metadata_matches(report['profile'], report['jit'], state, server):
             return False
         markers = state.get('generations')
-        if not page_evidence(markers, report['profile'] in ('wp-super-cache', 'w3-total-cache')):
+        if not page_evidence(markers, report['profile'] in ('wp-super-cache', 'w3-total-cache', 'litespeed-cache')):
             return False
         checks = state.get('checks')
         required = REQUIRED | (ACTIVE_REQUIRED if active else {'inactive-endpoint'})
+        if server == 'openlitespeed' and active:
+            required |= {'renderer-cache-bypass'}
+            if not lsapi_renderer_bypass(state):
+                return False
+        if server == 'openlitespeed' and report['profile'] == 'baseline':
+            required |= {'server-baseline'}
+            if not lsapi_baseline_uncached(state):
+                return False
+        if report['profile'] == 'litespeed-cache':
+            required |= {'server-cache-hits'}
+            if not litespeed_page_hits(state):
+                return False
         if report['profile'] in CONTENT_PROFILES:
             required |= {'vendor-http', 'vendor-structure', 'vendor-output', 'vendor-browser',
                          'vendor-browser-image' if active else 'vendor-browser-no-timer'}

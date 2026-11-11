@@ -1,0 +1,57 @@
+name: Native LiteSpeed profiles
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/litespeed-profiles.yml'
+      - 'tests/litespeed/**'
+      - 'tests/cache-profiles/**'
+      - 'docs/ISOLATED-LITESPEED.md'
+      - 'includes/**'
+      - 'assets/**'
+      - 'blocks/**'
+      - 'email-countdown-timer.php'
+      - 'scripts/distribution-files.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lsapi-profiles-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  lsapi-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [baseline, litespeed-cache]
+        jit: ['1235', 'disable']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, gd, imagick, curl, mbstring, xml, zip
+          tools: wp-cli:2.12.0
+          coverage: none
+      - name: Isolated test dependencies
+        run: |
+          test "$(wp cli version)" = 'WP-CLI 2.12.0'
+          python3 -m venv "$RUNNER_TEMP/cache-venv"
+          "$RUNNER_TEMP/cache-venv/bin/pip" install playwright==1.57.0 Pillow==12.1.0
+      - name: Native LSAPI paired experiment
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_CACHE_PROFILE: ${{ matrix.profile }}
+          ECD_CACHE_JIT: ${{ matrix.jit }}
+        run: bash tests/litespeed/run.sh
+      - name: Retain positive and negative evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lsapi-${{ matrix.profile }}-jit-${{ matrix.jit }}
+          path: ${{ runner.temp }}/cache-evidence/
+          if-no-files-found: error
+          retention-days: 14

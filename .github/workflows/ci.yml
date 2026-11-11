@@ -36,6 +36,7 @@ jobs:
           python3 tests/test-pcp-gate.py
           python3 tests/test-native-log-gate.py
           python3 tests/cache-profiles/test-contracts.py
+          python3 tests/litespeed/test_native.py
       - name: Distribution build negative tests and privacy guide
         run: |
           python3 tests/test-build.py

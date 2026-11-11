@@ -12,11 +12,20 @@ from types import SimpleNamespace
 from urllib.parse import urlencode
 import unittest
 from contracts import ACTIVE_REQUIRED, ADMIN_PHASES, CONTENT_PROFILES, ELEMENTOR_ADMIN_FONT, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, elementor_admin_font, expected_plugins, font_query_facts, generation, navigation_cancel, navigation_request_cancel, page_evidence
+from server_contracts import LSC_SETTINGS, OLS_IMAGE
 
 
-def good(profile='baseline'):
-    report = {'profile': profile, 'jit': '1235', 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': [], 'source_commit': 'a' * 40,
-              'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}], 'blocked_vendor_fonts': [], 'blocked_external': []}
+def good(profile='baseline', server=None, jit='1235'):
+    server = server or ('openlitespeed' if profile == 'litespeed-cache' else 'nginx-fpm')
+    report = {'profile': profile, 'jit': jit, 'complete': True, 'failures': [], 'page_errors': [], 'browser_errors': [], 'states': [], 'source_commit': 'a' * 40,
+              'plugins': [] if profile == 'baseline' else [{'name': profile, 'version': PROFILES[profile]}], 'blocked_vendor_fonts': [], 'blocked_external': [], 'server': server}
+    if server == 'openlitespeed':
+        report['server_proof'] = {'name': 'openlitespeed', 'image_reference': OLS_IMAGE, 'architecture': 'linux/amd64',
+            'php_lsapi': '8.4.27', 'version_output': 'LiteSpeed/1.9.4 Open (BUILD test)\n cache 1.66\n',
+            'connection_timeout': 40, 'php_workers': 4, 'lsapi_process_limit': 35, 'cache_enabled': profile == 'litespeed-cache', 'query_cache': True,
+            'image_id': 'sha256:' + 'c' * 64, 'executed_image_id': 'sha256:' + 'c' * 64,
+            'configuration_sha256': 'd' * 64, 'executed_configuration_sha256': 'd' * 64,
+            'packages': {'lsphp84': '8.4.27-1+resolute', 'lsphp84-imagick': '3.8.1-1+resolute'}}
     report['vendor_fixtures'] = {key: {'profile': profile, 'post_id': 42 + i, 'path': '/' + key + '-vendor/'} for i, key in enumerate(ORDER)}
     for index, key in enumerate(ORDER):
         active = key.endswith('-on')
@@ -26,20 +35,33 @@ def good(profile='baseline'):
                        'vendor-browser-image' if active else 'vendor-browser-no-timer'}
         if profile == 'autoptimize' and active:
             checks |= {'optimized-asset', 'local-optimized-asset', 'served-optimized-asset'}
+        if server == 'openlitespeed':
+            if active: checks |= {'renderer-cache-bypass'}
+            checks |= {'server-baseline' if profile == 'baseline' else 'server-cache-hits'}
         markers = [f'{x:024x}' for x in range(4)]
         if profile in ('wp-super-cache', 'w3-total-cache'):
             markers[-1] = markers[-2]
             checks |= {'cache-artifact'}
+        if profile == 'litespeed-cache': markers = ['a' * 24] * 4
         path = 'cache/supercache/control' if profile == 'wp-super-cache' else 'cache/page/control'
-        runtime = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': '1235', 'x-ecd-lab-jit-active': 'on',
+        runtime = {'x-ecd-lab-sapi': 'fpm-fcgi', 'x-ecd-lab-opcache': 'on', 'x-ecd-lab-jit': jit, 'x-ecd-lab-jit-active': 'off' if jit == 'disable' else 'on',
                    'x-ecd-lab-gd': 'yes', 'x-ecd-lab-active': 'on' if active else 'off', 'x-ecd-lab-php': '8.4.27'}
         env = {'active_plugins': sorted(expected_plugins(profile, active)), 'wordpress': '7.1.2', 'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': 'twentytwentyfive'}}
-        env.update(wp_cache=False, advanced_cache_dropin=False,
+        env.update(wp_cache=False, advanced_cache_dropin=False, object_cache_dropin=False,
             configuration={'version': PROFILES[profile], 'print_google_fonts': False, 'coming_soon': 'no', 'allow_tracking': 'no', 'activation_redirect_pending': False})
+        if server == 'openlitespeed':
+            runtime.update({'x-ecd-lab-sapi': 'litespeed', 'x-ecd-lab-memory-limit': '256M', 'x-ecd-lab-execution-limit': '30',
+                'x-ecd-lab-locked-memory-limit': 'yes', 'x-ecd-lab-locked-max-execution-time': 'yes'})
+        if profile == 'litespeed-cache': env.update(wp_cache=True, configuration=copy.deepcopy(LSC_SETTINGS))
         report['states'].append({'key': key, 'active': active, 'complete': True, 'checks': sorted(checks) + ['anonymous-page-http'] * 4, 'failures': [], 'generations': markers,
             'runtime': runtime, 'environment': env, 'engine_cache_files': [{'path': path, 'generation': markers[-1], 'sha256': 'b' * 64}],
             'vendor_proof': {'profile': profile, 'post_id': 42 + index, 'path': '/' + key + '-vendor/', 'status': 200,
                 'native_structure': True, 'timer_images': int(active), 'scoped_timer_images': int(active), 'scope_found': True, 'literal_shortcode': not active, 'rendered_post_ids': [str(42 + index)]}})
+        if server == 'openlitespeed':
+            report['states'][-1]['renderer_cache_proof'] = {kind: [{'status': 200, 'content_type': 'image/' + kind,
+                'cache_control': 'no-cache, no-store, must-revalidate', 'cache': None, 'format': kind.upper(),
+                'width': 600, 'height': 79, 'frames': 60 if kind == 'gif' else 1} for _ in range(2)] for kind in ('gif', 'png')}
+            report['states'][-1]['page_response_headers'] = [{} for _ in range(4)] if profile == 'baseline' else [{'x-litespeed-cache': x} for x in ('miss', 'hit', 'hit', 'hit')]
         if profile == 'elementor':
             for phase in ADMIN_PHASES:
                 if not active and phase == 'timer-editor': continue
@@ -50,6 +72,67 @@ def good(profile='baseline'):
 
 
 class Contracts(unittest.TestCase):
+    def test_both_native_lsapi_profiles_and_jit_modes_have_positive_controls(self):
+        for profile in ('baseline', 'litespeed-cache'):
+            for jit in ('1235', 'disable'):
+                self.assertTrue(accept(good(profile, server='openlitespeed', jit=jit)))
+
+    def test_litespeed_cannot_pass_on_fpm_or_unverified_server(self):
+        report = good('litespeed-cache'); report['server'] = 'nginx-fpm'
+        self.assertFalse(accept(report))
+        report = good(server='openlitespeed'); report.pop('server_proof')
+        self.assertFalse(accept(report))
+        report = good(server='openlitespeed'); report['states'][0]['runtime']['x-ecd-lab-sapi'] = 'fpm-fcgi'
+        self.assertFalse(accept(report))
+        self.assertFalse(accept(good('elementor', server='openlitespeed')))
+
+    def test_mismatched_image_config_versions_or_native_limits_fail(self):
+        for key, value in (('image_reference', 'litespeedtech/openlitespeed:latest'), ('executed_image_id', 'sha256:' + 'b' * 64),
+                ('executed_configuration_sha256', 'f' * 64), ('php_lsapi', '8.3.0'), ('version_output', 'nginx'),
+                ('architecture', 'linux/arm64'), ('connection_timeout', 120), ('php_workers', 16), ('lsapi_process_limit', 120), ('query_cache', False)):
+            report = good('litespeed-cache'); report['server_proof'][key] = value
+            self.assertFalse(accept(report), key)
+
+    def test_effective_php_limits_must_be_locked_and_observed(self):
+        for key, value in (('x-ecd-lab-memory-limit', '512M'), ('x-ecd-lab-execution-limit', '60'),
+                ('x-ecd-lab-locked-memory-limit', 'no'), ('x-ecd-lab-locked-max-execution-time', 'no')):
+            report = good('litespeed-cache'); report['states'][1]['runtime'][key] = value
+            self.assertFalse(accept(report), key)
+
+    def test_server_cache_claim_requires_hits_and_corresponding_origin(self):
+        for values in (['miss'] * 4, ['miss', 'hit', 'miss', 'hit'], ['hit'] * 4):
+            report = good('litespeed-cache')
+            report['states'][1]['page_response_headers'] = [{'x-litespeed-cache': x} for x in values]
+            self.assertFalse(accept(report))
+        report = good('litespeed-cache'); report['states'][1]['generations'][1] = 'b' * 24
+        self.assertFalse(accept(report))
+        # Two fixed warm requests can both miss; both measurements must hit.
+        report = good('litespeed-cache'); report['states'][1]['page_response_headers'][1]['x-litespeed-cache'] = 'miss'
+        report['states'][1]['generations'] = ['b' * 24] + ['a' * 24] * 3
+        self.assertTrue(accept(report))
+        report = good(server='openlitespeed'); report['states'][0]['page_response_headers'][0]['x-litespeed-cache'] = 'hit'
+        self.assertFalse(accept(report))
+
+    def test_both_renderer_formats_must_bypass_cache_twice(self):
+        for kind in ('gif', 'png'):
+            for field, value in (('cache', 'hit'), ('cache_control', 'public, max-age=1800'),
+                    ('cache_control', 'no-store-but-not-the-directive'), ('content_type', 'text/html'), ('status', 503),
+                    ('width', 1), ('height', 1), ('frames', 0), ('frames', True), ('format', 'HTML')):
+                report = good('litespeed-cache'); report['states'][1]['renderer_cache_proof'][kind][1][field] = value
+                self.assertFalse(accept(report), (kind, field))
+            report = good('litespeed-cache'); report['states'][1]['renderer_cache_proof'][kind].pop()
+            self.assertFalse(accept(report))
+        report = good('litespeed-cache'); report['states'][1]['checks'].remove('renderer-cache-bypass')
+        self.assertFalse(accept(report))
+
+    def test_litespeed_configuration_and_isolated_baseline_are_enforced(self):
+        for key, value in (('cache', False), ('guest', True), ('object', True), ('cache-ttl_pub', 60), ('crawler', True), ('cdn-quic', True)):
+            report = good('litespeed-cache'); report['states'][1]['environment']['configuration'][key] = value
+            self.assertFalse(accept(report), key)
+        for profile in ('baseline', 'litespeed-cache'):
+            report = good(profile, server='openlitespeed'); report['states'][0]['environment']['object_cache_dropin'] = True
+            self.assertFalse(accept(report))
+
     def cli_writer(self, temp, name='fixture', evidence=None, invalid=False):
         code = '''
 function wp_get_environment_type() { return 'local'; }

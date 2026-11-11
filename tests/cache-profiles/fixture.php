@@ -27,6 +27,10 @@ if ( $mode === 'seed' ) {
     Email_Countdown_Timer_Lab_CLI::write_json( 'fixture', array( 'pages' => $pages, 'deadline' => Email_Countdown_Timer_Config::deadline( $config ) ) );
 } elseif ( $mode === 'configure' ) {
     Email_Countdown_Timer_Lab_Vendors::configure( $profile );
+    if ( $profile === 'litespeed-cache' ) {
+        require_once __DIR__ . '/../litespeed/fixture.php';
+        Email_Countdown_Timer_Lab_LiteSpeed::configure();
+    }
     if ( $profile === 'wp-super-cache' ) {
         // Use the installed vendor's activation checks, not a fabricated drop-in.
         // Upstream 3.1.3: Automattic/wp-super-cache a4f8616 inc/lifecycle.php.
@@ -43,6 +47,7 @@ if ( $mode === 'seed' ) {
     if ( function_exists( 'wp_cache_clear_cache' ) ) { wp_cache_clear_cache(); }
     if ( function_exists( 'w3tc_flush_all' ) ) { w3tc_flush_all(); }
     if ( class_exists( 'autoptimizeCache' ) ) { autoptimizeCache::clearall(); }
+    if ( $profile === 'litespeed-cache' ) { \LiteSpeed\Purge::purge_all(); }
 } elseif ( $mode === 'inventory' ) {
     global $wpdb;
     $configuration = array();
@@ -64,11 +69,15 @@ if ( $mode === 'seed' ) {
         foreach ( array( 'autoptimize_html', 'autoptimize_js', 'autoptimize_js_aggregate', 'autoptimize_css', 'autoptimize_css_aggregate' ) as $key ) { $configuration[ $key ] = get_option( $key ); }
     }
     if ( in_array( $profile, array( 'elementor', 'woocommerce' ), true ) ) { $configuration = Email_Countdown_Timer_Lab_Vendors::inventory( $profile ); }
+    if ( $profile === 'litespeed-cache' ) {
+        require_once __DIR__ . '/../litespeed/fixture.php';
+        $configuration = Email_Countdown_Timer_Lab_LiteSpeed::inventory();
+    }
     require_once ABSPATH . 'wp-admin/includes/plugin.php';
     $installed = array();
     foreach ( get_plugins() as $file => $data ) {
         $installed[] = array( 'name' => dirname( $file ) === '.' ? basename( $file, '.php' ) : dirname( $file ),
             'file' => $file, 'version' => $data['Version'], 'status' => is_plugin_active( $file ) ? 'active' : 'inactive' );
     }
-    Email_Countdown_Timer_Lab_CLI::write_json( 'environment', array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => array_values( get_option( 'active_plugins', array() ) ), 'installed_plugins' => $installed, 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ) ) );
+    Email_Countdown_Timer_Lab_CLI::write_json( 'environment', array( 'wordpress' => get_bloginfo( 'version' ), 'php_cli' => PHP_VERSION, 'mysql' => $wpdb->get_var( 'SELECT VERSION()' ), 'theme' => array( 'name' => get_stylesheet(), 'version' => wp_get_theme()->get( 'Version' ) ), 'active_plugins' => array_values( get_option( 'active_plugins', array() ) ), 'installed_plugins' => $installed, 'configuration' => $configuration, 'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ), 'object_cache_dropin' => is_file( WP_CONTENT_DIR . '/object-cache.php' ) ) );
 } else { exit( 1 ); }
