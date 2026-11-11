@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Six counterbalanced states on the owned loopback PHP-FPM fixture, never production."""
+"""Six counterbalanced states on owned FPM/LSAPI loopback fixtures."""
 import io
 import gzip
 import hashlib
@@ -15,6 +15,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
 from contracts import ADMIN_PHASES, CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_admin_font, expected_plugins, font_query_facts, generation, navigation_request_cancel, page_evidence, vendor_font_control
+from server_contracts import litespeed_page_hits, lsapi_baseline_uncached, lsapi_renderer_bypass, lsapi_runtime, server_allowed, server_proof_matches
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -38,10 +39,11 @@ def main():
     if not wpdir.is_relative_to(temp) or not wpdir.name.startswith('ect-cache.') or evidence != temp / 'cache-evidence':
         raise RuntimeError('invalid_owned_paths')
     profile, jit = os.environ['ECD_CACHE_PROFILE'], os.environ['ECD_CACHE_JIT']
-    if profile not in PROFILES or jit not in ('1235', 'disable'):
+    server = os.environ.get('ECD_CACHE_SERVER', 'nginx-fpm')
+    if profile not in PROFILES or jit not in ('1235', 'disable') or not server_allowed(server, profile):
         raise RuntimeError('invalid_profile')
     base = 'http://localhost:8095'
-    report = {'profile': profile, 'jit': jit, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'blocked_vendor_fonts': [], 'navigation_cancellations': []}
+    report = {'profile': profile, 'jit': jit, 'server': server, 'complete': False, 'states': [], 'failures': [], 'page_errors': [], 'browser_errors': [], 'blocked_external': [], 'blocked_vendor_fonts': [], 'navigation_cancellations': []}
     current = None
     phase = 'initialization'
     navigating = False
@@ -69,13 +71,14 @@ def main():
         headers = response.headers
         expected_jit_active = 'off' if jit == 'disable' else 'on'
         check(response.status == 200
-              and headers.get('x-ecd-lab-sapi') == 'fpm-fcgi'
+              and headers.get('x-ecd-lab-sapi') == ('litespeed' if server == 'openlitespeed' else 'fpm-fcgi')
               and headers.get('x-ecd-lab-php', '').startswith('8.4.')
               and headers.get('x-ecd-lab-opcache') == 'on'
               and headers.get('x-ecd-lab-jit') == jit
               and headers.get('x-ecd-lab-jit-active') == expected_jit_active
               and headers.get('x-ecd-lab-gd') == 'yes'
-              and headers.get('x-ecd-lab-active') == ('on' if current['active'] else 'off'), 'runtime')
+              and headers.get('x-ecd-lab-active') == ('on' if current['active'] else 'off')
+              and (server != 'openlitespeed' or lsapi_runtime(headers)), 'runtime')
         current['runtime'] = {k: v for k, v in headers.items() if k.startswith('x-ecd-lab-')}
 
     def navigate(page, path):
@@ -156,6 +159,21 @@ def main():
         return found
 
     def images(request):
+        def bypass(kind, url, first):
+            if server != 'openlitespeed':
+                return
+            proof = current.setdefault('renderer_cache_proof', {}).setdefault(kind, [])
+            def capture(response):
+                with Image.open(io.BytesIO(response.body())) as decoded:
+                    decoded.load()
+                    proof.append({'status': response.status, 'content_type': response.headers.get('content-type'),
+                        'cache_control': response.headers.get('cache-control'), 'cache': response.headers.get('x-litespeed-cache'),
+                        'format': decoded.format, 'width': decoded.width, 'height': decoded.height, 'frames': decoded.n_frames})
+            capture(first)
+            second = request.get(url, headers={'Accept': 'image/' + kind}, timeout=45000)
+            capture(second)
+            runtime(second)
+
         endpoint = base + '/?' + urlencode({'ecd_action': 'render', 'ecd': 'cache-lab', 'mode': 'email'})
         gif = request.get(endpoint, headers={'Accept': 'image/gif'}, timeout=45000)
         runtime(gif)
@@ -171,13 +189,18 @@ def main():
                 durations.append(image.info.get('duration'))
             check(image.format == 'GIF' and image.width == 600 and image.height > 1
                   and len(durations) == 60 and durations == [1000] * 60, 'image-gif')
-        still = request.get(base + '/?ecd_action=render&ecd=cache-lab&mode=static', headers={'Accept': 'image/png'}, timeout=45000)
+        bypass('gif', endpoint, gif)
+        static_url = base + '/?ecd_action=render&ecd=cache-lab&mode=static'
+        still = request.get(static_url, headers={'Accept': 'image/png'}, timeout=45000)
         runtime(still)
         check(still.status == 200 and still.headers.get('content-type', '').startswith('image/png')
               and 'no-store' in still.headers.get('cache-control', ''), 'static-policy')
         with Image.open(io.BytesIO(still.body())) as image:
             image.load()
             check(image.format == 'PNG' and image.width == 600 and image.height > 1, 'image-static')
+        bypass('png', static_url, still)
+        if server == 'openlitespeed':
+            check(lsapi_renderer_bypass(current), 'renderer-cache-bypass')
 
     def browser_state(browser, url):
         nonlocal phase, navigating
@@ -319,8 +342,15 @@ def main():
         report['plugins'] = installed
         report['source_commit'] = (evidence / 'source-commit.txt').read_text().strip()
         report['distribution'] = json.loads((evidence / 'distribution.json').read_text())
-        packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
-        report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
+        if server == 'openlitespeed':
+            phase = 'native-server-json'
+            report['server_proof'] = json.loads((evidence / 'server.json').read_text())
+            if not server_proof_matches(report):
+                raise RuntimeError('native_server_mismatch')
+            report['native_packages'] = {'openlitespeed_binary': '1.9.4', **report['server_proof']['packages']}
+        else:
+            packages = subprocess.check_output(['dpkg-query', '-W', '-f=${Package} ${Version}\n', 'nginx', 'php8.4-fpm'], text=True)
+            report['native_packages'] = dict(line.split(' ', 1) for line in packages.strip().splitlines())
         with sync_playwright() as playwright:
             executable = shutil.which('google-chrome') or shutil.which('chromium')
             if not executable:
@@ -357,9 +387,9 @@ def main():
                                 response = request.get(url, headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
                                 check(response.status == 200 and response.headers.get('content-type', '').startswith('text/html'), 'anonymous-page-http')
                                 html = response.text()
-                                current['page_response_headers'].append({k: v for k, v in response.headers.items() if k.startswith('x-ecd-lab-')})
+                                current['page_response_headers'].append({k: v for k, v in response.headers.items() if k.startswith('x-ecd-lab-') or k in ('x-litespeed-cache', 'x-litespeed-cache-control')})
                                 current['generations'].append(generation(html))
-                            cached = profile in ('wp-super-cache', 'w3-total-cache')
+                            cached = profile in ('wp-super-cache', 'w3-total-cache', 'litespeed-cache')
                             if not page_evidence(current['generations'], cached):
                                 (evidence / (key + '-public.html')).write_text(html)
                                 eligibility = evidence / 'cache-eligibility.jsonl'
@@ -373,7 +403,11 @@ def main():
                                     'cache_comment': 'Cached page generated by WP-Super-Cache' in html,
                                     'uncached_comment': 'Page not cached by WP Super Cache' in html}))
                             check(page_evidence(current['generations'], cached), 'page-generation')
-                            if cached:
+                            if profile == 'litespeed-cache':
+                                check(litespeed_page_hits(current), 'server-cache-hits')
+                            if server == 'openlitespeed' and profile == 'baseline':
+                                check(lsapi_baseline_uncached(current), 'server-baseline')
+                            if profile in ('wp-super-cache', 'w3-total-cache'):
                                 current['engine_cache_files'] = cache_files(current['generations'][-1])
                                 check(bool(current['engine_cache_files']), 'cache-artifact')
                             phase = 'public-output'
@@ -431,7 +465,7 @@ def main():
             annotation('error', 'Vendor font attribution', 'Known blocked imports must match every off/on admin control.')
         report['passed'] = accept(report)
         (evidence / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
-        annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'passed': report['passed'],
+        annotation('notice', 'Cache profile result', json.dumps({'profile': profile, 'jit': jit, 'server': server, 'passed': report['passed'],
             'complete_states': sum(x['complete'] for x in report['states']), 'checks': sum(len(x['checks']) for x in report['states']),
             'blocked_vendor_fonts': len(report['blocked_vendor_fonts']), 'vendor_font_control': report['vendor_font_control'],
             'vendor_font_counts': {phase: [sum(x['state'] == key and x['phase'] == phase for x in report['blocked_vendor_fonts']) for key in ORDER] for phase in sorted(ADMIN_PHASES)} if profile == 'elementor' else None,
