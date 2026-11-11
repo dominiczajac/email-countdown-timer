@@ -29,6 +29,23 @@ configuration, install another PHP build or alter the tests' acceptance rules.
 The preinstalled server contract is documented by the
 [runner image inventory](https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md)
 and its [PHP build script](https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/scripts/build/install-php.sh).
-The pinned action also [registers versioned FPM binaries](https://github.com/shivammathur/setup-php/blob/f3e473d116dcccaddc5834248c87452386958240/src/scripts/linux.sh).
+The pinned action also [registers versioned FPM binaries](https://github.com/shivammathur/setup-php/blob/eb7c497e18156a6bbabfef1d3a82760b9eda3962/src/scripts/linux.sh).
 Future image changes must satisfy the same executable checks and native test
 gates; this document does not claim a fixed future runner image version.
+
+
+## Pinned action maintenance
+
+The workflows pin setup-php **2.40.0** to commit
+`eb7c497e18156a6bbabfef1d3a82760b9eda3962`, the commit resolved from the
+upstream signed release tag. Its Node 24 action retains the required versioned
+FPM/cached-build contract. PHP minors, extensions, WP-CLI 2.12.0, OPcache/JIT
+cells, native limits, isolated Ubuntu dependency sources and acceptance gates
+are unchanged. The Ubuntu 26.04 and third-party runner branches in the upstream
+release are outside this repository's hosted Ubuntu 24.04 native fixture scope.
+
+Changing CI actions does not change the 32-file WordPress installation ZIP or
+its font/license bytes. Keep the named Gate A package and maintainer acceptance
+receipt; separately record validation of the updated CI toolchain. Current-head
+CI and the cache/multisite/LSAPI workflows must finish successfully, and their
+actual uploaded evidence must remain downloadable and parseable before merge.
