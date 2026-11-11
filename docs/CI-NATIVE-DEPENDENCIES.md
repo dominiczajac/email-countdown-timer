@@ -33,7 +33,6 @@ The pinned action also [registers versioned FPM binaries](https://github.com/shi
 Future image changes must satisfy the same executable checks and native test
 gates; this document does not claim a fixed future runner image version.
 
-
 ## Pinned action maintenance
 
 The workflows pin setup-php **2.40.0** to commit
@@ -50,7 +49,6 @@ receipt; separately record validation of the updated CI toolchain. Current-head
 CI and the cache/multisite/LSAPI workflows must finish successfully, and their
 actual uploaded evidence must remain downloadable and parseable before merge.
 
-
 All nine evidence uploads pin **upload-artifact 7.0.2** to upstream commit
 `cf430e030ddbb5b0abf93d22962f4752f3646cd9`. Set `archive: true` explicitly,
 including the single-file font HTTP result, so the named artifact remains a ZIP
@@ -61,3 +59,7 @@ missing-file errors and read-only repository permissions remain unchanged.
 The action's [pinned input contract](https://github.com/actions/upload-artifact/blob/cf430e030ddbb5b0abf93d22962f4752f3646cd9/action.yml)
 is the reference for archive mode. Upload completion is not evidence acceptance:
 read the actual reports, source/ZIP hashes and native gates as before.
+
+The [12.6.0 toolchain verification record](CI-VERIFICATION-12.6.0.md) links the
+executed PR/main runs and downloaded artifact checksums, with failed startup
+attempts and live-acceptance limits kept explicit.
