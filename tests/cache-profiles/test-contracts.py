@@ -11,7 +11,7 @@ import tempfile
 from types import SimpleNamespace
 from urllib.parse import urlencode
 import unittest
-from contracts import ACTIVE_REQUIRED, ADMIN_PHASES, CONTENT_PROFILES, ELEMENTOR_APP_FONT, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, generation, navigation_cancel, navigation_request_cancel, page_evidence
+from contracts import ACTIVE_REQUIRED, ADMIN_PHASES, CONTENT_PROFILES, ELEMENTOR_APP_FONT, ORDER, PROFILES, REQUIRED, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, font_query_facts, generation, navigation_cancel, navigation_request_cancel, page_evidence
 
 
 def good(profile='baseline'):
@@ -170,6 +170,15 @@ Email_Countdown_Timer_Lab_CLI::write_json($argv[2], array('proof' => $argv[3] ==
             else:
                 blocks[0][{'wrong-font': 'font', 'wrong-phase': 'phase', 'not-blocked': 'blocked'}[change]] = {'wrong-font': 'other', 'wrong-phase': 'vendor-browser', 'not-blocked': False}[change]
             self.assertFalse(accept(report), change)
+
+    def test_font_diagnosis_never_copies_private_or_arbitrary_query_fields(self):
+        url = 'https://fonts.googleapis.com/css2?' + urlencode({'family': 'Roboto:wght@400;500', 'ver': '4.3.2', 'display': 'swap', 'token': 'synthetic-private-token'})
+        facts = font_query_facts(url)
+        self.assertEqual(facts, {'family': ['Roboto:wght@400;500'], 'display': ['swap'], 'ver': ['4.3.2'], 'other_fields': True})
+        self.assertNotIn('synthetic-private', json.dumps(facts))
+        facts = font_query_facts('https://fonts.googleapis.com/css2?family=synthetic-private-name&ver=private&display=private')
+        self.assertNotIn('private', json.dumps(facts))
+        self.assertIsNone(font_query_facts('https://other.invalid/css2?family=Roboto'))
 
     def test_other_profiles_cannot_claim_elementor_font_exemptions(self):
         for profile in PROFILES.keys() - {'elementor'}:

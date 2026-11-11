@@ -14,7 +14,7 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 from PIL import Image
 from playwright.sync_api import sync_playwright, expect
-from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, generation, navigation_request_cancel, page_evidence, vendor_font_control
+from contracts import CONTENT_PROFILES, ORDER, PROFILES, Page, VendorPage, accept, core_avatar, elementor_app_font, expected_plugins, font_query_facts, generation, navigation_request_cancel, page_evidence, vendor_font_control
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -99,6 +99,9 @@ def main():
                 known_font = elementor_app_font(request.url, request.resource_type, profile, phase)
                 item = {'state': current['key'], 'phase': phase, 'host': urlsplit(request.url).hostname,
                         'resource_type': request.resource_type, 'expected_core_avatar': known_avatar, 'expected_vendor_font': known_font}
+                font_facts = font_query_facts(request.url)
+                if font_facts is not None:
+                    item['font_query'] = font_facts
                 report['blocked_external'].append(item)
                 if known_font:
                     report['blocked_vendor_fonts'].append({'state': current['key'], 'phase': phase, 'font': 'elementor-app-roboto-css2', 'blocked': True})

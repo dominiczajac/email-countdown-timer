@@ -126,6 +126,23 @@ def elementor_app_font(url, resource_type, profile, phase):
             and query == {'family': [ELEMENTOR_APP_FONT], 'display': ['swap']})
 
 
+def font_query_facts(url):
+    """Bounded public font metadata for diagnosis; never arbitrary query data."""
+    parts = urlsplit(url)
+    if parts.netloc != 'fonts.googleapis.com' or parts.path != '/css2':
+        return None
+    try:
+        query = parse_qs(parts.query, strict_parsing=True, max_num_fields=8, errors='strict')
+    except (ValueError, UnicodeError):
+        return {'unsupported_query': True}
+    facts = {'other_fields': bool(set(query) - {'family', 'display', 'ver'})}
+    patterns = {'family': r'(?:Roboto|Poppins|Inter)(?::[A-Za-z0-9,;@._-]{1,240})?',
+                'display': r'(?:swap|auto|block|fallback|optional)', 'ver': r'[0-9]{1,3}(?:\.[0-9]{1,3}){1,3}'}
+    for key, pattern in patterns.items():
+        facts[key] = [value if re.fullmatch(pattern, value) else '<redacted>' for value in query.get(key, [])]
+    return facts
+
+
 def vendor_font_control(report):
     """Require the known blocked import identically in each off/on admin pair."""
     blocks = report.get('blocked_vendor_fonts', [])
