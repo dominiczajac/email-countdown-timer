@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import parse_qs, urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/cache-profiles'))
@@ -26,6 +26,21 @@ def local(url):
 
 def active_for(activation, key, role):
     return key.endswith('-on') and (activation == 'network' or role == 'blue')
+
+def image_reference(attributes, role):
+    if not isinstance(attributes, dict): return False
+    expected = {'ecd_action': ['render'], 'ecd': ['shared-timer'], 'mode': ['anim']}
+    try:
+        for name in ('src', 'data-ecd-src'):
+            p = urlsplit(attributes.get(name, ''))
+            if not local(attributes.get(name, '')) or p.path != PATHS[role] or p.fragment: return False
+            query = parse_qs(p.query, strict_parsing=True, max_num_fields=4)
+            if name == 'src':
+                stamp = query.pop('_t', [])
+                if len(stamp) != 1 or not re.fullmatch('[0-9]{10,12}', stamp[0]): return False
+            if query != expected: return False
+    except (ValueError, TypeError): return False
+    return True
 
 def runtime(headers, role, theme, jit, active):
     expected = {'blog': str(ROLES.index(role) + 1), 'home': BASE + PATHS[role], 'theme': theme,
@@ -131,9 +146,11 @@ def accept(report):
                 return False
             public = site.get('public')
             if (public != {'status': 200, 'images': int(active), 'live': int(active), 'deadline': DEADLINES[role] if active else None,
-                          'image_home': BASE + PATHS[role] if active else None, 'private_name_absent': True, 'literal_shortcode': not active}
+                          'image_home': BASE + PATHS[role] if active else None, 'image_reference_valid': True if active else None,
+                          'private_name_absent': True, 'literal_shortcode': not active}
                     or any(type(public.get(k)) is not int for k in ('status', 'images', 'live'))
-                    or public['private_name_absent'] is not True or public['literal_shortcode'] is not (not active)):
+                    or public['private_name_absent'] is not True or public['literal_shortcode'] is not (not active)
+                    or public['image_reference_valid'] is not (True if active else None)):
                 return False
             required = {'dashboard', 'media-library', 'public-browser'}
             if active:

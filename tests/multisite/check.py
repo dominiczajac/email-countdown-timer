@@ -13,7 +13,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from PIL import Image
 from playwright.sync_api import expect, sync_playwright
-from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, local, navigation_abort, page_evidence, runtime
+from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, image_reference, local, navigation_abort, page_evidence, runtime
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -209,11 +209,12 @@ def main():
                                 parsed = Page(html); image_home = None
                                 if parsed.images:
                                     src = urlsplit(parsed.images[0].get('src', ''))
-                                    check(parse_qs(src.query) == {'ecd_action': ['render'], 'ecd': ['shared-timer'], 'mode': ['anim']}, 'image_reference')
+                                    check(image_reference(parsed.images[0], role), 'image_reference')
                                     image_home = src.scheme + '://' + src.netloc + src.path
                                 row['public'] = {'status': response.status, 'images': len(parsed.images), 'live': len(parsed.live),
                                     'deadline': int(parsed.live[0]['data-ecd-deadline']) if parsed.live else None,
                                     'image_home': image_home, 'private_name_absent': 'PRIVATE-NETWORK-' not in html,
+                                    'image_reference_valid': True if parsed.images else None,
                                     'literal_shortcode': '[ecd_timer' in html}
                                 phase = 'images'
                                 if active:

@@ -58,3 +58,21 @@ logs. Original failures cannot become positive through the exit trap. Browser
 requests outside the fixture fail except for blocked stock Gravatar images.
 Only the two known subsite prefixes can be normalized for the existing bounded
 core-navigation cancellation policy; candidate AJAX/render requests remain fatal.
+
+## Setup and review corrections
+
+Initial native cells failed while replacing a theme already bundled with core
+or collecting inactive-root inventory. The disposable installer now replaces
+only its owned selected theme before byte verification. Inventory explicitly
+loads the pure configuration helper, so an inactive root or a plugin active only
+on blue does not require the runtime bootstrap. The existing renderer's `_t`
+cache-buster is validated alongside `data-ecd-src`; no renderer URL changed.
+Both Codex P1 findings were fixture defects and require fresh hosted results.
+
+A doc-only Gutenberg run was blocked by core's late welcome-guide overlay. The
+editor fixture now waits for initial resources, dismisses only that native guide
+through its real close control, and checks it is hidden. Native block assertions
+remain required. Local CLI inventory in off/site-only states, all three actual
+image references, distinct decoded widths and blue-only form save/restore were
+observed. The local browser preflight uses its true `cli-server` SAPI and does
+not replace the eight native FPM cells or the required editor matrix.

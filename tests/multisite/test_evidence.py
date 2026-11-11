@@ -12,7 +12,7 @@ import tempfile
 import unittest
 import zipfile
 
-from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, accept, active_for, assess, navigation_abort
+from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, accept, active_for, assess, image_reference, navigation_abort
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -38,7 +38,8 @@ def good(theme='twentytwentyone', activation='network', jit='1235'):
             site = {'role': role, 'active': active, 'complete': True, 'generations': [str(i) * 22 + str(x) + '0' for x in range(4)],
                     'page_runtime': [copy.deepcopy(h) for _ in range(4)],
                     'public': {'status': 200, 'images': int(active), 'live': int(active), 'deadline': DEADLINES[role] if active else None,
-                               'image_home': BASE + PATHS[role] if active else None, 'private_name_absent': True, 'literal_shortcode': not active},
+                               'image_home': BASE + PATHS[role] if active else None, 'image_reference_valid': True if active else None,
+                               'private_name_absent': True, 'literal_shortcode': not active},
                     'checks': ['dashboard', 'media-library', 'public-browser']}
             def image(kind, missing=False):
                 value = {'status': 404 if missing else 200, 'content_type': 'image/' + kind, 'cache_control': 'no-cache, no-store, must-revalidate',
@@ -67,6 +68,16 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(good()))
 
 class Evidence(unittest.TestCase):
+    def test_rendered_reference_keeps_the_existing_base_and_cache_buster(self):
+        for role in ROLES:
+            base = BASE + PATHS[role] + '?ecd_action=render&ecd=shared-timer&mode=anim'
+            attrs = {'src': base + '&_t=1794399999', 'data-ecd-src': base}
+            self.assertTrue(image_reference(attrs, role))
+            for name, value in [('src', base), ('src', base + '&_t=bad'), ('src', base + '&_t=1794399999&_t=1794399999'),
+                                ('data-ecd-src', base + '&extra=1'), ('src', base.replace(PATHS[role] + '?', '/other/?') + '&_t=1794399999')]:
+                with self.subTest(role=role, name=name, value=value):
+                    self.assertFalse(image_reference({**attrs, name: value}, role))
+
     def test_all_eight_real_matrix_shapes(self):
         for theme in THEMES:
             for activation in ('site', 'network'):

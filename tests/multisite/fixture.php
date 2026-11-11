@@ -2,6 +2,9 @@
 /** Fixed synthetic network only; never accepts an arbitrary site/database. */
 if ( PHP_SAPI !== 'cli' || getenv( 'ECD_INTEGRATION_DISPOSABLE' ) !== '1' || wp_get_environment_type() !== 'local'
     || $GLOBALS['wpdb']->base_prefix !== 'ecdnetwork_' || ! is_multisite() || is_subdomain_install() ) { exit( 1 ); }
+// Inventory runs while the root plugin is inactive, including site-only on
+// states. Load this pure helper without bootstrapping/registering the plugin.
+require_once WP_PLUGIN_DIR . '/easy-countdown/includes/class-ecd-config.php';
 
 final class Email_Countdown_Timer_Network_Lab {
     public static function write( string $name, array $value ): void {

@@ -42,7 +42,7 @@ theme_archive="$(mktemp "$RUNNER_TEMP/ect-network-theme.XXXXXX.zip")"
 curl --fail --location --retry 2 --proto '=https' --proto-redir '=https' "https://downloads.wordpress.org/theme/$ECD_NETWORK_THEME.$theme_version.zip" -o "$theme_archive"
 printf '%s  %s\n' "$theme_hash" "$theme_archive" | sha256sum --check
 sha256sum "$theme_archive" > "$ECD_NETWORK_EVIDENCE/theme-archive.sha256"
-"${wp[@]}" theme install "$theme_archive"
+"${wp[@]}" theme install "$theme_archive" --force
 python3 "$root/tests/multisite/verify-theme.py" "$theme_archive" "$ECD_NETWORK_WP/wp-content/themes/$ECD_NETWORK_THEME" \
   --slug "$ECD_NETWORK_THEME" --sha256 "$theme_hash" --report "$ECD_NETWORK_EVIDENCE/theme-files.json"
 rm -f "$theme_archive"
