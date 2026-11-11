@@ -91,17 +91,19 @@ Set Cache eligibility to Bypass cache and place this exception after conflicting
 Repeated GETs to the same timer URL should return an actual image, not HTML. Check for no-store/no-transform and normally CF-Cache-Status DYNAMIC or BYPASS rather than HIT/STALE. A single MISS is insufficient. Investigate HTML challenges in Security Events; do not disable site-wide protection. Ordinary Bot Fight Mode cannot be bypassed with WAF Skip. Custom Workers and image transformations need separate review. No live Cloudflare-zone test is claimed.
 
 = Which other plugins and email applications were tested? =
-Profiles cover caching, SEO and builders. Reports include admin/PHP failures without Easy Countdown. This is not universal certification. [Versions and results](https://github.com/dominiczajac/email-countdown-timer/pull/13). Local Thunderbird testing covered image blocking, playback and expiry; Gmail, Outlook, Apple Mail and real delivery remain unverified. Test your sender/clients and retain a visible deadline.
+Named cache, builder, commerce, theme and multisite profiles have [versioned reports](https://github.com/dominiczajac/email-countdown-timer/issues/20), including retained failures. Paid optimizers, Cloudflare zones and real sender/client delivery remain unverified. Local Thunderbird tests covered image blocking, playback and expiry. Test your sender/clients and retain a visible deadline.
 
 = What happens when I deactivate or uninstall? =
 Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned options/cache and unchanged files created by the font-copy tool. It keeps media, manual/replaced fonts, unrelated data/cron, backups, infrastructure logs and font-access rules. No cron is scheduled.
 
 == Screenshots ==
 
-1. Configure the deadline, time zone and appearance, then preview the saved timer and copy an embed.
-2. Choose an optional image after expiry and provide alternative text for the public timer.
-3. Use the timer editor in a single-column layout on a narrow screen.
-4. Find Easy Countdown's suggested wording in the WordPress Privacy Policy Guide.
+1. Use Quick Create on the WordPress dashboard.
+2. Set a deadline, time zone, included Lato and saved appearance.
+3. Copy Website/Email embeds with image and deadline guidance.
+4. Select a campaign in the native block and opt into live text.
+5. Run local diagnostics and copy a redacted report.
+6. Read suggested wording in the WordPress Privacy Policy Guide.
 
 == Changelog ==
 
@@ -110,15 +112,15 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 * Add the native block, static preview and opt-in live text with Pause/Resume.
 * Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
-* Add Quick Create/dashboard shortcuts, block list refresh and separate Website/Email embeds.
-* Add label presets independent of admin locale. Keep custom/empty labels and validate accented output.
+* Add Quick Create/dashboard shortcuts, block refresh and separate Website/Email embeds.
+* Add stored label presets independent of admin locale; preserve custom/empty labels and accented output.
 
 = 12.5.3 =
-* Bundle optional local Lato Regular under SIL OFL 1.1, with integrity-checked font and license notices.
+* Bundle Lato Regular under SIL OFL 1.1 with verified font/license notices.
 
 = 12.5.2 =
-* Integrate reserved website/email dimensions and the end-image password fix while preserving existing URLs and campaigns.
-* Update contributor, screenshots and Cloudflare guidance. Full history is in CHANGELOG.md.
+* Integrate reserved dimensions and the end-image password fix; preserve existing URLs and campaigns.
+* Update contributor, screenshots and Cloudflare guidance.
 
 == Upgrade Notice ==
 

@@ -1,0 +1,241 @@
+{
+  "plugin_version": "12.6.0",
+  "capture_source_commit": "7009621c958a04c93aa72f915ae4c62a0b2e4bd3",
+  "zip_sha256": "4fa70056f95965ab880ad18329c9c1326dd18d9ad928a9c0670e8744b5e1cd75",
+  "zip_bytes": 425814,
+  "installed_distribution_files": {
+    "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "assets/admin.css": "c5ed888b1e57d7564e48a2c21c69814fb4b4d17c8a1737dc74b6eaa5fe4455b5",
+    "assets/admin.js": "b4f5235bdb0ab27ccdfc6bf8ced5bca0d893f432473e86daf2734c974cf73e6d",
+    "assets/block-editor.js": "184aeadbe8f7ab1bda5099192a829adeb45cbabf6aa1d517efb7f918573474b1",
+    "assets/countdown.js": "8e546b071af64c5288e7ffa6942c4cae97e6a2505989027c069282ee380c9c09",
+    "assets/end-image.js": "1ebe68bc841771c5dcf73a570afb25c5301365d92dd17324bec66369a8164598",
+    "assets/live-countdown.css": "540a32139b3394a3fe381d0cbe15cdafb83c09c64a870bb98b7887da91163793",
+    "assets/live-countdown.js": "8b132a2dfc5110934c40b31e401aa2309ba86dcaf53f35c4e18d86073c31e70c",
+    "assets/status.js": "d3f6307a801f90e1917a11a3895a7c8a827ab33a295472f6dd6a97b229faa15b",
+    "blocks/timer/block.json": "54962f81c8173e5324903e346cb44106d88626f6224f793832a383c5f09d8ec4",
+    "email-countdown-timer.php": "87aefdf57cf4b1ab9df76036c337636494f44b6e17a87619b4b26a9745f4becf",
+    "fonts/OFL.txt": "74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e",
+    "fonts/README.txt": "ffed7d967790a55d3cda2514a844572c9352b679b2ba86b984201f67f31ef04f",
+    "fonts/easy-countdown-lato-regular.ttf": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
+    "includes/admin-view.php": "514f6e16af2c3683243bce3f858a56160aea8b4c23d866b3fbaadb7f35127dbe",
+    "includes/class-ecd-config.php": "4657402246ac313adb0ebb0cabd2e1dacef3c629e86c467c1935d46dd5e2560b",
+    "includes/class-ecd-plugin.php": "944a413c4a0d6174d6186bf89745f0e7dbff8aa196bfd96bcba96369506d40c0",
+    "includes/class-ecd-renderer.php": "d43eb76e96921f1a45fae48afc68961e1ec1f7f2cdab01e8654bf7e5a9b3134d",
+    "includes/class-email-countdown-timer-admin.php": "accbacde5623a152111acc4a3a00377443e576e4c68f71f7a7366cd1ea3abace",
+    "includes/class-email-countdown-timer-block.php": "c5cfdded3f79f7a05415a71c3aa5371e811b31cf335a059cd02f83aff6d49724",
+    "includes/class-email-countdown-timer-data-settings.php": "ec165d18066354f5775a36729921fe14552f719a08891e15e102bcd25eefdd44",
+    "includes/class-email-countdown-timer-embed.php": "8f2343c4c2f89ad787abf1150b0ac49c43a890910ab92f7a0b22d1d6eef70729",
+    "includes/class-email-countdown-timer-end-image.php": "70c654cd5b8fd92065648d32a6d8335536928c9fd25c045efccd249fca592970",
+    "includes/class-email-countdown-timer-font-access.php": "d030ae551da81aa0054e64cd5d0fb718683b34c8a0af1b07408077a0b05bf840",
+    "includes/class-email-countdown-timer-fonts.php": "478e687e82f74897050e66b9c33a2575ad6a659e878ad0629565b25fd693355c",
+    "includes/class-email-countdown-timer-live.php": "1ad3b1bf897c9e7f3493b7a88fda3aaca04d8ce3347f1fdd3a932b842bdca9b3",
+    "includes/class-email-countdown-timer-privacy.php": "590149d55af8376ff59e93fdcdb5cc14b3d801ef4edab82b6b8c52e44a3e2181",
+    "includes/class-email-countdown-timer-render-lock.php": "a5f72c2db072524bc0eef55bb7b79cc9701e45bb3146724655754e4dc4b6c8c3",
+    "includes/class-email-countdown-timer-status.php": "e19ec1d8594b0cb57c538dc4d818bf3e223e27a0580e97eab1224e39ea08dbe7",
+    "includes/class-email-countdown-timer-uninstaller.php": "04058e1a95ddece62c969c97432f456a271db340366745a9d8cadc2a14c67c1e",
+    "readme.txt": "48400abb3a42c0943c13ceaa5296d3c9d984fc4d3c2e212ebc24e7dc5c11a0fd",
+    "uninstall.php": "52d1eb1af496b455805bc9b9c2920945d7c8725946dbb0b8cadacb08724312cf"
+  },
+  "environment": {
+    "wordpress": "7.1.4",
+    "php_cli": "8.4.27",
+    "theme": [
+      {
+        "name": "twentytwentyfive",
+        "status": "active",
+        "update": "none",
+        "version": "1.5",
+        "update_version": "",
+        "auto_update": "off"
+      }
+    ],
+    "plugins": [
+      {
+        "name": "akismet",
+        "status": "inactive",
+        "update": "none",
+        "version": "5.7.2",
+        "update_version": "",
+        "auto_update": "off"
+      },
+      {
+        "name": "easy-countdown",
+        "status": "active",
+        "update": "none",
+        "version": "12.6.0",
+        "update_version": "",
+        "auto_update": "off"
+      },
+      {
+        "name": "hello",
+        "status": "inactive",
+        "update": "none",
+        "version": "1.7.2",
+        "update_version": "",
+        "auto_update": "off"
+      },
+      {
+        "name": "ecd-catalog-fixture",
+        "status": "must-use",
+        "update": false,
+        "version": "",
+        "update_version": "",
+        "auto_update": "off"
+      }
+    ],
+    "capture_source_commit": "7009621c958a04c93aa72f915ae4c62a0b2e4bd3",
+    "mysql": "8.4.13"
+  },
+  "fixture_preferences": "Synthetic demo administrator, avatars disabled; native dashboard preferences; core welcome guide uses its real Close control when shown",
+  "capture_kind": "Genuine browser screenshots of an owned synthetic WordPress installation; no edited UI pixels",
+  "sapi": "cli-server",
+  "scope": "Catalog presentation and local functional checks; hosted FPM/JIT CI remains separate",
+  "screenshots": [
+    {
+      "file": "screenshot-1.png",
+      "sha256": "283cf9c56765146e2039068a547df3e48e84e21eb43b79453121330631331177",
+      "bytes": 84056,
+      "dimensions": [
+        605,
+        919
+      ],
+      "view": "Dashboard Quick Create",
+      "area": "#email_countdown_timer_quick_access",
+      "page_path": "/wp-admin/"
+    },
+    {
+      "file": "screenshot-2.png",
+      "sha256": "7500e106407a0dcc54bb621e60314ac92c9212f22e71e907802f7404e9161459",
+      "bytes": 422828,
+      "dimensions": [
+        1440,
+        2912
+      ],
+      "view": "Saved campaign and included Lato",
+      "area": "full-page",
+      "page_path": "/wp-admin/admin.php"
+    },
+    {
+      "file": "screenshot-3.png",
+      "sha256": "6dc19f70d7c729a9464e1b8551b00fe80829f068aa27234699d67ab6c345d1de",
+      "bytes": 94445,
+      "dimensions": [
+        822,
+        986
+      ],
+      "view": "Separate Website and Email embeds",
+      "area": "#ect-embed",
+      "page_path": "/wp-admin/admin.php"
+    },
+    {
+      "file": "screenshot-4.png",
+      "sha256": "44eb0ee266c8a9ac3624bc7af4a602e002a8e863ffb4090e2e996cd64cc762e8",
+      "bytes": 139074,
+      "dimensions": [
+        1440,
+        1100
+      ],
+      "view": "Native block selection and live-text option",
+      "area": "viewport",
+      "page_path": "/wp-admin/post.php"
+    },
+    {
+      "file": "screenshot-5.png",
+      "sha256": "ca43ff7419942bd360c139cbea1ae15957519d8d0f81c56035bb6f9eaef76e8c",
+      "bytes": 235871,
+      "dimensions": [
+        1440,
+        2091
+      ],
+      "view": "On-demand diagnostics and redacted report",
+      "area": "full-page",
+      "page_path": "/wp-admin/admin.php"
+    },
+    {
+      "file": "screenshot-6.png",
+      "sha256": "2ab4bc15c580c56060ef0a4673b7fc18fd1a94d50c14767a49b4949a490ce5b7",
+      "bytes": 139034,
+      "dimensions": [
+        1440,
+        1100
+      ],
+      "view": "WordPress Privacy Policy Guide",
+      "area": "viewport",
+      "page_path": "/wp-admin/privacy-policy-guide.php"
+    }
+  ],
+  "facts": {
+    "diagnostics": {
+      "format": 1,
+      "plugin": "12.6.0",
+      "wordpress": "7.1.4",
+      "php": "8.4.27",
+      "checks": [
+        {
+          "name": "GD",
+          "status": "pass",
+          "code": "available",
+          "message": "GD image functions are available.",
+          "action": "Test a public image below; function availability alone does not verify codecs or hosting capacity."
+        },
+        {
+          "name": "FreeType",
+          "status": "pass",
+          "code": "available",
+          "message": "FreeType text functions are available.",
+          "action": "Use available local fonts with FreeType, or printable ASCII bitmap labels. Check the actual image for glyph coverage."
+        },
+        {
+          "name": "Imagick",
+          "status": "pass",
+          "code": "available",
+          "message": "Imagick is available for GIF animation.",
+          "action": "If GIFs stay static, check advisory locks, GIF codec policy and hosting memory. Test the actual image."
+        },
+        {
+          "name": "Database locking",
+          "status": "pass",
+          "code": "acquired",
+          "message": "A zero-wait database advisory lock was acquired; its cleanup was requested immediately.",
+          "action": "No lock configuration change is indicated. This probe does not certify database proxies or multiple primaries."
+        },
+        {
+          "name": "Campaign font",
+          "status": "pass",
+          "code": "local_font_available",
+          "message": "The selected local font resolves to a readable file with FreeType support.",
+          "action": "Inspect the actual image: file availability does not certify glyph coverage or layout."
+        }
+      ],
+      "image_test": {
+        "status": "pass",
+        "code": "loaded",
+        "http_status": 200
+      }
+    },
+    "public_png": {
+      "status": 200,
+      "dimensions": [
+        600,
+        79
+      ],
+      "sha256": "8bab224a8721c956ce41f16c4c84e6649c21775348f363785505bc0f6eaef4d0",
+      "php_sapi": "cli-server",
+      "php": "8.4.27"
+    },
+    "browser": "156.0.8078.79"
+  },
+  "blocked_external_hosts": [],
+  "page_errors": [],
+  "capture_finished_at_utc": "2026-11-11T18:43:11.946785+00:00",
+  "capture_source_tree": "95440130997c76cf3f20ea3e45aa1c2fd531a6dc",
+  "captions": {
+    "screenshot-1.png": "Use Quick Create on the WordPress dashboard.",
+    "screenshot-2.png": "Set a deadline, time zone, included Lato and saved appearance.",
+    "screenshot-3.png": "Copy Website/Email embeds with image and deadline guidance.",
+    "screenshot-4.png": "Select a campaign in the native block and opt into live text.",
+    "screenshot-5.png": "Run local diagnostics and copy a redacted report.",
+    "screenshot-6.png": "Read suggested wording in the WordPress Privacy Policy Guide."
+  }
+}
