@@ -39,10 +39,6 @@ def block_frame(page):
 def open_editor(page, target=post_id):
     page.goto(base + '/wp-admin/post.php?post=' + str(target) + '&action=edit')
     page.wait_for_function("window.wp && wp.blocks && wp.blocks.getBlockType('easy-countdown/timer') && wp.data.select('core/editor').getCurrentPostId()")
-    page.evaluate("""() => {
-        wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
-        wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block');
-    }""")
     # Wait for the real, permission-checked inline bootstrap. Never inject test settings.
     try:
         page.wait_for_function("window.emailCountdownTimerBlock")
@@ -55,10 +51,7 @@ def open_editor(page, target=post_id):
         }, indent=2))
         raise
     page.wait_for_function("""() => document.querySelector('.block-editor-block-list__layout') || Array.from(document.querySelectorAll('iframe')).some(f=>f.contentDocument && f.contentDocument.querySelector('.block-editor-block-list__layout'))""")
-    # Dismiss a guide if already mounted; this never skips block assertions.
-    for button in page.get_by_role('button', name=re.compile('Close.*(dialog|guide)', re.I)).all():
-        if button.is_visible():
-            button.click()
+    page.evaluate("wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block')")
 
 def insert(page, attributes):
     return page.evaluate("""(attrs) => {
@@ -75,6 +68,13 @@ try:
         browser = p.chromium.launch(executable_path=executable, args=['--no-sandbox'])
         context = browser.new_context(viewport={'width':1440,'height':1000}, reduced_motion='reduce')
         page = context.new_page()
+        # Core hydrates preferences asynchronously and can show this guide after
+        # the canvas is ready. Handle it whenever it blocks a real action; core
+        # background traffic makes global networkidle unsuitable for the editor.
+        # Use its actual Close control. Other dialogs and all block assertions
+        # retain their normal actionability checks.
+        page.add_locator_handler(page.locator('.edit-post-welcome-guide'),
+            lambda guide: guide.get_by_role('button', name=re.compile('^Close', re.I)).click())
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('request', lambda request: requests.append(request.url))
         page.on('dialog', lambda dialog: dialog.accept() if dialog.type == 'beforeunload' else dialog.dismiss())

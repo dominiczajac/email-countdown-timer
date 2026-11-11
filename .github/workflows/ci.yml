@@ -37,6 +37,7 @@ jobs:
           python3 tests/test-native-log-gate.py
           python3 tests/cache-profiles/test-contracts.py
           python3 tests/litespeed/test_native.py
+          python3 tests/multisite/test_evidence.py
       - name: Distribution build negative tests and privacy guide
         run: |
           python3 tests/test-build.py
