@@ -1,8 +1,14 @@
-# Explicit shipped sources. Only the reviewed example font and its notices are bundled.
+# Explicit shipped sources. Only reviewed fonts and original notices are bundled.
 LICENSE
 fonts/easy-countdown-lato-regular.ttf
 fonts/OFL.txt
 fonts/README.txt
+fonts/easy-countdown-ibm-plex-mono-regular.ttf
+fonts/OFL-ibm-plex-mono.txt
+fonts/easy-countdown-barlow-condensed-regular.ttf
+fonts/OFL-barlow-condensed.txt
+fonts/easy-countdown-crimson-text-regular.ttf
+fonts/OFL-crimson-text.txt
 assets/admin.css
 assets/admin.js
 assets/end-image.js

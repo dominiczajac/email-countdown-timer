@@ -8,8 +8,39 @@ final class Email_Countdown_Timer_Fonts {
     public const OPTION = 'email_countdown_timer_copied_fonts';
     public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
     public const BUNDLED_CHOICE = 'builtin:lato-regular';
+    public const IBM_PLEX_MONO = 'builtin:ibm-plex-mono-regular';
+    public const BARLOW_CONDENSED = 'builtin:barlow-condensed-regular';
+    public const CRIMSON_TEXT = 'builtin:crimson-text-regular';
     private const BUNDLED_SHA256 = 'd636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251';
     private const MAX_BYTES = 5242880;
+
+    /** Reviewed immutable font/notice pairs; filenames never become saved choices. */
+    public static function bundled(): array {
+        return array(
+            self::BUNDLED_CHOICE => array( 'file' => self::BUNDLED_FILE, 'sha256' => self::BUNDLED_SHA256,
+                'license' => 'OFL.txt', 'license_sha256' => '74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e' ),
+            self::IBM_PLEX_MONO => array( 'file' => 'easy-countdown-ibm-plex-mono-regular.ttf', 'sha256' => '6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46',
+                'license' => 'OFL-ibm-plex-mono.txt', 'license_sha256' => '7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da' ),
+            self::BARLOW_CONDENSED => array( 'file' => 'easy-countdown-barlow-condensed-regular.ttf', 'sha256' => '583cec5da3b84bc4dc7c9c72e2a565c94d34e431518b19d7e250b7830ad5f996',
+                'license' => 'OFL-barlow-condensed.txt', 'license_sha256' => '186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f' ),
+            self::CRIMSON_TEXT => array( 'file' => 'easy-countdown-crimson-text-regular.ttf', 'sha256' => '48e6c5d5ad1d01599d374ecb817e15890d1feb3b8a3a88e527d44c90389e1f06',
+                'license' => 'OFL-crimson-text.txt', 'license_sha256' => '50fd67cddc097377a5c871e8452b778bc5aedfa3480a705cb27c5e3a078218df' ),
+        );
+    }
+
+    public static function is_bundled( string $name ): bool {
+        return isset( self::bundled()[ $name ] );
+    }
+
+    public static function label( string $name ): string {
+        return match ( $name ) {
+            self::BUNDLED_CHOICE => __( 'Lato Regular (included)', 'easy-countdown' ),
+            self::IBM_PLEX_MONO => __( 'IBM Plex Mono Regular (included)', 'easy-countdown' ),
+            self::BARLOW_CONDENSED => __( 'Barlow Condensed Regular (included)', 'easy-countdown' ),
+            self::CRIMSON_TEXT => __( 'Crimson Text Regular (included)', 'easy-countdown' ),
+            default => $name,
+        };
+    }
 
     public static function register(): void {
         add_action( 'admin_post_email_countdown_timer_copy_fonts', array( self::class, 'handle_copy' ) );
@@ -73,14 +104,15 @@ final class Email_Countdown_Timer_Fonts {
     }
 
     public static function path( string $name ): ?string {
-        if ( self::BUNDLED_CHOICE === $name ) {
-            return self::contained_file( self::legacy_directory(), self::BUNDLED_FILE );
+        $bundled = self::bundled();
+        if ( isset( $bundled[ $name ] ) ) {
+            return self::contained_file( self::legacy_directory(), $bundled[ $name ]['file'] );
         }
         if ( ! self::valid_name( $name ) ) {
             return null;
         }
-        // A pre-existing filename selection must not silently become the bundled face.
-        if ( self::BUNDLED_FILE === $name ) {
+        // An old filename selection must never become a newly shipped face.
+        if ( in_array( $name, array_column( $bundled, 'file' ), true ) ) {
             return self::contained_file( self::persistent_directory(), $name );
         }
         return self::contained_file( self::legacy_directory(), $name )
@@ -89,14 +121,16 @@ final class Email_Countdown_Timer_Fonts {
 
     public static function names(): array {
         $names = array();
+        $bundled = self::bundled();
+        $shipped_files = array_column( $bundled, 'file' );
         $legacy = self::legacy_directory();
         foreach ( array( $legacy, self::persistent_directory() ) as $directory ) {
             if ( null === $directory || ! is_readable( $directory ) ) {
                 continue;
             }
             foreach ( scandir( $directory ) ?: array() as $name ) {
-                if ( $directory === $legacy && self::BUNDLED_FILE === $name ) {
-                    // The shipped font is exposed only via its reserved selection.
+                if ( $directory === $legacy && in_array( $name, $shipped_files, true ) ) {
+                    // Shipped faces are exposed only through reserved choices.
                     continue;
                 }
                 if ( null !== self::contained_file( $directory, $name ) ) {
@@ -104,8 +138,10 @@ final class Email_Countdown_Timer_Fonts {
                 }
             }
         }
-        if ( null !== self::contained_file( $legacy, self::BUNDLED_FILE ) ) {
-            $names[ self::BUNDLED_CHOICE ] = self::BUNDLED_CHOICE;
+        foreach ( $bundled as $choice => $font ) {
+            if ( null !== self::contained_file( $legacy, $font['file'] ) ) {
+                $names[ $choice ] = $choice;
+            }
         }
         natcasesort( $names );
         return array_values( $names );
@@ -133,6 +169,7 @@ final class Email_Countdown_Timer_Fonts {
             if ( ! is_array( $manifest ) ) {
                 throw new RuntimeException( 'The font ownership record is invalid.' );
             }
+            $shipped_hashes = array_column( self::bundled(), 'sha256', 'file' );
             foreach ( scandir( $source ) ?: array() as $name ) {
                 $file = self::contained_file( $source, $name );
                 if ( null === $file ) {
@@ -146,7 +183,7 @@ final class Email_Countdown_Timer_Fonts {
                 }
                 $hash = hash_file( 'sha256', $file );
                 // An unchanged shipped font is restored by updates, not user migration data.
-                if ( self::BUNDLED_FILE === $name && self::BUNDLED_SHA256 === $hash ) {
+                if ( isset( $shipped_hashes[ $name ] ) && $shipped_hashes[ $name ] === $hash ) {
                     continue;
                 }
                 $destination = $target . DIRECTORY_SEPARATOR . $name;
