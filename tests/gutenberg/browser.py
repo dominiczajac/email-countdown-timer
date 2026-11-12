@@ -60,15 +60,34 @@ def insert(page, attributes):
         return block.clientId;
     }""", attributes)
 
-def select_timer_with_keyboard(frame, timer_id):
+def select_timer_with_keyboard(page, frame, block_id, timer_id):
     combo = frame.get_by_role('combobox', name='Timer', exact=True).first
-    combo.fill(timer_id)
-    # Core and our controlled filter rerender asynchronously. Wait for the
-    # actual filtered menu before moving its highlight with the keyboard.
-    expect(frame.get_by_role('option')).to_have_count(1)
-    expect(frame.get_by_role('option', name=timer_id, exact=True)).to_be_visible()
-    combo.press('ArrowDown')
-    combo.press('Enter')
+    try:
+        # Core's onFocus clears its filter/input. Let that render finish before
+        # typing; fill() alone focuses and types within the same browser task.
+        combo.click()
+        expect(combo).to_be_focused()
+        expect(combo).to_have_attribute('aria-expanded', 'true')
+        expect(combo).to_have_value('')
+        combo.fill(timer_id)
+        expect(frame.get_by_role('option')).to_have_count(1)
+        option = frame.get_by_role('option', name=timer_id, exact=True)
+        expect(option).to_be_visible()
+        combo.press('ArrowDown')
+        # The active suggestion is also controlled state, separate from the
+        # filtered menu. Enter must target its actual committed active item.
+        expect(combo).to_have_attribute('aria-activedescendant', option.get_attribute('id'))
+        combo.press('Enter')
+        page.wait_for_function("(args)=>wp.data.select('core/block-editor').getBlock(args.id).attributes.timerId===args.timer", arg={'id':block_id,'timer':timer_id})
+    except Exception:
+        (evidence / 'timer-selection-failure.json').write_text(json.dumps({
+            'expected': timer_id,
+            'input': combo.evaluate('(e)=>({value:e.value,expanded:e.getAttribute("aria-expanded"),active:e.getAttribute("aria-activedescendant"),focused:e===document.activeElement})'),
+            'options': frame.get_by_role('option').evaluate_all('(nodes)=>nodes.map(e=>({id:e.id,text:e.textContent,selected:e.getAttribute("aria-selected")}))'),
+            'attributes': page.evaluate("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes", block_id),
+        }, indent=2))
+        page.screenshot(path=str(evidence / 'timer-selection-failure.png'), full_page=True)
+        raise
 
 original = wp('option', 'get', 'easy_countdown_timers', '--format=json')
 try:
@@ -117,8 +136,7 @@ try:
         page.bring_to_front()
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
         expect(frame.get_by_text('Campaign list updated.', exact=True)).to_be_visible()
-        select_timer_with_keyboard(frame, 'gutenberg-new')
-        page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", arg=first)
+        select_timer_with_keyboard(page, frame, first, 'gutenberg-new')
         check(True, 'newly created campaign becomes selectable without editor reload')
         wp('option', 'update', 'easy_countdown_timers', original, '--format=json')
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
@@ -128,8 +146,7 @@ try:
         page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId===''", arg=first)
         combo = frame.get_by_role('combobox', name='Timer', exact=True).first
         expect(combo).to_have_value('')
-        select_timer_with_keyboard(frame, 'gutenberg-a')
-        page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-a'", arg=first)
+        select_timer_with_keyboard(page, frame, first, 'gutenberg-a')
         check(True, 'select existing timer with keyboard in native ComboboxControl')
         preview = frame.locator('.wp-block-easy-countdown-timer img').first
         expect(preview).to_have_js_property('complete',True)
