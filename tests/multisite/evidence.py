@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/cache-profiles'))
 from contracts import ORDER, Page, core_avatar, generation, navigation_cancel, page_evidence
 from cache_evidence import HITS, SETTINGS, VENDOR, browser_proof, hit_proof, snapshot_replay
+import edit_refresh
 
 BASE = 'http://localhost:8097'
 PLUGIN = 'easy-countdown/email-countdown-timer.php'
@@ -72,7 +73,7 @@ def inventory_ok(sites, report, key, fixture):
         active = active_for(report['activation'], key, role)
         expected = {'role': role, 'id': i + 1, 'home': BASE + PATHS[role], 'path': PATHS[role],
                     'wordpress': '7.1.2', 'theme': {'name': report['theme'], 'version': THEMES[report['theme']][0], 'block': THEMES[report['theme']][1]},
-                    'width': WIDTHS[role], 'deadline': DEADLINES[role], 'campaign_keys': ['shared-timer', 'only-' + role],
+                    'width': WIDTHS[role], 'deadline': DEADLINES[role], 'background': '#ffffff', 'campaign_keys': ['shared-timer', 'only-' + role],
                     'site_plugins': [PLUGIN] if active and report['activation'] == 'site' else [],
                     'network_plugins': sorted(([PLUGIN] if active and report['activation'] == 'network' else []) + ([VENDOR] if cached else [])),
                     'wp_cache': cached, 'object_cache_dropin': False, 'advanced_cache_dropin': cached,
@@ -88,13 +89,14 @@ def inventory_ok(sites, report, key, fixture):
         if cached and any(type(site['cache_configuration'].get(k)) is not type(v) for k, v in SETTINGS.items()): return False
     return True
 
-def image_ok(proof, role, theme, jit, active, kind, missing=False):
+def image_ok(proof, role, theme, jit, active, kind, missing=False, expected_width=None):
     if not isinstance(proof, dict):
         return False
     if not runtime(proof.get('runtime'), role, theme, jit, active):
         return False
     if proof.get('cache_header') is not None: return False
     width, frames, status = (1, 1, 404) if missing else (WIDTHS[role], 60 if kind == 'gif' else 1, 200)
+    if expected_width is not None and not missing: width = expected_width
     expected = {'format': kind.upper(), 'status': status, 'width': width, 'frames': frames}
     if any(proof.get(k) != v for k, v in expected.items()) or any(type(proof.get(k)) is not int for k in ('status', 'width', 'frames')):
         return False
@@ -135,7 +137,7 @@ def accept(report):
     cached_markers = set()
     for state in states:
         key = state['key']
-        if state.get('complete') is not True or state.get('failures') != []:
+        if state.get('complete') is not True or state.get('failures') != [] or state.get('failed_edit_cleanup') is not None:
             return False
         if not inventory_ok(state.get('inventory_before'), report, key, fixture) or not inventory_ok(state.get('inventory_after'), report, key, fixture):
             return False
@@ -201,6 +203,13 @@ def accept(report):
                 return False
         elif mutation is not None:
             return False
+        if key.endswith('-on'):
+            if (not edit_refresh.accept(state.get('visible_edit'), key, cached, initial,
+                    edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue']),
+                    lambda h: runtime(h, 'blue', report['theme'], report['jit'], True),
+                    lambda image, kind, width: image_ok(image, 'blue', report['theme'], report['jit'], True, kind, expected_width=width))):
+                return False
+        elif state.get('visible_edit') is not None: return False
     return True
 
 def load_module(name, path):
@@ -228,6 +237,7 @@ def assess(directory):
         if not accept(report):
             result['errors'].append({'file': 'checks.json', 'reason': 'incomplete_or_failed_report'})
         result['errors'].extend(snapshot_replay(directory, report))
+        result['errors'].extend(edit_refresh.replay(directory, report, lambda attrs: image_reference(attrs, 'blue')))
     except (OSError, ValueError, UnicodeError, TypeError, KeyError) as error:
         result['errors'].append({'file': 'evidence', 'reason': type(error).__name__})
     result['passed'] = not result['errors']

@@ -45,6 +45,8 @@ final class Email_Countdown_Timer_Network_Lab {
                     ) ) );
                     $config['campaign_name'] = 'PRIVATE-NETWORK-' . $role;
                     update_option( 'easy_countdown_timers', array( 'shared-timer' => $config, 'only-' . $role => $config ), false );
+                    // Test-only recovery, never counted as a successful admin save.
+                    update_option( 'email_countdown_timer_network_original', get_option( 'easy_countdown_timers' ), false );
                     $pages = array();
                     foreach ( array( 'pair-1-off', 'pair-1-on', 'pair-2-on', 'pair-2-off', 'pair-3-off', 'pair-3-on' ) as $key ) {
                         $id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_name' => $key,
@@ -63,6 +65,7 @@ final class Email_Countdown_Timer_Network_Lab {
                     'network_plugins' => $network_plugins,
                     'campaign_keys' => array_keys( $timers ), 'campaign_sha256' => hash( 'sha256', wp_json_encode( self::canonical( $timers ) ) ),
                     'width' => $timers['shared-timer']['fixed_width'], 'deadline' => Email_Countdown_Timer_Config::deadline( $timers['shared-timer'] ),
+                    'background' => strtolower( $timers['shared-timer']['bg'] ),
                     'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'object_cache_dropin' => is_file( WP_CONTENT_DIR . '/object-cache.php' ),
                     'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ),
                     'cache_configuration' => getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ? Email_Countdown_Timer_Network_Super_Cache::inventory() : null );
@@ -84,4 +87,12 @@ if ( $mode === 'seed' ) {
     Email_Countdown_Timer_Network_Super_Cache::configure();
 } elseif ( $mode === 'purge-cache' && getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ) {
     Email_Countdown_Timer_Network_Super_Cache::purge();
+} elseif ( $mode === 'restore-blue' ) {
+    switch_to_blog( 2 );
+    try {
+        $original = get_option( 'email_countdown_timer_network_original' );
+        if ( home_url( '/' ) !== 'http://localhost:8097/blue/' || ! is_array( $original )
+            || array_keys( $original ) !== array( 'shared-timer', 'only-blue' ) ) { WP_CLI::error( 'Invalid owned recovery snapshot.' ); }
+        update_option( 'easy_countdown_timers', $original, false );
+    } finally { restore_current_blog(); }
 } else { exit( 1 ); }

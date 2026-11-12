@@ -53,11 +53,107 @@ origin after a legitimate invalidation must instead prove its native context.
 The original baseline still requires four fresh generations and all four native
 contexts. None of these branches changes the baseline or native log gates.
 
-This tests controlled steady states and private-name save/restore isolation.
-It does not certify automatic cache invalidation after visible schedule/style
-edits, blog-only purge behavior, arbitrary ports/domain mapping or every vendor
-setting. Local WordPress preflight observed separate cold/hit transitions and
+The earlier runs test controlled steady states and private-name save/restore
+isolation, without certifying automatic invalidation after visible edits.
+Blog-only purge behavior, arbitrary ports/domain mapping and other vendor
+settings remain outside scope. Local WordPress preflight observed separate cold/hit transitions and
 repeated native GIF/PNG bypass for all three sites, with its real `cli-server`
 SAPI reported. Hosted FPM evidence remains separately required. Sources executed
 by pull-request CI are the expected synthetic merge, bound to the reviewed head
 by Actions metadata and Git tree equality before merge.
+
+## Schedule/style edit and explicit refresh experiment
+
+The C3 edit check changes the existing blue site's timer through its real admin
+form, changing its deadline, background and minimum image width, then restores
+the exact original values. Compare anonymous HTML before the edit, after saving
+without a purge, after the vendor's explicit purge, and after restoring with and
+without that purge. Each observation retains its synthetic HTML, origin marker,
+native context and, where applicable, the exact vendor cache-file hash.
+
+Decode fresh PNG/GIF responses at the same immutable public URLs throughout the
+cycle. Confirm the saved settings, new image dimensions/background, native cache
+bypass, and unchanged sibling campaign hashes. The browser must show the
+observed live deadline/background and updated image, including a cache hit that
+still carries older HTML. A successful explicit purge must bring HTML back in
+line with the saved timer. The matching baseline must stay current without a
+vendor purge. No automatic invalidation result is assumed in advance.
+
+The experiment extends each active comparison in the existing two-theme,
+per-site/network activation and JIT matrix. Existing controls and post-stop
+native gates remain required. Only tests and documentation change; the named
+12.6.0 installation ZIP remains byte-identical. [PR #38](https://github.com/dominiczajac/email-countdown-timer/pull/38)
+records the reviewed revision, hosted results and both static reviews. Integration
+requires the full matrix and core CI to pass with no unresolved P0–P2 finding.
+
+The initial edit experiment at head `371242b` failed before completing its first
+visible edit. Its page-wide `timer_id` assertion also selected the hidden delete
+form field, although the edited settings were saved successfully. The harness
+now targets `#ect-editor` specifically. Failed run
+[43188103744](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43188103744)
+and its partial evidence remain negative; native bounds and acceptance checks
+are unchanged.
+
+Codex's first static review also caught a P1 evidence-file collision: browser
+screenshots reused the native PNG response filename for the edited/purged stages.
+Browser captures now use a distinct `-browser.png` suffix, covered by a filename
+collision regression; native response hashes and post-stop replay stay required.
+
+Claude's first review identified a P2 failure-isolation gap: an interrupted edit
+left blue's changed settings in later comparisons. Failed states now invoke a
+CLI-only recovery of the synthetic blue snapshot before the next comparison and
+record its hash check separately. Recovery is not successful form acceptance;
+the original failure still fails the whole run. A recovery exception or mismatch
+also stays negative. Successful edit cycles must still restore through the real
+form and match the original hashes without using that recovery path.
+
+Run [43189539623](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43189539623)
+at `59e4619` exposed a second test locator error: passing an already form-scoped
+locator into a `details.filter(has=...)` search made that relative descendant
+search empty. Chromium reproduced zero matches there and one for the corrected
+`#ect-editor details:has([name=fixed_width])` selector. All three interrupted
+cycles recovered the original site hashes, with later off states still running;
+the run remains failed. Fixed operation labels now locate such failures without
+retaining arbitrary exception text, form bodies or nonces.
+
+A local native renderer preflight found that GD/Imagick's GIF palette represents
+the edited `#f8fafc` background as RGB `[247,249,251]`, one step below each source
+channel; PNG is exactly `[248,250,252]`. The new color check allows at most one
+step per GIF channel, keeps PNG exact, retains the actual decoded samples and
+rejects larger changes/non-integer channels. This concerns only the new palette
+comparison; frame timing, dimensions, native limits, original log gates and
+retained-image hash verification are unchanged.
+
+## Observed edit results — 2026-11-12
+
+At head `811cb3c33967112e4bb360268d38e9226276018d`,
+[run 43190869002](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43190869002)
+passed all **16 cells**: **96 original states / 288 site probes / 192 real form
+saves**, plus **48 visible edit/restore cycles / 240 observation stages / 960
+anonymous HTTP observations / 240 browser observations / 480 retained PNG/GIF
+responses**. All 16 actual archive digests/sizes matched GitHub metadata. Local
+replay checked report/native-log acceptance, retained HTML, every new decoded
+image's geometry/palette/frame timing, installed manifests and source tree.
+The executed PR merge source `2892f2a9bbd9237f0345574613b563a64d354913` shares
+tree `cd69d4da2bbafb6146c30f78bda7774c1b05aea3` with the named head.
+
+| Profile | Fresh HTML after save, without purge | After explicit purge |
+|---|---|---|
+| Baseline, 24 cycles | 24/24 | Current settings retained |
+| WP Super Cache Simple/PHP, 24 cycles | 0/24 | 24/24 current settings |
+
+The same split occurred on restoration. Fresh image URLs returned current saved
+dimensions/colors even when cached live HTML still had the previous deadline,
+background and reserved image width. Purging then reloading the page restored
+agreement. Every successful cycle restored the exact original options through
+the admin form; no failure-recovery path was used. Recovery records are also
+rejected in otherwise complete reports, so cleanup cannot stand in for success.
+
+Observed WordPress 7.1.2, MySQL 8.4.13, native FPM 8.4.27, Chromium
+156.0.8078.79, Twenty Twenty-One 2.9 / Twenty Twenty-Four 1.6, and the unchanged
+WP Super Cache 3.1.5 settings above. The installation ZIP is unchanged at SHA256
+`4fa70056f95965ab880ad18329c9c1326dd18d9ad928a9c0670e8744b5e1cd75`, 425,814
+bytes / 32 files. This is bounded author verification, not independent owner or
+production acceptance. Later revisions still require their own hosted gates and
+both reviews before integration. Paid packages, further cache/topology settings,
+actual host/email-client acceptance and release approval remain separate.

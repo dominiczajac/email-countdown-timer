@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Native hosted network experiment. No production or local-CI impersonation."""
 from contextlib import ExitStack
+from datetime import datetime, timezone
 import hashlib
 import io
 import json
@@ -13,8 +14,9 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from PIL import Image
 from playwright.sync_api import expect, sync_playwright
-from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, image_reference, inventory_ok, local, navigation_abort, page_evidence, runtime
-from cache_evidence import HITS, browser_proof, hit_proof, snapshot
+from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, Page, accept, active_for, core_avatar, generation, image_ok, image_reference, inventory_ok, local, navigation_abort, page_evidence, runtime
+from cache_evidence import HITS, bounded_bytes, browser_proof, cache_path, hit_proof, snapshot
+import edit_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests/browser'))
@@ -63,13 +65,15 @@ def main():
         check(runtime(result, role, theme, jit, active), 'runtime_context')
         return result
 
-    def image(request, role, active, kind, campaign='shared-timer'):
+    def image(request, role, active, kind, campaign='shared-timer', snapshot_name=None):
         url = BASE + PATHS[role] + '?' + urlencode({'ecd_action': 'render', 'ecd': campaign, 'mode': 'email' if kind == 'gif' else 'static'})
         response = request.get(url, headers={'Accept': 'image/' + kind}, timeout=45000)
         body = response.body()
+        check(0 < len(body) <= 16 * 1024 * 1024, 'bounded_image_body')
         with Image.open(io.BytesIO(body)) as decoded:
             decoded.load()
-            result = {'status': response.status, 'content_type': response.headers.get('content-type'),
+            result = {'url': url, 'bytes': len(body), 'background_rgb': list(decoded.convert('RGB').getpixel((0, 0))),
+                      'status': response.status, 'content_type': response.headers.get('content-type'),
                       'cache_control': response.headers.get('cache-control'), 'format': decoded.format,
                       'width': decoded.width, 'height': decoded.height, 'frames': decoded.n_frames,
                       'cache_header': response.headers.get('x-wp-super-cache'),
@@ -78,6 +82,9 @@ def main():
                 result['durations'] = []
                 for index in range(decoded.n_frames):
                     decoded.seek(index); result['durations'].append(decoded.info.get('duration'))
+        if snapshot_name is not None:
+            with (out / snapshot_name).open('xb') as stream: stream.write(body)
+            result['snapshot'] = snapshot_name
         return result
 
     def isolate(context, role):
@@ -110,6 +117,85 @@ def main():
                 else: error('request_failed')
             page.on('requestfailed', failed)
         context.on('page', observe)
+
+    def visible_edit(browser, admin_page, site):
+        nonlocal phase, navigating
+        original = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'])
+        form = admin_page.locator('#ect-editor')
+        original_form = {field: form.locator('[name=' + field + ']').input_value() for field in ('deadline', 'bg', 'fixed_width')}
+        proof = {'complete': False, 'form_saves': [], 'stages': []}
+        current['visible_edit'] = proof
+        for name in edit_refresh.STAGES:
+            target = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'], name == 'edited')
+            if name in ('edited', 'restored'):
+                phase = 'timer-editor'
+                fields = original_form if name == 'restored' else {
+                    'deadline': datetime.fromtimestamp(target['deadline'], timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
+                    'bg': target['background'], 'fixed_width': str(target['width'])}
+                proof['operation'] = name + '-fill'
+                form.locator('[name=deadline]').fill(fields['deadline'])
+                form.locator('[name=bg]').fill(fields['bg'])
+                proof['operation'] = name + '-open-size'
+                disclosure = form.locator('details:has([name=fixed_width])')
+                if disclosure.get_attribute('open') is None: disclosure.locator('summary').click()
+                form.locator('[name=fixed_width]').fill(fields['fixed_width'])
+                admin_page.wait_for_load_state('networkidle')
+                proof['operation'] = name + '-save'
+                navigating = True
+                try:
+                    form.get_by_role('button', name='Save Changes', exact=True).click()
+                    expect(admin_page.get_by_text('Timer saved.', exact=True)).to_be_visible()
+                    expect(form.locator('[name=fixed_width]')).to_have_value(str(target['width']))
+                    expect(form.locator('[name=bg]')).to_have_value(fields['bg'])
+                    expect(form.locator('[name=timer_id]')).to_have_value('shared-timer')
+                finally: navigating = False
+                proof['form_saves'].append(name)
+            if cached and name in ('before', 'purged', 'restored-purged'):
+                wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'purge-cache')
+            phase = 'public-browser'
+            proof['operation'] = name + '-observe'
+            entries = inventory(); blue = entries[1]
+            stage = {'name': name, 'stored': {k: blue[k] for k in ('deadline', 'width', 'background')},
+                     'hashes': {x['role']: x['campaign_sha256'] for x in entries}, 'pages': []}
+            proof['stages'].append(stage)
+            with browser.new_context(viewport={'width': 1280, 'height': 900}, reduced_motion='no-preference') as context:
+                isolate(context, 'blue')
+                for _ in range(4):
+                    response = context.request.get(site['pages'][current['key']], headers={'Accept': 'text/html'}, timeout=45000, max_redirects=0)
+                    body = response.body(); html = body.decode('utf-8')
+                    check(0 < len(body) <= 16 * 1024 * 1024, 'bounded_edit_html')
+                    stage['pages'].append({'status': response.status, 'content_type': response.headers.get('content-type'),
+                        'cache_header': response.headers.get('x-wp-super-cache'), 'runtime': headers(response),
+                        'generation': generation(html), 'sha256': hashlib.sha256(body).hexdigest(),
+                        'public': edit_refresh.public_values(html, lambda attrs: image_reference(attrs, 'blue'))})
+                saved = edit_refresh.filename(current['key'], name, 'html')
+                with (out / saved).open('xb') as stream: stream.write(body)
+                relative = cache_path('blue', current['key']) if cached else None
+                if cached: check(bounded_bytes(wpdir / 'wp-content' / relative) == body, 'edit_cache_file_body')
+                stage['body'] = {'snapshot': saved, 'sha256': hashlib.sha256(body).hexdigest(), 'bytes': len(body),
+                                 'generation': generation(html), 'cache_path': relative}
+                stage['images'] = {kind: image(context.request, 'blue', True, kind,
+                    snapshot_name=edit_refresh.filename(current['key'], name, kind)) for kind in ('png', 'gif')}
+                page = context.new_page()
+                response = page.goto(site['pages'][current['key']], wait_until='load', timeout=45000)
+                check(response is not None and response.status == 200, 'edit_browser_http')
+                picture, live = page.locator('img.email-countdown-timer-image'), page.locator('.ecd-live')
+                expect(picture).to_have_count(1); expect(live).to_have_count(1)
+                expect(picture).to_have_js_property('complete', True)
+                expect(live.locator('button')).to_have_text('Pause countdown')
+                stage['browser'] = {'cache_header': response.headers.get('x-wp-super-cache'), 'runtime': headers(response),
+                    'generation': generation(response.text()), 'sha256': hashlib.sha256(response.body()).hexdigest(),
+                    'natural_width': picture.evaluate('(img)=>img.naturalWidth'),
+                    'public': {'deadline': int(live.get_attribute('data-ecd-deadline')), 'width': int(picture.get_attribute('width')),
+                               'background': live.evaluate('(element)=>getComputedStyle(element).getPropertyValue("--ecd-bg").trim().toLowerCase()')}}
+                if name in ('edited', 'purged'):
+                    page.screenshot(path=str(out / edit_refresh.filename(current['key'], name, 'browser')))
+        proof['after_save_fresh'] = proof['stages'][1]['pages'][-1]['public'] == proof['stages'][1]['stored']
+        proof['after_restore_fresh'] = proof['stages'][3]['pages'][-1]['public'] == proof['stages'][3]['stored']
+        proof['complete'] = True
+        check(edit_refresh.accept(proof, current['key'], cached, {r: report['fixture'][r]['campaign_sha256'] for r in ROLES}, original,
+            lambda h: runtime(h, 'blue', theme, jit, True),
+            lambda value, kind, width: image_ok(value, 'blue', theme, jit, True, kind, expected_width=width)), 'visible_edit_refresh')
 
     def browser_site(browser, site, row):
         nonlocal phase, navigating
@@ -151,6 +237,9 @@ def main():
                         finally: navigating = False
                         mutation[name] = hashes()
                     current['mutation'] = mutation
+                    visible_edit(browser, page, site)
+                    phase = 'timer-editor'
+                    row['checks'].append('visible-edit-refresh')
                 page.screenshot(path=str(out / (current['key'] + '-' + role + '-admin.png')))
             navigating = True
         navigating = False
@@ -207,7 +296,7 @@ def main():
                 report['browser'] = browser.version
                 wp('plugin', 'deactivate', 'easy-countdown', '--network')
                 for key in ORDER:
-                    current = {'key': key, 'complete': False, 'failures': [], 'sites': [], 'mutation': None}; report['states'].append(current)
+                    current = {'key': key, 'complete': False, 'failures': [], 'sites': [], 'mutation': None, 'visible_edit': None}; report['states'].append(current)
                     try:
                         phase = 'plugin-state'
                         args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'easy-countdown']
@@ -265,8 +354,15 @@ def main():
                         current['complete'] = True
                     except Exception as error:
                         failure = {'state': key, 'phase': phase, 'reason': str(error) if isinstance(error, Failure) else type(error).__name__}
+                        if current['visible_edit'] is not None: failure['operation'] = current['visible_edit'].get('operation')
                         current['failures'].append(failure); report['failures'].append(failure)
                         print('::error title=Network state::' + json.dumps(failure), flush=True)
+                        if current['visible_edit'] is not None:
+                            current['failed_edit_cleanup'] = edit_refresh.cleanup_failed_edit(
+                                lambda: wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'restore-blue'), hashes,
+                                {r: report['fixture'][r]['campaign_sha256'] for r in ROLES})
+                            if current['failed_edit_cleanup']['restored'] is not True:
+                                report['failures'].append({'state': key, 'phase': 'failed-edit-cleanup', 'reason': 'restore_failed'})
                     finally:
                         (out / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         report['complete'] = len(report['states']) == 6 and all(x['complete'] for x in report['states'])
