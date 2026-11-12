@@ -5,7 +5,7 @@ import pathlib
 import re
 import shutil
 import sys
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from playwright.sync_api import sync_playwright, expect
 from wordpress import log_in
 from status import verify_status
@@ -82,7 +82,10 @@ with sync_playwright() as p:
     page.get_by_role('link', name='Back to Timers', exact=True).click()
     page.locator('#ect-search').fill('Private named campaign')
     page.locator('.ect-search button').click()
-    check(page.locator('table tbody tr').count() == 1 and page.locator('table code').inner_text() == generated_id, 'name search returns the matching immutable timer ID')
+    page.wait_for_url(lambda url: parse_qs(urlsplit(url).query).get('s') == ['Private named campaign'])
+    expect(page.locator('table tbody tr')).to_have_count(1)
+    expect(page.locator('table code')).to_have_text(generated_id)
+    check(True, 'name search returns the matching immutable timer ID')
     page.get_by_role('link', name='Edit ' + generated_id, exact=True).click()
     page.locator('#ect-campaign_name').fill('Renamed internal campaign')
     page.locator('#ect-editor button[type=submit]').click()
