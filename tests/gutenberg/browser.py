@@ -175,9 +175,11 @@ try:
         check(not any(('mode=anim' in x or 'mode=email' in x) for x in requests if 'ecd_action=render' in x),'no animated request from editor')
         page.screenshot(path=str(evidence/'editor-selected.png'), full_page=True)
         page.set_viewport_size({'width':390,'height':844})
+        # Responsive mode can close the desktop sidebar after the viewport call
+        # returns. Wait for Core's mode, then request the Block panel explicitly.
+        page.wait_for_function("!wp.data.select('core/viewport').isViewportMatch('medium')")
+        page.evaluate("wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block')")
         picker = page.get_by_role('combobox', name='Timer', exact=True).first
-        if not picker.is_visible():
-            page.get_by_role('button', name=re.compile(r'^Settings(?: sidebar)?$', re.I)).click()
         expect(picker).to_be_visible()
         bounds = picker.bounding_box()
         check(bounds is not None and bounds['x'] >= 0 and bounds['x'] + bounds['width'] <= 391, 'sidebar timer picker fits the narrow editor viewport')
