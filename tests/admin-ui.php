@@ -117,6 +117,7 @@ foreach ( $appearance_presets as $preset => $appearance ) {
     ok( str_starts_with( $submit_admin( $post ), 'redirect:' ), 'quick creation saves ' . $preset );
     $created = $options['easy_countdown_timers'][ 'quick-' . $preset ];
     ok( array( $created['bg'], $created['dc'], $created['lc'] ) === $colors, 'server applies the selected colors without JavaScript: ' . $preset );
+    ok( $created['font'] === Email_Countdown_Timer_Admin::preset_font( $appearance ), 'server applies the registered preset font without JavaScript: ' . $preset );
     ok( $created['deadline'] === $quick['deadline'] && $created['tz'] === $quick['tz'] && $created['alt'] === 'Countdown', 'quick creation retains schedule and accessible default text' );
     ok( ! isset( $created['creation_mode'], $created['appearance_preset'] ) && $options['easy_countdown_timers']['existing'] === $ui_config, 'presets add no saved fields or existing-campaign changes' );
 }

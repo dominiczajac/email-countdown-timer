@@ -21,9 +21,12 @@ try {
     copy( __DIR__ . '/../fonts/' . Email_Countdown_Timer_Fonts::BUNDLED_FILE, $font );
     $expected = function_exists( 'imagettftext' ) && function_exists( 'imagettfbbox' ) ? Email_Countdown_Timer_Fonts::BUNDLED_CHOICE : '';
     $expect( Email_Countdown_Timer_Admin::defaults()['font'] === $expected, 'New campaigns need both a local file and FreeType before proposing Lato.' );
+    $expect( Email_Countdown_Timer_Admin::preset_font( array( 'font' => Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ) ) === $expected, 'Preset uses an available face only with FreeType.' );
+    $expect( Email_Countdown_Timer_Admin::preset_font( array( 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ) ) === '', 'A missing preset face uses bitmap without substituting another font.' );
     $expect( Email_Countdown_Timer_Admin::defaults( false )['font'] === '', 'Existing-record defaults must retain bitmap even with an available bundled font.' );
     unlink( $font );
     $expect( Email_Countdown_Timer_Admin::defaults()['font'] === '', 'Disappearing bundled font must return to bitmap without a persisted default.' );
+    $expect( Email_Countdown_Timer_Admin::preset_font( array( 'font' => Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ) ) === '', 'Disappearing preset face also uses bitmap.' );
 } finally {
     if ( is_file( $font ) ) { unlink( $font ); }
     rmdir( $fixture . '/fonts' );
