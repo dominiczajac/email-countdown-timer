@@ -90,6 +90,13 @@
         var blockProps = wp.blockEditor.useBlockProps();
         var controls = el(wp.blockEditor.InspectorControls, {},
             el(wp.components.PanelBody, { title: __('Countdown', 'easy-countdown'), initialOpen: true },
+                // Keep the searchable input outside the canvas WritingFlow,
+                // whose native arrow navigation can steal focus before React.
+                timers.length || timerId ? el(wp.components.ComboboxControl, {
+                    label: __('Timer', 'easy-countdown'), value: timerId,
+                    options: visibleTimers, onFilterValueChange: function (value) { setSearch(value || ''); }, onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
+                    help: __('Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns.', 'easy-countdown')
+                }) : null,
                 el(wp.components.SelectControl, {
                     label: __('Website display', 'easy-countdown'), value: displayMode,
                     options: [
@@ -120,11 +127,7 @@
                 value: alignment, onChange: function (value) { props.setAttributes({ alignment: value || 'left' }); }
             })),
             el('div', blockProps,
-                timers.length || timerId ? el(wp.components.ComboboxControl, {
-                    label: __('Timer', 'easy-countdown'), value: timerId,
-                    options: visibleTimers, onFilterValueChange: function (value) { setSearch(value || ''); }, onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
-                    help: __('Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns.', 'easy-countdown')
-                }) : null,
+                timers.length && !timerId ? el('p', {}, __('Choose a saved timer in the block settings sidebar.', 'easy-countdown')) : null,
                 !timers.length && !timerId ? el(wp.components.Placeholder, {
                     label: __('No campaigns yet', 'easy-countdown'),
                     instructions: settings.createUrl ? __('Create your first campaign in Easy Countdown, then return here and refresh the campaign list.', 'easy-countdown') : __('Ask a site administrator to create a campaign, then refresh the campaign list.', 'easy-countdown')

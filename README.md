@@ -70,7 +70,7 @@ In the WordPress block editor, insert **Easy Countdown**, choose an existing tim
 [ecd_timer id="promotion"]
 ```
 
-**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
+**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. Choose **Timer** in the block settings sidebar, where arrow-key navigation stays within the picker. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
 
 **Embed Codes > Email** provides separate **Email HTML** and **Image URL** copy actions. All three code fields remain available for manual copying without JavaScript. WordPress shortcodes do not run in email.
 
