@@ -1,6 +1,10 @@
 # FlyingPress, WP Rocket and other optimizers
 
-Applies to Easy Countdown 12.6.0; legacy asset-path alternatives are noted below. Vendor guidance was checked against official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries. Named free-plugin tests and their settings are recorded in [isolated cache profiles](../ISOLATED-CACHE-PROFILES.md) and [WP Super Cache multisite](../MULTISITE-SUPER-CACHE.md).
+Applies to Easy Countdown 12.6.1; legacy asset-path alternatives are noted below. Vendor guidance was checked against official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries. Named free-plugin tests and their settings are recorded in [isolated cache profiles](../ISOLATED-CACHE-PROFILES.md) and [WP Super Cache multisite](../MULTISITE-SUPER-CACHE.md).
+
+## Static previews and animated output
+
+Email and default website image output remain GIF, independent of Accept preferences. Static previews use PNG unless WebP is explicitly accepted, available on the server and at least as preferred as PNG. Specific media ranges override wildcard weights; `image/webp;q=0` refuses WebP, and a stronger PNG preference selects PNG. Invalid or contradictory duplicate WebP weights conservatively refuse or lower that preference. Wildcard-only requests retain PNG. GET and HEAD select the same MIME; responses retain `Vary: Accept`, per-format cache slots and `no-store, no-transform`. AVIF and automatic image conversion are not enabled. Website live text remains an optional alternative.
 
 ## Exclude narrowly, only where needed
 
