@@ -61,3 +61,26 @@ repeated native GIF/PNG bypass for all three sites, with its real `cli-server`
 SAPI reported. Hosted FPM evidence remains separately required. Sources executed
 by pull-request CI are the expected synthetic merge, bound to the reviewed head
 by Actions metadata and Git tree equality before merge.
+
+## Schedule/style edit and explicit refresh experiment
+
+The next C3 check edits the existing blue site's timer through its real admin
+form, changing its deadline, background and minimum image width, then restores
+the exact original values. Compare anonymous HTML before the edit, after saving
+without a purge, after the vendor's explicit purge, and after restoring with and
+without that purge. Each observation retains its synthetic HTML, origin marker,
+native context and, where applicable, the exact vendor cache-file hash.
+
+Decode fresh PNG/GIF responses at the same immutable public URLs throughout the
+cycle. Confirm the saved settings, new image dimensions/background, native cache
+bypass, and unchanged sibling campaign hashes. The browser must show the
+observed live deadline/background and updated image, including a cache hit that
+still carries older HTML. A successful explicit purge must bring HTML back in
+line with the saved timer. The matching baseline must stay current without a
+vendor purge. No automatic invalidation result is assumed in advance.
+
+The experiment extends each active comparison in the existing two-theme,
+per-site/network activation and JIT matrix. Existing controls and post-stop
+native gates remain required. Only tests and documentation change; the named
+12.6.0 installation ZIP remains byte-identical. Results are pending until the
+current reviewed revision has completed hosted CI and both static reviews.
