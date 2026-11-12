@@ -121,7 +121,8 @@ def main():
     def visible_edit(browser, admin_page, site):
         nonlocal phase, navigating
         original = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'])
-        original_form = {field: admin_page.locator('[name=' + field + ']').input_value() for field in ('deadline', 'bg', 'fixed_width')}
+        form = admin_page.locator('#ect-editor')
+        original_form = {field: form.locator('[name=' + field + ']').input_value() for field in ('deadline', 'bg', 'fixed_width')}
         proof = {'complete': False, 'form_saves': [], 'stages': []}
         current['visible_edit'] = proof
         for name in edit_refresh.STAGES:
@@ -131,19 +132,19 @@ def main():
                 fields = original_form if name == 'restored' else {
                     'deadline': datetime.fromtimestamp(target['deadline'], timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
                     'bg': target['background'], 'fixed_width': str(target['width'])}
-                admin_page.locator('[name=deadline]').fill(fields['deadline'])
-                admin_page.locator('[name=bg]').fill(fields['bg'])
-                disclosure = admin_page.locator('details').filter(has=admin_page.locator('[name=fixed_width]'))
+                form.locator('[name=deadline]').fill(fields['deadline'])
+                form.locator('[name=bg]').fill(fields['bg'])
+                disclosure = form.locator('details').filter(has=form.locator('[name=fixed_width]'))
                 if disclosure.get_attribute('open') is None: disclosure.locator('summary').click()
-                admin_page.locator('[name=fixed_width]').fill(fields['fixed_width'])
+                form.locator('[name=fixed_width]').fill(fields['fixed_width'])
                 admin_page.wait_for_load_state('networkidle')
                 navigating = True
                 try:
-                    admin_page.get_by_role('button', name='Save Changes', exact=True).click()
+                    form.get_by_role('button', name='Save Changes', exact=True).click()
                     expect(admin_page.get_by_text('Timer saved.', exact=True)).to_be_visible()
-                    expect(admin_page.locator('[name=fixed_width]')).to_have_value(str(target['width']))
-                    expect(admin_page.locator('[name=bg]')).to_have_value(fields['bg'])
-                    expect(admin_page.locator('[name=timer_id]')).to_have_value('shared-timer')
+                    expect(form.locator('[name=fixed_width]')).to_have_value(str(target['width']))
+                    expect(form.locator('[name=bg]')).to_have_value(fields['bg'])
+                    expect(form.locator('[name=timer_id]')).to_have_value('shared-timer')
                 finally: navigating = False
                 proof['form_saves'].append(name)
             if cached and name in ('before', 'purged', 'restored-purged'):

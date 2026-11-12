@@ -84,3 +84,11 @@ per-site/network activation and JIT matrix. Existing controls and post-stop
 native gates remain required. Only tests and documentation change; the named
 12.6.0 installation ZIP remains byte-identical. Results are pending until the
 current reviewed revision has completed hosted CI and both static reviews.
+
+The initial edit experiment at head `371242b` failed before completing its first
+visible edit. Its page-wide `timer_id` assertion also selected the hidden delete
+form field, although the edited settings were saved successfully. The harness
+now targets `#ect-editor` specifically. Failed run
+[43188103744](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43188103744)
+and its partial evidence remain negative; native bounds and acceptance checks
+are unchanged.
