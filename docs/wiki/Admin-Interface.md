@@ -10,6 +10,8 @@ Select **Create Timer**. Enter a unique ID, deadline and time zone in **Schedule
 
 A timer's ID is read-only during editing and enforced on the server. Reusing an ID in a new form returns an error instead of overwriting the existing timer.
 
+**Quick Create** on the timer list and dashboard offers Classic, Midnight, Ocean, Warm, Christmas, New Year, Easter, Valentine's Day, Halloween, Black Friday, Birthday and Wedding color presets. The full editor offers the same choices in **Appearance**. They set only background, digit and label colors; choose your own deadline and time zone. Applying an editor preset changes the unsaved form, preserving labels, font and schedule until you explicitly save. Quick Create also works without JavaScript.
+
 New forms suggest an opaque unique ID without reserving or saving it. The optional **Campaign name** stays in administration only; it is not used to generate that ID, as image alt text, in email HTML or in Gutenberg's catalog. Rename a campaign without changing its existing URLs. Old forms that omit the name preserve it; clearing the name deliberately removes just that metadata. The dashboard widget also shows names and the underlying IDs.
 
 ## Save and correct errors

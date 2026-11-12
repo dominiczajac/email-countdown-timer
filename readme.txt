@@ -22,7 +22,7 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 * Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
 * Alt text, a visible email deadline and reserved image space.
-* Quick Create presets and an administrator dashboard widget.
+* Holiday/occasion presets, Quick Create and a dashboard widget.
 * On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
 * Translation-ready English admin with WordPress controls.
@@ -112,7 +112,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 * Add on-demand diagnostics and a redacted report, without automatic network probes.
 * Add the native block, static preview and opt-in live text with Pause/Resume.
 * Preserve embeds, dimensions and permissions; fix keyboard selection in block settings.
-* Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
+* Add holiday/occasion presets; prefer Lato with FreeType for new timers. Keep saved timers.
 * Add Quick Create/dashboard shortcuts, block refresh and separate Website/Email embeds.
 * Add stored label presets independent of admin locale; preserve custom/empty labels and accented output.
 
