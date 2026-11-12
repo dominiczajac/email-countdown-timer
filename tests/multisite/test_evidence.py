@@ -40,6 +40,8 @@ def edit_good(report, state):
         display = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'],
             name in ('purged', 'restored') if cached else changed)
         marker = hashlib.sha256((key + name).encode()).hexdigest()[:24]
+        if cached and name in ('edited', 'restored'):
+            marker = proof['stages'][-1]['body']['generation']
         body = edit_body(display, marker); sha = hashlib.sha256(body).hexdigest()
         pages = []
         for i in range(4):
@@ -150,6 +152,31 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(report))
 
 class Evidence(unittest.TestCase):
+    def test_stale_edit_html_must_be_bound_to_the_earlier_cached_response(self):
+        for field in ('hash', 'marker', 'origin'):
+            report = good(profile='wp-super-cache'); stage = report['states'][1]['visible_edit']['stages'][1]
+            if field == 'hash':
+                for page in stage['pages']: page['sha256'] = 'a'*64
+                stage['body']['sha256'] = stage['browser']['sha256'] = 'a'*64
+            elif field == 'marker':
+                for page in stage['pages']: page['generation'] = 'a'*24
+                stage['body']['generation'] = stage['browser']['generation'] = 'a'*24
+            else:
+                stage['pages'][0]['cache_header'] = None
+                stage['pages'][0]['runtime'] = copy.deepcopy(report['states'][1]['sites'][1]['page_runtime'][0])
+            with self.subTest(field=field): self.assertFalse(accept(report))
+
+    def test_an_observed_automatic_refresh_is_accepted_and_not_assumed_stale(self):
+        report = good(profile='wp-super-cache'); proof = report['states'][1]['visible_edit']
+        for index in (1, 3):
+            stage = proof['stages'][index]; marker = hashlib.sha256(('fresh-' + stage['name']).encode()).hexdigest()[:24]
+            body = edit_body(stage['stored'], marker); sha = hashlib.sha256(body).hexdigest()
+            for page in stage['pages']: page.update(public=dict(stage['stored']), sha256=sha, generation=marker)
+            stage['body'].update(sha256=sha, generation=marker, bytes=len(body))
+            stage['browser'].update(public=dict(stage['stored']), sha256=sha, generation=marker)
+        proof['after_save_fresh'] = proof['after_restore_fresh'] = True
+        self.assertTrue(accept(report))
+
     def test_failed_edit_recovery_restores_before_checking_and_retains_failures(self):
         values = {'blue': 'edited', 'red': 'original'}; initial = {'blue': 'original', 'red': 'original'}; calls = []
         def restore():

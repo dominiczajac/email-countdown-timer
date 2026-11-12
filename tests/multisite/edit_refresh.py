@@ -60,6 +60,7 @@ def accept(proof, key, cached, initial, original, runtime_valid, image_valid):
         return False
     edited = settings(original['deadline'], original['width'], True)
     edited_hashes = None
+    previous_body = None
     for stage in proof['stages']:
         name = stage['name']; changed = name in ('edited', 'purged')
         expected = edited if changed else original
@@ -98,6 +99,14 @@ def accept(proof, key, cached, initial, original, runtime_valid, image_valid):
                 or type(body.get('bytes')) is not int or not 0 < body['bytes'] <= 16 * 1024 * 1024
                 or body.get('cache_path') != (cache_path('blue', key) if cached else None)):
             return False
+        # A stale result must be the actual earlier cached response, not a fresh
+        # origin that somehow ignored the saved option, or copied arbitrary HTML.
+        if pages[-1]['public'] != expected:
+            if (previous_body is None or any(p.get('cache_header') not in HITS for p in pages)
+                    or any(p['sha256'] != previous_body['sha256'] or p['generation'] != previous_body['generation'] for p in pages)):
+                return False
+        if cached and name in ('purged', 'restored-purged') and previous_body is not None and pages[0]['generation'] == previous_body['generation']:
+            return False
         browser = stage.get('browser')
         if (not isinstance(browser, dict) or not values_equal(browser.get('public'), pages[-1]['public'])
                 or browser.get('natural_width') != expected['width'] or type(browser.get('natural_width')) is not int
@@ -114,10 +123,12 @@ def accept(proof, key, cached, initial, original, runtime_valid, image_valid):
         for kind, image in images.items():
             mode = 'email' if kind == 'gif' else 'static'
             if (not image_valid(image, kind, expected['width']) or image.get('background_rgb') != rgb
+                    or not isinstance(image.get('background_rgb'), list) or any(type(channel) is not int for channel in image['background_rgb'])
                     or image.get('url') != 'http://localhost:8097/blue/?ecd_action=render&ecd=shared-timer&mode=' + mode
                     or image.get('snapshot') != filename(key, name, kind)
                     or type(image.get('bytes')) is not int or not 0 < image['bytes'] <= 16 * 1024 * 1024):
                 return False
+        previous_body = body
     for name, stage in (('after_save_fresh', proof['stages'][1]), ('after_restore_fresh', proof['stages'][3])):
         if type(proof.get(name)) is not bool or proof[name] is not values_equal(stage['pages'][-1]['public'], stage['stored']): return False
     return True

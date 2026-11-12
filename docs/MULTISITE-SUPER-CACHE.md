@@ -53,10 +53,10 @@ origin after a legitimate invalidation must instead prove its native context.
 The original baseline still requires four fresh generations and all four native
 contexts. None of these branches changes the baseline or native log gates.
 
-This tests controlled steady states and private-name save/restore isolation.
-It does not certify automatic cache invalidation after visible schedule/style
-edits, blog-only purge behavior, arbitrary ports/domain mapping or every vendor
-setting. Local WordPress preflight observed separate cold/hit transitions and
+The earlier runs test controlled steady states and private-name save/restore
+isolation, without certifying automatic invalidation after visible edits.
+Blog-only purge behavior, arbitrary ports/domain mapping and other vendor
+settings remain outside scope. Local WordPress preflight observed separate cold/hit transitions and
 repeated native GIF/PNG bypass for all three sites, with its real `cli-server`
 SAPI reported. Hosted FPM evidence remains separately required. Sources executed
 by pull-request CI are the expected synthetic merge, bound to the reviewed head
@@ -64,7 +64,7 @@ by Actions metadata and Git tree equality before merge.
 
 ## Schedule/style edit and explicit refresh experiment
 
-The next C3 check edits the existing blue site's timer through its real admin
+The C3 edit check changes the existing blue site's timer through its real admin
 form, changing its deadline, background and minimum image width, then restores
 the exact original values. Compare anonymous HTML before the edit, after saving
 without a purge, after the vendor's explicit purge, and after restoring with and
@@ -82,8 +82,9 @@ vendor purge. No automatic invalidation result is assumed in advance.
 The experiment extends each active comparison in the existing two-theme,
 per-site/network activation and JIT matrix. Existing controls and post-stop
 native gates remain required. Only tests and documentation change; the named
-12.6.0 installation ZIP remains byte-identical. Results are pending until the
-current reviewed revision has completed hosted CI and both static reviews.
+12.6.0 installation ZIP remains byte-identical. [PR #38](https://github.com/dominiczajac/email-countdown-timer/pull/38)
+records the reviewed revision, hosted results and both static reviews. Integration
+requires the full matrix and core CI to pass with no unresolved P0–P2 finding.
 
 The initial edit experiment at head `371242b` failed before completing its first
 visible edit. Its page-wide `timer_id` assertion also selected the hidden delete

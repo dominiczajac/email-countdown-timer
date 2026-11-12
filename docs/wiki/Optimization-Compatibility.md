@@ -1,17 +1,18 @@
 # FlyingPress, WP Rocket and other optimizers
 
-Applies to Easy Countdown 12.5.0; legacy asset-path alternatives are noted below. Guidance was checked against the vendors' official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries.
+Applies to Easy Countdown 12.6.0; legacy asset-path alternatives are noted below. Vendor guidance was checked against official documentation on 2026-09-28. This is an interoperability design and troubleshooting guide, **not a claim that every current release/configuration of either commercial plugin was integration-tested**. Our CI does not install their proprietary binaries. Named free-plugin tests and their settings are recorded in [isolated cache profiles](../ISOLATED-CACHE-PROFILES.md) and [WP Super Cache multisite](../MULTISITE-SUPER-CACHE.md).
 
 ## Exclude narrowly, only where needed
 
 | Symptom / setting | Exact asset or identifying keyword | Action |
 |---|---|---|
 | A website timer does not refresh when returning to its tab | `easy-countdown/assets/countdown.js` | Exclude this file from Delay JavaScript / load-after-interaction. If the issue is caused by minification or combination, exclude it there separately. Ordinary `defer` is supported. The WordPress handle is `ecd-refresh`; the usual script element ID is `ecd-refresh-js`. |
+| An opt-in live-text website block does not start until interaction | `easy-countdown/assets/live-countdown.js` | Exclude this file from Delay JavaScript if that feature prevents startup. Keep the script enabled for live blocks and verify ticking and Pause/Resume after purging optimized assets. Image-only embeds do not use it. |
 | Image is blank or replaced by a lazy-load placeholder | `email-countdown-timer-image` | Add this keyword to the image lazy-load exclusion field (without a leading dot). It is a class on the `img` itself. For custom, manually written markup, add the class or match `ecd_action=render` in the image URL. |
 | A timer GIF becomes static or shows an old countdown | Requests with query parameter `ecd_action=render` | Bypass HTML/page/edge caching and image conversion/proxy/CDN transformation for this dynamic image request. Do not add these parameters to a 'cache query strings' allowlist or an 'ignored parameters' list. |
 | A nonstandard optimizer modifies authenticated wp-admin | `easy-countdown/assets/admin.css`, `easy-countdown/assets/admin.js` and `easy-countdown/assets/end-image.js` | Exclude only those admin assets from the offending feature. In ordinary operation these assets are not loaded on the front end and need no public-page CSS exclusion. |
 
-Use the actual asset URL when WordPress content directories are customized. Do not exclude all of `/wp-content/`, all JavaScript, all images, or the entire website merely for this plugin. Keep CSS/JS minification enabled unless testing identifies a specific breakage. No front-end stylesheet is added by this plugin.
+Use the actual asset URL when WordPress content directories are customized. Do not exclude all of `/wp-content/`, all JavaScript, all images, or the entire website merely for this plugin. Keep CSS/JS minification enabled unless testing identifies a specific breakage. Image-only output adds no front-end stylesheet; opt-in live text conditionally loads `easy-countdown/assets/live-countdown.css` and its live script.
 
 ## WP Rocket
 
@@ -51,6 +52,29 @@ The plugin's own short-lived image transient is different from page caching: it 
 Purge affected page/optimized-asset/CDN caches after changing settings. Test logged out, on both mobile and desktop, with each relevant optimizer feature enabled individually. In browser Network, the image must return 200 and `image/gif` for `mode=email`/`mode=anim`, not `text/html`. Inspect animation, not just MIME. After a later time bucket, request the same timer again; it must not receive an indefinitely stale CDN copy. Return to a hidden tab and verify one refresh, not duplicate requests. Test with JavaScript disabled: the initial image should still load.
 
 After changing a timer's alt, purge the **HTML page** cache of pages containing its shortcode, since alt belongs to HTML, not image pixels. Previously copied email HTML must be copied again; an already-sent email's alt cannot be changed by updating its image URL. No page-cache or browser setting can force all email proxies to refetch immediately.
+
+## After changing a website timer
+
+Save the campaign, purge the HTML cache of the pages that embed it, and reload
+those pages while logged out. Apply the purge to any additional hosting/CDN HTML
+cache as well. A page-cache exclusion for dynamic images does not refresh an
+already cached page containing them.
+
+The two website modes need different checks:
+
+- **Image:** a fresh image request uses the saved campaign, while cached page
+  HTML can retain the old alt text and reserved width/aspect ratio. Verify both
+  the displayed image and its surrounding layout after a schedule/style edit.
+- **Live text:** deadline, colors and labels are part of the page HTML. The
+  browser ticks locally from that deadline; it does not poll WordPress for saved
+  changes. A timer can keep ticking correctly toward an old deadline until the
+  page is purged and reloaded. Compare the visible deadline with the editor.
+
+Keep the existing public timer URL; adding arbitrary cache-busting parameters
+or flushing all WordPress transients is not needed to update saved settings.
+Clearing a server cache does not update an already open tab or replace a GIF
+that an email client has already downloaded. Automatic page-cache invalidation
+depends on the cache integration and must be tested for the exact configuration.
 
 ## Vendor references
 
