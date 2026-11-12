@@ -90,6 +90,8 @@ Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-sit
 
 ## Performance and optimizer compatibility
 
+Cache write outcomes and an optional host entry-size budget are described in the [host hardening guide](docs/HOST-HARDENING.md), together with capacity planning and native-library patch maintenance. No visitor logging is added.
+
 The panel uses a small scoped stylesheet/script, system typography, static saved previews and no background polling, per-keystroke rendering or animated list thumbnails. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
 After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline shows the configured end image, or zeros when no valid end image is available. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.

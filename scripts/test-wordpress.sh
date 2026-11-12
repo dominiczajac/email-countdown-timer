@@ -37,6 +37,7 @@ network=()
 "${wp[@]}" eval-file "$root/tests/integration/embed-geometry.php"
 "${wp[@]}" eval-file "$root/tests/integration/gutenberg.php"
 "${wp[@]}" eval-file "$root/tests/integration/end-image.php"
+"${wp[@]}" eval-file "$root/tests/integration/cache-persistence.php"
 "${wp[@]}" core version --extra
 "${wp[@]}" cli version
 "${wp[@]}" eval-file "$root/tests/integration/fonts.php"

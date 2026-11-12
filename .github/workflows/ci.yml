@@ -65,7 +65,9 @@ jobs:
           php tests/font-defaults.php
           php tests/font-storage.php
       - name: Lock outcome and current static fallback
-        run: php tests/lock-outcomes.php
+        run: |
+          php tests/lock-outcomes.php
+          php tests/cache-persistence.php
       - name: Font access and approved maintenance contracts
         run: |
           php tests/font-access.php
