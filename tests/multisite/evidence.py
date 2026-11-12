@@ -137,7 +137,7 @@ def accept(report):
     cached_markers = set()
     for state in states:
         key = state['key']
-        if state.get('complete') is not True or state.get('failures') != []:
+        if state.get('complete') is not True or state.get('failures') != [] or state.get('failed_edit_cleanup') is not None:
             return False
         if not inventory_ok(state.get('inventory_before'), report, key, fixture) or not inventory_ok(state.get('inventory_after'), report, key, fixture):
             return False

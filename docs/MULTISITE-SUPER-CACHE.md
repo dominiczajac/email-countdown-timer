@@ -123,3 +123,37 @@ step per GIF channel, keeps PNG exact, retains the actual decoded samples and
 rejects larger changes/non-integer channels. This concerns only the new palette
 comparison; frame timing, dimensions, native limits, original log gates and
 retained-image hash verification are unchanged.
+
+## Observed edit results — 2026-11-12
+
+At head `811cb3c33967112e4bb360268d38e9226276018d`,
+[run 43190869002](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43190869002)
+passed all **16 cells**: **96 original states / 288 site probes / 192 real form
+saves**, plus **48 visible edit/restore cycles / 240 observation stages / 960
+anonymous HTTP observations / 240 browser observations / 480 retained PNG/GIF
+responses**. All 16 actual archive digests/sizes matched GitHub metadata. Local
+replay checked report/native-log acceptance, retained HTML, every new decoded
+image's geometry/palette/frame timing, installed manifests and source tree.
+The executed PR merge source `2892f2a9bbd9237f0345574613b563a64d354913` shares
+tree `cd69d4da2bbafb6146c30f78bda7774c1b05aea3` with the named head.
+
+| Profile | Fresh HTML after save, without purge | After explicit purge |
+|---|---|---|
+| Baseline, 24 cycles | 24/24 | Current settings retained |
+| WP Super Cache Simple/PHP, 24 cycles | 0/24 | 24/24 current settings |
+
+The same split occurred on restoration. Fresh image URLs returned current saved
+dimensions/colors even when cached live HTML still had the previous deadline,
+background and reserved image width. Purging then reloading the page restored
+agreement. Every successful cycle restored the exact original options through
+the admin form; no failure-recovery path was used. Recovery records are also
+rejected in otherwise complete reports, so cleanup cannot stand in for success.
+
+Observed WordPress 7.1.2, MySQL 8.4.13, native FPM 8.4.27, Chromium
+156.0.8078.79, Twenty Twenty-One 2.9 / Twenty Twenty-Four 1.6, and the unchanged
+WP Super Cache 3.1.5 settings above. The installation ZIP is unchanged at SHA256
+`4fa70056f95965ab880ad18329c9c1326dd18d9ad928a9c0670e8744b5e1cd75`, 425,814
+bytes / 32 files. This is bounded author verification, not independent owner or
+production acceptance. Later revisions still require their own hosted gates and
+both reviews before integration. Paid packages, further cache/topology settings,
+actual host/email-client acceptance and release approval remain separate.

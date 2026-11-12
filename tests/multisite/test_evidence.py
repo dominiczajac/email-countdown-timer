@@ -203,6 +203,8 @@ class Evidence(unittest.TestCase):
         report = good(); report['states'][1]['failures'] = [{'reason': 'original failure'}]
         report['states'][1]['failed_edit_cleanup'] = {'restored': True, 'error': None}
         self.assertFalse(accept(report))
+        report = good(); report['states'][1]['failed_edit_cleanup'] = {'restored': True, 'error': None}
+        self.assertFalse(accept(report))
 
     def test_edit_browser_screenshots_cannot_replace_native_response_files(self):
         names = [edit_refresh.filename(key, stage, kind) for key in ORDER if key.endswith('-on')
