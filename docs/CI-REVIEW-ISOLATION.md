@@ -1,0 +1,19 @@
+# Restricted Claude review
+
+The comment workflow still requires an open PR and an explicit `@claude review` mention by a human OWNER/MEMBER/COLLABORATOR. It checks out the trusted default branch without persisted checkout credentials. An untrusted PR must not supply executable workflow helpers.
+
+Before the Claude action receives OAuth, the trusted `prepare-claude-review.py` helper resolves the PR's immutable base/head SHAs, fetches missing commit objects, computes their actual merge base, and writes a patch plus regular UTF-8 changed-file snapshots beneath a fresh workspace directory. It never checks out the PR, executes its files, follows source symlinks, runs text conversion or external diff helpers. Deleted files retain their base snapshot; binary/non-regular/non-UTF-8 omissions are identified in `context.json`. File/byte budgets fail closed rather than silently producing a partial successful review. This also handles a stacked PR's actual base.
+
+The model receives only `Read`, `Glob` and `Grep` built-in tools. `--restricted` confines built-in file operations to the working directories and excludes project/local configuration; explicit settings disable hooks and deny Git metadata/environment-file reads. `--strict-mcp-config` restricts MCP discovery to the action's explicit servers. No shell/Git command prefix, agent, editor, writer or web tool is enabled. The pinned action installs Claude Code 2.1.322; restricted mode requires at least 2.1.248. Its documented behavior, not merely the `allowedTools` prompt-free list, supplies the file-tool boundary.
+
+The only permitted MCP operations are review comments and two CI read APIs: `get_ci_status` and `get_workflow_run_details`. Raw log downloads, which write outside the restricted working directory, are disabled. The workflow retains minimal repository/app token permissions, disables commit-signing file operations and does not run tests or project code in the secret-bearing review step. Actual tests remain in the separate CI jobs.
+
+CI also tests the exact workflow flags against the native CLI version using a loopback fake model API, synthetic files and a synthetic API key. A legitimate source read must succeed; outside-root, symlink and Git-metadata reads must be denied, shell tools absent, and project hooks/MCP unexecuted. No real OAuth or model-service request is used. Separate real-Git tests verify immutable snapshots, merge bases, deleted/binary/symlink handling, disabled diff helpers and failure cleanup. These are targeted boundary regressions, not a full upstream security audit.
+
+Prompt instructions reinforce the review goal but are not a security boundary. The model still processes untrusted content and can publish review comments. This configuration reduces available mechanisms; it is not a proof that every upstream CLI/SDK/MCP dependency is vulnerability-free. The historical `/proc` Read issue was fixed upstream before this pinned version. Keep the action/runtime and its transitive dependencies maintained.
+
+An `issue_comment` workflow runs from the default branch. A PR changing this workflow is initially reviewed by the existing default-branch version; verify the new version with an authorized review after merge. Record the actual reviewed SHA, CI status and any limitations. Static reviews are not test passes or independent human approvals.
+
+Service containers are pinned to full multi-platform index digests with readable version tags. Review digest updates and run the real database/Redis matrices; pinning makes a build reproducible but does not apply future security updates automatically.
+
+References: [Claude CLI tools/restricted mode](https://code.claude.com/docs/en/cli-reference), [pinned action](https://github.com/anthropics/claude-code-action/tree/4fa93a88de49bbef68b10eb15aabedf28ca0e1ed), [historical Read disclosure](https://www.microsoft.com/en-us/security/blog/?p=147931).
