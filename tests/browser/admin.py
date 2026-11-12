@@ -297,6 +297,17 @@ with sync_playwright() as p:
     page.goto(base + '/wp-admin/admin.php?page=email-countdown-timer-data')
     check(page.locator('[href*="assets/admin.css"]').count() == 1, 'Data Settings shares scoped styling')
     check(not page.locator('[name=delete_data_on_uninstall]').is_checked(), 'uninstall opt-in remains off')
+    boundary = context.new_page()
+    boundary.set_content((evidence / 'font-boundary.html').read_text())
+    for width in (320, 375, 768, 1440):
+        boundary.set_viewport_size({'width': width, 'height': 1000})
+        for section in boundary.locator('section[data-font]').all():
+            expect(section.locator('img')).to_have_count(2)
+            section.locator('img').evaluate_all('(es)=>Promise.all(es.map(e=>e.decode()))')
+            sizes = section.locator('img').evaluate_all('(es)=>es.map(e=>({w:e.naturalWidth,h:e.naturalHeight,scale:e.getBoundingClientRect().width/e.naturalWidth,height:e.getBoundingClientRect().height}))')
+            check(sizes[0]['w'] == sizes[1]['w'] and sizes[0]['h'] == sizes[1]['h'] and abs(sizes[0]['scale'] - sizes[1]['scale']) < 0.001 and abs(sizes[0]['height'] - sizes[1]['height']) < 0.1, f"email digits keep the same scale below 24h at {width}px: {section.get_attribute('data-font')}")
+    boundary.screenshot(path=str(evidence / 'font-boundary.png'), full_page=True)
+    boundary.close()
     verify_status(page, browser, context, base, evidence, check)
     check(not errors, 'no browser JavaScript exceptions')
     check(not any(urlsplit(u).hostname in {'fonts.googleapis.com', 'fonts.gstatic.com'} for u in requests), 'zero Google Fonts requests')

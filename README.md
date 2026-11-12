@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.6.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.6.1 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -16,7 +16,7 @@ Locally generated countdown images for email campaigns and WordPress pages. Set 
 | Database | Consistent MySQL/MariaDB session/primary for serialized animation generation; unavailable locking means cache misses remain uncached static images, even with Imagick |
 | Network | A publicly reachable HTTPS image URL for email recipients |
 
-There are no bundled runtime Composer/npm dependencies. One example font, Lato Regular, is included under SIL OFL 1.1 with its original license. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
+There are no bundled runtime Composer/npm dependencies. Four static fonts are included under SIL OFL 1.1 with their original per-family notices. Custom database proxies, native library builds, commercial optimizer versions and email clients require installation-specific testing. The [static fallback guide](docs/STATIC-FALLBACK.md) describes degraded operation, not complete SQLite or database-proxy compatibility.
 
 ## Existing WordPress.org submission
 
@@ -84,9 +84,9 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 
 Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
 
-**Lato Regular is included locally:** choose **Lato Regular (included)** in **Appearance > Typography and Size > Font**, then save. New timers select Lato when FreeType is available; saved campaigns and renderer defaults are unchanged. The original OFL license permits bundling with software, including commercial software; font rights remain under OFL, separate from the plugin GPL. Source and integrity details are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
+**Four local faces are included:** Lato Regular, IBM Plex Mono Regular, Barlow Condensed Regular and Crimson Text Regular. Choose a face in **Appearance > Typography and Size > Font**, then save. The new full editor still defaults to Lato with FreeType; saved campaigns keep their existing font or bitmap choice. The original OFL notices permit bundling with software, including commercial software; font rights remain OFL, separate from the plugin GPL. Sources, exact hashes and license filenames are in [`fonts/README.txt`](fonts/README.txt). FreeType is required. Keep your own fonts in persistent storage, not the replaceable plugin directory.
 
-Color presets include **Christmas, New Year, Easter, Valentine's Day, Halloween, Black Friday, Birthday and Wedding**, alongside Classic, Midnight, Ocean and Warm. Choose one in Quick Create, the dashboard widget or the full editor. Editor presets change only the three color fields and require an explicit save. Set the deadline and time zone yourself; presets preserve custom labels, fonts and existing campaigns.
+Appearance presets combine colors and typography. **Classic** uses Lato; **Midnight/New Year** use IBM Plex Mono; **Ocean/Easter/Halloween/Black Friday/Birthday** use Barlow Condensed; **Warm/Christmas/Valentine's Day/Wedding** use Crimson Text. Choose one in Quick Create, the dashboard widget or the full editor. Editor buttons update the unsaved colors/font and require an explicit save. Set the deadline and time zone yourself; presets preserve custom/empty labels and the schedule. If the selected face or FreeType is unavailable, bitmap fallback and its existing label validation apply. Website live text retains theme typography.
 
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
@@ -107,6 +107,8 @@ New shortcode output includes renderer-derived `width`/`height`, an explicit CSS
 Custom theme CSS can still override this reservation. Purge the affected HTML page cache after changing geometry/fonts and recopy old HTML embeds to receive the new attributes. An unavailable native renderer or invalid saved configuration cannot provide a reliable calculated size. This is a targeted CLS mitigation, not a guarantee of whole-page LCP/INP/CLS scores.
 
 New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles, alt and an absolute deadline outside the image. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
+
+With **Hide days**, new image responses keep at least the four-unit canvas width at the 24-hour boundary, including later fresh GIFs and static fallbacks. Days disappear below 24 hours; the remaining units are centered at the same glyph size. This avoids enlarging digits when email HTML retains its original display width. The image width below 24 hours changes from older versions; recopy embeds created with the older narrower image. An already downloaded/cached image cannot be replaced. The source-version bump invalidates plugin image signatures and admin assets once; page/email-provider caches remain external.
 
 Remote-image blocking, animation preferences, dark mode, provider caching and prefetching remain controlled by the recipient/client. Do not bypass them. Keep important terms and the real deadline in readable text; an already downloaded GIF cannot fetch a new state. [Email verification scope and checklist](docs/EMAIL-RENDERING.md) and [dependency boundaries](docs/DEPENDENCIES-AND-COMPATIBILITY.md).
 

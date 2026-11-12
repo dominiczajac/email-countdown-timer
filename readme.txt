@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.6.0
+Stable tag: 12.6.1
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -19,7 +19,7 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 * Native block with image or opt-in live text, timer selection and alignment.
 * Private campaign names, suggested IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
-* Custom colors, labels, sizes, an included Lato Regular font and local TTF/OTF files.
+* Custom colors, labels, sizes, four included fonts and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
 * Alt text, a visible email deadline and reserved image space.
 * Holiday/occasion presets, Quick Create and a dashboard widget.
@@ -74,7 +74,7 @@ Describe countdown and expiry: alt stays fixed during GIF playback. Use empty al
 Shortcodes reserve measured, proportional image space; themes can override it. After font/geometry changes, purge page HTML and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-New timers use included Lato with FreeType, otherwise bitmap. Saved timers are unchanged. Lato is SIL OFL 1.1 (fonts/OFL.txt). Keep custom TTF/OTF in Data Settings’ persistent directory; no Google importer. [Font storage](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/LOCAL-FONT-STORAGE.md).
+Lato, IBM Plex Mono, Barlow Condensed and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF in Data Settings’ persistent directory. No remote importer.
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -107,14 +107,16 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
+= 12.6.1 =
+* Bundle three more local fonts; appearance presets apply colors and typography.
+* Keep canvas width when days hide below 24h, preventing enlarged email digits.
+
 = 12.6.0 =
-* Report cache write failures; add an optional entry-size budget.
-* Add on-demand diagnostics and a redacted report, without automatic network probes.
-* Add the native block, static preview and opt-in live text with Pause/Resume.
-* Preserve embeds, dimensions and permissions; fix keyboard selection in block settings.
-* Add holiday/occasion presets; prefer Lato with FreeType for new timers. Keep saved timers.
-* Add Quick Create/dashboard shortcuts, block refresh and separate Website/Email embeds.
-* Add stored label presets independent of admin locale; preserve custom/empty labels and accented output.
+* Add cache outcomes, an optional entry budget, on-demand diagnostics and a redacted report.
+* Add the block, preview, refresh and optional live text with Pause/Resume.
+* Add Quick Create/dashboard shortcuts, presets and separate Website/Email embeds.
+* Preserve campaigns/custom labels; add stored label languages and prefer Lato with FreeType.
+* Fix keyboard selection in block settings; retain permissions and public URLs.
 
 = 12.5.3 =
 * Bundle Lato Regular under SIL OFL 1.1 with verified font/license notices.
@@ -125,5 +127,6 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.6.0 =
-Add existing timers with the native Easy Countdown block or keep using shortcodes. New timers select included Lato when FreeType works; existing saved settings remain unchanged. Back up data/fonts and update without uninstalling.
+= 12.6.1 =
+Back up fonts/data and update without uninstalling. Recopy old embeds made below 24h; new image canvases retain their width when days hide. Apply a style preset explicitly to change an existing font.
+

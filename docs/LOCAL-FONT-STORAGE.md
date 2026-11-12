@@ -30,10 +30,10 @@ Stored campaigns and public URLs are not migrated. Existing public rendering kee
 
 Tests: `php tests/font-storage.php`, existing frozen pixel regressions, real WordPress lifecycle/browser/HTTP suites. Test results for a particular commit must be read from that commit's CI, not inferred from this list.
 
-References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and PHP `link()` documentation. One unmodified OFL Lato Regular example is distributed in the plugin fonts/ directory. It is optional and restored by updates; its exact unchanged copy is skipped by the legacy-copy tool. Additional user fonts still belong in persistent storage.
+References: WordPress `wp_get_upload_dir()`, `Plugin_Upgrader::upgrade()`, and PHP `link()` documentation. Four unmodified OFL static faces (Lato, IBM Plex Mono, Barlow Condensed and Crimson Text) are distributed in the plugin fonts/ directory. Updates restore them; their exact unchanged copies are skipped by the legacy-copy tool. Additional user fonts still belong in persistent storage. Original per-family notices and hashes are in `fonts/README.txt`.
 
 ## Direct HTTP access
 
 Local storage alone does not make font binaries private. Configure denial for the dedicated font roots before storing files whose licenses restrict downloading. The explicit Font File Access action can create Apache rules, but does not verify enforcement and never overwrites existing files. nginx needs host-managed rules. Shared legacy roots on multisite require network-administrator permission; per-site uploads remain independently scoped. See [font HTTP protection](FONT-HTTP-ACCESS.md). Guard files remain on uninstall to protect manually managed fonts; they contain no campaign or visitor data.
 
-The included Lato face uses a reserved internal selection rather than its shipped filename. An existing persistent custom font with the same basename remains bound to its own file; a missing custom file is not silently replaced by bundled Lato. Existing saved campaigns are not migrated.
+Every included face uses a reserved internal selection rather than its shipped filename. An existing persistent custom font with the same basename remains bound to its own file; a missing custom file is not silently replaced by a bundled face. Existing saved campaigns are not migrated.
