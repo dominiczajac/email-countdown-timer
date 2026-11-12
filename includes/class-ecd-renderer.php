@@ -16,7 +16,7 @@ final class Email_Countdown_Timer_Renderer {
         $this->boxes = [];
         $args = [$c['bg'], $c['dc'], $c['lc'], $c['font'], $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
             ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']]];
-        $image = $this->drawFrame(max(0, $deadline-$now), ...array_merge($args, [$c['fixed_width']]));
+        $image = $this->drawFrame(max(0, $deadline-$now), ...array_merge($args, [$this->stableWidth($c, $deadline, $now)]));
         $width = imagesx($image);
         $height = imagesy($image);
         $endFrame = $ending !== null ? Email_Countdown_Timer_End_Image::canvas($ending, $width, $height, $c['bg']) : null;
@@ -63,12 +63,22 @@ final class Email_Countdown_Timer_Renderer {
         $this->boxes = [];
         $image = $this->drawFrame(max(0, $deadline - $now), $c['bg'], $c['dc'], $c['lc'], $c['font'],
             $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
-            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $this->stableWidth($c, $deadline, $now));
         if ($ending !== null && $now >= $deadline) {
             $endFrame = Email_Countdown_Timer_End_Image::canvas($ending, imagesx($image), imagesy($image), $c['bg']);
             if ($endFrame !== null) return $this->encode($endFrame, $format);
         }
         return $this->encode($image, $format);
+    }
+    /** Keep the email image's scale when Hide days removes its first unit. */
+    private function stableWidth(array $c, int $deadline, int $now): int {
+        if (!$c['hide_days'] || $deadline - $now >= 86400) return $c['fixed_width'];
+        // Use the same four-unit width as the 24-hour boundary, but draw only
+        // the actual three units. Glyph sizes and low-level legacy geometry stay intact.
+        $box = $this->layout(86400, $c['bg'], $c['dc'], $c['lc'], $c['font'],
+            $c['size_digit'], $c['size_label'], false,
+            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+        return (int)$box['finalW'];
     }
     private function encode($image, string $format): string {
         ob_start();
@@ -85,7 +95,7 @@ final class Email_Countdown_Timer_Renderer {
     public function measure(array $c, int $deadline, int $now): array {
         $layout = $this->layout(max(0, $deadline - $now), $c['bg'], $c['dc'], $c['lc'], $c['font'],
             $c['size_digit'], $c['size_label'], (bool)$c['hide_days'],
-            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $c['fixed_width']);
+            ['d'=>$c['label_d'], 'h'=>$c['label_h'], 'm'=>$c['label_m'], 's'=>$c['label_s']], $this->stableWidth($c, $deadline, $now));
         return ['width'=>(int)$layout['finalW'], 'height'=>(int)$layout['finalH'], 'font'=>$layout['fontPath']];
     }
     private function layout($remain, $bgHex, $dcHex, $lcHex, $fontFile, $sizeDigit, $sizeLabel, $hideDays, $labels, $forceW = 0, $forceH = null) {

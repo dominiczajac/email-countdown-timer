@@ -1,5 +1,5 @@
 <?php
-/** Read-only checks of the installed example font on disposable real WordPress. */
+/** Read-only checks of all approved faces in the actual installed WordPress ZIP. */
 if (!defined('WP_CLI') || !WP_CLI || getenv('ECD_INTEGRATION_DISPOSABLE') !== '1' || wp_get_environment_type() !== 'local') {
     throw new RuntimeException('Disposable local WordPress required.');
 }
@@ -9,19 +9,19 @@ $expect = static function (bool $condition, string $message) use (&$checks): voi
     ++$checks;
     if (!$condition) throw new RuntimeException('Bundled font: ' . $message);
 };
-$name = Email_Countdown_Timer_Fonts::BUNDLED_FILE;
-$choice = Email_Countdown_Timer_Fonts::BUNDLED_CHOICE;
-$file = EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/' . $name;
-$expect(is_file($file) && !is_link($file), 'exact package contains a regular local file');
-$expect(hash_file('sha256', $file) === 'd636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251', 'original font bytes');
-$expect(hash_file('sha256', EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/OFL.txt') === '74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e', 'original license shipped');
 $before = get_option('easy_countdown_timers', []);
-$expect(in_array($choice, Email_Countdown_Timer_Config::fonts(), true), 'reserved bundled selector available');
-$expect(Email_Countdown_Timer_Config::fontPath($choice) === realpath($file), 'reserved choice resolves shipped font');
-$expect(Email_Countdown_Timer_Admin::defaults()['font'] === $choice, 'new timer offers Lato when FreeType is present');
+$expect(Email_Countdown_Timer_Admin::defaults()['font'] === Email_Countdown_Timer_Fonts::BUNDLED_CHOICE, 'new full editor still offers Lato with FreeType');
 $expect(Email_Countdown_Timer_Admin::defaults(false)['font'] === '', 'saved legacy records still default to bitmap when no font was stored');
 $config = Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-01-01T00:00:00','tz'=>'UTC']);
 $expect($config['font'] === '', 'legacy missing selection remains bitmap');
+foreach (Email_Countdown_Timer_Fonts::bundled() as $choice => $face) {
+$file = EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/' . $face['file'];
+$expect(is_file($file) && !is_link($file), 'installed face is a regular local file');
+$expect(hash_file('sha256', $file) === $face['sha256'], 'original font bytes');
+$expect(hash_file('sha256', EMAIL_COUNTDOWN_TIMER_DIR . 'fonts/' . $face['license']) === $face['license_sha256'], 'original per-family license shipped');
+$expect(in_array($choice, Email_Countdown_Timer_Config::fonts(), true), 'reserved bundled selector available');
+$expect(Email_Countdown_Timer_Config::fontPath($choice) === realpath($file), 'reserved choice resolves installed face');
+$expect(Email_Countdown_Timer_Config::normalize(array_replace($config, ['font'=>$choice]))['font'] === $choice, 'registered font accepted by real save normalization');
 $font_config = array_replace($config, ['font'=>$choice,'label_d'=>'Dzień','label_h'=>'Godziny','label_m'=>'Minuty','label_s'=>'Sekundy']);
 $expect(function_exists('imagettfbbox') && function_exists('imagettftext'), 'FreeType present for native checks');
 $expect(Email_Countdown_Timer_Admin::preflight($font_config) === [], 'Polish labels pass real font preflight');
@@ -51,5 +51,6 @@ if (class_exists('Imagick')) {
 }
 $oversized = array_replace($font_config, ['size_digit'=>200,'size_label'=>100,'fixed_width'=>4000]);
 $expect(isset(Email_Countdown_Timer_Admin::preflight($oversized)['font']), 'pixel budget still enforced');
+}
 $expect(get_option('easy_countdown_timers', []) === $before, 'no campaign settings changed');
-WP_CLI::success("BUNDLED FONT: $checks assertions, installed package and real GD/FreeType.");
+WP_CLI::success("BUNDLED FONTS: $checks assertions, four installed faces and real GD/FreeType.");

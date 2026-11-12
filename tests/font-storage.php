@@ -43,15 +43,22 @@ try {
     ok(count(array_keys(Email_Countdown_Timer_Config::fonts(),$name,true))===1, 'deduplicate names across roots');
     unlink($original);
     ok(Email_Countdown_Timer_Config::fontPath($name)===realpath($destination), 'persistent font survives removal of legacy file');
-    $bundled_name = Email_Countdown_Timer_Fonts::BUNDLED_FILE;
     $bundled_option = Email_Countdown_Timer_Fonts::BUNDLED_CHOICE;
+    foreach (Email_Countdown_Timer_Fonts::bundled() as $bundled_choice => $face) {
+    $bundled_name = $face['file'];
     $same_name_custom = $dir . '/' . $bundled_name;
     file_put_contents($same_name_custom, 'distinct-custom-test-font');
     ok(Email_Countdown_Timer_Config::fontPath($bundled_name)===realpath($same_name_custom), 'existing same-name font keeps its user file');
-    ok(Email_Countdown_Timer_Config::fontPath($bundled_option)===realpath($legacy.'/'.$bundled_name), 'reserved choice resolves the included face separately');
-    ok(in_array($bundled_option, Email_Countdown_Timer_Config::fonts(), true) && in_array($bundled_name, Email_Countdown_Timer_Config::fonts(), true), 'both choices are independently available');
+    ok(Email_Countdown_Timer_Config::fontPath($bundled_choice)===realpath($legacy.'/'.$bundled_name), 'reserved choice resolves the included face separately');
+    ok(in_array($bundled_choice, Email_Countdown_Timer_Config::fonts(), true) && in_array($bundled_name, Email_Countdown_Timer_Config::fonts(), true), 'both choices are independently available');
     unlink($same_name_custom);
     ok(Email_Countdown_Timer_Config::fontPath($bundled_name)===null, 'missing custom filename never resolves to included face');
+    ok(Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','font'=>$bundled_choice])['font']===$bundled_choice, 'registered bundled choice accepted by normalization');
+    ok(!isset($options[Email_Countdown_Timer_Fonts::OPTION][$bundled_name]), 'unchanged stock file is not adopted by migration');
+    }
+    foreach (['builtin:unknown','builtin:../outside.ttf','builtin:ibm-plex-mono-regular/extra'] as $unknown) {
+        ok(rejects(fn()=>Email_Countdown_Timer_Config::normalize(['deadline'=>'2030-12-31T23:59:59','font'=>$unknown])), 'unknown and malformed builtin keys rejected');
+    }
     $new_font = Email_Countdown_Timer_Admin::defaults(true)['font'];
     ok($new_font === (function_exists('imagettftext') && function_exists('imagettfbbox') ? $bundled_option : ''), 'new editor proposes Lato only with FreeType');
     ok(Email_Countdown_Timer_Admin::defaults(false)['font']==='', 'existing-record defaults retain bitmap');
@@ -69,6 +76,7 @@ try {
     $options[Email_Countdown_Timer_Fonts::OPTION]['link-'.$name]=hash('sha256','do-not-delete');
     ok(Email_Countdown_Timer_Config::fontPath('link-'.$name)===null,'font symlink escape rejected');
     Email_Countdown_Timer_Fonts::delete_owned();
+    foreach (Email_Countdown_Timer_Fonts::bundled() as $face) ok(is_file($legacy.'/'.$face['file']) && hash_file('sha256',$legacy.'/'.$face['file'])===$face['sha256'], 'owned-copy cleanup preserves shipped font bytes');
     ok(!is_file($destination) && is_file($manual) && is_file($changed) && is_file($external), 'cleanup removes owned unchanged copy only');
     ok(is_link($dir.'/link-'.$name),'cleanup never follows symlink');
     $font_multisite=true;$font_site=2;

@@ -1,4 +1,6 @@
 * text=auto eol=lf
+# Preserve upstream license bytes, including CRLF and original trailing spaces.
+/fonts/OFL*.txt -text whitespace=-blank-at-eol,cr-at-eol
 /.github export-ignore
 /tests export-ignore
 /scripts export-ignore

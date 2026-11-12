@@ -66,9 +66,13 @@ jobs:
           node tests/countdown.test.cjs
           node tests/admin-unit.cjs
       - name: Persistent fonts and layout preflight
+        env:
+          ECD_REQUIRE_GD: '1'
+          ECD_REQUIRE_IMAGICK: ${{ matrix.backend == 'imagick' && '1' || '0' }}
         run: |
           php tests/font-defaults.php
           php tests/font-storage.php
+          php tests/bundled-font-render.php
       - name: Lock outcome and current static fallback
         run: |
           php tests/lock-outcomes.php

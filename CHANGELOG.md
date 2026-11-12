@@ -1,5 +1,11 @@
 # Changelog
 
+## 12.6.1 (review candidate)
+
+- Bundle unmodified IBM Plex Mono, Barlow Condensed and Crimson Text alongside Lato, with pinned hashes and original OFL notices. Appearance presets explicitly apply an available included font; existing campaigns retain their saved choice until edited and saved. If a preset font is unavailable, the editor preserves the selected font; Quick Create retains its bitmap fallback.
+- Keep the four-unit canvas width when Hide days removes the days below 24 hours. The remaining digits stay the same size in proportionally sized embeds, including newly generated GIFs and static fallbacks. Pixel limits still apply to the full reserved canvas. Recopy Email HTML originally generated below 24 hours to use the corrected width; previously downloaded images cannot be replaced.
+- Bump image and asset versions for the corrected layout. This candidate is not a published release.
+
 ## 12.6.0 (review candidate)
 
 - Add English, Polish, German, Spanish and French label presets independent of the administrator locale. Quick Create supports explicit language selection without JavaScript; the full editor applies labels only on request and saves explicitly. Preserve custom/empty saved labels and existing bitmap/font validation.

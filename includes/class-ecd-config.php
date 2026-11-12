@@ -44,7 +44,7 @@ final class Email_Countdown_Timer_Config {
         if ($c['tz'] === '') $c['tz'] = 'Europe/Warsaw';
         self::deadline($c);
         // Reject traversal, including a symlink escaping the font directory. Missing fonts retain the legacy fallback.
-        if ($c['font'] !== '' && $c['font'] !== Email_Countdown_Timer_Fonts::BUNDLED_CHOICE && (basename($c['font']) !== $c['font'] || strpos($c['font'], '\\') !== false ||
+        if ($c['font'] !== '' && !Email_Countdown_Timer_Fonts::is_bundled($c['font']) && (basename($c['font']) !== $c['font'] || strpos($c['font'], '\\') !== false ||
             !preg_match('/\.(ttf|otf)$/i', $c['font']))) {
             self::invalid(__('Invalid font filename.', 'easy-countdown'));
         }

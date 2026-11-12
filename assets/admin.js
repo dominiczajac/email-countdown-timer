@@ -84,6 +84,11 @@
                         field.value = button.dataset[key];
                         field.dispatchEvent(new Event('input', { bubbles: true }));
                     });
+                    const font = form.elements.font;
+                    if (font && button.dataset.font) {
+                        font.value = button.dataset.font;
+                        font.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
                     result.textContent = result.dataset.applied;
                 });
             });
