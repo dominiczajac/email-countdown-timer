@@ -107,6 +107,7 @@ $relative_luminance = static function ( string $hex ): float {
     return $rgb[0] * 0.2126 + $rgb[1] * 0.7152 + $rgb[2] * 0.0722;
 };
 foreach ( $appearance_presets as $preset => $appearance ) {
+    ok( isset( $appearance['font'] ) && Email_Countdown_Timer_Fonts::is_bundled( $appearance['font'] ), 'every appearance preset references a registered included face: ' . $preset );
     $colors = array( $appearance['bg'], $appearance['dc'], $appearance['lc'] );
     $background = $relative_luminance( $appearance['bg'] );
     foreach ( array( 'dc', 'lc' ) as $foreground ) {

@@ -13,6 +13,7 @@ Validate input, escape at the actual output boundary and preserve capability/non
 ```sh
 php tests/run.php
 php tests/uninstall.php
+php tests/bundled-font-render.php
 python3 tests/test-pcp-gate.py
 node --check assets/countdown.js
 ```

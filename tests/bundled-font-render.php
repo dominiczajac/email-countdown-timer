@@ -66,5 +66,14 @@ foreach ( Email_Countdown_Timer_Fonts::bundled() as $choice => $face ) {
         $c['hide_days'] = $hide; $c['fixed_width'] = 600;
         $expect( $renderer->measure( $c, $deadline, $deadline - 86399 )['width'] === 600, 'Explicit width and hidden/visible days retain their contract.' );
     }
+    $natural = $renderer->measure( array_replace( $c, array( 'fixed_width' => 0 ) ), $deadline, $deadline - 86400 );
+    $c['fixed_width'] = 1;
+    $expect( $renderer->measure( $c, $deadline, $deadline - 86399 )['width'] === $natural['width'], 'A narrow requested width never compresses boundary glyphs.' );
+    $oversized = array_replace( $c, array( 'size_digit' => 200, 'size_label' => 100, 'fixed_width' => 4000 ) );
+    $expect( isset( Email_Countdown_Timer_Admin::preflight( $oversized )['font'] ), 'Reserved geometry still obeys the pre-save pixel budget.' );
+    $rejected = false;
+    try { $renderer->render_static( $oversized, $deadline, $deadline - 86399, 'png' ); }
+    catch ( RuntimeException $error ) { $rejected = true; }
+    $expect( $rejected, 'Direct rendering also rejects an oversized canvas.' );
 }
 echo 'PASS ' . $checks . ' native bundled-font/boundary assertions; ' . ( class_exists( 'Imagick' ) ? '60-frame GIFs verified' : 'GD-only single-frame GIF fallback verified; animation unavailable' ) . ".\n";
