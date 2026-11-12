@@ -44,6 +44,15 @@ def values_equal(actual, expected):
             and type(actual.get('deadline')) is int and type(actual.get('width')) is int)
 
 
+def cleanup_failed_edit(restore, hashes, initial):
+    """Recover the disposable blue site; never turn the failed state into a pass."""
+    try:
+        restore()
+        return {'restored': hashes() == initial, 'error': None}
+    except Exception as error:
+        return {'restored': False, 'error': type(error).__name__}
+
+
 def accept(proof, key, cached, initial, original, runtime_valid, image_valid):
     if (not isinstance(proof, dict) or proof.get('complete') is not True or proof.get('form_saves') != ['edited', 'restored']
             or not isinstance(proof.get('stages'), list) or [x.get('name') for x in proof['stages'] if isinstance(x, dict)] != list(STAGES)

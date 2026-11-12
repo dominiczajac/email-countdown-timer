@@ -97,3 +97,11 @@ Codex's first static review also caught a P1 evidence-file collision: browser
 screenshots reused the native PNG response filename for the edited/purged stages.
 Browser captures now use a distinct `-browser.png` suffix, covered by a filename
 collision regression; native response hashes and post-stop replay stay required.
+
+Claude's first review identified a P2 failure-isolation gap: an interrupted edit
+left blue's changed settings in later comparisons. Failed states now invoke a
+CLI-only recovery of the synthetic blue snapshot before the next comparison and
+record its hash check separately. Recovery is not successful form acceptance;
+the original failure still fails the whole run. A recovery exception or mismatch
+also stays negative. Successful edit cycles must still restore through the real
+form and match the original hashes without using that recovery path.

@@ -352,6 +352,12 @@ def main():
                         failure = {'state': key, 'phase': phase, 'reason': str(error) if isinstance(error, Failure) else type(error).__name__}
                         current['failures'].append(failure); report['failures'].append(failure)
                         print('::error title=Network state::' + json.dumps(failure), flush=True)
+                        if current['visible_edit'] is not None:
+                            current['failed_edit_cleanup'] = edit_refresh.cleanup_failed_edit(
+                                lambda: wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'restore-blue'), hashes,
+                                {r: report['fixture'][r]['campaign_sha256'] for r in ROLES})
+                            if current['failed_edit_cleanup']['restored'] is not True:
+                                report['failures'].append({'state': key, 'phase': 'failed-edit-cleanup', 'reason': 'restore_failed'})
                     finally:
                         (out / 'checks.json').write_text(json.dumps(report, indent=2) + '\n')
         report['complete'] = len(report['states']) == 6 and all(x['complete'] for x in report['states'])

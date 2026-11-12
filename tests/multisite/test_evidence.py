@@ -150,6 +150,21 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(report))
 
 class Evidence(unittest.TestCase):
+    def test_failed_edit_recovery_restores_before_checking_and_retains_failures(self):
+        values = {'blue': 'edited', 'red': 'original'}; initial = {'blue': 'original', 'red': 'original'}; calls = []
+        def restore():
+            calls.append('restore'); values['blue'] = 'original'
+        def hashes():
+            calls.append('hashes'); return dict(values)
+        self.assertEqual(edit_refresh.cleanup_failed_edit(restore, hashes, initial), {'restored': True, 'error': None})
+        self.assertEqual(calls, ['restore', 'hashes'])
+        self.assertFalse(edit_refresh.cleanup_failed_edit(lambda: None, lambda: {'blue': 'edited'}, initial)['restored'])
+        def failed_restore(): raise RuntimeError('synthetic cleanup failure')
+        self.assertEqual(edit_refresh.cleanup_failed_edit(failed_restore, hashes, initial), {'restored': False, 'error': 'RuntimeError'})
+        report = good(); report['states'][1]['failures'] = [{'reason': 'original failure'}]
+        report['states'][1]['failed_edit_cleanup'] = {'restored': True, 'error': None}
+        self.assertFalse(accept(report))
+
     def test_edit_browser_screenshots_cannot_replace_native_response_files(self):
         names = [edit_refresh.filename(key, stage, kind) for key in ORDER if key.endswith('-on')
                  for stage in edit_refresh.STAGES for kind in ('html', 'png', 'gif', 'browser')]
