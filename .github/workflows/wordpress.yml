@@ -15,7 +15,7 @@ jobs:
         cache: [database, redis]
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4.13@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
         env:
           MYSQL_ROOT_PASSWORD: ecd-ci-only
           MYSQL_DATABASE: ecd_ci
@@ -25,7 +25,7 @@ jobs:
           --health-cmd="mysqladmin ping -h 127.0.0.1 -pecd-ci-only"
           --health-interval=10s --health-timeout=5s --health-retries=12
       redis:
-        image: redis:7.4-alpine
+        image: redis:7.4.12-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
         ports:
           - 6379:6379
         options: >-
