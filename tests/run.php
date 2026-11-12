@@ -86,6 +86,7 @@ class_alias('Email_Countdown_Timer_Renderer', 'ECD_Renderer');
 class_alias('Email_Countdown_Timer_Plugin', 'ECD_Plugin_Colons_Fix');
 define('ECD_PLUGIN_DIR', EMAIL_COUNTDOWN_TIMER_DIR);
 $plugin=new ECD_Plugin_Colons_Fix();
+require __DIR__.'/accept-header.php';
 // Explicitly preserve the saved v12.1 labels in the legacy rendering fixture.
 $base=ECD_Config::normalize(['deadline'=>'2027-12-31T23:59:59', 'label_d'=>'Dni', 'label_h'=>'Godz', 'label_m'=>'Min', 'label_s'=>'Sek']);
 ok($base['label_d']==='Dni' && $base['label_h']==='Godz' && $base['tz']==='Europe/Warsaw', 'saved legacy labels and time zone preserved');

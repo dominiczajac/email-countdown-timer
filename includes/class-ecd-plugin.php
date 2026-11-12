@@ -92,6 +92,30 @@ class Email_Countdown_Timer_Plugin {
         // One reusable slot per timer/format, not new DB rows every 15 seconds.
         return 'ecd_v1211_'.hash('sha256', $id.'|'.$format);
     }
+    /** Keep WebP an explicit opt-in; weights and specific exclusions precede wildcards. */
+    private static function prefersWebp(string $accept): bool {
+        $qualities = ['image/webp'=>null, 'image/png'=>null, 'image/*'=>null, '*/*'=>null];
+        foreach (explode(',', strtolower($accept)) as $range) {
+            $parts = explode(';', $range);
+            $media = trim(array_shift($parts));
+            if (!array_key_exists($media, $qualities)) continue;
+            $quality = 1000;
+            foreach ($parts as $parameter) {
+                $pair = explode('=', $parameter, 2);
+                if (trim($pair[0]) !== 'q') continue;
+                $value = trim($pair[1] ?? '');
+                $weight = preg_match('/^(?:0(?:\.[0-9]{0,3})?|1(?:\.0{0,3})?)$/D', $value)
+                    ? (int)round((float)$value * 1000) : 0;
+                // Ambiguous duplicate weights/ranges retain the stricter preference.
+                $quality = min($quality, $weight);
+            }
+            $qualities[$media] = $qualities[$media] === null ? $quality : min($qualities[$media], $quality);
+        }
+        $webp = $qualities['image/webp'] ?? 0;
+        $png = $qualities['image/png'] ?? $qualities['image/*'] ?? $qualities['*/*'] ?? 0;
+        // Preserve PNG fallback and the existing WebP tie-break; never opt in via */* alone.
+        return $webp > 0 && $webp >= $png;
+    }
     private function generateImage(bool $head = false, ?int $now = null): void {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
         $id = Email_Countdown_Timer_Config::id(wp_unslash(Email_Countdown_Timer_Config::text($_GET, 'ecd')));
@@ -110,7 +134,7 @@ class Email_Countdown_Timer_Plugin {
         // Missing/private/unavailable assets never become an ordinary countdown.
         if ($endOnly && Email_Countdown_Timer_End_Image::resolve((int)($config['expiry_image_id'] ?? 0)) === null) { $this->pixel(404, $head); return; }
         $fmt = in_array($mode, ['email','anim'], true) ? 'gif' : 'png';
-        if ($fmt === 'png' && function_exists('imagewebp') && strpos(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'), 'image/webp') !== false) $fmt = 'webp';
+        if ($fmt === 'png' && function_exists('imagewebp') && self::prefersWebp(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'))) $fmt = 'webp';
         if ($head) { $this->outputHeaders($fmt); return; }
         $deadline = Email_Countdown_Timer_Config::deadline($config);
         $fixedTime = $endOnly ? $deadline : $now;

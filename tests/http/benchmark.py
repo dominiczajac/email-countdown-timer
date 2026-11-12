@@ -17,10 +17,10 @@ def align():
     # Keep a measured burst inside one real 15-second bucket, without freezing time.
     remaining=15-time.time()%15
     if remaining<6: time.sleep(remaining+0.08)
-def request(mode='email', method='GET', timer='http-timer', barrier=None, canary=False):
+def request(mode='email', method='GET', timer='http-timer', barrier=None, canary=False, accept=None, decode=False):
     if barrier: barrier.wait(timeout=10)
     path='/?ecd_action=render&ecd='+timer+'&mode='+mode+'&_t='+str(time.time_ns())
-    headers={'Accept':'image/gif,image/png'}
+    headers={'Accept':'image/gif,image/png' if accept is None else accept}
     if canary:
         path+='&email=ECT_HTTP_PRIVATE_CANARY%40example.invalid'
         headers['User-Agent']='ECT_HTTP_PRIVATE_CANARY'
@@ -28,10 +28,10 @@ def request(mode='email', method='GET', timer='http-timer', barrier=None, canary
     try:
         conn.request(method,path,headers=headers); response=conn.getresponse(); body=response.read()
         result = {'ms':(time.perf_counter()-start)*1000,'status':response.status,'headers':dict((k.lower(),v) for k,v in response.getheaders()),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest(),'magic':body[:6].hex()}
-        if 'x-email-countdown-mode' in result['headers']:
+        if body and (decode or 'x-email-countdown-mode' in result['headers']):
             # Decode after latency was recorded; the extra process is not part of HTTP timing.
-            decoded=subprocess.check_output(['php','-r','$a=new Imagick();$a->readImageBlob(stream_get_contents(STDIN));echo json_encode([$a->getNumberImages(),$a->getImageWidth(),$a->getImageHeight()]);'],input=body)
-            result['frames'],result['width'],result['height']=json.loads(decoded)
+            decoded=subprocess.check_output(['php','-r','$a=new Imagick();$a->readImageBlob(stream_get_contents(STDIN));echo json_encode([$a->getNumberImages(),$a->getImageWidth(),$a->getImageHeight(),$a->getImageFormat()]);'],input=body)
+            result['frames'],result['width'],result['height'],result['decoded_format']=json.loads(decoded)
         return result
     finally: conn.close()
 def burst(n=8):
@@ -65,6 +65,33 @@ try:
             fixture('reset'); rows.append(request(mode))
         check(all(x['status']==200 for x in rows),f'Cold {mode} HTTP requests succeed')
         results['cold_'+mode]=summary(rows)
+    webp=json.loads((OUT/'versions.json').read_text())['webp']
+    results['accept_negotiation']=[]
+    for accept,preferred in [('', 'png'), ('image/webp', 'webp'),
+                            ('image/webp;q=0,image/png;q=1', 'png'),
+                            ('image/webp;q=0,*/*;q=1', 'png'),
+                            ('image/webp;q=0.5,image/png;q=1', 'png'),
+                            ('IMAGE/WEBP;Q=1,image/png;q=0.5', 'webp'),
+                            ('image/webp2,image/png', 'png'),
+                            ('image/webp;q=invalid,image/png', 'png')]:
+        expected=preferred if webp else 'png'
+        row=request('static',accept=accept,decode=True)
+        head=request('static',method='HEAD',accept=accept)
+        check(row['status']==200 and row['headers'].get('content-type')=='image/'+expected
+              and row['decoded_format'].lower()==expected and row['frames']==1 and row['width']>1,
+              'Static GET honors Accept and returns decodable '+expected+': '+accept)
+        check(head['status']==200 and head['bytes']==0 and head['headers'].get('content-type')==row['headers']['content-type'],
+              'Static HEAD agrees with GET without a body: '+accept)
+        check('accept' in row['headers'].get('vary','').lower(), 'Negotiated response varies on Accept: '+accept)
+        results['accept_negotiation'].append({'accept':accept,'get':row,'head':head})
+    for mode in ['email','anim']:
+        row=request(mode,accept='image/webp,image/png;q=0.5',decode=True)
+        head=request(mode,method='HEAD',accept='image/webp,image/png;q=0.5')
+        check(row['status']==200 and row['headers'].get('content-type')=='image/gif'
+              and row['decoded_format']=='GIF' and row['frames']==60,
+              mode+': explicit animation remains a 60-frame GIF despite WebP acceptance')
+        check(head['status']==200 and head['bytes']==0 and head['headers'].get('content-type')=='image/gif',
+              mode+': HEAD retains GIF')
     align();fixture('reset');request();clear_publications()
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         rows=list(executor.map(lambda _:request(),range(40)))
