@@ -14,8 +14,60 @@ import zipfile
 
 from evidence import BASE, DEADLINES, ORDER, PATHS, PLUGIN, ROLES, THEMES, WIDTHS, accept, active_for, assess, image_reference, navigation_abort
 from cache_evidence import SETTINGS, VENDOR, cache_path
+import edit_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
+
+def edit_body(display, marker):
+    base = BASE + '/blue/?ecd_action=render&amp;ecd=shared-timer&amp;mode=anim'
+    return ('<span id="ecd-cache-origin" data-generation="' + marker + '"></span>'
+            + '<img class="email-countdown-timer-image" width="' + str(display['width']) + '" src="' + base + '&amp;_t=1794399999" data-ecd-src="' + base + '">'
+            + '<div class="ecd-live" data-ecd-deadline="' + str(display['deadline']) + '" style="--ecd-bg:' + display['background'] + ';"></div>').encode()
+
+def edit_image_bytes(kind):
+    # Synthetic integrity inputs for the gate's unit tests, never native images.
+    return (b'\x89PNG\r\n\x1a\n' if kind == 'png' else b'GIF89a') + b'synthetic test data'
+
+def edit_good(report, state):
+    cached = report.get('profile') == 'wp-super-cache'; key = state['key']
+    row = state['sites'][1]; native = row['page_runtime'][0]
+    initial = {r: report['fixture'][r]['campaign_sha256'] for r in ROLES}
+    proof = {'complete': True, 'form_saves': ['edited', 'restored'], 'stages': [],
+             'after_save_fresh': not cached, 'after_restore_fresh': not cached}
+    for name in edit_refresh.STAGES:
+        changed = name in ('edited', 'purged')
+        stored = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'], changed)
+        display = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'],
+            name in ('purged', 'restored') if cached else changed)
+        marker = hashlib.sha256((key + name).encode()).hexdigest()[:24]
+        body = edit_body(display, marker); sha = hashlib.sha256(body).hexdigest()
+        pages = []
+        for i in range(4):
+            if not cached:
+                marker = hashlib.sha256((key + name + str(i)).encode()).hexdigest()[:24]
+                body = edit_body(display, marker); sha = hashlib.sha256(body).hexdigest()
+            hit = cached and (i > 0 or name in ('edited', 'restored'))
+            pages.append({'status': 200, 'content_type': 'text/html', 'cache_header': 'Served supercache file from PHP' if hit else None,
+                          'runtime': {} if hit else copy.deepcopy(native), 'generation': marker, 'sha256': sha, 'public': dict(display)})
+        stage = {'name': name, 'stored': stored, 'hashes': {**initial, 'blue': 'd' * 64} if changed else dict(initial), 'pages': pages,
+                 'body': {'snapshot': edit_refresh.filename(key, name, 'html'), 'bytes': len(body), 'sha256': sha, 'generation': marker,
+                          'cache_path': cache_path('blue', key) if cached else None}, 'images': {},
+                 'browser': {'cache_header': 'Served supercache file from PHP' if cached else None, 'runtime': {} if cached else copy.deepcopy(native),
+                             'generation': marker, 'sha256': sha, 'public': dict(display), 'natural_width': stored['width']}}
+        for kind in ('png', 'gif'):
+            image = copy.deepcopy(row['images'][kind][0]); data = edit_image_bytes(kind)
+            image.update({'width': stored['width'], 'background_rgb': [int(stored['background'][i:i+2],16) for i in (1,3,5)],
+                          'url': BASE + '/blue/?ecd_action=render&ecd=shared-timer&mode=' + ('email' if kind == 'gif' else 'static'),
+                          'snapshot': edit_refresh.filename(key, name, kind), 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
+            stage['images'][kind] = image
+        proof['stages'].append(stage)
+    return proof
+
+def write_edits(root, report):
+    for state in report['states']:
+        for stage in (state.get('visible_edit') or {}).get('stages', []):
+            (root / stage['body']['snapshot']).write_bytes(edit_body(stage['pages'][-1]['public'], stage['body']['generation']))
+            for kind, image in stage['images'].items(): (root / image['snapshot']).write_bytes(edit_image_bytes(kind))
 
 def cache_body(row):
     marker = row['generations'][-1]
@@ -37,7 +89,7 @@ def good(theme='twentytwentyone', activation='network', jit='1235', profile='bas
                 'gd': 'yes', 'active': 'on' if active else 'off', 'memory': '256M', 'execution': '30'}.items()}
             inventory = {'role': role, 'id': i + 1, 'home': BASE + PATHS[role], 'path': PATHS[role], 'wordpress': '7.1.2',
                          'php_cli': '8.4.27', 'mysql': '8.4.13', 'theme': {'name': theme, 'version': THEMES[theme][0], 'block': THEMES[theme][1]},
-                         'width': WIDTHS[role], 'deadline': DEADLINES[role], 'campaign_keys': ['shared-timer', 'only-' + role],
+                         'width': WIDTHS[role], 'deadline': DEADLINES[role], 'background': '#ffffff', 'campaign_keys': ['shared-timer', 'only-' + role],
                          'campaign_sha256': initial[role], 'wp_cache': False, 'object_cache_dropin': False, 'advanced_cache_dropin': False,
                          'site_plugins': [PLUGIN] if active and activation == 'site' else [],
                          'network_plugins': [PLUGIN] if active and activation == 'network' else []}
@@ -85,6 +137,8 @@ def good(theme='twentytwentyone', activation='network', jit='1235', profile='bas
                 row['browser_cache'] = {'mode': 'hit', 'header': 'Served supercache file from PHP', 'generation': marker,
                     'runtime': {}, 'file': browser_file, 'body_sha256': sha}
                 row['checks'] += ['page-cache-hit', 'browser-cache-context']
+    for state in report['states']:
+        state['visible_edit'] = edit_good(report, state) if state['key'].endswith('-on') else None
     return report
 
 def logs(root):
@@ -92,9 +146,58 @@ def logs(root):
     (root / 'php-errors.log').write_text('PHP Deprecated: synthetic retained notice\n')
     (root / 'nginx-error.log').write_text('')
     (root / 'service-stop.json').write_text(json.dumps({'nginx': 0, 'fpm': 0}))
-    (root / 'checks.json').write_text(json.dumps(good()))
+    report = good(); write_edits(root, report)
+    (root / 'checks.json').write_text(json.dumps(report))
 
 class Evidence(unittest.TestCase):
+    def test_visible_edits_require_current_images_saved_values_and_exact_restoration(self):
+        for field in ('stored', 'hashes', 'image-width', 'image-color', 'image-url', 'frames', 'browser', 'form-saves', 'freshness'):
+            report = good(profile='wp-super-cache'); proof = report['states'][1]['visible_edit']; stage = proof['stages'][1]
+            if field == 'stored': stage['stored']['deadline'] -= 1
+            elif field == 'hashes': stage['hashes']['red'] = 'a' * 64
+            elif field == 'image-width': stage['images']['png']['width'] = WIDTHS['blue']
+            elif field == 'image-color': stage['images']['gif']['background_rgb'] = [255, 255, 255]
+            elif field == 'image-url': stage['images']['png']['url'] += '&cache_buster=new'
+            elif field == 'frames': stage['images']['gif']['durations'][-1] = 900
+            elif field == 'browser': stage['browser']['natural_width'] = WIDTHS['blue']
+            elif field == 'form-saves': proof['form_saves'] = ['edited']
+            else: proof['after_save_fresh'] = True
+            with self.subTest(field=field): self.assertFalse(accept(report))
+        report = good(); report['states'][1]['visible_edit']['stages'][3]['hashes']['blue'] = 'a'*64
+        self.assertFalse(accept(report))
+
+    def test_edit_purge_must_refresh_html_and_keep_native_or_cache_provenance(self):
+        for field in ('missing', 'order', 'public', 'runtime', 'hash', 'cache-path', 'cache-hit', 'boolean-width'):
+            report = good(profile='wp-super-cache'); proof = report['states'][1]['visible_edit']; stage = proof['stages'][2]
+            if field == 'missing': proof['stages'].pop()
+            elif field == 'order': proof['stages'].reverse()
+            elif field == 'public': stage['pages'][3]['public'] = copy.deepcopy(proof['stages'][0]['stored'])
+            elif field == 'runtime': stage['pages'][0]['runtime'] = {}
+            elif field == 'hash': stage['pages'][2]['sha256'] = '0'*64
+            elif field == 'cache-path': stage['body']['cache_path'] = cache_path('red', 'pair-1-on')
+            elif field == 'cache-hit': stage['pages'][3]['cache_header'] = None
+            else: stage['stored']['width'] = True
+            with self.subTest(field=field): self.assertFalse(accept(report))
+
+    def test_baseline_cannot_present_stale_html_after_saving(self):
+        report = good(); stage = report['states'][1]['visible_edit']['stages'][1]
+        for page in stage['pages']: page['public'] = edit_refresh.settings(DEADLINES['blue'], WIDTHS['blue'])
+        self.assertFalse(accept(report))
+        report = good(); report['states'][0]['visible_edit'] = report['states'][1]['visible_edit']
+        self.assertFalse(accept(report))
+
+    def test_retained_edit_html_and_image_bodies_cannot_be_missing_changed_or_linked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); logs(root); report = good(); self.assertTrue(assess(root)['passed'])
+            stage = report['states'][1]['visible_edit']['stages'][1]
+            for name in (stage['body']['snapshot'], stage['images']['png']['snapshot'], stage['images']['gif']['snapshot']):
+                target = root / name; data = target.read_bytes(); target.unlink()
+                self.assertFalse(assess(root)['passed'])
+                target.write_bytes(b'changed'); self.assertFalse(assess(root)['passed'])
+                target.unlink(); target.symlink_to(root/'checks.json'); self.assertFalse(assess(root)['passed'])
+                target.unlink(); target.write_bytes(data)
+            self.assertTrue(assess(root)['passed'])
+
     def test_cache_profile_passes_all_eight_comparisons_with_real_hit_shape(self):
         for theme in THEMES:
             for activation in ('site', 'network'):
@@ -138,7 +241,7 @@ class Evidence(unittest.TestCase):
 
     def test_retained_cache_bodies_are_required_and_cannot_be_copied_or_linked(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);logs(root);r=good(profile='wp-super-cache');(root/'checks.json').write_text(json.dumps(r))
+            root=Path(tmp);logs(root);r=good(profile='wp-super-cache');write_edits(root,r);(root/'checks.json').write_text(json.dumps(r))
             for state in r['states']:
                 for row in state['sites']:
                     for file in (row['cache']['file'],row['browser_cache']['file']): (root/file['snapshot']).write_bytes(cache_body(row))

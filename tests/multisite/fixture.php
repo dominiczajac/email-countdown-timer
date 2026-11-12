@@ -63,6 +63,7 @@ final class Email_Countdown_Timer_Network_Lab {
                     'network_plugins' => $network_plugins,
                     'campaign_keys' => array_keys( $timers ), 'campaign_sha256' => hash( 'sha256', wp_json_encode( self::canonical( $timers ) ) ),
                     'width' => $timers['shared-timer']['fixed_width'], 'deadline' => Email_Countdown_Timer_Config::deadline( $timers['shared-timer'] ),
+                    'background' => strtolower( $timers['shared-timer']['bg'] ),
                     'wp_cache' => defined( 'WP_CACHE' ) && WP_CACHE, 'object_cache_dropin' => is_file( WP_CONTENT_DIR . '/object-cache.php' ),
                     'advanced_cache_dropin' => is_file( WP_CONTENT_DIR . '/advanced-cache.php' ),
                     'cache_configuration' => getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ? Email_Countdown_Timer_Network_Super_Cache::inventory() : null );
