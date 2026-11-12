@@ -69,6 +69,14 @@ final class Email_Countdown_Timer_Admin {
             'midnight' => array( 'label' => __( 'Midnight', 'easy-countdown' ), 'bg' => '#111827', 'dc' => '#F9FAFB', 'lc' => '#CBD5E1' ),
             'ocean' => array( 'label' => __( 'Ocean', 'easy-countdown' ), 'bg' => '#F8FAFC', 'dc' => '#1D4ED8', 'lc' => '#334155' ),
             'warm' => array( 'label' => __( 'Warm', 'easy-countdown' ), 'bg' => '#FFF7ED', 'dc' => '#9A3412', 'lc' => '#713F12' ),
+            'christmas' => array( 'label' => __( 'Christmas', 'easy-countdown' ), 'bg' => '#FFF5F5', 'dc' => '#991B1B', 'lc' => '#166534' ),
+            'new-year' => array( 'label' => __( 'New Year', 'easy-countdown' ), 'bg' => '#111827', 'dc' => '#FDE68A', 'lc' => '#F9FAFB' ),
+            'easter' => array( 'label' => __( 'Easter', 'easy-countdown' ), 'bg' => '#F5F3FF', 'dc' => '#6D28D9', 'lc' => '#166534' ),
+            'valentines' => array( 'label' => __( "Valentine's Day", 'easy-countdown' ), 'bg' => '#FFF1F2', 'dc' => '#9F1239', 'lc' => '#831843' ),
+            'halloween' => array( 'label' => __( 'Halloween', 'easy-countdown' ), 'bg' => '#1C1917', 'dc' => '#FDBA74', 'lc' => '#F5F5F4' ),
+            'black-friday' => array( 'label' => __( 'Black Friday', 'easy-countdown' ), 'bg' => '#09090B', 'dc' => '#FAFAFA', 'lc' => '#FACC15' ),
+            'birthday' => array( 'label' => __( 'Birthday', 'easy-countdown' ), 'bg' => '#FDF4FF', 'dc' => '#86198F', 'lc' => '#1D4ED8' ),
+            'wedding' => array( 'label' => __( 'Wedding', 'easy-countdown' ), 'bg' => '#FFFBEB', 'dc' => '#78350F', 'lc' => '#3F6212' ),
         );
     }
 
@@ -110,7 +118,7 @@ final class Email_Countdown_Timer_Admin {
                         <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
                             <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
                         <?php endforeach; ?>
-                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Four high-contrast color combinations. New timers use included Lato when FreeType is available, otherwise bitmap.', 'easy-countdown' ); ?></p></div>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'High-contrast colors for holidays and occasions. New timers use included Lato with FreeType, otherwise bitmap.', 'easy-countdown' ); ?></p></div>
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-language"><?php echo esc_html__( 'Countdown label language', 'easy-countdown' ); ?></label>
                     <select id="<?php echo esc_attr( $prefix ); ?>-language" name="label_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-language-help">
                         <?php foreach ( self::label_presets() as $language => $labels ) : ?>

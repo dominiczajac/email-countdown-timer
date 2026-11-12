@@ -98,7 +98,21 @@ $submit_admin( array_replace( $quick, array( 'tz' => 'not/a-zone' ) ) );
 $quick_error = Email_Countdown_Timer_Admin::state();
 ok( isset( $quick_error['errors']['tz'] ) && $options === $before_quick, 'quick creation validates the deadline time zone without a write' );
 ok( $quick_error['id'] === 'quick-new' && $quick_error['data']['dc'] === '#F9FAFB' && $quick_error['data']['deadline'] === $quick['deadline'], 'failed quick create retains identity, preset colors and deadline in the full editor' );
+$appearance_presets = Email_Countdown_Timer_Admin::presets();
 foreach ( array( 'classic' => array( '#FFFFFF', '#111827', '#475569' ), 'midnight' => array( '#111827', '#F9FAFB', '#CBD5E1' ), 'ocean' => array( '#F8FAFC', '#1D4ED8', '#334155' ), 'warm' => array( '#FFF7ED', '#9A3412', '#713F12' ) ) as $preset => $colors ) {
+    ok( array_values( array_intersect_key( $appearance_presets[ $preset ], array_flip( array( 'bg', 'dc', 'lc' ) ) ) ) === $colors, 'original preset colors remain stable: ' . $preset );
+}
+$relative_luminance = static function ( string $hex ): float {
+    $rgb = array_map( static fn( $v ) => $v <= 0.04045 ? $v / 12.92 : ( ( $v + 0.055 ) / 1.055 ) ** 2.4, array_map( static fn( $v ) => hexdec( $v ) / 255, str_split( substr( $hex, 1 ), 2 ) ) );
+    return $rgb[0] * 0.2126 + $rgb[1] * 0.7152 + $rgb[2] * 0.0722;
+};
+foreach ( $appearance_presets as $preset => $appearance ) {
+    $colors = array( $appearance['bg'], $appearance['dc'], $appearance['lc'] );
+    $background = $relative_luminance( $appearance['bg'] );
+    foreach ( array( 'dc', 'lc' ) as $foreground ) {
+        $text = $relative_luminance( $appearance[ $foreground ] );
+        ok( ( max( $background, $text ) + 0.05 ) / ( min( $background, $text ) + 0.05 ) >= 4.5, 'preset text has at least 4.5:1 contrast: ' . $preset . '/' . $foreground );
+    }
     $post = array_replace( $quick, array( 'timer_id' => 'quick-' . $preset, 'appearance_preset' => $preset ) );
     ok( str_starts_with( $submit_admin( $post ), 'redirect:' ), 'quick creation saves ' . $preset );
     $created = $options['easy_countdown_timers'][ 'quick-' . $preset ];
