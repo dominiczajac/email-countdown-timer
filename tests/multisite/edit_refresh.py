@@ -20,9 +20,9 @@ def settings(deadline, width, edited=False):
 
 
 def filename(key, stage, kind):
-    if not re.fullmatch('pair-[1-3]-on', key) or stage not in STAGES or kind not in ('html', 'png', 'gif'):
+    if not re.fullmatch('pair-[1-3]-on', key) or stage not in STAGES or kind not in ('html', 'png', 'gif', 'browser'):
         raise ValueError('invalid_edit_snapshot')
-    return 'edit-' + key + '-' + stage + '.' + kind
+    return 'edit-' + key + '-' + stage + ('-browser.png' if kind == 'browser' else '.' + kind)
 
 
 def public_values(html, reference_valid):

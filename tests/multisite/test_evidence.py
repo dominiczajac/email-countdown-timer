@@ -150,6 +150,16 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(report))
 
 class Evidence(unittest.TestCase):
+    def test_edit_browser_screenshots_cannot_replace_native_response_files(self):
+        names = [edit_refresh.filename(key, stage, kind) for key in ORDER if key.endswith('-on')
+                 for stage in edit_refresh.STAGES for kind in ('html', 'png', 'gif', 'browser')]
+        self.assertEqual(len(names), len(set(names)))
+        self.assertTrue(edit_refresh.filename('pair-1-on', 'edited', 'browser').endswith('-browser.png'))
+        for key, stage, kind in (('../other', 'edited', 'png'), ('pair-1-off', 'edited', 'png'),
+                                 ('pair-1-on', '../other', 'png'), ('pair-1-on', 'edited', '../other')):
+            with self.subTest(key=key, stage=stage, kind=kind), self.assertRaises(ValueError):
+                edit_refresh.filename(key, stage, kind)
+
     def test_visible_edits_require_current_images_saved_values_and_exact_restoration(self):
         for field in ('stored', 'hashes', 'image-width', 'image-color', 'image-url', 'frames', 'browser', 'form-saves', 'freshness'):
             report = good(profile='wp-super-cache'); proof = report['states'][1]['visible_edit']; stage = proof['stages'][1]

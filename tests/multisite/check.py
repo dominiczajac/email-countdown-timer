@@ -185,7 +185,7 @@ def main():
                     'public': {'deadline': int(live.get_attribute('data-ecd-deadline')), 'width': int(picture.get_attribute('width')),
                                'background': live.evaluate('(element)=>getComputedStyle(element).getPropertyValue("--ecd-bg").trim().toLowerCase()')}}
                 if name in ('edited', 'purged'):
-                    page.screenshot(path=str(out / ('edit-' + current['key'] + '-' + name + '.png')))
+                    page.screenshot(path=str(out / edit_refresh.filename(current['key'], name, 'browser')))
         proof['after_save_fresh'] = proof['stages'][1]['pages'][-1]['public'] == proof['stages'][1]['stored']
         proof['after_restore_fresh'] = proof['stages'][3]['pages'][-1]['public'] == proof['stages'][3]['stored']
         proof['complete'] = True

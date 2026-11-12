@@ -92,3 +92,8 @@ now targets `#ect-editor` specifically. Failed run
 [43188103744](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43188103744)
 and its partial evidence remain negative; native bounds and acceptance checks
 are unchanged.
+
+Codex's first static review also caught a P1 evidence-file collision: browser
+screenshots reused the native PNG response filename for the edited/purged stages.
+Browser captures now use a distinct `-browser.png` suffix, covered by a filename
+collision regression; native response hashes and post-stop replay stay required.
