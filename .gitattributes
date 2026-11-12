@@ -1,4 +1,6 @@
 * text=auto eol=lf
+# Keep original third-party license bytes, including upstream CRLF endings.
+/fonts/OFL*.txt -text whitespace=cr-at-eol
 /.github export-ignore
 /tests export-ignore
 /scripts export-ignore
