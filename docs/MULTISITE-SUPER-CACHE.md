@@ -115,3 +115,11 @@ search empty. Chromium reproduced zero matches there and one for the corrected
 cycles recovered the original site hashes, with later off states still running;
 the run remains failed. Fixed operation labels now locate such failures without
 retaining arbitrary exception text, form bodies or nonces.
+
+A local native renderer preflight found that GD/Imagick's GIF palette represents
+the edited `#f8fafc` background as RGB `[247,249,251]`, one step below each source
+channel; PNG is exactly `[248,250,252]`. The new color check allows at most one
+step per GIF channel, keeps PNG exact, retains the actual decoded samples and
+rejects larger changes/non-integer channels. This concerns only the new palette
+comparison; frame timing, dimensions, native limits, original log gates and
+retained-image hash verification are unchanged.

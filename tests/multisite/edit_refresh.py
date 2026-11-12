@@ -122,8 +122,14 @@ def accept(proof, key, cached, initial, original, runtime_valid, image_valid):
         rgb = [int(expected['background'][i:i + 2], 16) for i in (1, 3, 5)]
         for kind, image in images.items():
             mode = 'email' if kind == 'gif' else 'static'
-            if (not image_valid(image, kind, expected['width']) or image.get('background_rgb') != rgb
-                    or not isinstance(image.get('background_rgb'), list) or any(type(channel) is not int for channel in image['background_rgb'])
+            channels = image.get('background_rgb')
+            # GD's GIF palette quantization can move a channel by one. PNG stays
+            # exact; retain the actually decoded GIF sample, not the target RGB.
+            tolerance = 1 if kind == 'gif' else 0
+            if (not image_valid(image, kind, expected['width'])
+                    or not isinstance(channels, list) or len(channels) != 3
+                    or any(type(channel) is not int or not 0 <= channel <= 255 for channel in channels)
+                    or any(abs(actual - target) > tolerance for actual, target in zip(channels, rgb))
                     or image.get('url') != 'http://localhost:8097/blue/?ecd_action=render&ecd=shared-timer&mode=' + mode
                     or image.get('snapshot') != filename(key, name, kind)
                     or type(image.get('bytes')) is not int or not 0 < image['bytes'] <= 16 * 1024 * 1024):

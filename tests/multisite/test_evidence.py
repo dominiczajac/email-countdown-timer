@@ -152,6 +152,18 @@ def logs(root):
     (root / 'checks.json').write_text(json.dumps(report))
 
 class Evidence(unittest.TestCase):
+    def test_gif_palette_allows_only_one_channel_step_while_png_stays_exact(self):
+        report = good(profile='wp-super-cache'); stage = report['states'][1]['visible_edit']['stages'][1]
+        stage['images']['gif']['background_rgb'] = [247, 249, 251]
+        self.assertTrue(accept(report))
+        stage['images']['gif']['background_rgb'] = [246, 249, 251]
+        self.assertFalse(accept(report))
+        report = good(); stage = report['states'][1]['visible_edit']['stages'][1]
+        stage['images']['png']['background_rgb'] = [247, 250, 252]
+        self.assertFalse(accept(report))
+        stage['images']['png']['background_rgb'] = [248, 250, 252.0]
+        self.assertFalse(accept(report))
+
     def test_stale_edit_html_must_be_bound_to_the_earlier_cached_response(self):
         for field in ('hash', 'marker', 'origin'):
             report = good(profile='wp-super-cache'); stage = report['states'][1]['visible_edit']['stages'][1]
