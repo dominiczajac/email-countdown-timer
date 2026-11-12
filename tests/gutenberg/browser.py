@@ -63,13 +63,13 @@ def insert(page, attributes):
 def select_timer_with_keyboard(page, block_id, timer_id):
     combo = page.get_by_role('combobox', name='Timer', exact=True).first
     try:
-        # Core's onFocus clears its filter/input. Let that render finish before
-        # typing; fill() alone focuses and types within the same browser task.
+        # Focus in a separate gesture. Core 6.4 need not reopen a collapsed,
+        # already-focused field on click; typing opens its actual result list.
         combo.click()
         expect(combo).to_be_focused()
-        expect(combo).to_have_attribute('aria-expanded', 'true')
-        expect(combo).to_have_value('')
         combo.fill(timer_id)
+        expect(combo).to_have_value(timer_id)
+        expect(combo).to_have_attribute('aria-expanded', 'true')
         # Other sidebar fields contain native <option> elements too. Inspect
         # the timer's expanded listbox, rather than every option in the page.
         menu = page.get_by_role('listbox')
