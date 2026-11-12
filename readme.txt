@@ -129,4 +129,3 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 = 12.6.1 =
 Back up fonts/data and update without uninstalling. Recopy old embeds made below 24h; new image canvases retain their width when days hide. Apply a style preset explicitly to change an existing font.
-
