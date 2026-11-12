@@ -117,13 +117,13 @@ if ( ! current_user_can( 'manage_options' ) ) {
                     </section>
                     <section class="ect-card" aria-labelledby="ect-appearance-title"><h3 id="ect-appearance-title"><?php echo esc_html__( 'Appearance', 'easy-countdown' ); ?></h3>
                         <div data-ect-presets hidden>
-                            <p class="description"><?php echo esc_html__( 'Presets apply colors and an included font. Review the fields and save explicitly. Bitmap is used if the font or FreeType is unavailable.', 'easy-countdown' ); ?></p>
+                            <p class="description"><?php echo esc_html__( 'Presets apply colors and an available included font. Review the fields and save explicitly. If the preset font or FreeType is unavailable, your selected font is kept.', 'easy-countdown' ); ?></p>
                             <div class="ect-inline" role="group" aria-label="<?php echo esc_attr__( 'Appearance presets', 'easy-countdown' ); ?>">
                                 <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
                                     <button class="button" type="button" data-ect-preset="<?php echo esc_attr( $email_countdown_timer_key ); ?>" data-bg="<?php echo esc_attr( $email_countdown_timer_preset['bg'] ); ?>" data-dc="<?php echo esc_attr( $email_countdown_timer_preset['dc'] ); ?>" data-lc="<?php echo esc_attr( $email_countdown_timer_preset['lc'] ); ?>" data-font="<?php echo esc_attr( Email_Countdown_Timer_Admin::preset_font( $email_countdown_timer_preset ) ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></button>
                                 <?php endforeach; ?>
                             </div>
-                            <p class="description" data-ect-preset-result role="status" aria-live="polite" data-applied="<?php echo esc_attr__( 'Colors and font applied. Review the preview after saving.', 'easy-countdown' ); ?>"></p>
+                            <p class="description" data-ect-preset-result role="status" aria-live="polite" data-applied="<?php echo esc_attr__( 'Preset applied. Review the fields and save explicitly.', 'easy-countdown' ); ?>"></p>
                         </div>
                         <fieldset><legend><?php echo esc_html__( 'Colors', 'easy-countdown' ); ?></legend><div class="ect-colors">
                         <?php foreach ( array( 'bg' => __( 'Background', 'easy-countdown' ), 'dc' => __( 'Digits', 'easy-countdown' ), 'lc' => __( 'Labels', 'easy-countdown' ) ) as $email_countdown_timer_key => $email_countdown_timer_label ) : ?>

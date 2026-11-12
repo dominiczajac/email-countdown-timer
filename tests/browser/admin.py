@@ -140,6 +140,10 @@ with sync_playwright() as p:
     check(page.locator('#ect-font').input_value() == 'builtin:ibm-plex-mono-regular', 'New Year keyboard apply selects IBM Plex Mono')
     page.get_by_role('button', name='Classic', exact=True).click()
     check(page.locator('#ect-bg').input_value() == '#FFFFFF' and page.locator('#ect-dc').input_value() == '#111827', 'Classic preset restores light colors without submitting')
+    page.get_by_role('button', name='Wedding', exact=True).evaluate('(button) => { button.dataset.font = ""; }')
+    page.get_by_role('button', name='Wedding', exact=True).click()
+    check(page.locator('#ect-font').input_value() == 'builtin:lato-regular', 'unavailable preset font preserves the selected face while applying colors')
+    page.get_by_role('button', name='Wedding', exact=True).evaluate('(button) => { button.dataset.font = "builtin:crimson-text-regular"; }')
 
     page.get_by_text('Custom Labels', exact=True).click()
     page.locator('#ect-label_d').fill('Campaign days')
