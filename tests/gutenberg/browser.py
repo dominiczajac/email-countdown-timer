@@ -60,6 +60,16 @@ def insert(page, attributes):
         return block.clientId;
     }""", attributes)
 
+def select_timer_with_keyboard(frame, timer_id):
+    combo = frame.get_by_role('combobox', name='Timer', exact=True).first
+    combo.fill(timer_id)
+    # Core and our controlled filter rerender asynchronously. Wait for the
+    # actual filtered menu before moving its highlight with the keyboard.
+    expect(frame.get_by_role('option')).to_have_count(1)
+    expect(frame.get_by_role('option', name=timer_id, exact=True)).to_be_visible()
+    combo.press('ArrowDown')
+    combo.press('Enter')
+
 original = wp('option', 'get', 'easy_countdown_timers', '--format=json')
 try:
     with sync_playwright() as p:
@@ -107,10 +117,7 @@ try:
         page.bring_to_front()
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
         expect(frame.get_by_text('Campaign list updated.', exact=True)).to_be_visible()
-        new_combo = frame.get_by_role('combobox', name='Timer', exact=True).first
-        new_combo.fill('gutenberg-new')
-        new_combo.press('ArrowDown')
-        new_combo.press('Enter')
+        select_timer_with_keyboard(frame, 'gutenberg-new')
         page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", arg=first)
         check(True, 'newly created campaign becomes selectable without editor reload')
         wp('option', 'update', 'easy_countdown_timers', original, '--format=json')
@@ -118,11 +125,10 @@ try:
         expect(frame.get_by_text('This timer is no longer in the saved list.', exact=False)).to_be_visible()
         check(page.evaluate("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", first), 'removed campaign is reported without silently rewriting the saved reference')
         page.evaluate("(id)=>wp.data.dispatch('core/block-editor').updateBlockAttributes(id,{timerId:''})", first)
+        page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId===''", arg=first)
         combo = frame.get_by_role('combobox', name='Timer', exact=True).first
-        expect(combo).to_be_visible()
-        combo.fill('gutenberg-a')
-        combo.press('ArrowDown')
-        combo.press('Enter')
+        expect(combo).to_have_value('')
+        select_timer_with_keyboard(frame, 'gutenberg-a')
         page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-a'", arg=first)
         check(True, 'select existing timer with keyboard in native ComboboxControl')
         preview = frame.locator('.wp-block-easy-countdown-timer img').first

@@ -85,6 +85,22 @@ http {
 CONF
 PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d /usr/sbin/php-fpm8.4 -c /etc/php/8.4/cli/php.ini -y "$service_dir/fpm.conf" -F &
 fpm=$!
+# Do not send nginx's first PHP request before FPM has bound its socket.
+# A startup 502 is a real server-log failure and must not be erased or ignored.
+python3 - <<'PY'
+import socket
+import time
+for _ in range(100):
+    try:
+        with socket.create_connection(('127.0.0.1', 9007), timeout=1):
+            print('FPM TCP readiness: PASS')
+        break
+    except OSError:
+        time.sleep(0.1)
+else:
+    raise SystemExit('FPM did not bind its owned test socket')
+PY
+kill -0 "$fpm"
 nginx -p "$service_dir/" -c "$service_dir/nginx.conf" -g 'daemon off;' &
 web=$!
 ready=0
