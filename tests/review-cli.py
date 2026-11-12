@@ -65,6 +65,9 @@ def main():
                         {"type": "tool_use", "id": "toolu_outside", "name": "Read", "input": {"file_path": str(outside)}},
                         {"type": "tool_use", "id": "toolu_git", "name": "Read", "input": {"file_path": str(git_config)}},
                         {"type": "tool_use", "id": "toolu_link", "name": "Read", "input": {"file_path": str(link)}},
+                        {"type": "tool_use", "id": "toolu_grep_outside", "name": "Grep", "input": {"pattern": "ECD_SYNTHETIC", "path": str(outside), "output_mode": "content"}},
+                        {"type": "tool_use", "id": "toolu_grep_git", "name": "Grep", "input": {"pattern": "ECD_SYNTHETIC", "path": str(git_config), "output_mode": "content"}},
+                        {"type": "tool_use", "id": "toolu_glob_outside", "name": "Glob", "input": {"pattern": "*.txt", "path": str(root)}},
                         {"type": "tool_use", "id": "toolu_shell", "name": "Bash", "input": {"command": f"touch {shell_marker}"}},
                     ]
                     stop = "tool_use"
@@ -145,7 +148,7 @@ def main():
         assert not any(path.exists() for path in (shell_marker, hook_marker, mcp_marker)), "Unexpected code/MCP execution"
         results = {part["tool_use_id"]: part for body in tool_requests[1:] for message in body.get("messages", [])
                    if isinstance(message.get("content"), list) for part in message["content"] if part.get("type") == "tool_result"}
-        for tool_id in ("toolu_outside", "toolu_git", "toolu_link", "toolu_shell"):
+        for tool_id in ("toolu_outside", "toolu_git", "toolu_link", "toolu_shell", "toolu_grep_outside", "toolu_grep_git", "toolu_glob_outside"):
             assert results.get(tool_id, {}).get("is_error"), f"Expected explicit denial for {tool_id}"
         print("PASS pinned CLI: source read, outside/symlink/Git denials, absent shell/write tools, disabled project hooks/MCP")
 
