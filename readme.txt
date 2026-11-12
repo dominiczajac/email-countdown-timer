@@ -99,7 +99,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Screenshots ==
 
 1. Use Quick Create on the WordPress dashboard.
-2. Set a deadline, time zone, included Lato and saved appearance.
+2. Set a deadline, time zone, local font and saved appearance.
 3. Copy Website/Email embeds with image and deadline guidance.
 4. Select a campaign in the native block and opt into live text.
 5. Run local diagnostics and copy a redacted report.
@@ -108,6 +108,8 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Changelog ==
 
 = 12.6.1 =
+
+* Respect static PNG/WebP preferences and WebP refusal; retain animated GIF.
 * Bundle three more local fonts; appearance presets apply colors and typography.
 * Keep canvas width when days hide below 24h, preventing enlarged email digits.
 

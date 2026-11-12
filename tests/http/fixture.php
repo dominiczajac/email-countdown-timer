@@ -36,5 +36,5 @@ if ($task==='seed') {
     if ((int)$count!==0) WP_CLI::error('Request canary unexpectedly persisted');
     echo "NO_REQUEST_CANARY_IN_OPTIONS\n";
 } elseif ($task==='versions') {
-    echo json_encode(['php'=>PHP_VERSION,'wordpress'=>get_bloginfo('version'),'database'=>$wpdb->db_version(),'external_object_cache'=>wp_using_ext_object_cache(),'imagick'=>phpversion('imagick'),'gd'=>gd_info()['GD Version']]);
+    echo json_encode(['php'=>PHP_VERSION,'wordpress'=>get_bloginfo('version'),'database'=>$wpdb->db_version(),'external_object_cache'=>wp_using_ext_object_cache(),'imagick'=>phpversion('imagick'),'gd'=>gd_info()['GD Version'],'webp'=>function_exists('imagewebp')]);
 } else WP_CLI::error('Unknown synthetic task');
