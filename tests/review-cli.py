@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shlex
+import runpy
 import subprocess
 import tempfile
 import threading
@@ -137,6 +138,8 @@ def main():
             thread.join(timeout=2)
         if result.returncode:
             raise RuntimeError(f"Pinned CLI failed ({result.returncode}): {result.stderr[-3000:]} {result.stdout[-2000:]}")
+        publication = runpy.run_path(str(Path(__file__).resolve().parents[1] / 'scripts/publish-claude-review.py'))
+        publication['review_body']([json.loads(result.stdout)], 'a' * 40)
         tool_requests = [body for body in requests if any(tool["name"] == "Read" for tool in body.get("tools", []))]
         assert len(tool_requests) >= 2, "Expected actual tool results to reach the loopback API"
         names = {tool["name"] for tool in tool_requests[0]["tools"]}

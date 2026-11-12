@@ -36,6 +36,7 @@ jobs:
           python3 tests/test-pcp-gate.py
           python3 tests/test-native-log-gate.py
           python3 tests/test-review-context.py
+          python3 tests/test-review-publication.py
           python3 tests/cache-profiles/test-contracts.py
           python3 tests/litespeed/test_native.py
           python3 tests/multisite/test_evidence.py
