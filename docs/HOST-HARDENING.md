@@ -16,7 +16,7 @@ After an internal cache hit or publication attempt, `X-Email-Countdown-Cache` re
 | `write-failed` | The write returned false and the exact current image could not be verified. |
 | `too-large` | The entry exceeded an explicitly configured host budget and was not submitted. |
 
-Fallback/error responses need not contain this header. A valid freshly rendered image is still returned after a false write or size rejection. Its MIME, pixels, frame count/timing and public URL are unchanged. No stale GIF or cached static substitute is introduced. Cache/encoder exceptions retain the existing sanitized error behavior.
+Fallback/error responses need not contain this header. A valid freshly rendered image is still returned after a false write or size rejection. Its MIME, pixels, frame count/timing and public URL are unchanged. No stale GIF or cached static substitute is introduced. Failure while verifying a false write also means `write-failed`; exceptions from the original cache-read/write or encoder paths retain sanitized error handling.
 
 The `email_countdown_timer_image_cache_result` action receives three values: fixed publication state, serialized envelope bytes, and effective byte limit. It receives no campaign ID, configuration, path or visitor metadata. The plugin adds no log, persistent diagnostic record or external request. A host can attach its own local monitoring handler.
 
