@@ -70,8 +70,12 @@ def select_timer_with_keyboard(page, block_id, timer_id):
         expect(combo).to_have_attribute('aria-expanded', 'true')
         expect(combo).to_have_value('')
         combo.fill(timer_id)
-        expect(page.get_by_role('option')).to_have_count(1)
-        option = page.get_by_role('option', name=timer_id, exact=True)
+        # Other sidebar fields contain native <option> elements too. Inspect
+        # the timer's expanded listbox, rather than every option in the page.
+        menu = page.get_by_role('listbox')
+        expect(menu).to_be_visible()
+        expect(menu.get_by_role('option')).to_have_count(1)
+        option = menu.get_by_role('option', name=timer_id, exact=True)
         expect(option).to_be_visible()
         combo.press('ArrowDown')
         expect(combo).to_be_focused()
@@ -84,7 +88,7 @@ def select_timer_with_keyboard(page, block_id, timer_id):
         (evidence / 'timer-selection-failure.json').write_text(json.dumps({
             'expected': timer_id,
             'input': combo.evaluate('(e)=>({value:e.value,expanded:e.getAttribute("aria-expanded"),active:e.getAttribute("aria-activedescendant"),focused:e===document.activeElement})'),
-            'options': page.get_by_role('option').evaluate_all('(nodes)=>nodes.map(e=>({id:e.id,text:e.textContent,selected:e.getAttribute("aria-selected")}))'),
+            'options': page.get_by_role('listbox').get_by_role('option').evaluate_all('(nodes)=>nodes.map(e=>({id:e.id,text:e.textContent,selected:e.getAttribute("aria-selected")}))'),
             'attributes': page.evaluate("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes", block_id),
         }, indent=2))
         page.screenshot(path=str(evidence / 'timer-selection-failure.png'), full_page=True)
