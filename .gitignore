@@ -52,3 +52,6 @@ __pycache__/
 
 # Reproducible local distribution output
 /dist/
+
+# Immutable data for the restricted CI reviewer (never part of the install ZIP).
+/.email-countdown-review-*/

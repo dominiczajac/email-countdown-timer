@@ -35,6 +35,8 @@ jobs:
         run: |
           python3 tests/test-pcp-gate.py
           python3 tests/test-native-log-gate.py
+          python3 tests/test-review-context.py
+          python3 tests/test-review-publication.py
           python3 tests/cache-profiles/test-contracts.py
           python3 tests/litespeed/test_native.py
           python3 tests/multisite/test_evidence.py
@@ -44,6 +46,9 @@ jobs:
           python3 tests/test-label-font.py
           php tests/privacy-policy.php
           php tests/privacy-policy.php missing
+      - name: Pinned reviewer CLI boundary checks with a synthetic loopback API
+        if: matrix.php == '8.4' && matrix.backend == 'imagick'
+        run: npm exec --yes --package @anthropic-ai/claude-code@2.1.322 -- python3 tests/review-cli.py --claude claude
       - name: PHP syntax
         run: find . -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Security and rendering regression tests
@@ -65,7 +70,9 @@ jobs:
           php tests/font-defaults.php
           php tests/font-storage.php
       - name: Lock outcome and current static fallback
-        run: php tests/lock-outcomes.php
+        run: |
+          php tests/lock-outcomes.php
+          php tests/cache-persistence.php
       - name: Font access and approved maintenance contracts
         run: |
           php tests/font-access.php

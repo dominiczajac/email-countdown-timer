@@ -12,6 +12,8 @@ $options = $transients = $scripts = [];
 $admin = true; $nonce = true; $writes = 0; $checks = 0; $statusCode = 200;
 class ECD_Test_Stop extends RuntimeException {}
 function add_action(...$args) {}
+function do_action($name, ...$args) { foreach ($GLOBALS['test_actions'][$name] ?? [] as $handler) $handler(...$args); }
+function apply_filters($name, $value, ...$args) { foreach ($GLOBALS['test_filters'][$name] ?? [] as $handler) $value=$handler($value, ...$args); return $value; }
 function add_shortcode(...$args) {}
 function add_menu_page(...$args) {}
 function current_user_can($cap, ...$args) {
@@ -25,7 +27,12 @@ function check_admin_referer($action) { if (!$GLOBALS['nonce']) throw new ECD_Te
 function get_option($key, $default=[]) { return $GLOBALS['options'][$key] ?? $default; }
 function update_option($key, $value, $autoload=false) { $GLOBALS['options'][$key]=$value; return true; }
 function get_transient($key) { return $GLOBALS['transients'][$key] ?? false; }
-function set_transient($key, $value, $ttl) { $GLOBALS['transients'][$key]=$value; $GLOBALS['writes']++; }
+function set_transient($key, $value, $ttl) {
+    $GLOBALS['writes']++;
+    if (isset($GLOBALS['test_set_transient'])) return ($GLOBALS['test_set_transient'])($key, $value, $ttl);
+    $GLOBALS['transients'][$key]=$value;
+    return true;
+}
 function delete_transient($key) { unset($GLOBALS['transients'][$key]); }
 function sanitize_title($text) { return trim(preg_replace('/[^a-z0-9_%\-]+/', '-', strtolower(strip_tags($text))), '-'); }
 function sanitize_text_field($text) { return trim(strip_tags($text)); }

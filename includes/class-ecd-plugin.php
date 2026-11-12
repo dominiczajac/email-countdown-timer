@@ -118,7 +118,7 @@ class Email_Countdown_Timer_Plugin {
         [$signature, $bucket, $ending] = $this->imageState($config, $deadline, $now, $fmt);
         $key = $this->cacheKey($id, $endOnly ? $fmt.'-end' : $fmt);
         $blob = $this->cachedImage($key, $signature, $bucket);
-        if ($blob !== null) { $this->outputImage($blob, $fmt); return; }
+        if ($blob !== null) { header('X-Email-Countdown-Cache: hit'); $this->outputImage($blob, $fmt); return; }
         require_once __DIR__.'/class-email-countdown-timer-render-lock.php';
         $attempt = Email_Countdown_Timer_Render_Lock::attempt($key, 1);
         $lock = $attempt['lock'];
@@ -149,12 +149,36 @@ class Email_Countdown_Timer_Plugin {
                     }
                     return;
                 }
-                set_transient($key, ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)], 60);
-            }
+                $cacheState = $this->storeImageCache($key, $signature, $bucket, $blob);
+            } else { $cacheState = 'hit'; }
+            header('X-Email-Countdown-Cache: '.$cacheState);
             $this->outputImage($blob, $fmt);
         } finally {
             $lock->release();
         }
+    }
+    private function storeImageCache(string $key, string $signature, int $bucket, string $blob): string {
+        $entry = ['signature'=>$signature, 'bucket'=>$bucket, 'data'=>base64_encode($blob)];
+        $bytes = strlen(serialize($entry));
+        // Optional host limit, including the base64/envelope overhead. Zero keeps
+        // existing cache behavior; the image and animation budgets are unchanged.
+        $limit = apply_filters('email_countdown_timer_cache_entry_max_bytes', 0);
+        $limit = is_int($limit) && $limit > 0 ? $limit : 0;
+        if ($limit > 0 && $bytes > $limit) {
+            $state = 'too-large';
+        } elseif (set_transient($key, $entry, 60)) {
+            $state = 'stored';
+        } else {
+            // WordPress can return false for an unchanged value. Verify the exact
+            // entry with a backend read before calling this a persistence failure.
+            try { $retained = $this->cachedImage($key, $signature, $bucket, true) === $blob; }
+            catch (Throwable $e) { $retained = false; }
+            $state = $retained ? 'retained' : 'write-failed';
+        }
+        // Fixed state and byte counts only: no IDs, labels, paths or visitor data.
+        // Nothing is persisted or sent by this hook unless the host adds a handler.
+        do_action('email_countdown_timer_image_cache_result', $state, $bytes, $limit);
+        return $state;
     }
     private function imageState(array $config, int $deadline, int $now, string $format): array {
         $font = Email_Countdown_Timer_Config::fontPath($config['font']);

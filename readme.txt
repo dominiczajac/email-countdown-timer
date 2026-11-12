@@ -30,7 +30,7 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 
 **Requirements and limitations**
 
-Requires WordPress 6.4+, PHP 8.1+ and GD with PNG/GIF support. Use supported PHP in production. Imagick enables animation; FreeType enables fonts. Animation requires MySQL/MariaDB advisory locks on a consistent connection. Without Imagick or usable locking, output is static.
+Requires WordPress 6.4+, PHP 8.1+ and GD with PNG/GIF support. Use supported PHP and patched native libraries. Imagick enables animation; FreeType enables fonts. Animation requires MySQL/MariaDB advisory locks on a consistent connection. Without Imagick or usable locking, output is static.
 
 Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache images, or show a still frame. A downloaded GIF cannot refresh itself. Retain the visible deadline and test your complete campaign.
 
@@ -108,9 +108,10 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Changelog ==
 
 = 12.6.0 =
+* Report cache write failures; add an optional entry-size budget.
 * Add on-demand diagnostics and a redacted report, without automatic network probes.
 * Add the native block, static preview and opt-in live text with Pause/Resume.
-* Preserve shortcode rendering, reserved dimensions and campaign editing permissions.
+* Preserve embeds, dimensions and permissions; fix keyboard selection in block settings.
 * Add four color presets and prefer Lato for new timers with FreeType. Saved timers stay unchanged.
 * Add Quick Create/dashboard shortcuts, block refresh and separate Website/Email embeds.
 * Add stored label presets independent of admin locale; preserve custom/empty labels and accented output.

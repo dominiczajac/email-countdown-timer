@@ -70,7 +70,7 @@ In the WordPress block editor, insert **Easy Countdown**, choose an existing tim
 [ecd_timer id="promotion"]
 ```
 
-**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
+**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. Choose **Timer** in the block settings sidebar, where arrow-key navigation stays within the picker. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
 
 **Embed Codes > Email** provides separate **Email HTML** and **Image URL** copy actions. All three code fields remain available for manual copying without JavaScript. WordPress shortcodes do not run in email.
 
@@ -89,6 +89,8 @@ Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-sit
 **Automatic Google Fonts import is deferred and not implemented.** No catalog request, API-key field or Google font request is enabled. Fonts are read by the server renderer; visitors receive image bytes, not web-font downloads.
 
 ## Performance and optimizer compatibility
+
+Cache write outcomes and an optional host entry-size budget are described in the [host hardening guide](docs/HOST-HARDENING.md), together with capacity planning and native-library patch maintenance. No visitor logging is added.
 
 The panel uses a small scoped stylesheet/script, system typography, static saved previews and no background polling, per-keystroke rendering or animated list thumbnails. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
