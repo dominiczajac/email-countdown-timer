@@ -132,12 +132,15 @@ def main():
                 fields = original_form if name == 'restored' else {
                     'deadline': datetime.fromtimestamp(target['deadline'], timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
                     'bg': target['background'], 'fixed_width': str(target['width'])}
+                proof['operation'] = name + '-fill'
                 form.locator('[name=deadline]').fill(fields['deadline'])
                 form.locator('[name=bg]').fill(fields['bg'])
-                disclosure = form.locator('details').filter(has=form.locator('[name=fixed_width]'))
+                proof['operation'] = name + '-open-size'
+                disclosure = form.locator('details:has([name=fixed_width])')
                 if disclosure.get_attribute('open') is None: disclosure.locator('summary').click()
                 form.locator('[name=fixed_width]').fill(fields['fixed_width'])
                 admin_page.wait_for_load_state('networkidle')
+                proof['operation'] = name + '-save'
                 navigating = True
                 try:
                     form.get_by_role('button', name='Save Changes', exact=True).click()
@@ -150,6 +153,7 @@ def main():
             if cached and name in ('before', 'purged', 'restored-purged'):
                 wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'purge-cache')
             phase = 'public-browser'
+            proof['operation'] = name + '-observe'
             entries = inventory(); blue = entries[1]
             stage = {'name': name, 'stored': {k: blue[k] for k in ('deadline', 'width', 'background')},
                      'hashes': {x['role']: x['campaign_sha256'] for x in entries}, 'pages': []}
@@ -350,6 +354,7 @@ def main():
                         current['complete'] = True
                     except Exception as error:
                         failure = {'state': key, 'phase': phase, 'reason': str(error) if isinstance(error, Failure) else type(error).__name__}
+                        if current['visible_edit'] is not None: failure['operation'] = current['visible_edit'].get('operation')
                         current['failures'].append(failure); report['failures'].append(failure)
                         print('::error title=Network state::' + json.dumps(failure), flush=True)
                         if current['visible_edit'] is not None:

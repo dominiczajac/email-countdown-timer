@@ -106,3 +106,12 @@ record its hash check separately. Recovery is not successful form acceptance;
 the original failure still fails the whole run. A recovery exception or mismatch
 also stays negative. Successful edit cycles must still restore through the real
 form and match the original hashes without using that recovery path.
+
+Run [43189539623](https://github.com/dominiczajac/email-countdown-timer/actions/runs/43189539623)
+at `59e4619` exposed a second test locator error: passing an already form-scoped
+locator into a `details.filter(has=...)` search made that relative descendant
+search empty. Chromium reproduced zero matches there and one for the corrected
+`#ect-editor details:has([name=fixed_width])` selector. All three interrupted
+cycles recovered the original site hashes, with later off states still running;
+the run remains failed. Fixed operation labels now locate such failures without
+retaining arbitrary exception text, form bodies or nonces.
