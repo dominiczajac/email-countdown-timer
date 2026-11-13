@@ -73,3 +73,11 @@ Choice: builtin:crimson-text-regular
 Font SHA256: 48e6c5d5ad1d01599d374ecb817e15890d1feb3b8a3a88e527d44c90389e1f06
 License: OFL-crimson-text.txt
 License SHA256: 50fd67cddc097377a5c871e8452b778bc5aedfa3480a705cb27c5e3a078218df
+
+Barlow Condensed Black (weight 900), original static face, unmodified.
+Source: google/fonts commit c30b221beb0c1da59d563feb91ec8656a1fa972a
+Path: ofl/barlowcondensed/BarlowCondensed-Black.ttf
+Bundled: easy-countdown-barlow-condensed-black.ttf
+SHA256: e74b750df582c608f35db467b711b2b60d2217618e85e60b72b42dfd00446cab
+License: existing OFL-barlow-condensed.txt, unchanged original family notice.
+The maintainer requested genuine heavier preset typography. No synthetic bold or runtime download.

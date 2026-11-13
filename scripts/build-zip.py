@@ -20,6 +20,7 @@ import zlib
 SLUG = "easy-countdown"
 # Only these reviewed static faces/notices; never package site-managed files.
 FONT_HASHES = {
+    "fonts/easy-countdown-barlow-condensed-black.ttf": "e74b750df582c608f35db467b711b2b60d2217618e85e60b72b42dfd00446cab",
     "fonts/easy-countdown-lato-regular.ttf": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
     "fonts/OFL.txt": "74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e",
     "fonts/easy-countdown-ibm-plex-mono-regular.ttf": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46",

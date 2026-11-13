@@ -37,3 +37,5 @@ assets/live-countdown.css
 includes/class-email-countdown-timer-live.php
 includes/class-email-countdown-timer-status.php
 assets/status.js
+
+fonts/easy-countdown-barlow-condensed-black.ttf
