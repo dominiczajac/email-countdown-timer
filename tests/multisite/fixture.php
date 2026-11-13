@@ -44,7 +44,7 @@ final class Email_Countdown_Timer_Network_Lab {
                         'alt' => 'Synthetic ' . $role . ' countdown', 'campaign_name' => 'PRIVATE-NETWORK-' . $role,
                     ) ) );
                     $config['campaign_name'] = 'PRIVATE-NETWORK-' . $role;
-                    update_option( 'easy_countdown_timers', array( 'shared-timer' => $config, 'only-' . $role => $config ), false );
+                    update_option( 'easy_countdown_timers', array( 'shared-timer' => $config, 'only-' . $role => array_replace( $config, array( 'campaign_name' => 'PRIVATE-NETWORK-' . $role . '-ONLY' ) ) ), false );
                     // Test-only recovery, never counted as a successful admin save.
                     update_option( 'email_countdown_timer_network_original', get_option( 'easy_countdown_timers' ), false );
                     $pages = array();
