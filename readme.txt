@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.6.1
+Stable tag: 12.7.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -107,6 +107,12 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
+= 12.7.0 =
+* Simplify creation with required unique timer names and internal IDs.
+* Initialize new time zones locally; animate saved previews automatically.
+* Add Barlow Condensed Black for Black Friday; simplify email HTML.
+* Use Polish labels Dni, Godzin, Minut, Sekund.
+
 = 12.6.1 =
 
 * Respect static PNG/WebP preferences and WebP refusal; retain animated GIF.
@@ -114,11 +120,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 * Keep canvas width when days hide below 24h, preventing enlarged email digits.
 
 = 12.6.0 =
-* Add cache outcomes, an optional entry budget, on-demand diagnostics and a redacted report.
-* Add the block, preview, refresh and optional live text with Pause/Resume.
-* Add Quick Create/dashboard shortcuts, presets and separate Website/Email embeds.
-* Preserve campaigns/custom labels; add stored label languages and prefer Lato with FreeType.
-* Fix keyboard selection in block settings; retain permissions and public URLs.
+* Add campaign management, local diagnostics, language presets and website live text.
 
 = 12.5.3 =
 * Bundle Lato Regular under SIL OFL 1.1 with verified font/license notices.

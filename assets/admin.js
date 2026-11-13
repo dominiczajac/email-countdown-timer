@@ -1,6 +1,13 @@
 /* Progressive enhancement only: explicit saves, local computation, no polling. */
 (() => {
     'use strict';
+    document.querySelectorAll('[data-ect-auto-timezone]').forEach(marker => {
+        const select = document.getElementById(marker.dataset.ectAutoTimezone);
+        try {
+            const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (select && Array.from(select.options).some(option => option.value === zone)) select.value = zone;
+        } catch (_) { /* Keep the configured WordPress timezone as fallback. */ }
+    });
     const root = document.querySelector('[data-ect-admin]');
     if (!root) return;
     root.querySelectorAll('[data-ect-disclosure]').forEach(section => { if (!section.querySelector('[aria-invalid="true"]')) section.open = false; });
@@ -115,7 +122,6 @@
         }
     }
     const image = root.querySelector('#ect-preview');
-    const animation = root.querySelector('#ect-animation');
     if (image) {
         const error = root.querySelector('#ect-image-error');
         const failed = () => { error.hidden = false; announce(error.textContent); };
@@ -123,12 +129,22 @@
         image.addEventListener('load', () => { error.hidden = image.naturalWidth > 1; });
         if (image.complete && image.naturalWidth <= 1) error.hidden = false;
     }
-    if (image && animation) {
-        let playing = false;
-        const stop = () => { if (!playing) return; playing = false; image.src = image.dataset.static; animation.textContent = animation.dataset.play; animation.setAttribute('aria-pressed', 'false'); };
-        animation.hidden = false; animation.setAttribute('aria-pressed', 'false');
-        animation.addEventListener('click', () => { if (playing) return stop(); playing = true; image.src = image.dataset.animated; animation.textContent = animation.dataset.stop; animation.setAttribute('aria-pressed', 'true'); });
-        document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+    if (image && image.dataset.animated) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let refresh = null;
+        const update = () => {
+            clearTimeout(refresh);
+            if (document.hidden) return;
+            if (reduced.matches) { image.src = image.dataset.static; return; }
+            const url = new URL(image.dataset.animated, document.baseURI);
+            url.searchParams.set('_t', String(Date.now()));
+            image.src = url.href;
+            refresh = setTimeout(update, 58000);
+        };
+        document.addEventListener('visibilitychange', update);
+        if (reduced.addEventListener) reduced.addEventListener('change', update);
+        window.addEventListener('pagehide', () => clearTimeout(refresh));
+        update();
     }
     root.querySelectorAll('[data-ect-copy]').forEach(button => {
         const code = document.getElementById(button.dataset.ectCopy);

@@ -20,7 +20,7 @@ with sync_playwright() as p:
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers');check(page.locator('[src*="assets/end-image.js"]').count()==0,'no picker script on timer list')
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new');expect(page.get_by_role('heading',name='Easy Countdown',exact=True)).to_be_visible()
     check(page.locator('[src*="assets/end-image.js"]').count()==1,'picker script only once on editor')
-    page.locator('#ect-timer_id').fill('end-browser');page.locator('#ect-deadline').fill('2030-01-01T00:00:05')
+    page.locator('#ect-campaign_name').fill('End image browser');page.locator('#ect-deadline').fill('2030-01-01T00:00:05')
     page.get_by_role('button',name='Choose Image',exact=True).click()
     # Core may initially show Upload files; exercise its visible library tab.
     page.locator('.media-modal .media-router').get_by_role('tab',name='Media Library',exact=True).click()
@@ -28,7 +28,7 @@ with sync_playwright() as p:
     item=page.locator('.media-modal .attachment[data-id="'+aid+'"]');expect(item).to_be_visible(timeout=20000);item.click()
     page.get_by_role('button',name='Use This Image',exact=True).click()
     expect(page.locator('#ect-expiry_image_id')).to_have_value(aid);check(page.locator('#ect-end-choose').evaluate('(e)=>e===document.activeElement'),'picker returns focus to its trigger')
-    submit(page);page.wait_for_url('**edit=end-browser**')
+    submit(page);page.wait_for_url('**edit=**')
     check(page.locator('#ect-expiry_image_id').input_value()==aid,'selected ID persists in real WordPress')
     # Nonzero seconds avoid Playwright's strict comparison against minute-normalized input.
     page.locator('#ect-deadline').fill('2001-01-01T00:00:05');submit(page);page.wait_for_url('**status=saved**')
@@ -43,7 +43,7 @@ with sync_playwright() as p:
     page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
     page.screenshot(path=os.environ['RUNNER_TEMP']+'/admin-evidence/end-image.png',full_page=True)
     nojs=browser.new_context(java_script_enabled=False,storage_state=ctx.storage_state());plain=nojs.new_page()
-    plain.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new');plain.locator('#ect-timer_id').fill('end-nojs');plain.locator('#ect-deadline').fill('2001-01-01T00:00:05');plain.locator('#ect-expiry_image_id').fill(aid);submit(plain);plain.wait_for_url('**edit=end-nojs**')
+    plain.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new');plain.locator('#ect-campaign_name').fill('End image without JS');plain.locator('#ect-deadline').fill('2001-01-01T00:00:05');plain.locator('#ect-expiry_image_id').fill(aid);submit(plain);plain.wait_for_url('**edit=**')
     check(plain.locator('#ect-expiry_image_id').input_value()==aid,'manual attachment ID works without JavaScript')
     check(not errors,'no browser exceptions');browser.close()
 pathlib.Path(os.environ['RUNNER_TEMP']+'/admin-evidence/end-image.json').write_text(json.dumps({'checks':checks,'errors':errors},indent=2)+'\n')

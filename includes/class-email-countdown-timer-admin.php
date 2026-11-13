@@ -16,6 +16,10 @@ final class Email_Countdown_Timer_Admin {
     }
 
     public static function enqueue( string $hook ): void {
+        if ( 'index.php' === $hook && current_user_can( 'manage_options' ) ) {
+            wp_enqueue_script( 'email-countdown-timer-admin', plugins_url( 'assets/admin.js', EMAIL_COUNTDOWN_TIMER_FILE ), array( 'wp-a11y' ), EMAIL_COUNTDOWN_TIMER_VERSION, true );
+            return;
+        }
         if ( ! in_array( $hook, self::$screens, true ) ) {
             return;
         }
@@ -51,6 +55,16 @@ final class Email_Countdown_Timer_Admin {
         return is_string( $name ) && strlen( $name ) <= 200 ? sanitize_text_field( $name ) : '';
     }
 
+    public static function display_name( array $config ): string {
+        return self::campaign_name( $config ) ?: __( 'Unnamed timer', 'easy-countdown' );
+    }
+
+    private static function name_key( string $name ): string {
+        $name = trim( $name );
+        if ( function_exists( 'remove_accents' ) ) $name = remove_accents( $name );
+        return function_exists( 'mb_strtolower' ) ? mb_strtolower( $name, 'UTF-8' ) : strtolower( $name );
+    }
+
     public static function defaults( bool $new_timer = true ): array {
         // New campaigns use the included font only when FreeType can render it.
         // Saved campaigns keep their original selection and missing values.
@@ -74,7 +88,7 @@ final class Email_Countdown_Timer_Admin {
             'easter' => array( 'label' => __( 'Easter', 'easy-countdown' ), 'bg' => '#F5F3FF', 'dc' => '#6D28D9', 'lc' => '#166534', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
             'valentines' => array( 'label' => __( "Valentine's Day", 'easy-countdown' ), 'bg' => '#FFF1F2', 'dc' => '#9F1239', 'lc' => '#831843', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
             'halloween' => array( 'label' => __( 'Halloween', 'easy-countdown' ), 'bg' => '#1C1917', 'dc' => '#FDBA74', 'lc' => '#F5F5F4', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
-            'black-friday' => array( 'label' => __( 'Black Friday', 'easy-countdown' ), 'bg' => '#09090B', 'dc' => '#FAFAFA', 'lc' => '#FACC15', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
+            'black-friday' => array( 'label' => __( 'Black Friday', 'easy-countdown' ), 'bg' => '#09090B', 'dc' => '#FAFAFA', 'lc' => '#FACC15', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED_BLACK ),
             'birthday' => array( 'label' => __( 'Birthday', 'easy-countdown' ), 'bg' => '#FDF4FF', 'dc' => '#86198F', 'lc' => '#1D4ED8', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
             'wedding' => array( 'label' => __( 'Wedding', 'easy-countdown' ), 'bg' => '#FFFBEB', 'dc' => '#78350F', 'lc' => '#3F6212', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
         );
@@ -110,18 +124,18 @@ final class Email_Countdown_Timer_Admin {
             <input type="hidden" name="ecd_action" value="email_countdown_timer_save">
             <input type="hidden" name="original_id" value="">
             <input type="hidden" name="creation_mode" value="quick">
+            <input type="hidden" name="name_workflow" value="1">
             <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
             <div class="ect-two-fields">
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-name"><?php echo esc_html__( 'Campaign name (optional)', 'easy-countdown' ); ?></label>
-                    <input id="<?php echo esc_attr( $prefix ); ?>-name" name="campaign_name" class="widefat" type="text" maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-name-help">
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-name"><?php echo esc_html__( 'Timer name', 'easy-countdown' ); ?></label>
+                    <input id="<?php echo esc_attr( $prefix ); ?>-name" name="campaign_name" class="widefat" type="text" required maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-name-help">
                     <p class="description" id="<?php echo esc_attr( $prefix ); ?>-name-help"><?php echo esc_html__( 'For your administration only. Not used in public images, embeds or the generated ID. Up to 200 bytes.', 'easy-countdown' ); ?></p></div>
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-id"><?php echo esc_html__( 'Timer ID', 'easy-countdown' ); ?></label>
-                    <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" class="widefat" type="text" required maxlength="200" value="<?php echo esc_attr( self::suggested_id() ); ?>" aria-describedby="<?php echo esc_attr( $prefix ); ?>-id-help">
-                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-id-help"><?php echo esc_html__( 'Suggested unique ID for public embed URLs. You can change it before creation; afterwards it stays fixed.', 'easy-countdown' ); ?></p></div>
+                <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" type="hidden" value="">
                 <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'easy-countdown' ); ?></label>
                     <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
                 <?php self::timezone_input( $prefix . '-tz', $quick['tz'] ); ?>
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Appearance preset', 'easy-countdown' ); ?></label>
+                <input type="hidden" data-ect-auto-timezone="<?php echo esc_attr( $prefix . '-tz' ); ?>">
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Countdown preset', 'easy-countdown' ); ?></label>
                     <select id="<?php echo esc_attr( $prefix ); ?>-preset" name="appearance_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-preset-help">
                         <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
                             <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
@@ -134,7 +148,7 @@ final class Email_Countdown_Timer_Admin {
                         <?php endforeach; ?>
                     </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-language-help"><?php echo esc_html__( 'Stored with this campaign, independently of the WordPress language. Accented labels need a font with those characters, such as included Lato with FreeType.', 'easy-countdown' ); ?></p></div>
             </div>
-            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create campaign', 'easy-countdown' ); ?></button>
+            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create timer', 'easy-countdown' ); ?></button>
                 <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'easy-countdown' ); ?></a></div>
         </form>
         <?php
@@ -152,11 +166,11 @@ final class Email_Countdown_Timer_Admin {
 
     public static function register_dashboard_widget(): void {
         if ( current_user_can( 'manage_options' ) ) {
-            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', __( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
+            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', '<span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html__( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
         }
     }
 
-    /** Core dashboard styles only; no preview generation, script or background request. */
+    /** Native dashboard styles; timezone initialization only, without image generation. */
     public static function render_dashboard_widget(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
@@ -174,7 +188,7 @@ final class Email_Countdown_Timer_Admin {
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::campaign_name( $timer ) ?: (string) $id ) ); ?>"><?php echo esc_html( self::campaign_name( $timer ) ?: (string) $id ); ?></a><?php if ( '' !== self::campaign_name( $timer ) ) : ?> <code><?php echo esc_html( (string) $id ); ?></code><?php endif; ?></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::display_name( $timer ) ) ); ?>"><?php echo esc_html( self::display_name( $timer ) ); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
                 <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>
@@ -208,6 +222,10 @@ final class Email_Countdown_Timer_Admin {
         $original = Email_Countdown_Timer_Config::id( self::posted( 'original_id' ) );
         $id = Email_Countdown_Timer_Config::id( self::posted( 'timer_id' ) );
         $action = self::posted( 'ecd_action' );
+        $name_workflow = '1' === self::posted( 'name_workflow' );
+        if ( $name_workflow && 'email_countdown_timer_save' === $action ) {
+            $id = '' === $original ? self::suggested_id() : $original;
+        }
         $errors = array();
         $data = array();
         $defaults = self::defaults( '' === $original );
@@ -293,6 +311,19 @@ final class Email_Countdown_Timer_Admin {
                 $data['campaign_name'] = sanitize_text_field( self::posted( 'campaign_name' ) );
             } else {
                 $data['campaign_name'] = self::campaign_name( $timers[ $original ] ?? array() );
+            }
+            if ( $name_workflow ) {
+                if ( '' === trim( $data['campaign_name'] ) ) {
+                    $errors['campaign_name'] = __( 'Enter a unique timer name.', 'easy-countdown' );
+                } else {
+                    $key = self::name_key( $data['campaign_name'] );
+                    foreach ( $timers as $existing_id => $existing ) {
+                        if ( (string) $existing_id !== $original && is_array( $existing ) && $key === self::name_key( self::campaign_name( $existing ) ) ) {
+                            $errors['campaign_name'] = __( 'This timer name is already used. Choose a different name.', 'easy-countdown' );
+                            break;
+                        }
+                    }
+                }
             }
             if ( '' === $id ) {
                 $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'easy-countdown' );

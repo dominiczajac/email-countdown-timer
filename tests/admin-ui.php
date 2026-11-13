@@ -166,7 +166,7 @@ ok( $dashboard_widget[0] === 'email_countdown_timer_quick_access' && is_callable
 ob_start(); call_user_func( $dashboard_widget[2] ); $dashboard = ob_get_clean();
 ok( str_contains( $dashboard, 'id="ect-dashboard-create"' ) && str_contains( $dashboard, 'name="creation_mode" value="quick"' ) && str_contains( $dashboard, 'value="midnight"' ), 'dashboard uses the shared no-JS quick form with presets' );
 ok( str_contains( $dashboard, 'name="_wpnonce"' ) && str_contains( $dashboard, 'email_countdown_timer_save' ), 'dashboard posts to the same nonce-protected save controller' );
-ok( substr_count( $dashboard, 'aria-label="Edit campaign-' ) === 5 && str_contains( $dashboard, 'All timers' ), 'dashboard offers five edit shortcuts and access to every campaign' );
+ok( substr_count( $dashboard, 'aria-label="Edit ' ) === 5 && str_contains( $dashboard, 'All timers' ), 'dashboard offers five edit shortcuts and access to every campaign' );
 ok( ! str_contains( $dashboard, '<img' ) && empty( $styles ) && empty( $scripts ) && $options === $snapshot_dashboard, 'dashboard renders no image, adds no assets and never rewrites existing timers' );
 $options['easy_countdown_timers'] = array( 'bad\"><script>' => $ui_config, 'not-a-timer' => 'invalid' );
 ob_start(); Email_Countdown_Timer_Admin::render_dashboard_widget(); $dashboard_empty = ob_get_clean();
