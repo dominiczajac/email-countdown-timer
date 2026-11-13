@@ -1,36 +1,21 @@
-# Easy Countdown 12.6.0 catalog assets
+# Easy Countdown 12.7.0 catalog materials
 
-These six PNGs are genuine browser screenshots of an owned, synthetic WordPress
-7.1.4 installation using the 12.6.0 candidate. They are presentation assets for
-the existing WordPress.org submission. They are outside the explicit install
-manifest and the plugin's runtime `assets/` directory.
+The six PNGs are genuine browser captures of an owned synthetic WordPress 7.1.4
+installation using the exact 12.7.0 installation ZIP. They are excluded from
+the installation manifest and are separate WordPress.org presentation materials.
 
-| File | Readme caption / view |
-|---|---|
-| `screenshot-1.png` | Dashboard Quick Create widget |
-| `screenshot-2.png` | Saved deadline, time zone, appearance and included Lato |
-| `screenshot-3.png` | Separate Website/Email embeds and copy guidance |
-| `screenshot-4.png` | Native campaign selection and opt-in live text |
-| `screenshot-5.png` | On-demand diagnostics, anonymous image test and redacted report |
-| `screenshot-6.png` | Suggested WordPress Privacy Policy Guide text |
+The numbered views follow readme.txt: dashboard Quick Create; saved timer and
+typography; Website/Email embedding; native block/live text; diagnostics; Privacy
+Policy Guide. capture.json records the exact ZIP/hash/bytes, every installed
+file hash, source/tree, actual native Apache/PHP/WordPress/browser environment,
+screenshot hashes/dimensions/captions, selected checks and blocked external hosts.
+No UI pixels were edited. Synthetic data, standard dashboard preferences and
+disabled avatars were used. Capture sends no email and establishes no owner,
+production, Outlook or full accessibility acceptance.
 
-`capture.json` records the capture source, ZIP SHA256, all installed distribution
-file hashes, exact screenshot bytes/dimensions/hashes and actual environment.
-Capture used the real local `cli-server` SAPI; hosted FPM/JIT tests are separate.
-The anonymous PNG decoded at 600×79, local checks and the clipboard report were
-verified, and the capture had no JavaScript page errors. The demo uses synthetic
-campaigns/administrator data, standard dashboard preferences and disabled
-avatars. It blocks mail and external WordPress HTTP requests. No UI pixels were
-edited; the widget and embed views use element screenshots as recorded.
-
-The captured package has the same shipped file hashes as the final candidate
-when only development docs/assets are added afterward. Verify every manifest
-entry against the final `distribution.json`; a runtime/readme change requires
-fresh package verification and, when it changes the view, fresh screenshots.
-
-After maintainer acceptance and explicit publication approval, use only the PNG
-files for the separate directory catalog-assets location. Do not place this
-folder in the installation ZIP, publish a native Wiki, upload a materials ZIP as
-a plugin, or treat these screenshots as maintainer live acceptance, real email
-delivery or universal compatibility certification. See the
-[current handoff](../docs/REVIEW-HANDOFF-12.6.0.md).
+Only docs/catalog changes may follow the captured runtime without changing the
+installation identity. Compare every manifest hash against final CI. A shipped
+file change requires refreshed package identity and relevant capture/checks.
+Use only the install ZIP for the existing submission; the materials ZIP is not
+installable. Preparing/committing these files does not publish the directory,
+SVN, native Wiki or environment. See [current handoff](../docs/REVIEW-HANDOFF-12.7.0.md).
