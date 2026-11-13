@@ -17,6 +17,10 @@ foreach(Email_Countdown_Timer_Fonts::bundled() as $choice=>$face) {
   Email_Countdown_Timer_Config::checkCanvas($p['w'],$p['h']);
  }
 }
+$empty_frame=Email_Countdown_Timer_Frame::payload('empty',array_replace($base,array('font'=>Email_Countdown_Timer_Fonts::BUNDLED_CHOICE,'label_h'=>'')));
+ok($empty_frame['labels'][1]['w']>=1,'empty labels render safely');
+$wide=Email_Countdown_Timer_Frame::payload('wide',array_replace($base,array('font'=>'','label_d'=>str_repeat('A',139),'label_h'=>str_repeat('A',139),'label_m'=>str_repeat('A',139),'label_s'=>str_repeat('A',139))));
+ok($wide['w']<=4000 && $wide['h']<=1000,'valid boundary canvas stays within the original limits');
 $raw=array_replace($base,array('alt'=>'" onload="alert(1)','campaign_name'=>'PRIVATE-FRAME-NAME'));
 $html=Email_Countdown_Timer_Frame::document('frame-test',$raw);
 ok(!str_contains($html,' onload="alert') && !str_contains($html,'PRIVATE-FRAME-NAME'),'frame HTML escapes metadata and excludes private name');

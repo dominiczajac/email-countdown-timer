@@ -83,10 +83,22 @@
         wp.element.useEffect(function () { setFailed(false); setDraft(timerId); }, [timerId]);
         var pauseState = wp.element.useState(false);
         var paused = pauseState[0];
+        var previewRef = wp.element.useRef(null);
         var previewUrl = wp.element.useMemo(function () {
             if (!timerId || !settings.frameUrl) return '';
             return settings.frameUrl + '&paused=' + (paused ? '1' : '0') + '&ecd=' + encodeURIComponent(timerId) + '&_t=' + Date.now() + '-' + refresh;
         }, [timerId, settings.frameUrl, refresh, paused]);
+        wp.element.useEffect(function () {
+            var timer;
+            function message(event) {
+                if (previewRef.current && event.source === previewRef.current.contentWindow && event.data && event.data.type === 'ecd-frame-status' && typeof event.data.ready === 'boolean') {
+                    clearTimeout(timer); setFailed(!event.data.ready);
+                }
+            }
+            window.addEventListener('message',message);
+            if(previewUrl) timer=setTimeout(function(){setFailed(true);},10000);
+            return function(){window.removeEventListener('message',message);clearTimeout(timer);};
+        },[previewUrl]);
         var found = timers.some(function (timer) { return timer.value === timerId; });
         var missing = !!timerId && !found && !settings.truncated;
         var blockProps = wp.blockEditor.useBlockProps();
@@ -146,12 +158,12 @@
                 failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The countdown preview could not load. Check the timer and image cache settings.', 'easy-countdown')) : null,
                 previewUrl && !missing ? el('div', { style: { display: 'flex', justifyContent: positions[alignment] } },
                     el('iframe', {
-                        key: previewUrl, src: previewUrl, title: __('Active countdown preview', 'easy-countdown'),
+                        ref: previewRef, key: previewUrl, src: previewUrl, title: __('Active countdown preview', 'easy-countdown'),
                         sandbox: 'allow-scripts', referrerPolicy: 'no-referrer', tabIndex: -1,
                         width: (settings.frameSizes && settings.frameSizes[timerId] || {}).width || 600,
                         height: (settings.frameSizes && settings.frameSizes[timerId] || {}).height || 180,
                         style: { display: 'block', border: 0, maxWidth: '100%', pointerEvents: 'none' },
-                        onError: function () { setFailed(true); }, onLoad: function () { setFailed(false); }
+                        onError: function () { setFailed(true); }, onLoad: function () {}
                     })
                 ) : null
             )

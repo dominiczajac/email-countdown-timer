@@ -125,7 +125,7 @@ with sync_playwright() as p:
     page.locator('#ect-editor button[type=submit]').click()
     page.wait_for_url('**edit=**')
     copied_id=saved_id(page)
-    published_copy = page.locator('#ect-preview').get_attribute('src')
+    published_copy = page.locator('#ect-embed-code').input_value()
     page.get_by_role('link', name='Back to Timers', exact=True).click()
     timer_row(page, copied_id).get_by_role('button', name=re.compile('^Archive ')).click()
     page.wait_for_url('**status=archived**')
@@ -204,6 +204,9 @@ with sync_playwright() as p:
     check('<img ' in code and '<p>' not in code, 'email HTML is image-only without the extra Ends paragraph')
     check(page.locator('#ect-manual-shortcode').input_value() == '[ecd_timer id="'+browser_id+'"]', 'unchanged shortcode contract')
     page.evaluate("Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw new Error('denied')}},configurable:true})")
+    # Let the cross-process iframe's hit-test map settle after leaving its pause control.
+    page.get_by_role('button',name='Copy Email HTML',exact=True).scroll_into_view_if_needed()
+    page.wait_for_timeout(200)
     page.get_by_role('button', name='Copy Email HTML', exact=True).click()
     expect(page.locator('#ect-manual-html-result')).to_contain_text('Copy was unavailable')
     check(page.locator('#ect-manual-html').evaluate('(e)=>e.selectionEnd===e.value.length'), 'denied clipboard has selected-text fallback')

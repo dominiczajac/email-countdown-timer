@@ -4,14 +4,15 @@
     var data = JSON.parse(document.getElementById('ect-frame-data').textContent);
     var canvas = document.getElementById('ect-frame-canvas'), button = document.getElementById('ect-frame-pause');
     var ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    var start = performance.now(), paused = data.paused, timer = null, ended = false;
+    function status(ready) { window.parent.postMessage({type:'ecd-frame-status',ready:ready},'*'); }
+    if (!ctx) { status(false); return; }
+    var paused = data.paused, timer = null, ended = false;
     function load(sprite) {
         return new Promise(function (resolve, reject) {
             var image = new Image(); image.onload = function () { sprite.image = image; resolve(); }; image.onerror = reject; image.src = sprite.uri;
         });
     }
-    function remaining() { return Math.max(0, data.remaining - Math.floor((performance.now() - start) / 1000)); }
+    function remaining() { return Math.max(0, data.deadline - Math.floor(Date.now() / 1000)); }
     function draw() {
         clearTimeout(timer); timer = null;
         if (document.visibilityState === 'hidden') return;
@@ -23,14 +24,16 @@
             end.onload = function () { if(end.naturalWidth > 1) { canvas.hidden = true; button.hidden = true; document.getElementById('ect-frame-fallback').replaceWith(end); } };
             end.src = data.end;
         }
+        ctx.setTransform(1,0,0,1,0,0);
         ctx.fillStyle = data.bg; ctx.fillRect(0, 0, data.w, data.h);
+        ctx.setTransform(data.scale,0,0,data.scale,(data.w-data.logicalW*data.scale)/2,(data.h-data.logicalH*data.scale)/2);
         var first = data.hideDays && values[0] === 0 ? 1 : 0;
         var total = data.cols.slice(first).reduce(function(a,b){return a+b;},0) + (3-first)*(20+data.digits[':'].w);
-        var x = (data.w-total)/2;
+        var x = (data.logicalW-total)/2;
         for(var i=first;i<4;i++) {
             var text = String(values[i]).padStart(2,'0'), vx = x+(data.cols[i]-text.length*data.dw)/2;
             for(var j=0;j<text.length;j++) { var s=data.digits[text[j]]; ctx.drawImage(s.image,vx+(data.dw-s.w)/2,10+data.dh-s.h); vx+=data.dw; }
-            var label=data.labels[i]; ctx.drawImage(label.image,x+(data.cols[i]-label.w)/2,20+data.dh);
+            var label=data.labels[i]; ctx.drawImage(label.image,x+(data.cols[i]-label.w)/2,10+data.dh+data.gap);
             x+=data.cols[i];
             if(i<3) { var colon=data.digits[':']; ctx.drawImage(colon.image,x+10,10+data.dh-colon.h); x+=20+colon.w; }
         }
@@ -38,10 +41,10 @@
         if(!paused && left > 0) timer = setTimeout(draw,1000);
     }
     Promise.all(Object.values(data.digits).concat(data.labels).map(load)).then(function () {
-        document.getElementById('ect-frame-fallback').hidden=true; canvas.hidden=false; button.hidden=false; draw();
+        document.getElementById('ect-frame-fallback').hidden=true; canvas.hidden=false; button.hidden=false; draw(); status(true);
         button.addEventListener('click',function(){paused=!paused;draw();});
         document.addEventListener('visibilitychange',function(){if(!paused)draw();});
         window.addEventListener('pagehide',function(){clearTimeout(timer);});
         window.addEventListener('pageshow',function(e){if(e.persisted && !paused)draw();});
-    }).catch(function(){ /* The saved static PNG remains available. */ });
+    }).catch(function(){ status(false); /* The saved static PNG remains available. */ });
 }());

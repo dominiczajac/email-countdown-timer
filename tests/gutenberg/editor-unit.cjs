@@ -14,7 +14,7 @@ const initial = () => ({
 });
 function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }) {
     let definition, active, cursor;
-    const changes = [], instances = new Map();
+    const changes = [], instances = new Map(),messages=new Set();
     const wp = {
         i18n: { __: text => text },
         element: {
@@ -37,15 +37,16 @@ function harness(settings = initial(), fetch = () => { throw new Error('Unexpect
                     active.effects.push(() => { slot.cleanup = callback(); });
                 }
             },
+            useRef: function(value){return this.useState({current:value})[0];},
             useMemo: fn => fn()
         },
         components: Object.fromEntries(['ComboboxControl', 'SelectControl', 'TextControl', 'PanelBody', 'Notice', 'Button', 'Placeholder'].map(name => [name, name])),
         blockEditor: { InspectorControls: 'InspectorControls', BlockControls: 'BlockControls', AlignmentToolbar: 'AlignmentToolbar', useBlockProps: () => ({ className: 'wp-block-easy-countdown-timer' }) },
         blocks: { registerBlockType: (name, value) => { assert.equal(name, 'easy-countdown/timer'); definition = value; } }
     };
-    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings }, Date: { now: () => 1000 } });
+    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings,addEventListener(name,fn){if(name==='message')messages.add(fn);},removeEventListener(name,fn){messages.delete(fn);} },setTimeout:()=>1,clearTimeout(){}, Date: { now: () => 1000 } });
     return {
-        definition, changes,
+        definition, changes, message(event){messages.forEach(fn=>fn(event));},
         render(attrs, id = 'first') {
             if (!instances.has(id)) instances.set(id, { slots: [], effects: [] });
             active = instances.get(id); cursor = 0;
@@ -94,6 +95,13 @@ async function main() {
     all(tree, 'ComboboxControl')[0].props.onChange('beta');
     check(h.changes.at(-1).timerId === 'beta' && Object.keys(h.changes.at(-1)).length === 1, 'selection stores ID only');
     check(all(tree, 'a')[0].props.rel === 'noopener noreferrer', 'safe administrator link');
+    const source={};all(tree,'iframe')[0].props.ref.current={contentWindow:source};
+    h.message({source:{},data:{type:'ecd-frame-status',ready:false}});
+    check(!all(h.render({timerId:'alpha'}),'Notice').some(n=>n.children[0].includes('could not load')),'another frame cannot spoof preview failure');
+    h.message({source,data:{type:'ecd-frame-status',ready:false}});
+    tree=h.render({timerId:'alpha'});all(tree,'iframe')[0].props.onLoad();
+    check(all(h.render({timerId:'alpha'}),'Notice').some(n=>n.children[0].includes('could not load')),'HTTP failure signal is not cleared by iframe load');
+    h.message({source,data:{type:'ecd-frame-status',ready:true}});tree=h.render({timerId:'alpha'});
     all(tree, 'iframe')[0].props.onError();
     tree = h.render({ timerId: 'alpha' });
     check(all(tree, 'Notice').some(n => n.children[0].includes('could not load')), 'preview failure shown');

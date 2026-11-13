@@ -90,6 +90,7 @@ jobs:
           php tests/gutenberg.php
           php tests/frame.php
           node tests/gutenberg/editor-unit.cjs
+          node tests/frame-clock.cjs
           node tests/live-countdown.cjs
       - name: Uninstall safety regression tests
         run: php tests/uninstall.php

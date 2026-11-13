@@ -70,3 +70,5 @@ email_countdown_timer_test_step "Maintenance browser" "$RUNNER_TEMP/ect-browser-
 
 email_countdown_timer_test_step "End-image browser" "$RUNNER_TEMP/ect-browser-venv/bin/python" "$root/tests/browser/end-image.py"
 "${wp[@]}" post get "$ECD_BROWSER_END_ID" --field=post_type | grep -qx attachment
+
+python3 "$root/tests/browser/frame.py"

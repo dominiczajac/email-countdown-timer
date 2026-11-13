@@ -124,6 +124,15 @@
             });
         }
     }
+    const preview = root.querySelector('#ect-preview'), previewError = root.querySelector('#ect-image-error');
+    if (preview && previewError) {
+        let timeout = setTimeout(() => { previewError.hidden = false; },10000);
+        window.addEventListener('message', event => {
+            if (event.source === preview.contentWindow && event.data && event.data.type === 'ecd-frame-status' && typeof event.data.ready === 'boolean') {
+                clearTimeout(timeout); previewError.hidden = event.data.ready;
+            }
+        });
+    }
     root.querySelectorAll('[data-ect-copy]').forEach(button => {
         const code = document.getElementById(button.dataset.ectCopy);
         const result = document.getElementById(`${button.dataset.ectCopy}-result`);

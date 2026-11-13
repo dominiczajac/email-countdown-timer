@@ -6,7 +6,8 @@ class Email_Countdown_Timer_Plugin {
     private const VERSION = EMAIL_COUNTDOWN_TIMER_VERSION;
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
-        if ($this->isImageRequest()) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only cache bypass for the explicitly requested public frame route.
+        if ($this->isImageRequest() || Email_Countdown_Timer_Config::text($_GET, 'ecd_action') === 'frame') {
             // Dynamic images only; the bootstrap also sets DONOTCACHEPAGE.
             add_filter('flying_press_is_cacheable', '__return_false');
         }
