@@ -1,15 +1,15 @@
 check_id,check,owner,status,date_utc,zip_sha256,environment_or_client_versions,notes
-A01,Backup and update without uninstalling,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,12.6.1 owner feedback informed this update; record actual acceptance of the new 12.7.0 bytes separately
-A02,Legacy directory transition and existing URL/data/font preservation,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A03,Required unique names/automatic IDs/timezone aliases/presets/24h digit size/keyboard/narrow layouts,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A04,Duplicate/archive/restore and anonymous existing URLs,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A05,Manual assistive-technology acceptance,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A06,Anonymous static PNG/WebP preferences and GIF before/after expiry plus HEAD agreement,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A07,Restricted end-image cache invalidation and recovery on staging,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A08,Actual host/theme/optimizer configuration and HTML cache purge,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A09,FlyingPress licensed package and actual settings,maintainer,pending_package,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A10,WP Rocket licensed package and actual settings,maintainer,pending_package,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A11,Cloudflare zone challenge/cache check if configured,maintainer,pending_applicability,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A12,Real Sendy and Gmail/Outlook/Apple Mail delivery acceptance,maintainer,pending_sender_clients,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,Classic Windows Outlook Office LTSC Professional Plus 2024: client controls GIF playback; autoplay override excluded
-A13,PHP/browser errors and lifecycle/uninstall isolation on a disposable staging clone,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
-A14,Maintainer handles existing submission thread/account/2FA and sending personally,maintainer,pending_owner,,dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd,,
+A01,Backup and update without uninstalling,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,12.6.1 owner feedback informed this update; record actual acceptance of the new 12.7.0 bytes separately
+A02,Legacy directory transition and existing URL/data/font preservation,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A03,Required unique names/automatic IDs/timezone aliases/presets/24h digit size/keyboard/narrow layouts,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A04,Duplicate/archive/restore and anonymous existing URLs,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A05,Manual assistive-technology acceptance,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A06,Anonymous static PNG/WebP preferences and GIF before/after expiry plus HEAD agreement,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A07,Restricted end-image cache invalidation and recovery on staging,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A08,Actual host/theme/optimizer configuration and HTML cache purge,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A09,FlyingPress licensed package and actual settings,maintainer,pending_package,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A10,WP Rocket licensed package and actual settings,maintainer,pending_package,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A11,Cloudflare zone challenge/cache check if configured,maintainer,pending_applicability,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A12,Real Sendy and Gmail/Outlook/Apple Mail delivery acceptance,maintainer,pending_sender_clients,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,Classic Windows Outlook Office LTSC Professional Plus 2024: client controls GIF playback; autoplay override excluded
+A13,PHP/browser errors and lifecycle/uninstall isolation on a disposable staging clone,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,
+A14,Maintainer handles existing submission thread/account/2FA and sending personally,maintainer,pending_owner,,616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a,,

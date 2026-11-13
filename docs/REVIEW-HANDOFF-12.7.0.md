@@ -11,9 +11,9 @@ use the new [owner-pending worksheet](ACCEPTANCE-12.7.0.csv) for this candidate.
 - Display name/root/text domain: **Easy Countdown**, `easy-countdown`.
 - Main PHP file: `email-countdown-timer.php`; candidate version: **12.7.0**.
 - Confirmed WordPress.org contributor: **ddoomm** (Simple Fast Secure).
-- Installation ZIP: **649,119 bytes / 39 files**.
-- ZIP SHA256: `dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd`.
-- Runtime/capture source: `015d1bf25d11671fbcbe2c7e78a9a867adb84b86`.
+- Installation ZIP: **649,330 bytes / 39 files**.
+- ZIP SHA256: `616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a`.
+- Runtime/capture source: `f3aab2fe9175c80aaf42400d2fff7588d01a976a`.
 - Integration and final verification: [PR #43](https://github.com/dominiczajac/email-countdown-timer/pull/43).
 
 Use the exact installation ZIP from the successful final CI's
@@ -74,7 +74,7 @@ visible and motion is allowed. It stops renewing when hidden, without Imagick,
 or with reduced motion; no-JS keeps the initial static preview. This is the
 existing bounded rendering/cache path, not a new endpoint. Black Friday uses a
 genuine weight-900 font. Polish preset labels are Dni / Godzin / Minut / Sekund.
-Colliding legacy names are disambiguated in the administrator picker without changing ID values. Gutenberg name labels are restricted to timer administrators; other content
+Colliding legacy names are disambiguated in the list, dashboard, editor, deletion warnings and administrator picker without changing ID values. Gutenberg name labels are restricted to timer administrators; other content
 editors still receive IDs. Public embeds and image caches contain no names.
 
 Custom CSS, per-timer clean uninstall and forced Outlook autoplay were withdrawn.
