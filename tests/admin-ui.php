@@ -75,7 +75,9 @@ if ( function_exists( 'imagecreatetruecolor' ) ) {
     ok( $named_pixels === $renamed_pixels && $writes === 1 && ! str_contains( serialize( $transients ), $private_name ), 'renaming private metadata does not change image pixels, cache signature or cached content' );
     $transients = $old_transients; $writes = $old_writes; $_GET = $old_get;
 }
-ok( str_starts_with( $submit_admin( array_replace( $valid_post, array( 'campaign_name' => '' ) ) ), 'redirect:' ) && $options['easy_countdown_timers']['existing'] === $ui_config, 'explicitly empty name removes only that optional metadata' );
+$before_empty_name = $options;
+$submit_admin( array_replace( $valid_post, array( 'campaign_name' => '' ) ) );
+ok( $options === $before_empty_name && isset( Email_Countdown_Timer_Admin::state()['errors']['campaign_name'] ), 'an older form cannot explicitly erase the now-required name' );
 $options = $before_names; $reset_admin(); $_GET = array();
 $quick = array( 'ecd_action' => 'email_countdown_timer_save', 'creation_mode' => 'quick', 'original_id' => '', 'timer_id' => 'quick-new', 'deadline' => '2031-08-20T12:30:00', 'tz' => 'America/New_York', 'appearance_preset' => 'midnight' );
 $before_quick = $options;

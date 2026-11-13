@@ -312,7 +312,7 @@ final class Email_Countdown_Timer_Admin {
             } else {
                 $data['campaign_name'] = self::campaign_name( $timers[ $original ] ?? array() );
             }
-            if ( $name_workflow ) {
+            if ( $name_workflow || array_key_exists( 'campaign_name', $_POST ) ) {
                 if ( '' === trim( $data['campaign_name'] ) ) {
                     $errors['campaign_name'] = __( 'Enter a unique timer name.', 'easy-countdown' );
                 } else {

@@ -9,11 +9,11 @@ def check(value,name):
     checks.append(name)
 with sync_playwright() as p:
     binary=shutil.which('google-chrome') or shutil.which('chromium');assert binary
-    browser=p.chromium.launch(executable_path=binary,args=['--no-sandbox']);ctx=browser.new_context();page=ctx.new_page()
+    browser=p.chromium.launch(executable_path=binary,args=['--no-sandbox']);ctx=browser.new_context(timezone_id='Pacific/Chatham',);page=ctx.new_page()
     log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new')
     check(page.locator('#ect-tz').input_value()=='Pacific/Chatham','new editor inherits changed real site timezone')
-    page.goto(base+'/wp-admin/admin.php?page=ecd-timers&edit=alt-browser-test')
+    page.goto(base+'/wp-admin/admin.php?page=ecd-timers&edit='+json.loads(pathlib.Path(os.environ['RUNNER_TEMP']+'/admin-evidence/alt-checks.json').read_text())['timer_id'])
     check(page.locator('#ect-tz').input_value()=='Europe/Warsaw','existing campaign does not inherit later site change')
     page.goto(base+'/wp-admin/admin.php?page=email-countdown-timer-data')
     expect(page.get_by_role('heading',name='Font File Access',exact=True)).to_be_visible()

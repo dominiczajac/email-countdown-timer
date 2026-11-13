@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.6.1 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.7.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 

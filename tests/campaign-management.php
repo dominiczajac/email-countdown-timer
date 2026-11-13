@@ -49,7 +49,7 @@ $copy_state = Email_Countdown_Timer_Admin::state();
 ok( $copy_state['view'] === 'editor' && $copy_state['original'] === '' && $copy_state['saved'] === null && $copy_state['id'] !== 'original', 'duplicate opens an unsaved new ID without editing original' );
 ok( $copy_state['data']['tz'] === 'GMT' && $copy_state['data']['bg'] === '#123456' && $copy_state['data']['label_h'] === '' && $copy_state['data']['label_s'] === 'Custom seconds' && $copy_state['data']['font'] === '', 'duplication preserves schedule, exact alias, colors, font and custom/empty labels' );
 $archived_source = $options['easy_countdown_timers']['original'];
-$copy_post = array_merge( array_map( 'strval', $copy_state['data'] ), array( 'ecd_action' => 'email_countdown_timer_save', 'original_id' => '', 'timer_id' => 'fresh-copy' ) );
+$copy_post = array_merge( array_map( 'strval', $copy_state['data'] ), array( 'ecd_action' => 'email_countdown_timer_save', 'original_id' => '', 'timer_id' => 'fresh-copy', 'campaign_name' => 'Private copied timer' ) );
 ok( str_starts_with( $submit_admin( $copy_post ), 'redirect:' ) && $options['easy_countdown_timers']['original'] === $archived_source, 'copy saves through normal validation without changing source' );
 ok( ! Email_Countdown_Timer_Admin::archived( $options['easy_countdown_timers']['fresh-copy'] ), 'copy of an archived campaign starts unarchived' );
 $copy_snapshot = $options;
