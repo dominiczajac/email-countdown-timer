@@ -19,8 +19,8 @@ websites. Email output remains image-only. The public frame serves only saved
 timer presentation, without private names or font downloads, using bounded
 local raster caches. No developer telemetry or recipient tracking is added.
 
-Installation ZIP: **656,272 bytes / 41 files**.
-SHA256: `71f80d26d84f328ae1848548b376715efc94e276bcfc13b763ce0c79c8542383`.
+Installation ZIP: **656,370 bytes / 41 files**.
+SHA256: `75cf2f312c0d67b5fd9023e56c400a04021b5da3cf7285ded4d288d289bdfa5f`.
 
 Source and verification:
 https://github.com/dominiczajac/email-countdown-timer/pull/44

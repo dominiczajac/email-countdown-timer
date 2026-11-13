@@ -8,9 +8,9 @@ Preparing this package does not publish a release or submit it for review.
 
 - Root, display name and text domain: `easy-countdown`, **Easy Countdown**.
 - Version: **12.8.0**; main file: `email-countdown-timer.php`.
-- Installation ZIP: **656,272 bytes / 41 files**.
-- SHA256: `71f80d26d84f328ae1848548b376715efc94e276bcfc13b763ce0c79c8542383`.
-- Runtime and screenshot source: `c0fcfde6b700af270718e88b276fca79b74e2e35`.
+- Installation ZIP: **656,370 bytes / 41 files**.
+- SHA256: `75cf2f312c0d67b5fd9023e56c400a04021b5da3cf7285ded4d288d289bdfa5f`.
+- Runtime and screenshot source: `ce440055ed545d19e7bcf3c3ae3a62a78b9f08c3`.
 - Integration, latest-head CI and automated reviews: [PR #44](https://github.com/dominiczajac/email-countdown-timer/pull/44).
 
 Open the successful final CI run linked on the PR, expand **Artifacts**, download

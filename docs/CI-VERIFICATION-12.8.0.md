@@ -7,9 +7,9 @@ delivery receipt; no future run is predeclared successful.
 
 ## Package and local execution
 
-Runtime/capture source: `c0fcfde6b700af270718e88b276fca79b74e2e35`.
-Installation ZIP: **12.8.0**, **656,272 bytes**, **41 files**;
-SHA256 `71f80d26d84f328ae1848548b376715efc94e276bcfc13b763ce0c79c8542383`.
+Runtime/capture source: `ce440055ed545d19e7bcf3c3ae3a62a78b9f08c3`.
+Installation ZIP: **12.8.0**, **656,370 bytes**, **41 files**;
+SHA256 `75cf2f312c0d67b5fd9023e56c400a04021b5da3cf7285ded4d288d289bdfa5f`.
 All installed hashes were read back on the native WordPress container and match
 the build manifest and `.wordpress-org/capture.json`.
 
@@ -29,7 +29,7 @@ Executed checks include:
 - **22 clipboard assertions**, timezone aliases, privacy audit/tripwire,
   syntax/whitespace checks and **16 packaging tests**.
 - Native Apache WordPress **7.1.4**, PHP **8.4.27**, MySQL **8.4.13**:
-  **123 admin**, **15 alt**, **4 privacy**, **6 maintenance**, **10 end-image**
+  **124 admin**, **15 alt**, **4 privacy**, **6 maintenance**, **10 end-image**
   and **19 frame browser checks** passed against this installed package.
 
 Native frame checks exercise a genuinely different-origin parent, opaque sandbox,
@@ -49,6 +49,14 @@ a Chromium out-of-process iframe hit-test race immediately after parent scrollin
 the real pointer test now allows the compositor to settle before clicking.
 No failed run is relabeled or waived.
 
+The final native admin job also exposed a pre-existing initialization race:
+a manually selected Quick Create timezone could be overwritten when the footer
+script loaded late. An owned native reproduction recorded New York changing to
+Los Angeles before the fix and remaining New York afterward. The initializer now
+preserves selections differing from the server default; a required browser check
+holds the real script until after the manual selection. The latest local admin
+suite passes 124 checks. The failed hosted run remains recorded.
+
 The later cache-freshness review finding is fixed with a forced backend/Options
 API re-read under the lock, and both backends have cached-miss regression checks.
 Deleted timers no longer start a false preview timeout; background frames signal
@@ -56,7 +64,7 @@ loaded assets before their first visible paint. The fallback PNG appears only
 once in the HTML, and CSP enforces the sandbox even for direct navigation.
 
 The bounded 250-timer catalog was measured on the owned native WordPress CLI
-with all five fonts and varied sizes: 211 / 230 / 185 ms across three runs.
+with all five fonts and varied sizes: 182 / 175 / 196 ms across three runs.
 This is a metadata-only cost on explicit bootstrap/refresh, with no PNG generation
 or polling; it is not a production-capacity guarantee.
 
