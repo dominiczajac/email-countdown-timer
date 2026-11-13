@@ -55,9 +55,21 @@ final class Email_Countdown_Timer_Admin {
         return is_string( $name ) && strlen( $name ) <= 200 ? sanitize_text_field( $name ) : '';
     }
 
-    public static function display_name( array $config, string $id = '' ): string {
+    public static function display_name( array $config, string $id = '', array $collisions = array() ): string {
         $name = self::campaign_name( $config );
+        if ( '' !== $name && '' !== $id && isset( $collisions[ self::name_key( $name ) ] ) ) return $name . ' (' . $id . ')';
         return '' !== $name ? $name : ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id ) : __( 'Unnamed timer', 'easy-countdown' ) );
+    }
+
+    /** Compute once per view, including archived records, without changing saved data. */
+    public static function name_collisions( array $timers ): array {
+        $counts = array();
+        foreach ( $timers as $timer ) {
+            if ( ! is_array( $timer ) ) continue;
+            $key = self::name_key( self::campaign_name( $timer ) );
+            if ( '' !== $key ) $counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
+        }
+        return array_filter( $counts, static fn( $count ) => $count > 1 );
     }
 
     private static function name_key( string $name ): string {
@@ -176,7 +188,9 @@ final class Email_Countdown_Timer_Admin {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        $timers = array_filter( self::timers(), static fn( $timer, $id ) => ! self::archived( $timer ) && '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_BOTH );
+        $all_timers = self::timers();
+        $collisions = self::name_collisions( $all_timers );
+        $timers = array_filter( $all_timers, static fn( $timer, $id ) => ! self::archived( $timer ) && '' !== (string) $id && Email_Countdown_Timer_Config::id( (string) $id ) === (string) $id, ARRAY_FILTER_USE_BOTH );
         uksort( $timers, 'strnatcasecmp' );
         ?>
         <div id="email-countdown-timer-dashboard">
@@ -189,7 +203,7 @@ final class Email_Countdown_Timer_Admin {
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::display_name( $timer, (string) $id ) ) ); ?>"><?php echo esc_html( self::display_name( $timer, (string) $id ) ); ?></a></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::display_name( $timer, (string) $id, $collisions ) ) ); ?>"><?php echo esc_html( self::display_name( $timer, (string) $id, $collisions ) ); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
                 <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>
@@ -492,7 +506,7 @@ final class Email_Countdown_Timer_Admin {
         $pages = max( 1, (int) ceil( count( $filtered ) / 25 ) );
         $page = min( $pages, max( 1, (int) Email_Countdown_Timer_Config::text( $query, 'paged', '1' ) ) );
         $id = $pending ? $pending['id'] : ( '' === $edit && 'editor' === $view ? self::suggested_id() : $edit );
-        return array( 'view' => $view, 'id' => $id, 'original' => $original,
+        return array( 'view' => $view, 'id' => $id, 'original' => $original, 'name_collisions' => self::name_collisions( $timers ),
             'data' => $data, 'errors' => $errors, 'saved' => $saved, 'search' => $search, 'page' => $page, 'pages' => $pages,
             'total' => count( $filtered ), 'timers' => array_slice( $filtered, ( $page - 1 ) * 25, 25, true ),
             'filter' => $filter, 'active_count' => count( $timers ) - $archived_count, 'archived_count' => $archived_count, 'duplicate_source' => $duplicate,

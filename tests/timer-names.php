@@ -30,6 +30,13 @@ $options['easy_countdown_timers']['legacy-b']=$options['easy_countdown_timers'][
 $legacy_name_post=array_replace($names_edit,array('original_id'=>'legacy-a','campaign_name'=>'Old shared name'));
 $legacy_before=$options;$submit_admin($legacy_name_post);
 ok($options===$legacy_before && isset(Email_Countdown_Timer_Admin::state()['errors']['campaign_name']), 'legacy colliding names require a unique name on the next modern save');
+ob_start(); $plugin->renderAdminPage(); $collision_view=ob_get_clean();
+ok(str_contains($collision_view,'Edit timer: Old shared name (legacy-a)') && substr_count($collision_view,'Permanently delete Old shared name (legacy-a)?')===2, 'colliding saved names remain distinguishable in editor and both destructive confirmations');
+$reset_admin();$_GET=$_POST=array();
+ob_start(); $plugin->renderAdminPage(); $collision_list=ob_get_clean();
+ok(str_contains($collision_list,'Old shared name (legacy-a)') && str_contains($collision_list,'Old shared name (legacy-b)'), 'list gives distinct identities to colliding legacy records');
+ob_start(); Email_Countdown_Timer_Admin::render_dashboard_widget(); $collision_dashboard=ob_get_clean();
+ok(str_contains($collision_dashboard,'Old shared name (legacy-a)') && str_contains($collision_dashboard,'Old shared name (legacy-b)'), 'dashboard gives distinct identities to colliding legacy records');
 ok(str_starts_with($submit_admin(array_replace($legacy_name_post,array('campaign_name'=>'Unique legacy name'))),'redirect:') && $options['easy_countdown_timers']['legacy-a']['campaign_name']==='Unique legacy name', 'renaming a colliding legacy record restores normal editing without changing its ID');
 ok(Email_Countdown_Timer_Admin::display_name(array(), 'legacy-a') === 'Unnamed timer (legacy-a)' && Email_Countdown_Timer_Admin::display_name(array(), 'legacy-b') === 'Unnamed timer (legacy-b)', 'unnamed legacy records keep distinct fallback identities until explicitly named');
 ok(Email_Countdown_Timer_Admin::display_name(array('campaign_name'=>'0'), 'legacy-a') === '0', 'a valid zero-like timer name is displayed rather than replaced by a fallback');
