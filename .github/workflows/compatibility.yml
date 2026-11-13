@@ -1,0 +1,77 @@
+name: Third-party compatibility lab
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compatibility.yml'
+      - 'tests/compatibility/**'
+      - 'includes/**'
+      - 'assets/**'
+      - 'email-countdown-timer.php'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compatibility-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: baseline
+            php: '8.4'
+            database: mysql:8.4
+            ping: mysqladmin
+          - profile: publishing
+            php: '8.3'
+            database: mariadb:10.11
+            ping: mariadb-admin
+          - profile: commerce
+            php: '8.4'
+            database: mysql:8.4
+            ping: mysqladmin
+          - profile: builder
+            php: '8.4'
+            database: mariadb:11.4
+            ping: mariadb-admin
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MYSQL_ROOT_PASSWORD: compatibility-disposable-only
+          MYSQL_DATABASE: ect_compat
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="${{ matrix.ping }} ping -h 127.0.0.1 -pcompatibility-disposable-only"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, gd, imagick, mbstring, curl, intl, xml, zip
+          coverage: none
+          tools: wp-cli
+      - name: Isolated browser and decoder tooling
+        run: |
+          python3 -m venv "$RUNNER_TEMP/compat-venv"
+          "$RUNNER_TEMP/compat-venv/bin/pip" install playwright==1.57.0 Pillow==12.1.0
+      - name: Install and exercise actual third-party plugins
+        env:
+          ECD_INTEGRATION_DISPOSABLE: '1'
+          ECD_COMPAT_PROFILE: ${{ matrix.profile }}
+        run: bash tests/compatibility/run.sh
+      - name: Preserve results, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: compatibility-${{ matrix.profile }}
+          path: ${{ runner.temp }}/compat-evidence/
+          if-no-files-found: error
+          retention-days: 14
