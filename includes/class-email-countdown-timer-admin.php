@@ -92,7 +92,7 @@ final class Email_Countdown_Timer_Admin {
     public static function label_presets(): array {
         return array(
             'en' => array( 'label' => __( 'English', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds' ) ),
-            'pl' => array( 'label' => __( 'Polish', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Dni', 'label_h' => 'Godziny', 'label_m' => 'Minuty', 'label_s' => 'Sekundy' ) ),
+            'pl' => array( 'label' => __( 'Polish', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Dni', 'label_h' => 'Godzin', 'label_m' => 'Minut', 'label_s' => 'Sekund' ) ),
             'de' => array( 'label' => __( 'German', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Tage', 'label_h' => 'Stunden', 'label_m' => 'Minuten', 'label_s' => 'Sekunden' ) ),
             'es' => array( 'label' => __( 'Spanish', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Días', 'label_h' => 'Horas', 'label_m' => 'Minutos', 'label_s' => 'Segundos' ) ),
             'fr' => array( 'label' => __( 'French', 'easy-countdown' ), 'labels' => array( 'label_d' => 'Jours', 'label_h' => 'Heures', 'label_m' => 'Minutes', 'label_s' => 'Secondes' ) ),

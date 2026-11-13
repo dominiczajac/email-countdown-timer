@@ -6,6 +6,7 @@ $label_translations_before = $GLOBALS['test_translations'] ?? array();
 $admin = $nonce = true; $_SERVER['REQUEST_METHOD'] = 'POST'; $_GET = $_POST = array();
 $GLOBALS['test_translations'] = array( 'English' => 'Translated admin name', 'Days' => 'DO NOT STORE THIS TRANSLATION', 'Seconds' => 'OTHER TRANSLATED DATA' );
 $output_label_presets = Email_Countdown_Timer_Admin::label_presets();
+ok( $output_label_presets['pl']['labels'] === array( 'label_d' => 'Dni', 'label_h' => 'Godzin', 'label_m' => 'Minut', 'label_s' => 'Sekund' ), 'Polish preset uses the requested countdown labels without rewriting existing saved labels' );
 ok( array_keys( $output_label_presets ) === array( 'en', 'pl', 'de', 'es', 'fr' ), 'five explicit output languages are offered' );
 ok( $output_label_presets['en']['label'] === 'Translated admin name' && $output_label_presets['en']['labels']['label_d'] === 'Days', 'admin language names translate without translating stored output labels' );
 $manual_labels = Email_Countdown_Timer_Config::normalize( array( 'deadline' => '2031-12-31T12:00:00', 'label_d' => 'Campaign days', 'label_h' => '', 'label_m' => 'My minutes', 'label_s' => 'Keep seconds' ) );
