@@ -1,9 +1,9 @@
-Easy Countdown: four reviewed local fonts
+Easy Countdown: five reviewed static faces across four font families
 
 Select an included face under Create/Edit Timer > Appearance > Typography
 and Size > Font, then save. Lato remains the new full editor's default when
 FreeType is available; existing campaigns keep their font or bitmap setting.
-The other included faces are IBM Plex Mono Regular, Barlow Condensed Regular
+The other included faces are IBM Plex Mono Regular, Barlow Condensed Regular, Barlow Condensed Black (900)
 and Crimson Text Regular. Local GD/FreeType support is required.
 
 Font: Lato Regular, by Lukasz Dziedzic / tyPoland.
@@ -20,7 +20,7 @@ Upstream Git blob: 0f3d0f837d24834b9b5b0a6b735459c56f5e75c3
 Font SHA256: d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251
 OFL.txt SHA256: 74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e
 
-The four fonts are part of every installation ZIP; WordPress never downloads them.
+The five faces are part of every installation ZIP; WordPress never downloads them.
 They are read locally when drawing an image, not sent as web fonts to recipients.
 Website live text continues to use theme typography.
 This directory belongs to the plugin and is replaced during updates. Store YOUR
