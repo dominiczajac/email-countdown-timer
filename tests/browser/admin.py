@@ -327,7 +327,7 @@ with sync_playwright() as p:
             check(sizes[0]['w'] == sizes[1]['w'] and sizes[0]['h'] == sizes[1]['h'] and abs(sizes[0]['scale'] - sizes[1]['scale']) < 0.001 and abs(sizes[0]['height'] - sizes[1]['height']) < 0.1, f"email digits keep the same scale below 24h at {width}px: {section.get_attribute('data-font')}")
     boundary.screenshot(path=str(evidence / 'font-boundary.png'), full_page=True)
     boundary.close()
-    verify_status(page, browser, context, base, evidence, check)
+    verify_status(page, browser, context, base, evidence, check, quick_id)
     check(not errors, 'no browser JavaScript exceptions')
     check(not any(urlsplit(u).hostname in {'fonts.googleapis.com', 'fonts.gstatic.com'} for u in requests), 'zero Google Fonts requests')
     report = {'checks': checks, 'count': len(checks), 'browser': browser.version, 'wordpress_site': 'disposable localhost only', 'js_errors': errors, 'limits': 'Custom browser checks; not a screen-reader audit, full axe scan or WCAG certification.'}

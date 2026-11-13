@@ -306,12 +306,13 @@ final class Email_Countdown_Timer_Admin {
             if ( array_key_exists( 'campaign_name', $_POST ) ) {
                 // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked above; reject non-string names before reading the value.
                 if ( ! is_string( $_POST['campaign_name'] ) || strlen( self::posted( 'campaign_name' ) ) > 200 ) {
-                    $errors['campaign_name'] = __( 'Use plain text for the campaign name, up to 200 bytes.', 'easy-countdown' );
+                    $errors['campaign_name'] = __( 'Use plain text for the timer name, up to 200 bytes.', 'easy-countdown' );
                 }
                 $data['campaign_name'] = sanitize_text_field( self::posted( 'campaign_name' ) );
             } else {
                 $data['campaign_name'] = self::campaign_name( $timers[ $original ] ?? array() );
             }
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Entry gate verified POST, capability and nonce; validate older forms that submit a name too.
             if ( $name_workflow || array_key_exists( 'campaign_name', $_POST ) ) {
                 if ( '' === trim( $data['campaign_name'] ) ) {
                     $errors['campaign_name'] = __( 'Enter a unique timer name.', 'easy-countdown' );
@@ -543,7 +544,7 @@ final class Email_Countdown_Timer_Admin {
                     <option value="<?php echo esc_attr( $zone ); ?>" <?php selected( $value, $zone ); ?>><?php echo esc_html( '' === $zone ? __( 'Choose a time zone', 'easy-countdown' ) : str_replace( '_', ' ', $zone ) ); ?></option>
                 <?php endforeach; ?>
             </select>
-            <p class="description" id="<?php echo esc_attr( $help_id ); ?>"><?php echo esc_html__( 'New campaigns start in the WordPress site time zone. Named zones follow daylight saving changes; fixed offsets do not. Check the saved deadline and its UTC equivalent before sharing.', 'easy-countdown' ); ?></p>
+            <p class="description" id="<?php echo esc_attr( $help_id ); ?>"><?php echo esc_html__( 'New timers use your browser time zone when available, otherwise the WordPress site time zone. Existing timers keep their saved zone. Named zones follow daylight saving changes; fixed offsets do not.', 'easy-countdown' ); ?></p>
             <p class="ect-error" id="<?php echo esc_attr( $error_id ); ?>"><?php echo esc_html( $error ); ?></p>
         </div>
         <?php

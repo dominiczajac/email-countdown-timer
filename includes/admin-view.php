@@ -50,7 +50,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
             <?php else : ?>
                 <div class="ect-table-wrap" role="region" aria-labelledby="ect-list-title" tabindex="0">
                     <table class="widefat striped"><caption class="screen-reader-text"><?php echo esc_html__( 'Saved timers, deadlines and actions', 'easy-countdown' ); ?></caption>
-                        <thead><tr><th scope="col"><?php echo esc_html__( 'Campaign / Timer ID', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Deadline / Time Zone', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Status', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Actions', 'easy-countdown' ); ?></th></tr></thead>
+                        <thead><tr><th scope="col"><?php echo esc_html__( 'Timer name', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Deadline / Time Zone', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Status', 'easy-countdown' ); ?></th><th scope="col"><?php echo esc_html__( 'Actions', 'easy-countdown' ); ?></th></tr></thead>
                         <tbody>
                         <?php foreach ( $email_countdown_timer_ui['timers'] as $email_countdown_timer_id => $email_countdown_timer_timer ) : ?>
                             <?php

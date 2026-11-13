@@ -62,7 +62,7 @@ with sync_playwright() as p:
     check(attrs['alt'] == custom_alt, 'shortcode uses saved alternative text')
     check(attrs['loading'] == 'eager' and attrs['data-no-lazy'] == '1', 'shortcode supplies targeted LazyLoad markers')
     check(attrs['referrerpolicy'] == 'no-referrer', 'shortcode minimizes referrer disclosure')
-    image = anonymous.get(base + '/?ecd_action=render&ecd=alt-browser-test&mode=email')
+    image = anonymous.get(base + '/?ecd_action=render&ecd='+timer_id+'&mode=email')
     check(image.status == 200 and image.headers.get('content-type', '').startswith('image/gif'), 'anonymous image is GIF, not page HTML')
     check('no-store' in image.headers.get('cache-control', ''), 'image response is not persistently cacheable')
     check(image.headers.get('x-content-type-options') == 'nosniff', 'binary response keeps nosniff')
@@ -75,7 +75,7 @@ with sync_playwright() as p:
     # A separate no-JS browser proves the field is not injected by JavaScript.
     nojs = browser.new_context(storage_state=context.storage_state(), java_script_enabled=False)
     plain = nojs.new_page()
-    plain.goto(base + '/wp-admin/admin.php?page=ecd-timers&edit=alt-browser-test')
+    plain.goto(base + '/wp-admin/admin.php?page=ecd-timers&edit='+timer_id)
     plain.get_by_label('Image alternative text (alt)', exact=True).fill('')
     plain.locator('#ect-editor button[type=submit]').click()
     expect(plain.get_by_text('Timer saved.', exact=True)).to_be_visible()
