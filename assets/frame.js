@@ -6,7 +6,7 @@
     var ctx = canvas.getContext('2d');
     function status(ready) { window.parent.postMessage({type:'ecd-frame-status',ready:ready},'*'); }
     if (!ctx) { status(false); return; }
-    var paused = data.paused, timer = null, ended = false;
+    var paused = data.paused, timer = null, ended = false, drawn = false;
     function load(sprite) {
         return new Promise(function (resolve, reject) {
             var image = new Image(); image.onload = function () { sprite.image = image; resolve(); }; image.onerror = reject; image.src = sprite.uri;
@@ -16,6 +16,7 @@
     function draw() {
         clearTimeout(timer); timer = null;
         if (document.visibilityState === 'hidden') return;
+        var firstDraw = !drawn;
         var left = remaining(), values = [Math.floor(left / 86400), Math.floor(left % 86400 / 3600), Math.floor(left % 3600 / 60), left % 60];
         canvas.dataset.remaining = String(left);
         if (left === 0 && data.end && !ended) {
@@ -40,14 +41,16 @@
             x+=data.cols[i];
             if(i<3) { var colon=data.digits[':']; if(data.text) { ctx.font=data.dh+'px monospace';ctx.fillStyle=data.dc;ctx.fillText(':',x+15,10+data.dh,10); } else ctx.drawImage(colon.image,x+10,10+data.dh-colon.h); x+=20+colon.w; }
         }
+        if(firstDraw) { document.getElementById('ect-frame-fallback').hidden=true;canvas.hidden=false;button.hidden=false;drawn=true;status(true); }
         button.textContent = button.dataset[paused ? 'resume' : 'pause']; button.disabled = left === 0;
-        if(!paused && left > 0) timer = setTimeout(draw,1000);
+        if(!paused && left > 0) timer = setTimeout(draw,1000-Date.now()%1000);
     }
     Promise.all(data.text?[]:Object.values(data.digits).concat(data.labels).map(load)).then(function () {
-        document.getElementById('ect-frame-fallback').hidden=true; canvas.hidden=false; button.hidden=false; draw(); status(true);
+        draw();
         button.addEventListener('click',function(){paused=!paused;draw();});
-        document.addEventListener('visibilitychange',function(){if(!paused)draw();});
+        document.addEventListener('visibilitychange',function(){if(!paused || !drawn)draw();});
+        window.addEventListener('message',function(e){if(e.source===window.parent && e.data && e.data.type==='ecd-frame-ping') { if(drawn) status(true); else draw(); }});
         window.addEventListener('pagehide',function(){clearTimeout(timer);});
-        window.addEventListener('pageshow',function(e){if(e.persisted && !paused)draw();});
+        window.addEventListener('pageshow',function(e){if(e.persisted && (!paused || !drawn))draw();});
     }).catch(function(){ status(false); /* The saved static PNG remains available. */ });
 }());

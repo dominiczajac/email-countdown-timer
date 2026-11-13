@@ -160,6 +160,8 @@ try:
         live=preview.content_frame.locator('#ect-frame-canvas');expect(live).to_be_visible()
         left=int(live.get_attribute('data-remaining'));page.wait_for_timeout(2100)
         check(int(live.get_attribute('data-remaining'))<left,'native block preview counts locally')
+        page.wait_for_timeout(8500)
+        check(not page.get_by_text('The countdown preview could not load.',exact=False).count(),'status messages reach the correct editor canvas window without a false timeout')
         check(frame.locator('.wp-block-easy-countdown-timer button').count()==0,'canvas has no refresh actions')
         check('Static editor preview' not in frame.locator('.wp-block-easy-countdown-timer').inner_text(),'canvas has no static-preview explanation')
         page.get_by_role('button',name='Refresh preview',exact=True).click()

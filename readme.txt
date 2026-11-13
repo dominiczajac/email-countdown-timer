@@ -16,7 +16,7 @@ Create countdowns locally for WordPress, external websites and email. No externa
 
 **Features**
 
-* Native block, active editor previews and external website iframe embeds.
+* Block editor previews and external website iframes.
 * Required timer names, internal IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, five local font faces and local TTF/OTF files.
@@ -25,7 +25,7 @@ Create countdowns locally for WordPress, external websites and email. No externa
 * Holiday/occasion presets, Quick Create and a dashboard widget.
 * On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
-* Translation-ready English admin with WordPress controls.
+* Translation-ready English admin.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
 **Requirements and limitations**
@@ -36,7 +36,7 @@ Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache
 
 **Privacy**
 
-Easy Countdown adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. Settings and short-lived shared image/glyph caches stay local. It does not send email or contact Google Fonts.
+Easy Countdown adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. Settings, media IDs, uninstall preference, font-copy ownership and temporary image/glyph caches stay local. It does not send email or contact Google Fonts.
 
 Hosting, WordPress and email providers keep their own logs. Keep personal data out of public URLs. Privacy Policy Guide text needs your review.
 

@@ -122,7 +122,7 @@ final class Email_Countdown_Timer_Frame {
         if($head) return;
         $nonce=base64_encode(random_bytes(18));
         header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; frame-ancestors *; base-uri 'none'; form-action 'none'");
-        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','easy-countdown').'</p><script nonce="'.esc_attr($nonce).'">window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");</script>';
+        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','easy-countdown').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
     }
 
     public static function listen(): void {

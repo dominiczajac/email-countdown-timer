@@ -95,7 +95,7 @@ async function main() {
     all(tree, 'ComboboxControl')[0].props.onChange('beta');
     check(h.changes.at(-1).timerId === 'beta' && Object.keys(h.changes.at(-1)).length === 1, 'selection stores ID only');
     check(all(tree, 'a')[0].props.rel === 'noopener noreferrer', 'safe administrator link');
-    const source={};all(tree,'iframe')[0].props.ref.current={contentWindow:source};
+    const source={postMessage(){}};all(tree,'iframe')[0].props.ref.current={contentWindow:source};
     h.message({source:{},data:{type:'ecd-frame-status',ready:false}});
     check(!all(h.render({timerId:'alpha'}),'Notice').some(n=>n.children[0].includes('could not load')),'another frame cannot spoof preview failure');
     h.message({source,data:{type:'ecd-frame-status',ready:false}});

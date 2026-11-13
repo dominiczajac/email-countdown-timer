@@ -95,9 +95,10 @@
                     clearTimeout(timer); setFailed(!event.data.ready);
                 }
             }
-            window.addEventListener('message',message);
+            var host = previewRef.current && previewRef.current.ownerDocument ? previewRef.current.ownerDocument.defaultView : window;
+            host.addEventListener('message',message);
             if(previewUrl) timer=setTimeout(function(){setFailed(true);},10000);
-            return function(){window.removeEventListener('message',message);clearTimeout(timer);};
+            return function(){host.removeEventListener('message',message);clearTimeout(timer);};
         },[previewUrl]);
         var found = timers.some(function (timer) { return timer.value === timerId; });
         var missing = !!timerId && !found && !settings.truncated;
@@ -163,7 +164,7 @@
                         width: (settings.frameSizes && settings.frameSizes[timerId] || {}).width || 600,
                         height: (settings.frameSizes && settings.frameSizes[timerId] || {}).height || 180,
                         style: { display: 'block', border: 0, maxWidth: '100%', pointerEvents: 'none' },
-                        onError: function () { setFailed(true); }, onLoad: function () {}
+                        onError: function () { setFailed(true); }, onLoad: function () { if(previewRef.current && previewRef.current.contentWindow) previewRef.current.contentWindow.postMessage({type:'ecd-frame-ping'},'*'); }
                     })
                 ) : null
             )
