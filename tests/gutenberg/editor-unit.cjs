@@ -113,12 +113,12 @@ async function main() {
     const body = new URLSearchParams(request.options.body);
     check(request.url === initial().refresh.url && request.options.method === 'POST' && request.options.credentials === 'same-origin' && request.options.cache === 'no-store', 'refresh uses only the authenticated WordPress admin URL');
     check([...body.keys()].sort().join(',') === 'action,nonce,post_id' && body.get('post_id') === '12' && body.get('nonce') === 'synthetic-editor-nonce' && body.get('action') === 'email_countdown_timer_campaigns', 'request carries only action, editing context and nonce');
-    const next = { ...initial(), timers: [{ value: 'alpha', label: 'alpha' }, { value: 'gamma', label: 'gamma' }] };
+    const next = { ...initial(), timers: [{ value: 'alpha', label: 'alpha' }, { value: 'gamma', label: 'Named administrator timer' }] };
     delete next.refresh;
     respond({ ok: true, json: async () => ({ success: true, data: next }) });
     await pending;
     tree = h.render({ timerId: 'alpha' });
-    check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma') && all(tree, 'img').length === 1, 'new campaign appears without remounting or changing the selected timer');
+    check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma' && t.label === 'Named administrator timer') && all(tree, 'img').length === 1, 'new campaign appears without remounting or changing the selected timer');
     const second = h.render({ timerId: 'beta' }, 'second');
     check(all(second, 'img').length === 0 && all(second, 'Notice').some(n => n.children[0].includes('no longer')), 'deleted campaign is detected in another mounted block');
     check(h.changes.length === changeCount, 'catalog refresh never rewrites selected IDs or alignment');
@@ -130,7 +130,7 @@ async function main() {
     check(all(tree, 'Notice').some(n => n.children[0].includes('could not refresh')) && all(tree, 'ComboboxControl')[0].props.value === 'alpha', 'permission/network failure retains last list and selected ID with a retry message');
     const malformed = button(tree, 'Refresh campaigns').props.onClick();
     await Promise.resolve();
-    respond({ ok: true, json: async () => ({ success: true, data: { ...next, timers: [{ value: 'bad', label: '<raw>' }] } }) });
+    respond({ ok: true, json: async () => ({ success: true, data: { ...next, timers: [{ value: 'bad', label: 'x'.repeat(201) }] } }) });
     await malformed;
     tree = h.render({ timerId: 'alpha' });
     check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma'), 'malformed success response cannot replace the safe list');
