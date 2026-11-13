@@ -1,4 +1,4 @@
-/* Explicit saves and local controls; the visible saved preview refreshes its minute-long GIF. */
+/* Explicit saves and local controls; the saved iframe clock ticks locally. */
 (() => {
     'use strict';
     document.querySelectorAll('[data-ect-auto-timezone]').forEach(marker => {
@@ -7,6 +7,10 @@
             const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if (!select) return;
             const options = Array.from(select.options);
+            const initial = options.find(option => option.defaultSelected) || options[0];
+            // A fast interaction or restored form can precede this footer script.
+            // Preserve a selection that already differs from the server default.
+            if (initial && select.value !== initial.value) return;
             const match = options.find(option => option.value === zone) || options.find(option => {
                 try { return Intl.DateTimeFormat(undefined, { timeZone: option.value }).resolvedOptions().timeZone === zone; }
                 catch (_) { return false; }

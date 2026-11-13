@@ -56,6 +56,21 @@ with sync_playwright() as p:
     widget = page.locator('#email-countdown-timer-dashboard')
     expect(widget).to_be_visible()
     check(widget.locator('#ect-dashboard-id').is_hidden() and widget.locator('#ect-dashboard-tz').input_value()=='America/Los_Angeles', 'dashboard hides IDs and initializes the browser timezone')
+    # A user can choose a zone before the footer enhancement finishes loading.
+    delayed = context.new_page()
+    held_scripts = []
+    delayed.route('**/assets/admin.js*', lambda route: held_scripts.append(route))
+    delayed.goto(base + '/wp-admin/admin.php?page=ecd-timers', wait_until='commit')
+    delayed.locator('#ect-quick-tz').select_option('America/New_York')
+    for _ in range(50):
+        if held_scripts:
+            break
+        delayed.wait_for_timeout(100)
+    assert len(held_scripts) == 1, 'The actual admin enhancement must be held for the race check'
+    held_scripts[0].continue_()
+    delayed.wait_for_load_state('load')
+    check(delayed.locator('#ect-quick-tz').input_value() == 'America/New_York', 'late timezone initialization preserves an early manual selection')
+    delayed.close()
     widget.locator('#ect-dashboard-name').fill('Private dashboard campaign')
 
     # datetime-local removes zero seconds; Playwright requires its canonical value.
@@ -110,6 +125,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='Create timer', exact=True).click()
     page.wait_for_url('**edit=**')
     quick_id=saved_id(page)
+    (evidence / 'quick-create.json').write_text(json.dumps({'color':page.locator('#ect-dc').input_value(),'timezone':page.locator('#ect-tz').input_value()},indent=2)+'\n')
     check(page.locator('#ect-dc').input_value() == '#1D4ED8' and page.locator('#ect-tz').input_value() == 'America/New_York', 'Quick Create persists the chosen preset and time zone')
     check(page.locator('#ect-font').input_value() == 'builtin:barlow-condensed-regular', 'Ocean Quick Create uses included Barlow Condensed on the native FreeType runner')
     check(page.locator('#ect-label_d').input_value() == 'Días', 'Quick Create saves accented Spanish labels with the included font')

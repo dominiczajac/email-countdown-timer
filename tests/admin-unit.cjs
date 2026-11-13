@@ -41,10 +41,10 @@ async function main() {
 main().catch(error => { console.error(error); process.exitCode = 1; });
 
 // Actual initializer with Intl canonicalization: a system tzdb can omit backward aliases.
-for (const [zone, expected] of [['Asia/Calcutta','Asia/Kolkata'], ['Unsupported/Zone','UTC']]) {
-    const select = { value: 'UTC', options: [{ value:'UTC' },{ value:'Asia/Kolkata' }] };
+for (const [zone, expected, chosen] of [['Asia/Calcutta','Asia/Kolkata'], ['Unsupported/Zone','UTC'], ['Asia/Calcutta','America/New_York','America/New_York']]) {
+    const select = { value: chosen || 'UTC', options: [{ value:'UTC', defaultSelected:true },{ value:'Asia/Kolkata' },{ value:'America/New_York' }] };
     const document = { querySelectorAll: () => [{ dataset:{ ectAutoTimezone:'zone' } }], getElementById: () => select, querySelector: () => null };
     const Intl = { DateTimeFormat: (_locale, options) => ({ resolvedOptions: () => ({ timeZone:options ? (options.timeZone==='Asia/Kolkata'?'Asia/Calcutta':options.timeZone) : zone }) }) };
     vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, Intl });
-    assert.equal(select.value,expected,'alias selects equivalent supported zone, unknown zone keeps site fallback');
+    assert.equal(select.value,expected,'aliases initialize untouched forms, unsupported zones fall back and early manual choices survive');
 }
