@@ -39,3 +39,6 @@ includes/class-email-countdown-timer-status.php
 assets/status.js
 
 fonts/easy-countdown-barlow-condensed-black.ttf
+
+includes/class-email-countdown-timer-frame.php
+assets/frame.js

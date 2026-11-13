@@ -46,7 +46,7 @@ with sync_playwright() as p:
     __import__('subprocess').run(['wp','--path='+os.environ['ECD_BROWSER_WP'],'--no-color','post','update',os.environ['ECD_BROWSER_PAGE_ID'],'--post_content=[ecd_timer id="'+timer_id+'"]'],check=True,capture_output=True)
     expect(page.get_by_text('Timer saved.', exact=True)).to_be_visible()
     check(page.locator('#ect-alt').input_value() == custom_alt, 'alt roundtrips through real WordPress database')
-    expect(page.locator('#ect-preview')).to_have_attribute('alt', custom_alt)
+    expect(page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')).to_have_attribute('aria-label', custom_alt)
     parser = TimerImageParser()
     parser.feed(page.locator('#ect-manual-html').input_value())
     check(len(parser.images) == 1 and parser.images[0]['alt'] == custom_alt, 'copied HTML contains exact escaped alternative text')

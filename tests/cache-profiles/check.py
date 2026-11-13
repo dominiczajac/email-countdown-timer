@@ -234,8 +234,9 @@ def main():
                 phase = 'timer-editor'
                 runtime(navigate(page, '/wp-admin/admin.php?page=ecd-timers&edit=cache-lab'))
                 expect(page.locator('#ect-timer_id')).to_have_value('cache-lab')
-                expect(page.locator('#ect-preview')).to_have_js_property('complete', True)
-                check(page.locator('#ect-preview').evaluate('(img) => img.naturalWidth > 1'), 'timer-editor')
+                live_preview=page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')
+                expect(live_preview).to_be_visible()
+                check(live_preview.evaluate('(canvas)=>canvas.width>1'), 'timer-editor')
                 page.screenshot(path=str(evidence / (current['key'] + '-editor.png')))
             navigating = True
         navigating = False

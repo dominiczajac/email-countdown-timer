@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.7.0
+Stable tag: 12.8.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,11 +12,11 @@ Countdown images for email and WordPress, with local fonts and an end image.
 
 == Description ==
 
-Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or use [ecd_timer id="promotion"] on WordPress. No external account/API key.
+Create countdowns locally for WordPress, external websites and email. No external account or API key.
 
 **Features**
 
-* Native block with image or opt-in live text, timer selection and alignment.
+* Block editor previews and external website iframes.
 * Required timer names, internal IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, five local font faces and local TTF/OTF files.
@@ -25,20 +25,20 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 * Holiday/occasion presets, Quick Create and a dashboard widget.
 * On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
-* Translation-ready English admin with WordPress controls.
+* Translation-ready English admin.
 * Opt-in cleanup on uninstall; settings are retained by default.
 
 **Requirements and limitations**
 
-Requires WordPress 6.4+, PHP 8.1+ and GD with PNG/GIF support. Use supported PHP and patched native libraries. Imagick enables animation; FreeType enables fonts. Animation requires MySQL/MariaDB advisory locks on a consistent connection. Without Imagick or usable locking, output is static.
+Requires WordPress 6.4+, PHP 8.1+ and GD. FreeType enables fonts; Imagick animates GIFs. Raster cache misses use session locks; if unavailable, iframes use system fonts. The iframe ticks locally without Imagick; email GIFs retain their static fallback.
 
 Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache images, or show a still frame. A downloaded GIF cannot refresh itself. Retain the visible deadline and test your complete campaign.
 
 **Privacy**
 
-Easy Countdown adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. It stores campaign settings, selected media IDs, uninstall preference, font-copy ownership records and short-lived shared image caches locally. It does not send email or contact Google Fonts.
+Easy Countdown adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. Settings, media IDs, uninstall preference, font-copy ownership and temporary image/glyph caches stay local. It does not send email or contact Google Fonts.
 
-Hosting, WordPress, other plugins and email proxies have separate processing and logs. Keep personal data and secrets out of public content and URLs. WordPress's Privacy Policy Guide contains suggested wording, not automatic publication or legal certification.
+Hosting, WordPress and email providers keep their own logs. Keep personal data out of public URLs. Privacy Policy Guide text needs your review.
 
 [Source code and documentation](https://github.com/dominiczajac/email-countdown-timer)
 
@@ -47,7 +47,7 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
 2. Use Quick Create in Easy Countdown or its dashboard widget: name, deadline, time zone, countdown preset and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
-4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
+4. Embed Codes provides the WordPress block/shortcode, external website iframe and Email HTML/Image URL.
 5. Check the public image while logged out and send a test using your actual mailing platform.
 
 Back up data/fonts and update without uninstalling. Deactivate a legacy email-countdown-timer copy before activating easy-countdown: both share data. Never run both or uninstall with cleanup enabled while data is needed. Copy plugin-local fonts before replacing code directories.
@@ -55,7 +55,7 @@ Back up data/fonts and update without uninstalling. Deactivate a legacy email-co
 == Frequently Asked Questions ==
 
 = How do I use the block editor? =
-Insert Easy Countdown and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves a campaign reference and uses a static preview. Website display > Live text adds local ticking and Pause/Resume with theme typography. Image remains the default. Reduced motion starts paused; no-JS shows a snapshot. Clear page caches after campaign changes.
+Insert Easy Countdown and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves a reference and shows an active preview; refresh/pause controls stay in its sidebar. Website display > Live text adds local ticking and Pause/Resume with theme typography. Image remains the default. Reduced motion starts paused; no-JS shows a snapshot. Clear page caches after campaign changes.
 
 
 = Does the timer start separately for each recipient? =
@@ -107,6 +107,11 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
+= 12.8.0 =
+* Add locally ticking raster previews and a sandboxed external website iframe.
+* Preserve saved fonts without font downloads or per-second server requests.
+* Keep editor controls in the sidebar; align the dashboard title and remove the save badge.
+
 = 12.7.0 =
 * Simplify creation with required unique timer names and internal IDs.
 * Initialize new time zones locally; animate saved previews automatically.
@@ -131,5 +136,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.7.0 =
-Unnamed/colliding legacy timers need a unique name on the next save; IDs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.
+= 12.8.0 =
+Active editor/iframe previews use GD and session locks without Imagick. Copy iframe HTML for external websites; email GIF output is unchanged. New frames require JavaScript to tick and a correctly set device clock. Exclude ecd_action=frame from page/edge caching.

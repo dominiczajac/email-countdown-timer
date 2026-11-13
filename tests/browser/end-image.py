@@ -32,8 +32,9 @@ with sync_playwright() as p:
     check(page.locator('#ect-expiry_image_id').input_value()==aid,'selected ID persists in real WordPress')
     # Nonzero seconds avoid Playwright's strict comparison against minute-normalized input.
     page.locator('#ect-deadline').fill('2001-01-01T00:00:05');submit(page);page.wait_for_url('**status=saved**')
-    expect(page.locator('#ect-preview')).to_have_js_property('complete',True)
-    check(page.locator('#ect-preview').evaluate('(e)=>e.naturalWidth>1'),'expired saved preview remains a valid local image')
+    end_preview=page.locator('#ect-preview').content_frame.locator('main > img')
+    expect(end_preview).to_be_visible()
+    check(end_preview.evaluate('(e)=>e.naturalWidth>1'),'expired saved preview remains a valid local image')
     page.locator('#ect-expiry_image_id').fill('999999999');submit(page)
     expect(page.locator('#ect-errors')).to_be_visible();check(page.locator('#ect-expiry_image_id').input_value()=='999999999','unavailable attachment shows field error and retains input')
     page.get_by_role('button',name='Remove End Image',exact=True).click();expect(page.locator('#ect-expiry_image_id')).to_have_value('0')

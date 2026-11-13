@@ -37,5 +37,10 @@ final class Email_Countdown_Timer_Lock_DB_Double {
 }
 $GLOBALS['wpdb'] = new Email_Countdown_Timer_Lock_DB_Double();
 function wp_using_ext_object_cache() { return !empty($GLOBALS['ect_ext_cache']); }
-function wp_cache_delete($key, $group) { return true; }
+function wp_cache_delete($key, $group) {
+    if ($group === 'options' && str_starts_with($key, '_transient_')) {
+        unset($GLOBALS['ect_transient_local'][substr($key, strlen('_transient_'))]);
+    }
+    return true;
+}
 function wp_cache_get($key, $group, $force=false) { $GLOBALS['ect_force_read']=$force; return $GLOBALS['transients'][$key] ?? false; }

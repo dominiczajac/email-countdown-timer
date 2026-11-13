@@ -26,7 +26,7 @@ function current_user_can($cap, ...$args) {
 function check_admin_referer($action) { if (!$GLOBALS['nonce']) throw new ECD_Test_Stop('nonce'); }
 function get_option($key, $default=[]) { return $GLOBALS['options'][$key] ?? $default; }
 function update_option($key, $value, $autoload=false) { $GLOBALS['options'][$key]=$value; return true; }
-function get_transient($key) { return $GLOBALS['transients'][$key] ?? false; }
+function get_transient($key) { return $GLOBALS['ect_transient_local'][$key] ?? $GLOBALS['transients'][$key] ?? false; }
 function set_transient($key, $value, $ttl) {
     $GLOBALS['writes']++;
     if (isset($GLOBALS['test_set_transient'])) return ($GLOBALS['test_set_transient'])($key, $value, $ttl);

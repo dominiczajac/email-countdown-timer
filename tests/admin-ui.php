@@ -144,7 +144,7 @@ $_GET = array( 'paged' => '3' );
 ok( 11 === count( Email_Countdown_Timer_Admin::state()['timers'] ), 'last page does not omit matching timers' );
 $_GET = array( 'edit' => 'campaign-0' );
 ob_start(); $plugin->renderAdminPage(); $markup = ob_get_clean();
-ok( str_contains( $markup, 'mode=static' ) && ! preg_match( '/src="[^"]*mode=email/', $markup ), 'editor initial image is static, not animated' );
+ok( str_contains( $markup, 'ecd_action=frame' ) && str_contains($markup, 'sandbox="allow-scripts"') && !str_contains($markup, 'ect-save-state'), 'editor has an isolated active frame and no save-status badge' );
 ok( str_contains( $markup, 'id="ect-website-title"' ) && str_contains( $markup, 'id="ect-email-title"' ) && str_contains( $markup, '[ecd_timer id=' ), 'website and email embedding have separate sections without JavaScript' );
 ok( str_contains( $markup, 'data-ect-copy="ect-manual-shortcode"' ) && str_contains( $markup, 'data-ect-copy="ect-manual-html"' ) && str_contains( $markup, 'data-ect-copy="ect-embed-code"' ), 'each embed has its own copy action' );
 ok( str_contains( $markup, '2030-12-31' ) && str_contains( $markup, 'Europe/Warsaw' ), 'absolute deadline and zone accompany image' );

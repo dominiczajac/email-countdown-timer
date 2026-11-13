@@ -7,14 +7,14 @@ let checks = 0;
 const check = (value, message) => { assert.ok(value, message); checks++; };
 const initial = () => ({
     timers: [{ value: 'alpha', label: 'alpha' }, { value: 'beta', label: 'beta' }], truncated: false,
-    imageUrl: 'http://example.invalid/?ecd_action=render&mode=static',
+    imageUrl: 'http://example.invalid/?ecd_action=render&mode=static', frameUrl: 'http://example.invalid/?ecd_action=frame',
     manageUrl: 'http://example.invalid/wp-admin/admin.php?page=ecd-timers',
     createUrl: 'http://example.invalid/wp-admin/admin.php?page=ecd-timers#ect-quick-create',
     refresh: { url: 'http://example.invalid/wp-admin/admin-ajax.php', postId: 12, nonce: 'synthetic-editor-nonce' }
 });
-function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }) {
+function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }, canvasWindow = null) {
     let definition, active, cursor;
-    const changes = [], instances = new Map();
+    const changes = [], instances = new Map(),messages=new Set(), timers=new Map(); let nextTimer=0;
     const wp = {
         i18n: { __: text => text },
         element: {
@@ -37,19 +37,23 @@ function harness(settings = initial(), fetch = () => { throw new Error('Unexpect
                     active.effects.push(() => { slot.cleanup = callback(); });
                 }
             },
+            useRef: function(value){return this.useState({current:value})[0];},
             useMemo: fn => fn()
         },
         components: Object.fromEntries(['ComboboxControl', 'SelectControl', 'TextControl', 'PanelBody', 'Notice', 'Button', 'Placeholder'].map(name => [name, name])),
         blockEditor: { InspectorControls: 'InspectorControls', BlockControls: 'BlockControls', AlignmentToolbar: 'AlignmentToolbar', useBlockProps: () => ({ className: 'wp-block-easy-countdown-timer' }) },
         blocks: { registerBlockType: (name, value) => { assert.equal(name, 'easy-countdown/timer'); definition = value; } }
     };
-    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings }, Date: { now: () => 1000 } });
+    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings,addEventListener(name,fn){if(name==='message')messages.add(fn);},removeEventListener(name,fn){messages.delete(fn);} },setTimeout:fn=>{timers.set(++nextTimer,fn);return nextTimer;},clearTimeout(id){timers.delete(id);}, Date: { now: () => 1000 } });
     return {
-        definition, changes,
+        definition, changes, runTimers(){for(const [id,fn] of [...timers]) {timers.delete(id);fn();}}, message(event){messages.forEach(fn=>fn(event));},
         render(attrs, id = 'first') {
             if (!instances.has(id)) instances.set(id, { slots: [], effects: [] });
             active = instances.get(id); cursor = 0;
             const tree = definition.edit({ attributes: attrs, setAttributes: value => changes.push(value) });
+            if (canvasWindow) all(tree, 'iframe').forEach(node => {
+                node.props.ref.current = { contentWindow: canvasWindow.child, ownerDocument: { defaultView: canvasWindow } };
+            });
             active.effects.splice(0).forEach(effect => effect());
             return tree;
         },
@@ -70,31 +74,38 @@ async function main() {
     });
     check(h.definition.apiVersion === 3 && h.definition.save() === null, 'native API3 dynamic registration');
     let tree = h.render({ timerId: 'alpha', alignment: 'left' });
-    check(all(tree, 'img').length === 1, 'valid timer has preview without any wp.data store');
+    check(all(tree, 'iframe').length === 1, 'valid timer has preview without any wp.data store');
     const modeHarness = harness();
     const display = all(modeHarness.render({ timerId: 'alpha' }), 'SelectControl').find(n => n.props.label === 'Website display');
     check(display.props.value === 'image', 'old blocks default to Image mode');
     display.props.onChange('live');
     check(modeHarness.changes.at(-1).displayMode === 'live' && Object.keys(modeHarness.changes.at(-1)).length === 1, 'explicit live choice stores only the block mode');
     const liveTree = modeHarness.render({ timerId: 'alpha', displayMode: 'live' });
-    check(all(liveTree, 'p').some(n => String(n.children[0]).includes('theme typography')), 'live mode explains static preview and frontend differences');
+    check(!all(tree, 'p').some(n => String(n.children[0]).includes('Static editor preview')), 'canvas omits static-preview text');
 
-    check(all(tree, 'img')[0].props.src.includes('mode=static'), 'static endpoint');
-    check(all(tree, 'img')[0].props.referrerPolicy === 'no-referrer', 'no referrer');
-    const before = all(tree, 'img')[0].props.src;
+    check(all(tree, 'iframe')[0].props.src.includes('ecd_action=frame'), 'active isolated frame endpoint');
+    check(all(tree, 'iframe')[0].props.referrerPolicy === 'no-referrer', 'no referrer');
+    const before = all(tree, 'iframe')[0].props.src;
     all(tree, 'ComboboxControl')[0].props.onFilterValueChange('bet');
     tree = h.render({ timerId: 'alpha' });
     check(all(tree, 'ComboboxControl')[0].props.options.length === 1 && all(tree, 'ComboboxControl')[0].props.options[0].value === 'beta', 'search filters choices');
-    check(h.changes.length === 0 && all(tree, 'img')[0].props.src === before, 'typing does not apply a timer or refresh the image');
+    check(h.changes.length === 0 && all(tree, 'iframe')[0].props.src === before, 'typing does not apply a timer or refresh the image');
     button(tree, 'Refresh preview').props.onClick();
     tree = h.render({ timerId: 'alpha' });
-    check(all(tree, 'img')[0].props.src !== before && h.changes.length === 0, 'explicit preview refresh changes only image request');
+    check(all(tree, 'iframe')[0].props.src !== before && h.changes.length === 0, 'explicit preview refresh changes only image request');
     all(tree, 'AlignmentToolbar')[0].props.onChange('center');
     check(h.changes.at(-1).alignment === 'center' && Object.keys(h.changes.at(-1)).length === 1, 'native toolbar changes alignment only');
     all(tree, 'ComboboxControl')[0].props.onChange('beta');
     check(h.changes.at(-1).timerId === 'beta' && Object.keys(h.changes.at(-1)).length === 1, 'selection stores ID only');
     check(all(tree, 'a')[0].props.rel === 'noopener noreferrer', 'safe administrator link');
-    all(tree, 'img')[0].props.onError();
+    const source={postMessage(){}};all(tree,'iframe')[0].props.ref.current={contentWindow:source};
+    h.message({source:{},data:{type:'ecd-frame-status',ready:false}});
+    check(!all(h.render({timerId:'alpha'}),'Notice').some(n=>n.children[0].includes('could not load')),'another frame cannot spoof preview failure');
+    h.message({source,data:{type:'ecd-frame-status',ready:false}});
+    tree=h.render({timerId:'alpha'});all(tree,'iframe')[0].props.onLoad();
+    check(all(h.render({timerId:'alpha'}),'Notice').some(n=>n.children[0].includes('could not load')),'HTTP failure signal is not cleared by iframe load');
+    h.message({source,data:{type:'ecd-frame-status',ready:true}});tree=h.render({timerId:'alpha'});
+    all(tree, 'iframe')[0].props.onError();
     tree = h.render({ timerId: 'alpha' });
     check(all(tree, 'Notice').some(n => n.children[0].includes('could not load')), 'preview failure shown');
     button(tree, 'Refresh preview').props.onClick();
@@ -118,9 +129,11 @@ async function main() {
     respond({ ok: true, json: async () => ({ success: true, data: next }) });
     await pending;
     tree = h.render({ timerId: 'alpha' });
-    check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma' && t.label === 'Named administrator timer') && all(tree, 'img').length === 1, 'new campaign appears without remounting or changing the selected timer');
+    check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma' && t.label === 'Named administrator timer') && all(tree, 'iframe').length === 1, 'new campaign appears without remounting or changing the selected timer');
     const second = h.render({ timerId: 'beta' }, 'second');
-    check(all(second, 'img').length === 0 && all(second, 'Notice').some(n => n.children[0].includes('no longer')), 'deleted campaign is detected in another mounted block');
+    check(all(second, 'iframe').length === 0 && all(second, 'Notice').some(n => n.children[0].includes('no longer')), 'deleted campaign is detected in another mounted block');
+    h.runTimers();
+    check(!all(h.render({ timerId: 'beta' }, 'second'), 'Notice').some(n => n.children[0].includes('could not load')), 'deleted timer does not start a false preview timeout');
     check(h.changes.length === changeCount, 'catalog refresh never rewrites selected IDs or alignment');
     check(all(tree, 'p').some(n => n.props.role === 'status' && n.children[0] === 'Campaign list updated.'), 'refresh completion has an accessible status');
     const denied = button(tree, 'Refresh campaigns').props.onClick();
@@ -148,10 +161,25 @@ async function main() {
     check(all(authorTree, 'a').length === 0 && all(authorTree, 'Placeholder')[0].props.instructions.includes('administrator'), 'content editor gets guidance without management links');
     const truncated = harness({ ...initial(), truncated: true });
     const unlisted = truncated.render({ timerId: 'beyond-list' });
-    check(all(unlisted, 'TextControl').length === 1 && all(unlisted, 'img').length === 1, 'truncated catalog retains explicit entry for a known unlisted ID');
+    check(all(unlisted, 'TextControl').length === 1 && all(unlisted, 'iframe').length === 1, 'truncated catalog retains explicit entry for a known unlisted ID');
     const absent = harness(null);
     const absentTree = absent.render({});
-    check(all(absentTree, 'img').length === 0 && all(absentTree, 'a').length === 0 && !button(absentTree, 'Refresh campaigns'), 'absent bootstrap fails without data or request access');
+    check(all(absentTree, 'iframe').length === 0 && all(absentTree, 'a').length === 0 && !button(absentTree, 'Refresh campaigns'), 'absent bootstrap fails without data or request access');
+    const canvasListeners = new Set();
+    const canvasWindow = {
+        child: { postMessage() {} },
+        addEventListener(name, fn) { if (name === 'message') canvasListeners.add(fn); },
+        removeEventListener(name, fn) { canvasListeners.delete(fn); }
+    };
+    const nested = harness(initial(), undefined, canvasWindow);
+    nested.render({ timerId: 'alpha' });
+    check(canvasListeners.size === 1, 'nested editor listens in the canvas window that owns the preview');
+    nested.message({ source: canvasWindow.child, data: { type: 'ecd-frame-status', ready: false } });
+    check(!all(nested.render({ timerId: 'alpha' }), 'Notice').length, 'outer-window messages cannot change a nested preview');
+    canvasListeners.forEach(fn => fn({ source: canvasWindow.child, data: { type: 'ecd-frame-status', ready: false } }));
+    check(all(nested.render({ timerId: 'alpha' }), 'Notice').some(n => n.children[0].includes('could not load')), 'child failure reaches its owning canvas window');
+    nested.unmount();
+    check(canvasListeners.size === 0, 'unmount cleans up the owning canvas listener');
     console.log(`GUTENBERG EDITOR DOUBLES PASS: ${checks} assertions (not native browser)`);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

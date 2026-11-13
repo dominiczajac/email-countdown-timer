@@ -40,7 +40,7 @@ final class Email_Countdown_Timer_Uninstaller {
         $timers = get_option( self::TIMERS_OPTION, array() );
         if ( is_array( $timers ) ) {
             foreach ( array_keys( $timers ) as $id ) {
-                foreach ( array( 'png', 'gif', 'webp' ) as $format ) {
+                foreach ( array( 'png', 'gif', 'webp', 'frame' ) as $format ) {
                     self::delete_image_cache( 'ecd_v1211_' . hash( 'sha256', (string) $id . '|' . $format ) );
                 }
             }

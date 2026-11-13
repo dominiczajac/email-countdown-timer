@@ -1,4 +1,4 @@
-/* Explicit saves and local controls; the visible saved preview refreshes its minute-long GIF. */
+/* Explicit saves and local controls; the saved iframe clock ticks locally. */
 (() => {
     'use strict';
     document.querySelectorAll('[data-ect-auto-timezone]').forEach(marker => {
@@ -7,6 +7,10 @@
             const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if (!select) return;
             const options = Array.from(select.options);
+            const initial = options.find(option => option.defaultSelected) || options[0];
+            // A fast interaction or restored form can precede this footer script.
+            // Preserve a selection that already differs from the server default.
+            if (initial && select.value !== initial.value) return;
             const match = options.find(option => option.value === zone) || options.find(option => {
                 try { return Intl.DateTimeFormat(undefined, { timeZone: option.value }).resolvedOptions().timeZone === zone; }
                 catch (_) { return false; }
@@ -42,9 +46,6 @@
         const initial = serialize();
 
         const dirty = () => serialize() !== initial;
-        const state = root.querySelector('#ect-save-state');
-        const initialState = state ? state.textContent : '';
-        form.addEventListener('input', () => { if (state) state.textContent = dirty() ? state.dataset.dirty : initialState; });
         window.addEventListener('beforeunload', event => { if (!allowNavigation && dirty()) { event.preventDefault(); event.returnValue = ''; } });
         form.noValidate = true;
         form.addEventListener('submit', event => {
@@ -127,31 +128,16 @@
             });
         }
     }
-    const image = root.querySelector('#ect-preview');
-    if (image) {
-        const error = root.querySelector('#ect-image-error');
-        const failed = () => { error.hidden = false; announce(error.textContent); };
-        image.addEventListener('error', failed);
-        image.addEventListener('load', () => { error.hidden = image.naturalWidth > 1; });
-        if (image.complete && image.naturalWidth <= 1) error.hidden = false;
-    }
-    if (image && image.dataset.animated) {
-        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-        let refresh = null;
-        const update = () => {
-            clearTimeout(refresh);
-            if (document.hidden) return;
-            if (reduced.matches) { image.src = image.dataset.static; return; }
-            const url = new URL(image.dataset.animated, document.baseURI);
-            url.searchParams.set('_t', String(Date.now()));
-            image.src = url.href;
-            refresh = setTimeout(update, 58000);
-        };
-        document.addEventListener('visibilitychange', update);
-        if (reduced.addEventListener) reduced.addEventListener('change', update);
-        window.addEventListener('pagehide', () => clearTimeout(refresh));
-        window.addEventListener('pageshow', event => { if (event.persisted) update(); });
-        update();
+    const preview = root.querySelector('#ect-preview'), previewError = root.querySelector('#ect-image-error');
+    if (preview && previewError) {
+        let timeout = setTimeout(() => { previewError.hidden = false; },10000);
+        const ping = () => preview.contentWindow && preview.contentWindow.postMessage({type:'ecd-frame-ping'},'*');
+        preview.addEventListener('load',ping); ping();
+        window.addEventListener('message', event => {
+            if (event.source === preview.contentWindow && event.data && event.data.type === 'ecd-frame-status' && typeof event.data.ready === 'boolean') {
+                clearTimeout(timeout); previewError.hidden = event.data.ready;
+            }
+        });
     }
     root.querySelectorAll('[data-ect-copy]').forEach(button => {
         const code = document.getElementById(button.dataset.ectCopy);

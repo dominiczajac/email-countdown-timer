@@ -2,7 +2,7 @@
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.7.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.8.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
 
 ## Requirements
 
@@ -20,7 +20,7 @@ There are no bundled runtime Composer/npm dependencies. Five static faces across
 
 ## Existing WordPress.org submission
 
-The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors: ddoomm` identifies the maintainer's confirmed WordPress.org account. The submitted package must be the same archive validated by CI and the maintainer's live checks; see the [12.7.0 handoff and live checks](docs/REVIEW-HANDOFF-12.7.0.md). The maintainer handles WordPress.org submission personally.
+The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors: ddoomm` identifies the maintainer's confirmed WordPress.org account. The submitted package must be the same archive validated by CI and the maintainer's live checks; see the [12.8.0 handoff and live checks](docs/REVIEW-HANDOFF-12.8.0.md). The maintainer handles WordPress.org submission personally.
 
 ## Image after the countdown
 
@@ -94,7 +94,7 @@ Appearance presets combine colors and typography. **Classic** uses Lato; **Midni
 
 Cache write outcomes and an optional host entry-size budget are described in the [host hardening guide](docs/HOST-HARDENING.md), together with capacity planning and native-library patch maintenance. No visitor logging is added.
 
-The panel uses a small scoped stylesheet/script, system typography, a saved GIF preview that refreshes once every 58 seconds while its tab is visible and motion is allowed. Missing Imagick, reduced motion and no JavaScript keep a static preview. There is no per-keystroke rendering or animated list thumbnail. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
+The panel uses a small scoped stylesheet/script, system typography, a locally ticking saved canvas preview in a sandboxed iframe. PNG glyphs preserve the saved local font without making its file public. Imagick is not required; JavaScript is required for ticking. A pause control is available and there are no motion transitions. There is no per-keystroke rendering or animated list thumbnail. Warm image hits take no generation lock. A cold animation uses a shared database session lock and rechecks cache after waiting, so concurrent requests can share one generated image.
 
 After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline shows the configured end image, or zeros when no valid end image is available. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
@@ -106,7 +106,7 @@ New shortcode output includes renderer-derived `width`/`height`, an explicit CSS
 
 Custom theme CSS can still override this reservation. Purge the affected HTML page cache after changing geometry/fonts and recopy old HTML embeds to receive the new attributes. An unavailable native renderer or invalid saved configuration cannot provide a reliable calculated size. This is a targeted CLS mitigation, not a guarantee of whole-page LCP/INP/CLS scores.
 
-New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles, alt and an absolute deadline outside the image. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
+New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles and alt text, without an appended deadline paragraph. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
 
 With **Hide days**, new image responses keep at least the four-unit canvas width at the 24-hour boundary, including later fresh GIFs and static fallbacks. Days disappear below 24 hours; the remaining units are centered at the same glyph size. This avoids enlarging digits when email HTML retains its original display width. The image width below 24 hours changes from older versions; recopy embeds created with the older narrower image. An already downloaded/cached image cannot be replaced. The source-version bump invalidates plugin image signatures and admin assets once; page/email-provider caches remain external.
 
@@ -151,7 +151,7 @@ php tests/run.php
 php tests/uninstall.php
 ```
 
-The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Only the allowlisted example font and its notices are bundled; user fonts, tests, CI and development docs are not. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
+The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Only the five allowlisted font faces and their notices are bundled; user fonts, tests, CI and development docs are not. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
 
 [Wiki sources](docs/wiki/Home.md) · [Changelog](CHANGELOG.md) · [Directory readiness](docs/WORDPRESS-ORG-READINESS.md) · [Static fallback](docs/STATIC-FALLBACK.md)
 
@@ -172,3 +172,11 @@ polling. Cross-host tests need CORS. Success does not verify real senders, clien
 remote networks or proxy caches. [Scope and report policy](docs/STATUS-TROUBLESHOOTING.md).
 
 Copied Email HTML contains only the timer image, without an automatically appended Ends paragraph. Include any important deadline/terms in your own message content. Outlook playback remains controlled by the recipient client. Custom CSS and per-timer uninstall settings are not introduced.
+
+## External website iframe and active previews
+
+Copy **Embed Codes > External website (iframe) > Iframe HTML** into another site's HTML editor. The standalone view has a fixed reserved size, an opaque-origin `allow-scripts` sandbox, nonce CSP and no-referrer policy. It exposes only the existing public timer presentation, not private timer names, font files or paths. It uses the current device clock and the saved absolute deadline; keep the device clock correct. Pause freezes the displayed snapshot; resume catches up. No per-second HTTP or font downloads occur. A no-JS frame shows a static PNG snapshot (a warm raster cache can make that snapshot up to 60 seconds old).
+
+The saved editor and Gutenberg share this active raster view. In Gutenberg, refresh and pause/resume controls are in the sidebar; the canvas contains only the timer. Frontend block Image/Live text choices and email GIF behavior remain unchanged. Iframes are for websites, not mailing clients.
+
+Exclude `ecd_action=frame` as well as `ecd_action=render` from all page/edge caches, and permit the frame on its standalone URL. Host-level X-Frame-Options or CSP rules can still block it. Raster generation requires GD and the same session-lock topology as native rendering. Busy/unsupported locking or a small host cache budget uses an active system-font canvas instead of generating glyphs. Failures are visible and signal the parent editor. One reusable raster cache slot per timer is capped at 256 KiB (or a smaller host limit) and expires after 60 seconds and is invalidated by configuration/font/version changes. The existing host entry-size filter and opt-in uninstall include this slot. This is not a global rate limit.

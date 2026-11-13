@@ -1,20 +1,21 @@
 {
-  "plugin_version": "12.7.0",
-  "capture_source_commit": "f3aab2fe9175c80aaf42400d2fff7588d01a976a",
-  "zip_sha256": "616adf76957ce6d3d8b08d869a41b93b32692a4d9566e94f28e8797aa05fd18a",
-  "zip_bytes": 649330,
+  "plugin_version": "12.8.0",
+  "capture_source_commit": "ce440055ed545d19e7bcf3c3ae3a62a78b9f08c3",
+  "zip_sha256": "75cf2f312c0d67b5fd9023e56c400a04021b5da3cf7285ded4d288d289bdfa5f",
+  "zip_bytes": 656370,
   "installed_distribution_files": {
     "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
-    "assets/admin.css": "c5ed888b1e57d7564e48a2c21c69814fb4b4d17c8a1737dc74b6eaa5fe4455b5",
-    "assets/admin.js": "53c2f23650507dbce60a4476ac4aa4c607145e6d750093deb1a363e90d2242a2",
-    "assets/block-editor.js": "af354818699f03983713dce81a3d5ca524fb86849ec794a5a7def8ab5f1e754d",
+    "assets/admin.css": "24bd76db0be6ddc2fee4211e532c18160a0c7b1184cc2ff3aec246e730fdeeba",
+    "assets/admin.js": "d5bd25eaf74952838ea82990d6a2692071cd47c9db5637a98c5ac216f07708fa",
+    "assets/block-editor.js": "76001a9224f785b3ebdc88be7657938f0490aecf8c86b58cbefc3b680883aa53",
     "assets/countdown.js": "8e546b071af64c5288e7ffa6942c4cae97e6a2505989027c069282ee380c9c09",
     "assets/end-image.js": "1ebe68bc841771c5dcf73a570afb25c5301365d92dd17324bec66369a8164598",
+    "assets/frame.js": "74f963cdfea148a6ddc4bd5a120d6e8c3a142d14cfbabe9a4a3eff6d79f1dd8d",
     "assets/live-countdown.css": "540a32139b3394a3fe381d0cbe15cdafb83c09c64a870bb98b7887da91163793",
     "assets/live-countdown.js": "8b132a2dfc5110934c40b31e401aa2309ba86dcaf53f35c4e18d86073c31e70c",
     "assets/status.js": "d3f6307a801f90e1917a11a3895a7c8a827ab33a295472f6dd6a97b229faa15b",
-    "blocks/timer/block.json": "1823299177d14729a6d314cd2579d2b442e5fdc671ae010b1f0d2b12dea05436",
-    "email-countdown-timer.php": "7af8c4e9ebca75462e4b525e7886cbcb2a8e0f9f8ee82c6eb55041058a2c1c3b",
+    "blocks/timer/block.json": "1e9813cc1ed0e588699ad082841e738bdb33726bc18ecb175a5f3edbc765f7fa",
+    "email-countdown-timer.php": "ab92b6f0bebf5ca147734a2dec2549c7f096ef2fcfe53309c256abfc792e2e7c",
     "fonts/OFL-barlow-condensed.txt": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
     "fonts/OFL-crimson-text.txt": "50fd67cddc097377a5c871e8452b778bc5aedfa3480a705cb27c5e3a078218df",
     "fonts/OFL-ibm-plex-mono.txt": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da",
@@ -25,23 +26,24 @@
     "fonts/easy-countdown-crimson-text-regular.ttf": "48e6c5d5ad1d01599d374ecb817e15890d1feb3b8a3a88e527d44c90389e1f06",
     "fonts/easy-countdown-ibm-plex-mono-regular.ttf": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46",
     "fonts/easy-countdown-lato-regular.ttf": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
-    "includes/admin-view.php": "428cf26ab1f8271bd8cc9f304a1f1c92a83d3f3be044bcfe6a0f865f876bd10c",
+    "includes/admin-view.php": "830a7dec8451bab922d9a2e723deb9400319f96464b32747488f3fbfdfab7221",
     "includes/class-ecd-config.php": "39112d815dceedb2fe2f1b2132aa9b9d73942dd937a0dcf7c8af93c29883c66a",
-    "includes/class-ecd-plugin.php": "4ad066701bd3adaca4062ebf18eecebf5c9ebdf0f97156cd5a6b773ab9373c12",
+    "includes/class-ecd-plugin.php": "1b36586268b96a1aeaf6972d5550e386c57ba6ce4b793ba6cb807c9867e1e833",
     "includes/class-ecd-renderer.php": "73c0d90e7d066a8d90094a5a284f30c57dec7a611758a0f10dc9b1f1792b67e1",
-    "includes/class-email-countdown-timer-admin.php": "20ae5dbf76e56723ea6c4fdc0c1f77f9461b354553b76276ea59993318d76506",
-    "includes/class-email-countdown-timer-block.php": "5daaa90e55116d0c836ff819ad5efb3cabc10967a4c9625f98a9c60e34336905",
+    "includes/class-email-countdown-timer-admin.php": "61e89c104055439d75d1038973932e5bcd9c9bf7c7276bd7b22df69eda459e25",
+    "includes/class-email-countdown-timer-block.php": "a78ec4d1c1bef0bd6228287b775ca2982b95f1272efa7bb1d5bd55c026f632b2",
     "includes/class-email-countdown-timer-data-settings.php": "ec165d18066354f5775a36729921fe14552f719a08891e15e102bcd25eefdd44",
     "includes/class-email-countdown-timer-embed.php": "8f2343c4c2f89ad787abf1150b0ac49c43a890910ab92f7a0b22d1d6eef70729",
     "includes/class-email-countdown-timer-end-image.php": "70c654cd5b8fd92065648d32a6d8335536928c9fd25c045efccd249fca592970",
     "includes/class-email-countdown-timer-font-access.php": "d030ae551da81aa0054e64cd5d0fb718683b34c8a0af1b07408077a0b05bf840",
     "includes/class-email-countdown-timer-fonts.php": "9aa07e78cc7562e123a6c82e6c8337889f04463b4d3f9452f561250f40274897",
+    "includes/class-email-countdown-timer-frame.php": "9debeb15ed566405c1067895176a1e5247161aa74b79f8e490cba191551011fe",
     "includes/class-email-countdown-timer-live.php": "1ad3b1bf897c9e7f3493b7a88fda3aaca04d8ce3347f1fdd3a932b842bdca9b3",
     "includes/class-email-countdown-timer-privacy.php": "590149d55af8376ff59e93fdcdb5cc14b3d801ef4edab82b6b8c52e44a3e2181",
     "includes/class-email-countdown-timer-render-lock.php": "a5f72c2db072524bc0eef55bb7b79cc9701e45bb3146724655754e4dc4b6c8c3",
     "includes/class-email-countdown-timer-status.php": "e19ec1d8594b0cb57c538dc4d818bf3e223e27a0580e97eab1224e39ea08dbe7",
-    "includes/class-email-countdown-timer-uninstaller.php": "04058e1a95ddece62c969c97432f456a271db340366745a9d8cadc2a14c67c1e",
-    "readme.txt": "45b7ae2817891ead8b1e2bb947692b486c583ce3845bf0d2c84fb83a758406fd",
+    "includes/class-email-countdown-timer-uninstaller.php": "80f9d04f02ba4113969506d569bdbb34fd8266922ddd08fb72353c403ff71b3a",
+    "readme.txt": "bb511867333b19d317448632188f089fabeaa7b2d8dd4089d69427aa0a6b8acf",
     "uninstall.php": "52d1eb1af496b455805bc9b9c2920945d7c8725946dbb0b8cadacb08724312cf"
   },
   "environment": {
@@ -50,11 +52,11 @@
     "theme": "Twenty Twenty-Five",
     "theme_version": "1.5",
     "plugins": {
-      "easy-countdown": "12.7.0"
+      "easy-countdown": "12.8.0"
     },
     "mysql": "8.4.13",
     "server": "Native Apache in a disposable Docker container",
-    "capture_source_commit": "f3aab2fe9175c80aaf42400d2fff7588d01a976a"
+    "capture_source_commit": "ce440055ed545d19e7bcf3c3ae3a62a78b9f08c3"
   },
   "fixture_preferences": "Synthetic demo administrator, avatars disabled; native dashboard preferences; core welcome guide uses its real Close control when shown",
   "capture_kind": "Genuine browser screenshots of an owned synthetic WordPress installation; no edited UI pixels",
@@ -63,8 +65,8 @@
   "screenshots": [
     {
       "file": "screenshot-1.png",
-      "sha256": "8b0198e05ddffb44d12c7ebf43697cf41036d14965bb4a614a2c990154d13c3f",
-      "bytes": 69468,
+      "sha256": "b6d7c583e1ec9b0c6b483cc0c369254be4297a1c7c777f8ecf3b922aa1c931e0",
+      "bytes": 69455,
       "dimensions": [
         605,
         815
@@ -75,11 +77,11 @@
     },
     {
       "file": "screenshot-2.png",
-      "sha256": "aea02aa5dc091452ace034dd2caeafdab3ca73dc4b030065301d4e2b1cbfd873",
-      "bytes": 433744,
+      "sha256": "0aef73b2e0b27654095cc5a3e8451f68a00debfa1f33c93e8ef0b0a057dca79c",
+      "bytes": 472331,
       "dimensions": [
         1440,
-        2951
+        2948
       ],
       "view": "Saved timer, occasion presets and included Barlow Condensed",
       "area": "full-page",
@@ -87,11 +89,11 @@
     },
     {
       "file": "screenshot-3.png",
-      "sha256": "a0ee56aa487f0578fc981d2f441088bf5910c9aa9adfbe453e464f4b0995f271",
-      "bytes": 94767,
+      "sha256": "c05c98de90050e58fab720d7b8ad8c38a275bdb3ef5c3a49ec230ae2ae2cf136",
+      "bytes": 137483,
       "dimensions": [
         822,
-        986
+        1333
       ],
       "view": "Separate Website and Email embeds",
       "area": "#ect-embed",
@@ -99,8 +101,8 @@
     },
     {
       "file": "screenshot-4.png",
-      "sha256": "ac31fa65668db1c6e737718633b02b80e01cfcebc2fd72f55021224e4e08e6f6",
-      "bytes": 135089,
+      "sha256": "0659dac168871f2e0d06d0ab99d0b40bd724e3eee28e0f1a0cfa1f786ba72e30",
+      "bytes": 90520,
       "dimensions": [
         1440,
         1100
@@ -111,8 +113,8 @@
     },
     {
       "file": "screenshot-5.png",
-      "sha256": "fdcc3e707a1d0ce5b3a4f02149757604f4827f8cde4a7592ea0c1d6da9b29b3f",
-      "bytes": 234309,
+      "sha256": "dc443fc926d4a6fe1f19abfb62bccb17164df2239e2038271b77e0b55ff92610",
+      "bytes": 234064,
       "dimensions": [
         1440,
         2091
@@ -159,7 +161,7 @@
     ],
     "diagnostics": {
       "format": 1,
-      "plugin": "12.7.0",
+      "plugin": "12.8.0",
       "wordpress": "7.1.4",
       "php": "8.4.27",
       "checks": [
@@ -211,7 +213,7 @@
         600,
         79
       ],
-      "sha256": "78dd6f2c247e6e84a228426355ac6b2b3e78e2dbc71687dce09ce7e3b81e5113",
+      "sha256": "098af0d8fb4bbc187af1880408d9384f023d32175aa35bccc193e041e49427b3",
       "php_sapi": "apache2handler",
       "php": "8.4.27"
     },
@@ -219,8 +221,8 @@
   },
   "blocked_external_hosts": [],
   "page_errors": [],
-  "capture_source_tree": "32afcb670f130861051021883d539e3c1c418880",
-  "capture_finished_at_utc": "2026-11-13T11:21:54.305518+00:00",
+  "capture_source_tree": "7eee7cbf455acc45a74dfd2000f7248c935b3d6a",
+  "capture_finished_at_utc": "2026-11-13T13:44:08.208878+00:00",
   "captions": {
     "screenshot-1.png": "Use Quick Create on the WordPress dashboard.",
     "screenshot-2.png": "Set a deadline, time zone, local font and saved appearance.",

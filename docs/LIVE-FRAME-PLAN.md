@@ -1,0 +1,7 @@
+# Active previews and external iframe — implementation scope
+
+The maintainer explicitly requests active saved/editor previews, an external-site iframe embed, removal of canvas-only Gutenberg text/actions and the save-status badge, and dashboard title alignment. This authorizes one public read-only `ecd_action=frame` HTML view of an existing public timer. No font upload/download endpoint, recipient tracking or image-renderer change is introduced.
+
+The frame will rasterize a bounded digit/label atlas with the saved local face (including custom fonts). Browser canvas ticks locally, independently of Imagick and animated GIF playback. Font files remain private; only PNG glyphs and already-public timer presentation leave the server. Original GIF/email output and the frozen rendering oracle remain unchanged. A pause control handles auto-updating content; the editor's pause/refresh actions stay in the sidebar. The frame has a static no-JS fallback, fixed reserved dimensions, isolated CSP and sandboxed embedding. It accepts only existing canonical IDs and GET/HEAD; no arbitrary settings or remote URL input.
+
+Validation covers native visible ticking beyond one minute, no per-second network requests, expiry, multiple frames, fonts/labels/bounds, methods/headers/privacy, cross-origin embedding and Gutenberg editor behavior. Final current-head CI and both requested automated reviews remain merge gates. Packaging and fresh catalog materials follow the verified source; no release, WordPress.org or environment publication is performed.
