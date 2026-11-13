@@ -106,7 +106,7 @@ New shortcode output includes renderer-derived `width`/`height`, an explicit CSS
 
 Custom theme CSS can still override this reservation. Purge the affected HTML page cache after changing geometry/fonts and recopy old HTML embeds to receive the new attributes. An unavailable native renderer or invalid saved configuration cannot provide a reliable calculated size. This is a targeted CLS mitigation, not a guarantee of whole-page LCP/INP/CLS scores.
 
-New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles, alt and an absolute deadline outside the image. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
+New Email HTML uses explicit proportional dimensions, a maximum default display width of 600 pixels, inline styles and alt text, without an appended deadline paragraph. Place it inside your email template's content cell. No script, CSS animation, web font or remote service is required in the message. The chosen end image is fitted to the same image canvas.
 
 With **Hide days**, new image responses keep at least the four-unit canvas width at the 24-hour boundary, including later fresh GIFs and static fallbacks. Days disappear below 24 hours; the remaining units are centered at the same glyph size. This avoids enlarging digits when email HTML retains its original display width. The image width below 24 hours changes from older versions; recopy embeds created with the older narrower image. An already downloaded/cached image cannot be replaced. The source-version bump invalidates plugin image signatures and admin assets once; page/email-provider caches remain external.
 
@@ -151,7 +151,7 @@ php tests/run.php
 php tests/uninstall.php
 ```
 
-The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Only the allowlisted example font and its notices are bundled; user fonts, tests, CI and development docs are not. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
+The build uses an explicit runtime manifest, verifies metadata and refuses symlinks/missing/unlisted runtime files. Plugin Check, real WordPress lifecycle, browser and HTTP tests install this ZIP. Only the five allowlisted font faces and their notices are bundled; user fonts, tests, CI and development docs are not. Python is a packaging dependency only. [Build and verification instructions](docs/DISTRIBUTION-BUILD.md).
 
 [Wiki sources](docs/wiki/Home.md) · [Changelog](CHANGELOG.md) · [Directory readiness](docs/WORDPRESS-ORG-READINESS.md) · [Static fallback](docs/STATIC-FALLBACK.md)
 

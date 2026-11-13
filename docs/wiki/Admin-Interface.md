@@ -1,10 +1,10 @@
 # Admin Interface
 
-The 12.2.0 interface runs inside the existing **Easy Countdown** WordPress menu. All writes require `manage_options` and valid nonces. The option name, shortcode, image query parameters and existing campaign values remain compatible.
+The interface runs inside the existing **Easy Countdown** WordPress menu. All writes require `manage_options` and valid nonces. The option name, shortcode, image query parameters and existing campaign values remain compatible.
 
 ## Find or create a timer
 
-The default screen is **Your Timers**, with name/ID search and 25 records per page. It shows an optional campaign name alongside the immutable ID, deadline/time zone, a text status, **Edit** and **Get Embed Code**. It does not generate image thumbnails. Pagination limits HTML, not the size of the existing single database option containing all timers.
+The default screen is **Your Timers**, with name/ID search and 25 records per page. It shows saved timer names, deadline/time zone, a text status, **Edit** and **Get Embed Code**. It does not generate image thumbnails. Pagination limits HTML, not the size of the existing single database option containing all timers.
 
 Select **Create Timer**. Enter a required unique **Timer name**, deadline and time zone in **Schedule**, then choose the countdown preset/colors in **Appearance**. Internal IDs are generated on the server and hidden from ordinary management fields. Typography, custom labels and existing geometry controls remain available.
 
@@ -20,13 +20,13 @@ The **Time Zone** selector initializes new forms from the browser zone when supp
 
 **Create Timer** and **Save Changes** submit explicitly. There is no autosave. Invalid fields are marked individually and listed in an error summary. With JavaScript, focus moves to the summary and linked fields open their enclosing sections. Server validation preserves entered scalar values; malformed non-scalar requests are rejected. A failed database write must not show a success message.
 
-The unsaved-change badge tracks changes locally; browsers may warn before leaving an edited form. No request is made for each keystroke or color change. The contrast helper compares digit/label colors against the image background without changing campaign colors or guaranteeing accessibility of a complete email.
+The form tracks unsaved changes locally; browsers may warn before leaving an edited form. No save-status badge is shown. No request is made for each keystroke or color change. The contrast helper compares digit/label colors against the image background without changing campaign colors or guaranteeing accessibility of a complete email.
 
 ## Preview and embedding
 
-**Saved Preview** loads a static image from the existing image endpoint. It deliberately does not pretend to show unsaved values. Save first to update the image. If Imagick is present, **Preview Animation** loads the GIF only after a click. **Stop Preview** returns to the static image. A hidden browser tab also stops the preview; no refresh polling is installed.
+**Saved Preview** counts down locally in a sandboxed iframe using the saved deadline and rasterized local font. Save first to apply form changes. Pause/Resume freezes the snapshot and catches up when resumed; returning to a hidden tab catches up without repeated server requests. JavaScript is required for ticking; no-JS keeps a static PNG snapshot. There is no Preview Animation button or per-second polling.
 
-**Embed Codes** offers Image URL, Email HTML and Website Shortcode. The email HTML includes image alternative text and the absolute deadline as text. Review that text before mailing, especially after changing a campaign deadline. No image can guarantee correct countdown timing in all email clients because proxies, prefetch and caching remain outside this plugin's control.
+**Embed Codes** offers Image URL, image-only Email HTML, Website Shortcode and External website (iframe). Copy the iframe into another website’s HTML editor; scripts must be allowed and host framing headers must permit the standalone frame URL. Email HTML retains image alternative text without an appended deadline paragraph. Add explanatory deadline text in your own template when needed. No image can guarantee correct countdown timing in all email clients because proxies, prefetch and caching remain outside this plugin's control.
 
 **Copy Code** announces success only after the clipboard write succeeds. If access is unavailable, it selects the text and explains manual copying. **All formats (manual copy)** exposes normal read-only textareas for every format.
 
@@ -58,6 +58,6 @@ The selector offers the five registered bundled faces and installed local TTF/OT
 
 ## Saved animation and email copy
 
-The saved preview starts automatically when JavaScript is enabled, the page is visible and reduced motion is not requested. It refreshes after 58 seconds to continue from the current server time. There is no Preview Animation button. Reduced-motion and no-JavaScript views keep the static preview. Copied Email HTML is image-only; add deadline text in your own email content. Outlook animation follows client settings and is not forced. No Custom CSS or per-timer Clean uninstall control is added.
+The saved preview starts automatically with JavaScript and ticks without motion transitions, including with reduced motion. Imagick is not needed. The fallback PNG can be up to 60 seconds old when the glyph cache is warm; the active clock uses the saved absolute deadline and the device clock. Keep the device clock correct. Copied Email HTML is image-only; add deadline text in your own email content. Outlook animation follows client settings and is not forced. No Custom CSS or per-timer Clean uninstall control is added.
 
 Saved previews and Gutenberg now use locally ticking raster frames. The Gutenberg canvas has no static-preview copy or refresh buttons; actions remain in its sidebar. The editor has no save-status badge. Copy the new External website (iframe) HTML under Embed Codes for other websites; see the main README for cache/header requirements.

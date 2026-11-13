@@ -12,7 +12,7 @@ const initial = () => ({
     createUrl: 'http://example.invalid/wp-admin/admin.php?page=ecd-timers#ect-quick-create',
     refresh: { url: 'http://example.invalid/wp-admin/admin-ajax.php', postId: 12, nonce: 'synthetic-editor-nonce' }
 });
-function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }) {
+function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }, canvasWindow = null) {
     let definition, active, cursor;
     const changes = [], instances = new Map(),messages=new Set();
     const wp = {
@@ -51,6 +51,9 @@ function harness(settings = initial(), fetch = () => { throw new Error('Unexpect
             if (!instances.has(id)) instances.set(id, { slots: [], effects: [] });
             active = instances.get(id); cursor = 0;
             const tree = definition.edit({ attributes: attrs, setAttributes: value => changes.push(value) });
+            if (canvasWindow) all(tree, 'iframe').forEach(node => {
+                node.props.ref.current = { contentWindow: canvasWindow.child, ownerDocument: { defaultView: canvasWindow } };
+            });
             active.effects.splice(0).forEach(effect => effect());
             return tree;
         },
@@ -160,6 +163,21 @@ async function main() {
     const absent = harness(null);
     const absentTree = absent.render({});
     check(all(absentTree, 'iframe').length === 0 && all(absentTree, 'a').length === 0 && !button(absentTree, 'Refresh campaigns'), 'absent bootstrap fails without data or request access');
+    const canvasListeners = new Set();
+    const canvasWindow = {
+        child: { postMessage() {} },
+        addEventListener(name, fn) { if (name === 'message') canvasListeners.add(fn); },
+        removeEventListener(name, fn) { canvasListeners.delete(fn); }
+    };
+    const nested = harness(initial(), undefined, canvasWindow);
+    nested.render({ timerId: 'alpha' });
+    check(canvasListeners.size === 1, 'nested editor listens in the canvas window that owns the preview');
+    nested.message({ source: canvasWindow.child, data: { type: 'ecd-frame-status', ready: false } });
+    check(!all(nested.render({ timerId: 'alpha' }), 'Notice').length, 'outer-window messages cannot change a nested preview');
+    canvasListeners.forEach(fn => fn({ source: canvasWindow.child, data: { type: 'ecd-frame-status', ready: false } }));
+    check(all(nested.render({ timerId: 'alpha' }), 'Notice').some(n => n.children[0].includes('could not load')), 'child failure reaches its owning canvas window');
+    nested.unmount();
+    check(canvasListeners.size === 0, 'unmount cleans up the owning canvas listener');
     console.log(`GUTENBERG EDITOR DOUBLES PASS: ${checks} assertions (not native browser)`);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
