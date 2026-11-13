@@ -7,9 +7,9 @@ predeclare future tests successful or transfer older owner acceptance.
 
 ## Identified installation
 
-- Runtime/capture source: `6fe5d06b9fdf5d0c7eb713a08a51db637e85e3e8`.
-- Easy Countdown **12.7.0**, unreleased; **648,747 bytes / 39 files**.
-- ZIP SHA256: `cf8ac84b6a61853fc329d3aca51b6a2f4f82442b28bbbb66e9e0125eb5590148`.
+- Runtime/capture source: `4eada366cac7269420ed41ffc35eaae4874e207d`.
+- Easy Countdown **12.7.0**, unreleased; **648,798 bytes / 39 files**.
+- ZIP SHA256: `479950f0919b0ef499595d2b2ec9fed581990fe9a2656fe3a20edad1323cdaed`.
 - Five pinned static faces across four families, with four original OFL notices.
 - Barlow Condensed Black is the unmodified weight-900 upstream face;
   `fonts/README.txt` records immutable provenance and exact binary/license hashes.
