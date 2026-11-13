@@ -17,7 +17,7 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 **Features**
 
 * Native block with image or opt-in live text, timer selection and alignment.
-* Private campaign names, suggested IDs, deadlines and time zones.
+* Required timer names, internal IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
 * Custom colors, labels, sizes, four included fonts and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
@@ -45,7 +45,7 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 == Installation ==
 
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone, appearance and label language. Create Timer opens all settings.
+2. Use Quick Create in Easy Countdown or its dashboard widget: name, deadline, time zone, countdown preset and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
 4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
 5. Check the public image while logged out and send a test using your actual mailing platform.
@@ -74,7 +74,7 @@ Describe countdown and expiry: alt stays fixed during GIF playback. Use empty al
 Shortcodes reserve measured, proportional image space; themes can override it. After font/geometry changes, purge page HTML and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-Lato, IBM Plex Mono, Barlow Condensed and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF in Data Settings’ persistent directory. No remote importer.
+Lato, IBM Plex Mono, Barlow Condensed (Regular/Black) and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF in Data Settings’ persistent directory. No remote importer.
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -131,5 +131,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.6.1 =
-Back up fonts/data and update without uninstalling. Recopy old embeds made below 24h; new image canvases retain their width when days hide. Apply a style preset explicitly to change an existing font.
+= 12.7.0 =
+Use unique timer names in the current editor; existing URLs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Recopy older under-24h embeds when needed.

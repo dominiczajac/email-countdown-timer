@@ -30,13 +30,13 @@ Uninstall with the existing opt-in removes plugin-owned data; it does not erase 
 
 ## Editor and dashboard access
 
-Optional campaign names are stored with each timer for administrator-only display and search. Public IDs are suggested independently of those names. Names are excluded from renderer normalization, binary caches, shortcode/email HTML and Gutenberg's ID catalog. They are not image alternative text. An older form preserves a saved name, while an explicit empty name removes it. Opt-in uninstall removes names together with the timer option.
+Timer names are required in current creation/editing forms and stored as administrator-only metadata. Opaque public IDs are generated independently and hidden from ordinary management fields. Names are excluded from renderer normalization, image caches, shortcode/email HTML and the Gutenberg ID catalog. Existing unnamed records are preserved; explicitly submitted blank or duplicate names are rejected. Opt-in uninstall removes names with the timer option.
 
 The editor's explicit **Refresh campaigns** action makes one authenticated request to this site's WordPress admin AJAX handler. It sends a post-context ID and nonce and receives at most 250 campaign IDs and editor URLs. Permissions are rechecked on each request; there is no anonymous catalog, visitor polling or persistent client storage. The dashboard widget uses a native form and links, with no background requests or image generation. These editor/admin actions do not collect email opens or visitor analytics.
 
 ## Manual fonts and persistent storage
 
-Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint is provided. Four static faces (Lato, IBM Plex Mono, Barlow Condensed and Crimson Text) are bundled with original SIL OFL 1.1 notices and used locally, without remote font requests.
+Use trusted, licensed static TTF/OTF files in the persistent per-site uploads directory. Follow [Local Font Storage](../LOCAL-FONT-STORAGE.md) before the first upgrade from 12.3.1 or older. The copy tool requires an explicit administrator action and never deletes originals or overwrites conflicts. Font license notices must be copied manually. No browser upload endpoint is provided. Five static faces (Lato, IBM Plex Mono, Barlow Condensed and Crimson Text) are bundled with original SIL OFL 1.1 notices and used locally, without remote font requests.
 
 Opt-in uninstall removes only unchanged files recorded as owned by the copy tool. Manually uploaded/replaced files and empty directories may remain; a retained file is not visitor tracking.
 
