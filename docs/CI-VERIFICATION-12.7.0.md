@@ -7,9 +7,9 @@ predeclare future tests successful or transfer older owner acceptance.
 
 ## Identified installation
 
-- Runtime/capture source: `4eada366cac7269420ed41ffc35eaae4874e207d`.
-- Easy Countdown **12.7.0**, unreleased; **648,798 bytes / 39 files**.
-- ZIP SHA256: `479950f0919b0ef499595d2b2ec9fed581990fe9a2656fe3a20edad1323cdaed`.
+- Runtime/capture source: `5d4ddab1322e7e2baef24f3d99fe17eb8c3584b3`.
+- Easy Countdown **12.7.0**, unreleased; **648,810 bytes / 39 files**.
+- ZIP SHA256: `a9fcfabc1f002818a9c8cb7639a04bebfe1854b1e10b613442f492d98b001728`.
 - Five pinned static faces across four families, with four original OFL notices.
 - Barlow Condensed Black is the unmodified weight-900 upstream face;
   `fonts/README.txt` records immutable provenance and exact binary/license hashes.
@@ -20,7 +20,7 @@ manifest with final CI, rather than relying only on the version string.
 
 ## Executed local validation
 
-- **758 PHP assertions** with native GD/Imagick; **788** including the separate
+- **759 PHP assertions** with native GD/Imagick; **789** including the separate
   alt/compatibility suite. They cover required names, duplicate/archive collisions,
   immutable generated IDs, saved-name deletion warnings and stable rendering.
 - **74 block adapter assertions** after the core suite: administrator labels,

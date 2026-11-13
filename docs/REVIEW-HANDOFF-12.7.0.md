@@ -11,9 +11,9 @@ use the new [owner-pending worksheet](ACCEPTANCE-12.7.0.csv) for this candidate.
 - Display name/root/text domain: **Easy Countdown**, `easy-countdown`.
 - Main PHP file: `email-countdown-timer.php`; candidate version: **12.7.0**.
 - Confirmed WordPress.org contributor: **ddoomm** (Simple Fast Secure).
-- Installation ZIP: **648,798 bytes / 39 files**.
-- ZIP SHA256: `479950f0919b0ef499595d2b2ec9fed581990fe9a2656fe3a20edad1323cdaed`.
-- Runtime/capture source: `4eada366cac7269420ed41ffc35eaae4874e207d`.
+- Installation ZIP: **648,810 bytes / 39 files**.
+- ZIP SHA256: `a9fcfabc1f002818a9c8cb7639a04bebfe1854b1e10b613442f492d98b001728`.
+- Runtime/capture source: `5d4ddab1322e7e2baef24f3d99fe17eb8c3584b3`.
 - Integration and final verification: [PR #43](https://github.com/dominiczajac/email-countdown-timer/pull/43).
 
 Use the exact installation ZIP from the successful final CI's
