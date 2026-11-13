@@ -28,7 +28,7 @@
     function validCatalog(data) {
         return data && Array.isArray(data.timers) && data.timers.length <= 250 &&
             typeof data.truncated === 'boolean' &&
-            ['imageUrl', 'manageUrl', 'createUrl'].every(function (key) { return typeof data[key] === 'string'; }) &&
+            ['imageUrl', 'frameUrl', 'manageUrl', 'createUrl'].every(function (key) { return typeof data[key] === 'string'; }) &&
             data.timers.every(function (timer) {
                 return timer && typeof timer.value === 'string' && timer.value.length > 0 && timer.value.length <= 200 && typeof timer.label === 'string' && timer.label.length > 0 && timer.label.length <= 403;
             });

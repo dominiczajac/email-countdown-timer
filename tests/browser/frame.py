@@ -16,7 +16,7 @@ class Host(http.server.BaseHTTPRequestHandler):
  def log_message(self,*args):pass
 host=http.server.ThreadingHTTPServer(('127.0.0.1',0),Host);threading.Thread(target=host.serve_forever,daemon=True).start()
 try:
- wp('eval-file',str(root/'tests/browser/frame-fixture.php'))
+ wp('eval-file',os.environ.get('ECD_FRAME_FIXTURE',str(root/'tests/browser/frame-fixture.php')))
  with sync_playwright() as p:
   b=p.chromium.launch(executable_path=shutil.which('google-chrome') or shutil.which('chromium'),args=['--no-sandbox']);ctx=b.new_context(reduced_motion='reduce');api=ctx.request
   url=base+'/?ecd_action=frame&ecd=frame-live'
@@ -38,7 +38,7 @@ try:
   page.get_by_title('External countdown').content_frame.get_by_role('button',name='Resume countdown',exact=True).click();check(int(live.get_attribute('data-remaining'))<=int(held)-5,'resume catches up to the absolute deadline')
   page.screenshot(path=str(out/'external-frame.png'))
   # Use an unmodified clock to check the real server's near deadline.
-  wp('eval-file',str(root/'tests/browser/frame-fixture.php'))
+  wp('eval-file',os.environ.get('ECD_FRAME_FIXTURE',str(root/'tests/browser/frame-fixture.php')))
   real=b.new_context();ended=real.new_page();ended.goto(base+'/?ecd_action=frame&ecd=frame-expire');expect(ended.locator('#ect-frame-canvas')).to_be_visible();ended.wait_for_timeout(5000)
   check(ended.locator('#ect-frame-canvas').is_hidden() and ended.locator('main>img').evaluate('(im)=>im.naturalWidth>1'),'expiry loads the existing public end-image route')
   check(not any(urlsplit(u).hostname in ['fonts.googleapis.com','fonts.gstatic.com'] for u in requests),'no external font service')

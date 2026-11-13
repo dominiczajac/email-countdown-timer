@@ -5,3 +5,4 @@ $timers=get_option('easy_countdown_timers',array());$timers['frame-live']=$c+arr
 $timers['frame-invalid']=array_replace($c,array('fixed_width'=>5000));
 $timers['frame-expire']=array_replace($c,array('deadline'=>gmdate('Y-m-d\TH:i:s',time()+4),'expiry_image_id'=>(int)getenv('ECD_BROWSER_END_ID')));
 update_option('easy_countdown_timers',$timers,false);
+foreach(array('frame-live','frame-expire','frame-invalid') as $id) delete_transient('ecd_v1211_'.hash('sha256',$id.'|frame'));

@@ -59,3 +59,5 @@ The selector offers the five registered bundled faces and installed local TTF/OT
 ## Saved animation and email copy
 
 The saved preview starts automatically when JavaScript is enabled, the page is visible and reduced motion is not requested. It refreshes after 58 seconds to continue from the current server time. There is no Preview Animation button. Reduced-motion and no-JavaScript views keep the static preview. Copied Email HTML is image-only; add deadline text in your own email content. Outlook animation follows client settings and is not forced. No Custom CSS or per-timer Clean uninstall control is added.
+
+Saved previews and Gutenberg now use locally ticking raster frames. The Gutenberg canvas has no static-preview copy or refresh buttons; actions remain in its sidebar. The editor has no save-status badge. Copy the new External website (iframe) HTML under Embed Codes for other websites; see the main README for cache/header requirements.

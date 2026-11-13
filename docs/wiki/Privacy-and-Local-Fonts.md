@@ -49,3 +49,5 @@ On `admin_init`, the plugin registers suggested text through `wp_add_privacy_pol
 There is no working Google picker or API-key field. The [design proposal](../GOOGLE-FONTS-DESIGN.md) remains deferred. A future import would require explicit authorization and updated disclosure; no external request is silently enabled.
 
 References: [WordPress plugin privacy](https://developer.wordpress.org/plugins/privacy/), [WordPress update behavior](https://developer.wordpress.org/reference/classes/plugin_upgrader/upgrade/), [Google Fonts API](https://developers.google.com/fonts/docs/developer_api).
+
+Active iframe/editor previews expose bounded PNG glyph rasters, not font binaries or disk paths. Countdown updates run in the frame without per-second requests. A shared, non-personal 60-second raster cache uses one slot per timer and follows the existing uninstall policy. Frame-to-editor status messages carry only a boolean; the parent checks the exact child Window. The standalone frame is publicly embeddable, isolated by CSP and an opaque sandbox, and adds no tracking, storage or external font service.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 12.8.0 (review candidate)
+
+- Add active canvas previews to the saved editor and Gutenberg, independent of Imagick/GIF playback and without per-second PHP requests. Rasterize saved local fonts into bounded PNG glyphs; do not expose font files or paths. Preserve the original GIF renderer and email output.
+- Add the public read-only `ecd_action=frame` view and sandboxed iframe HTML/copy action for external websites. Keep fixed canvas limits, no-store/CSP/referrer headers, exact ID/method validation, a static no-JS fallback, pause/resume, sleep/bfcache/expiry handling and explicit failure signals.
+- Reuse one transient slot and session render lock per timer for raster caching; honor the existing entry budget and opt-in uninstall. No cookies, tracking, remote font service or new settings schema.
+- Move Gutenberg refresh/pause actions into the sidebar, remove static-preview canvas text and the save-status badge, and group dashboard title/icon to keep native alignment.
+
 ## 12.7.0 (review candidate)
 
 - Use required unique Timer names in current creation/editing forms and server-generated opaque internal IDs, hidden from ordinary management fields. Preserve existing IDs, image URLs and private metadata; validate submitted names against active and archived timers. Older integrations that omit the new metadata retain their compatibility path. Unnamed legacy records keep distinguishable ID-based display fallbacks. Unnamed or colliding legacy names require a unique name on the next save in the current editor.
