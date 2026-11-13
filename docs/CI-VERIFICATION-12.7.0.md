@@ -7,9 +7,9 @@ predeclare future tests successful or transfer older owner acceptance.
 
 ## Identified installation
 
-- Runtime/capture source: `5d4ddab1322e7e2baef24f3d99fe17eb8c3584b3`.
-- Easy Countdown **12.7.0**, unreleased; **648,810 bytes / 39 files**.
-- ZIP SHA256: `a9fcfabc1f002818a9c8cb7639a04bebfe1854b1e10b613442f492d98b001728`.
+- Runtime/capture source: `015d1bf25d11671fbcbe2c7e78a9a867adb84b86`.
+- Easy Countdown **12.7.0**, unreleased; **649,119 bytes / 39 files**.
+- ZIP SHA256: `dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd`.
 - Five pinned static faces across four families, with four original OFL notices.
 - Barlow Condensed Black is the unmodified weight-900 upstream face;
   `fonts/README.txt` records immutable provenance and exact binary/license hashes.
@@ -23,7 +23,7 @@ manifest with final CI, rather than relying only on the version string.
 - **759 PHP assertions** with native GD/Imagick; **789** including the separate
   alt/compatibility suite. They cover required names, duplicate/archive collisions,
   immutable generated IDs, saved-name deletion warnings and stable rendering.
-- **74 block adapter assertions** after the core suite: administrator labels,
+- **76 block adapter assertions** after the core suite: administrator labels,
   content-editor privacy, context permissions/nonces, list bounds and rendering.
 - JavaScript clipboard doubles plus browser-zone alias/unsupported-zone controls.
 - **16 packaging tests**: explicit manifest, tampering controls, no site fonts,
@@ -37,7 +37,7 @@ manifest with final CI, rather than relying only on the version string.
 
 Admin checks include real opaque IDs, unique-name validation, unchanged URLs,
 selected browser/site zones, duplicates, image-only HTML, no-JS, automatically
-active GIF, renewal after 58 seconds, and reduced-motion static fallback.
+active GIF, renewal after 58 seconds, and reduced-motion static fallback. Deterministic preview lifecycle checks separately cover hidden tabs, pagehide and persisted pageshow restoration.
 Maintenance separately proves the changed site-zone fallback without JavaScript.
 The hosted suite independently exercises FPM/JIT, multisite, Redis/database,
 HTTP image formats, plugin profiles and minimum/current WordPress versions.

@@ -23,8 +23,8 @@ browser timezone defaults, with existing URLs preserved. Copied email HTML is
 now image-only; existing copied emails are unaffected. It adds no developer telemetry, recipient tracking, external font service or
 public font upload endpoint.
 
-Installation ZIP: **648,810 bytes / 39 files**.
-SHA256: `a9fcfabc1f002818a9c8cb7639a04bebfe1854b1e10b613442f492d98b001728`.
+Installation ZIP: **649,119 bytes / 39 files**.
+SHA256: `dd476394303a4f92ec4ded0778a112afa0dd533b0e1de41b8ec49a250307e3fd`.
 
 Source and automated verification:
 https://github.com/dominiczajac/email-countdown-timer/pull/43
