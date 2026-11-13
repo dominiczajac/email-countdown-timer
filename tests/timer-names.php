@@ -19,4 +19,10 @@ $names_edit=array_merge(array_map('strval',$names_created[$names_id]),array('ecd
 ok(str_starts_with($submit_admin($names_edit),'redirect:') && isset($options['easy_countdown_timers'][$names_id]) && !isset($options['easy_countdown_timers']['malicious-new-id']), 'renaming cannot rewrite the original public ID');
 ok($options['easy_countdown_timers'][$names_id]['tz']==='UTC', 'renaming preserves saved timezone');
 ok(Email_Countdown_Timer_Admin::presets()['black-friday']['font']===Email_Countdown_Timer_Fonts::BARLOW_CONDENSED_BLACK, 'Black Friday chooses the genuine weight-900 face');
+$options['easy_countdown_timers']['other-timer'] = array_replace($names_created[$names_id], array('campaign_name'=>'Reserved name'));
+$submit_admin(array_replace($names_edit,array('campaign_name'=>'Reserved name')));
+ob_start(); $plugin->renderAdminPage(); $failed_name_view=ob_get_clean();
+foreach (array('Existing emails and pages', 'This cannot be undone') as $warning) {
+    ok(str_contains($failed_name_view, 'Permanently delete Renamed launch? '.$warning) && !str_contains($failed_name_view, 'Permanently delete Reserved name?'), 'failed rename deletion warning identifies the saved timer: '.$warning);
+}
 $options=$names_snapshot;$reset_admin();$_GET=$_POST=array();

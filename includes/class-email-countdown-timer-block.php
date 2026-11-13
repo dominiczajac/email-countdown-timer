@@ -106,7 +106,7 @@ final class Email_Countdown_Timer_Block {
         wp_send_json_success( self::catalog() );
     }
 
-    /** Bounded IDs only; used after authorization for both bootstrap and explicit refresh. */
+    /** Bounded references; display names are restricted to timer administrators. */
     private static function catalog(): array {
         $timers = get_option( 'easy_countdown_timers', array() );
         $choices = array();
@@ -122,7 +122,8 @@ final class Email_Countdown_Timer_Block {
                     break;
                 }
                 // Do not expose raw settings, attachment IDs, deadlines, alt or disk paths.
-                $choices[] = array( 'value' => $id, 'label' => $id );
+                $name = current_user_can( 'manage_options' ) ? Email_Countdown_Timer_Config::text( $config, 'campaign_name' ) : '';
+                $choices[] = array( 'value' => $id, 'label' => '' !== trim( $name ) ? $name : $id );
             }
         }
         usort( $choices, static fn( $a, $b ) => strnatcasecmp( $a['label'], $b['label'] ) );

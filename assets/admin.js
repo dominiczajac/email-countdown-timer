@@ -1,11 +1,17 @@
-/* Progressive enhancement only: explicit saves, local computation, no polling. */
+/* Explicit saves and local controls; the visible saved preview refreshes its minute-long GIF. */
 (() => {
     'use strict';
     document.querySelectorAll('[data-ect-auto-timezone]').forEach(marker => {
         const select = document.getElementById(marker.dataset.ectAutoTimezone);
         try {
             const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (select && Array.from(select.options).some(option => option.value === zone)) select.value = zone;
+            if (!select) return;
+            const options = Array.from(select.options);
+            const match = options.find(option => option.value === zone) || options.find(option => {
+                try { return Intl.DateTimeFormat(undefined, { timeZone: option.value }).resolvedOptions().timeZone === zone; }
+                catch (_) { return false; }
+            });
+            if (match) select.value = match.value;
         } catch (_) { /* Keep the configured WordPress timezone as fallback. */ }
     });
     const root = document.querySelector('[data-ect-admin]');

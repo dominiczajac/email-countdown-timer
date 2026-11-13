@@ -22,7 +22,7 @@ The GitHub repository remains `dominiczajac/email-countdown-timer`. Stored optio
 
 ## Fonts and end images
 
-Use the existing persistent per-site directory, normally `wp-content/uploads/email-countdown-timer/fonts/`. Multisite appends a site-ID directory. See [Local font storage](../LOCAL-FONT-STORAGE.md) and [Font HTTP access](Font-HTTP-Access.md). Five optional static faces are bundled with original SIL OFL 1.1 notices: Lato, IBM Plex Mono, Barlow Condensed and Crimson Text. No Google importer is implemented.
+Use the existing persistent per-site directory, normally `wp-content/uploads/email-countdown-timer/fonts/`. Multisite appends a site-ID directory. See [Local font storage](../LOCAL-FONT-STORAGE.md) and [Font HTTP access](Font-HTTP-Access.md). Five optional static faces across four families are bundled with original SIL OFL 1.1 notices: Lato, IBM Plex Mono, Barlow Condensed and Crimson Text. No Google importer is implemented.
 
 The optional **After Countdown** image is selected from the site's Media Library. It stays user-owned and is not deleted with a timer or during uninstall. See [End image](End-Image.md) for formats, limits, deadline behavior and email-cache limitations.
 

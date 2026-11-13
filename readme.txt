@@ -19,9 +19,9 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 * Native block with image or opt-in live text, timer selection and alignment.
 * Required timer names, internal IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
-* Custom colors, labels, sizes, four included fonts and local TTF/OTF files.
+* Custom colors, labels, sizes, five local font faces and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
-* Alt text, a visible email deadline and reserved image space.
+* Alt text and reserved image space.
 * Holiday/occasion presets, Quick Create and a dashboard widget.
 * On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
@@ -132,4 +132,4 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Upgrade Notice ==
 
 = 12.7.0 =
-Use unique timer names in the current editor; existing URLs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Recopy older under-24h embeds when needed.
+Use unique timer names in the current editor; existing URLs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.

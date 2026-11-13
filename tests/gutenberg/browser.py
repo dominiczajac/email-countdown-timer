@@ -60,22 +60,23 @@ def insert(page, attributes):
         return block.clientId;
     }""", attributes)
 
-def select_timer_with_keyboard(page, block_id, timer_id):
+def select_timer_with_keyboard(page, block_id, timer_id, label=None):
+    label = label or timer_id
     combo = page.get_by_role('combobox', name='Timer', exact=True).first
     try:
         # Focus in a separate gesture. Core 6.4 need not reopen a collapsed,
         # already-focused field on click; typing opens its actual result list.
         combo.click()
         expect(combo).to_be_focused()
-        combo.fill(timer_id)
-        expect(combo).to_have_value(timer_id)
+        combo.fill(label)
+        expect(combo).to_have_value(label)
         expect(combo).to_have_attribute('aria-expanded', 'true')
         # Other sidebar fields contain native <option> elements too. Inspect
         # the timer's expanded listbox, rather than every option in the page.
         menu = page.get_by_role('listbox')
         expect(menu).to_be_visible()
         expect(menu.get_by_role('option')).to_have_count(1)
-        option = menu.get_by_role('option', name=timer_id, exact=True)
+        option = menu.get_by_role('option', name=label, exact=True)
         expect(option).to_be_visible()
         combo.press('ArrowDown')
         expect(combo).to_be_focused()
@@ -142,7 +143,7 @@ try:
         page.bring_to_front()
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
         expect(frame.get_by_text('Campaign list updated.', exact=True)).to_be_visible()
-        select_timer_with_keyboard(page, first, new_timer_id)
+        select_timer_with_keyboard(page, first, new_timer_id, 'New block timer')
         check(True, 'newly created campaign becomes selectable without editor reload')
         wp('option', 'update', 'easy_countdown_timers', original, '--format=json')
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
