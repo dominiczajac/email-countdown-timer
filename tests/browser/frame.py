@@ -24,6 +24,7 @@ try:
   check(api.get(url+'&_t=ignored').headers.get('x-email-countdown-frame-cache')=='hit','warm request reuses one frame cache slot despite cache buster')
   text=cold.text();check('PRIVATE-FRAME-ONLY' not in text and '.ttf' not in text and '/var/www/' not in text,'HTML exposes raster glyphs without names or font files/paths')
   check('frame-ancestors *' in cold.headers.get('content-security-policy','') and 'X-Frame-Options'.lower() not in cold.headers,'only the standalone frame permits external parents')
+  check('sandbox allow-scripts' in cold.headers.get('content-security-policy',''),'server CSP enforces opaque sandbox even without an iframe attribute')
   check('no-store' in cold.headers.get('cache-control','') and cold.headers.get('referrer-policy')=='no-referrer','dynamic HTML and referrer headers')
   head=api.head(url);check(head.status==200 and not head.body(),'HEAD has an empty body')
   denied=api.post(url);check(denied.status==405 and denied.headers.get('allow')=='GET, HEAD','write methods rejected')

@@ -6,7 +6,7 @@
     var ctx = canvas.getContext('2d');
     function status(ready) { window.parent.postMessage({type:'ecd-frame-status',ready:ready},'*'); }
     if (!ctx) { status(false); return; }
-    var paused = data.paused, timer = null, ended = false, drawn = false;
+    var paused = data.paused, timer = null, ended = false, drawn = false, ready = false;
     function load(sprite) {
         return new Promise(function (resolve, reject) {
             var image = new Image(); image.onload = function () { sprite.image = image; resolve(); }; image.onerror = reject; image.src = sprite.uri;
@@ -41,15 +41,15 @@
             x+=data.cols[i];
             if(i<3) { var colon=data.digits[':']; if(data.text) { ctx.font=data.dh+'px monospace';ctx.fillStyle=data.dc;ctx.fillText(':',x+15,10+data.dh,10); } else ctx.drawImage(colon.image,x+10,10+data.dh-colon.h); x+=20+colon.w; }
         }
-        if(firstDraw) { document.getElementById('ect-frame-fallback').hidden=true;canvas.hidden=false;button.hidden=false;drawn=true;status(true); }
+        if(firstDraw) { document.getElementById('ect-frame-fallback').hidden=true;canvas.hidden=false;button.hidden=false;drawn=true; }
         button.textContent = button.dataset[paused ? 'resume' : 'pause']; button.disabled = left === 0;
         if(!paused && left > 0) timer = setTimeout(draw,1000-Date.now()%1000);
     }
     Promise.all(data.text?[]:Object.values(data.digits).concat(data.labels).map(load)).then(function () {
-        draw();
+        ready=true;draw();status(true);
         button.addEventListener('click',function(){paused=!paused;draw();});
         document.addEventListener('visibilitychange',function(){if(!paused || !drawn)draw();});
-        window.addEventListener('message',function(e){if(e.source===window.parent && e.data && e.data.type==='ecd-frame-ping') { if(drawn) status(true); else draw(); }});
+        window.addEventListener('message',function(e){if(e.source===window.parent && e.data && e.data.type==='ecd-frame-ping') { if(ready) status(true); }});
         window.addEventListener('pagehide',function(){clearTimeout(timer);});
         window.addEventListener('pageshow',function(e){if(e.persisted && (!paused || !drawn))draw();});
     }).catch(function(){ status(false); /* The saved static PNG remains available. */ });

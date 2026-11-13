@@ -14,7 +14,7 @@ const initial = () => ({
 });
 function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }, canvasWindow = null) {
     let definition, active, cursor;
-    const changes = [], instances = new Map(),messages=new Set();
+    const changes = [], instances = new Map(),messages=new Set(), timers=new Map(); let nextTimer=0;
     const wp = {
         i18n: { __: text => text },
         element: {
@@ -44,9 +44,9 @@ function harness(settings = initial(), fetch = () => { throw new Error('Unexpect
         blockEditor: { InspectorControls: 'InspectorControls', BlockControls: 'BlockControls', AlignmentToolbar: 'AlignmentToolbar', useBlockProps: () => ({ className: 'wp-block-easy-countdown-timer' }) },
         blocks: { registerBlockType: (name, value) => { assert.equal(name, 'easy-countdown/timer'); definition = value; } }
     };
-    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings,addEventListener(name,fn){if(name==='message')messages.add(fn);},removeEventListener(name,fn){messages.delete(fn);} },setTimeout:()=>1,clearTimeout(){}, Date: { now: () => 1000 } });
+    vm.runInNewContext(fs.readFileSync('assets/block-editor.js', 'utf8'), { window: { wp, fetch, emailCountdownTimerBlock: settings,addEventListener(name,fn){if(name==='message')messages.add(fn);},removeEventListener(name,fn){messages.delete(fn);} },setTimeout:fn=>{timers.set(++nextTimer,fn);return nextTimer;},clearTimeout(id){timers.delete(id);}, Date: { now: () => 1000 } });
     return {
-        definition, changes, message(event){messages.forEach(fn=>fn(event));},
+        definition, changes, runTimers(){for(const [id,fn] of [...timers]) {timers.delete(id);fn();}}, message(event){messages.forEach(fn=>fn(event));},
         render(attrs, id = 'first') {
             if (!instances.has(id)) instances.set(id, { slots: [], effects: [] });
             active = instances.get(id); cursor = 0;
@@ -132,6 +132,8 @@ async function main() {
     check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma' && t.label === 'Named administrator timer') && all(tree, 'iframe').length === 1, 'new campaign appears without remounting or changing the selected timer');
     const second = h.render({ timerId: 'beta' }, 'second');
     check(all(second, 'iframe').length === 0 && all(second, 'Notice').some(n => n.children[0].includes('no longer')), 'deleted campaign is detected in another mounted block');
+    h.runTimers();
+    check(!all(h.render({ timerId: 'beta' }, 'second'), 'Notice').some(n => n.children[0].includes('could not load')), 'deleted timer does not start a false preview timeout');
     check(h.changes.length === changeCount, 'catalog refresh never rewrites selected IDs or alignment');
     check(all(tree, 'p').some(n => n.props.role === 'status' && n.children[0] === 'Campaign list updated.'), 'refresh completion has an accessible status');
     const denied = button(tree, 'Refresh campaigns').props.onClick();

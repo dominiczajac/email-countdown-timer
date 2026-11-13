@@ -72,13 +72,27 @@ final class Email_Countdown_Timer_Frame {
     }
 
     /** One reusable cache slot and existing session lock per timer, never per visitor. */
+    private static function cache_entry(string $key, bool $fresh = false) {
+        if ($fresh && wp_using_ext_object_cache()) {
+            return wp_cache_get($key, 'transient', true);
+        }
+        if ($fresh) {
+            // Clear only request-local Options API lookup caches. Keep the
+            // completed transient another lock owner may just have published.
+            wp_cache_delete('_transient_'.$key, 'options');
+            wp_cache_delete('_transient_timeout_'.$key, 'options');
+            wp_cache_delete('notoptions', 'options');
+        }
+        return get_transient($key);
+    }
+
     private static function cached_payload(string $id, array $raw): array {
         require_once __DIR__.'/class-email-countdown-timer-render-lock.php';
         $c=Email_Countdown_Timer_Config::normalize($raw); unset($c['alt']);
         $deadline=Email_Countdown_Timer_Config::deadline($c); $now=time(); $font=Email_Countdown_Timer_Config::fontPath($c['font']);
         $signature=hash('sha256',serialize(array($c,$font,$font?filemtime($font):0,EMAIL_COUNTDOWN_TIMER_VERSION,max(2,strlen((string)intdiv(max(0,$deadline-$now),86400))),$now>=$deadline)));
         $key='ecd_v1211_'.hash('sha256',$id.'|frame');
-        $entry=get_transient($key);
+        $entry=self::cache_entry($key);
         if(is_array($entry) && ($entry['signature']??'')===$signature && isset($entry['data'])) { header('X-Email-Countdown-Frame-Cache: hit'); return $entry['data']; }
         $limit=(int)apply_filters('email_countdown_timer_cache_entry_max_bytes',0);
         $limit=$limit>0?min($limit,262144):262144;
@@ -86,7 +100,7 @@ final class Email_Countdown_Timer_Frame {
         $attempt=Email_Countdown_Timer_Render_Lock::attempt($key,1); $lock=$attempt['lock'];
         if($lock===null) { header('X-Email-Countdown-Frame-Cache: degraded'); return self::text_payload($id,$c); }
         try {
-            $entry=get_transient($key);
+            $entry=self::cache_entry($key,true);
             if(is_array($entry) && ($entry['signature']??'')===$signature && isset($entry['data'])) { header('X-Email-Countdown-Frame-Cache: hit'); return $entry['data']; }
             $data=self::payload($id,$c,$now);
             if(!$lock->owns()) throw new RuntimeException('Frame render lock lost.');
@@ -101,14 +115,15 @@ final class Email_Countdown_Timer_Frame {
     public static function document( string $id, array $raw, bool $paused = false ): string {
         $data=self::cached_payload($id,$raw); $data['paused']=$paused;
         if($data['deadline']<=time() && $data['end']!=='') $data['fallback']=add_query_arg(array('ecd_action'=>'render','ecd'=>$id,'mode'=>'static'),home_url('/'));
+        $fallback=$data['fallback']; unset($data['fallback']);
         $alt=Email_Countdown_Timer_Config::alt($raw,__('Countdown','easy-countdown'));
         $nonce=base64_encode(random_bytes(18));
-        header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; style-src 'nonce-$nonce'; img-src 'self' data:; frame-ancestors *; base-uri 'none'; form-action 'none'");
+        header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; style-src 'nonce-$nonce'; img-src 'self' data:; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
         header_remove('X-Frame-Options');
         ob_start(); ?>
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo esc_html__('Countdown timer','easy-countdown'); ?></title>
 <style nonce="<?php echo esc_attr($nonce); ?>">html,body{margin:0;padding:0;background:transparent;font:13px system-ui,sans-serif}main{text-align:center}canvas,img{display:block;max-width:100%;height:auto;margin:auto}[hidden]{display:none!important}button{font:inherit;min-height:30px;margin:4px;cursor:pointer}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}</style></head><body><main>
-<img id="ect-frame-fallback" src="<?php echo esc_attr($data['fallback']); ?>" alt="<?php echo esc_attr($alt); ?>">
+<img id="ect-frame-fallback" src="<?php echo esc_attr($fallback); ?>" alt="<?php echo esc_attr($alt); ?>">
 <canvas id="ect-frame-canvas" width="<?php echo esc_attr((string)$data['w']); ?>" height="<?php echo esc_attr((string)$data['h']); ?>" role="img" aria-label="<?php echo esc_attr($alt); ?>" hidden></canvas>
 <button id="ect-frame-pause" type="button" data-pause="<?php echo esc_attr__('Pause countdown','easy-countdown'); ?>" data-resume="<?php echo esc_attr__('Resume countdown','easy-countdown'); ?>" hidden><?php echo esc_html__('Pause countdown','easy-countdown'); ?></button>
 <p class="sr"><?php echo esc_html__('Deadline:','easy-countdown').' '.esc_html(Email_Countdown_Timer_Config::text($raw,'deadline')).' '.esc_html(Email_Countdown_Timer_Config::text($raw,'tz')); ?></p>
@@ -121,7 +136,7 @@ final class Email_Countdown_Timer_Frame {
         status_header($status);
         if($head) return;
         $nonce=base64_encode(random_bytes(18));
-        header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; frame-ancestors *; base-uri 'none'; form-action 'none'");
+        header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
         echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','easy-countdown').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
     }
 
@@ -130,7 +145,7 @@ final class Email_Countdown_Timer_Frame {
         if(Email_Countdown_Timer_Config::text($_GET,'ecd_action')!=='frame') return;
         while(ob_get_level()>0) { $buffer=ob_get_status(); if(!(($buffer['flags']??0)&PHP_OUTPUT_HANDLER_REMOVABLE)) break; ob_end_clean(); }
         header('Content-Type: text/html; charset=UTF-8'); header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, no-transform'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: no-referrer');
-        header_remove('X-Frame-Options'); header("Content-Security-Policy: default-src 'none'; frame-ancestors *; base-uri 'none'; form-action 'none'");
+        header_remove('X-Frame-Options'); header("Content-Security-Policy: default-src 'none'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
         $method=Email_Countdown_Timer_Config::text($_SERVER,'REQUEST_METHOD','GET');
         if(!in_array($method,array('GET','HEAD'),true)) { header('Allow: GET, HEAD'); status_header(405); exit; }
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Validated canonical public identifier; does not authorize a mutation.

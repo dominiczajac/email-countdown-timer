@@ -83,6 +83,8 @@
         wp.element.useEffect(function () { setFailed(false); setDraft(timerId); }, [timerId]);
         var pauseState = wp.element.useState(false);
         var paused = pauseState[0];
+        var found = timers.some(function (timer) { return timer.value === timerId; });
+        var missing = !!timerId && !found && !settings.truncated;
         var previewRef = wp.element.useRef(null);
         var previewUrl = wp.element.useMemo(function () {
             if (!timerId || !settings.frameUrl) return '';
@@ -97,11 +99,9 @@
             }
             var host = previewRef.current && previewRef.current.ownerDocument ? previewRef.current.ownerDocument.defaultView : window;
             host.addEventListener('message',message);
-            if(previewUrl) timer=setTimeout(function(){setFailed(true);},10000);
+            if(previewUrl && !missing) timer=setTimeout(function(){setFailed(true);},10000);
             return function(){host.removeEventListener('message',message);clearTimeout(timer);};
-        },[previewUrl]);
-        var found = timers.some(function (timer) { return timer.value === timerId; });
-        var missing = !!timerId && !found && !settings.truncated;
+        },[previewUrl,missing]);
         var blockProps = wp.blockEditor.useBlockProps();
         var controls = el(wp.blockEditor.InspectorControls, {},
             el(wp.components.PanelBody, { title: __('Countdown', 'easy-countdown'), initialOpen: true },
