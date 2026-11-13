@@ -7,13 +7,13 @@ let checks = 0;
 function check(value, message) { assert.ok(value, message); checks++; }
 function editor({ clipboard = true, secure = true, reject = false } = {}) {
     const fields = new Map(), buttons = [], writes = [], announcements = [];
-    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">\n<p>Ends: 2031-08-20 UTC</p>'], ['ect-embed-code', 'https://example.invalid/?mode=email']]) {
+    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email']]) {
         const code = { value, focused: false, selected: false, focus() { this.focused = true; }, select() { this.selected = true; } };
         fields.set(id, code); fields.set(id + '-result', { textContent: '' });
         buttons.push({ hidden: true, dataset: { ectCopy: id, success: 'Copied.', fallback: 'Select and copy manually.' }, addEventListener(name, action) { this[name] = action; } });
     }
     const root = { querySelector: () => null, querySelectorAll: selector => selector === '[data-ect-copy]' ? buttons : [] };
-    const document = { querySelector: () => root, getElementById: id => fields.get(id) };
+    const document = { querySelectorAll: () => [], querySelector: () => root, getElementById: id => fields.get(id) };
     const wp = { a11y: { speak: message => announcements.push(message) } };
     const navigator = clipboard ? { clipboard: { writeText: async value => { if (reject) throw new Error('denied'); writes.push(value); } } } : {};
     vm.runInNewContext(fs.readFileSync('assets/admin.js', 'utf8'), { document, window: { wp, isSecureContext: secure }, wp, navigator });
@@ -39,3 +39,30 @@ async function main() {
     console.log(`ADMIN COPY DOUBLES PASS: ${checks} assertions (not native browser)`);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
+
+// Actual initializer with Intl canonicalization: a system tzdb can omit backward aliases.
+for (const [zone, expected] of [['Asia/Calcutta','Asia/Kolkata'], ['Unsupported/Zone','UTC']]) {
+    const select = { value: 'UTC', options: [{ value:'UTC' },{ value:'Asia/Kolkata' }] };
+    const document = { querySelectorAll: () => [{ dataset:{ ectAutoTimezone:'zone' } }], getElementById: () => select, querySelector: () => null };
+    const Intl = { DateTimeFormat: (_locale, options) => ({ resolvedOptions: () => ({ timeZone:options ? (options.timeZone==='Asia/Kolkata'?'Asia/Calcutta':options.timeZone) : zone }) }) };
+    vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, Intl });
+    assert.equal(select.value,expected,'alias selects equivalent supported zone, unknown zone keeps site fallback');
+}
+// Saved-preview lifecycle with deterministic browser event/timer doubles.
+{
+    let next = 0;
+    const timers = new Map(), events = {}, media = { matches: false, addEventListener(name, fn) { events['media-' + name] = fn; } };
+    const image = { src: '', dataset: { animated: 'https://example.invalid/?mode=email', static: 'https://example.invalid/?mode=static' }, naturalWidth:600, complete:true, addEventListener() {} };
+    const error = { hidden:true };
+    const root = { querySelector: s => s === '#ect-preview' ? image : s === '#ect-image-error' ? error : null, querySelectorAll: () => [] };
+    const document = { hidden:false, baseURI:'https://example.invalid/', querySelectorAll:()=>[], querySelector:()=>root, addEventListener(name,fn){ events[name]=fn; } };
+    const window = { matchMedia:()=>media, addEventListener(name,fn){ events[name]=fn; } };
+    vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, window, URL, setTimeout: (fn,delay) => { timers.set(++next,{fn,delay}); return next; }, clearTimeout:id=>timers.delete(id) });
+    assert.match(image.src,/mode=email/);assert.equal([...timers.values()][0].delay,58000);
+    document.hidden=true;events.visibilitychange();assert.equal(timers.size,0,'hidden preview stops renewal');
+    document.hidden=false;events.visibilitychange();assert.equal(timers.size,1,'visible preview resumes');
+    events.pagehide();assert.equal(timers.size,0,'leaving page clears renewal');
+    events.pageshow({persisted:true});assert.equal(timers.size,1,'bfcache restoration resumes renewal');
+    media.matches=true;events['media-change']();assert.equal(timers.size,0);assert.match(image.src,/mode=static/);
+    console.log('ADMIN PREVIEW LIFECYCLE DOUBLES PASS: visible, hidden, pagehide, bfcache and reduced motion');
+}

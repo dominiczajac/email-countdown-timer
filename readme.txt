@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.6.1
+Stable tag: 12.7.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,11 +17,11 @@ Create countdowns locally. Copy Email HTML/Image URL into a mailing platform or 
 **Features**
 
 * Native block with image or opt-in live text, timer selection and alignment.
-* Private campaign names, suggested IDs, deadlines and time zones.
+* Required timer names, internal IDs, deadlines and time zones.
 * 60 one-second GIF frames when animation requirements are met.
-* Custom colors, labels, sizes, four included fonts and local TTF/OTF files.
+* Custom colors, labels, sizes, five local font faces and local TTF/OTF files.
 * Optional, proportionally fitted image after expiry.
-* Alt text, a visible email deadline and reserved image space.
+* Alt text and reserved image space.
 * Holiday/occasion presets, Quick Create and a dashboard widget.
 * On-demand status checks, an anonymous image test and a redacted support report.
 * English, Polish, German, Spanish and French label presets.
@@ -45,7 +45,7 @@ Hosting, WordPress, other plugins and email proxies have separate processing and
 == Installation ==
 
 1. Install the Easy Countdown ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Use Quick Create in Easy Countdown or its dashboard widget: ID, deadline, time zone, appearance and label language. Create Timer opens all settings.
+2. Use Quick Create in Easy Countdown or its dashboard widget: name, deadline, time zone, countdown preset and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
 4. Embed Codes > Website provides the block/shortcode. Email provides HTML and an Image URL. Replace promotion in [ecd_timer id="promotion"].
 5. Check the public image while logged out and send a test using your actual mailing platform.
@@ -74,7 +74,7 @@ Describe countdown and expiry: alt stays fixed during GIF playback. Use empty al
 Shortcodes reserve measured, proportional image space; themes can override it. After font/geometry changes, purge page HTML and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-Lato, IBM Plex Mono, Barlow Condensed and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF in Data Settings’ persistent directory. No remote importer.
+Lato, IBM Plex Mono, Barlow Condensed (Regular/Black) and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF in Data Settings’ persistent directory. No remote importer.
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
@@ -107,6 +107,12 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
+= 12.7.0 =
+* Simplify creation with required unique timer names and internal IDs.
+* Initialize new time zones locally; animate saved previews automatically.
+* Add Barlow Condensed Black for Black Friday; simplify email HTML.
+* Use Polish labels Dni, Godzin, Minut, Sekund.
+
 = 12.6.1 =
 
 * Respect static PNG/WebP preferences and WebP refusal; retain animated GIF.
@@ -114,11 +120,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 * Keep canvas width when days hide below 24h, preventing enlarged email digits.
 
 = 12.6.0 =
-* Add cache outcomes, an optional entry budget, on-demand diagnostics and a redacted report.
-* Add the block, preview, refresh and optional live text with Pause/Resume.
-* Add Quick Create/dashboard shortcuts, presets and separate Website/Email embeds.
-* Preserve campaigns/custom labels; add stored label languages and prefer Lato with FreeType.
-* Fix keyboard selection in block settings; retain permissions and public URLs.
+* Add campaign management, local diagnostics, language presets and website live text.
 
 = 12.5.3 =
 * Bundle Lato Regular under SIL OFL 1.1 with verified font/license notices.
@@ -129,5 +131,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.6.1 =
-Back up fonts/data and update without uninstalling. Recopy old embeds made below 24h; new image canvases retain their width when days hide. Apply a style preset explicitly to change an existing font.
+= 12.7.0 =
+Unnamed/colliding legacy timers need a unique name on the next save; IDs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.

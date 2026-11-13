@@ -60,22 +60,23 @@ def insert(page, attributes):
         return block.clientId;
     }""", attributes)
 
-def select_timer_with_keyboard(page, block_id, timer_id):
+def select_timer_with_keyboard(page, block_id, timer_id, label=None):
+    label = label or page.evaluate('(id)=>window.emailCountdownTimerBlock.timers.find(t=>t.value===id)?.label || id', timer_id)
     combo = page.get_by_role('combobox', name='Timer', exact=True).first
     try:
         # Focus in a separate gesture. Core 6.4 need not reopen a collapsed,
         # already-focused field on click; typing opens its actual result list.
         combo.click()
         expect(combo).to_be_focused()
-        combo.fill(timer_id)
-        expect(combo).to_have_value(timer_id)
+        combo.fill(label)
+        expect(combo).to_have_value(label)
         expect(combo).to_have_attribute('aria-expanded', 'true')
         # Other sidebar fields contain native <option> elements too. Inspect
         # the timer's expanded listbox, rather than every option in the page.
         menu = page.get_by_role('listbox')
         expect(menu).to_be_visible()
         expect(menu.get_by_role('option')).to_have_count(1)
-        option = menu.get_by_role('option', name=timer_id, exact=True)
+        option = menu.get_by_role('option', name=label, exact=True)
         expect(option).to_be_visible()
         combo.press('ArrowDown')
         expect(combo).to_be_focused()
@@ -131,22 +132,23 @@ try:
         with context.expect_page() as created:
             frame.get_by_role('link', name='Create a campaign (new tab)', exact=True).click()
         campaign = created.value
-        campaign.locator('#ect-quick-id').fill('gutenberg-new')
+        campaign.locator('#ect-quick-name').fill('New block timer')
         campaign.locator('#ect-quick-deadline').fill('2035-12-31T23:59:59')
         campaign.locator('#ect-quick-preset').select_option('warm')
-        campaign.get_by_role('button', name='Create campaign', exact=True).click()
+        campaign.get_by_role('button', name='Create timer', exact=True).click()
         expect(campaign.get_by_text('Timer saved.', exact=True)).to_be_visible()
         check(campaign.locator('#ect-dc').input_value() == '#9A3412', 'block empty-state action opens working Quick Create with server presets')
+        new_timer_id=campaign.locator('#ect-timer_id').input_value()
         campaign.close()
         page.bring_to_front()
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
         expect(frame.get_by_text('Campaign list updated.', exact=True)).to_be_visible()
-        select_timer_with_keyboard(page, first, 'gutenberg-new')
+        select_timer_with_keyboard(page, first, new_timer_id, 'New block timer')
         check(True, 'newly created campaign becomes selectable without editor reload')
         wp('option', 'update', 'easy_countdown_timers', original, '--format=json')
         frame.get_by_role('button', name='Refresh campaigns', exact=True).click()
         expect(frame.get_by_text('This timer is no longer in the saved list.', exact=False)).to_be_visible()
-        check(page.evaluate("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId==='gutenberg-new'", first), 'removed campaign is reported without silently rewriting the saved reference')
+        check(page.evaluate("([id,timer])=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId===timer", [first,new_timer_id]), 'removed campaign is reported without silently rewriting the saved reference')
         page.evaluate("(id)=>wp.data.dispatch('core/block-editor').updateBlockAttributes(id,{timerId:''})", first)
         page.wait_for_function("(id)=>wp.data.select('core/block-editor').getBlock(id).attributes.timerId===''", arg=first)
         combo = page.get_by_role('combobox', name='Timer', exact=True).first

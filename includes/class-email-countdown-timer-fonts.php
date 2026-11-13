@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Email_Countdown_Timer_Fonts {
+    public const BARLOW_CONDENSED_BLACK = 'builtin:barlow-condensed-black';
     public const OPTION = 'email_countdown_timer_copied_fonts';
     public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
     public const BUNDLED_CHOICE = 'builtin:lato-regular';
@@ -17,6 +18,7 @@ final class Email_Countdown_Timer_Fonts {
     /** Reviewed immutable font/notice pairs; filenames never become saved choices. */
     public static function bundled(): array {
         return array(
+            self::BARLOW_CONDENSED_BLACK => array( 'file' => 'easy-countdown-barlow-condensed-black.ttf', 'sha256' => 'e74b750df582c608f35db467b711b2b60d2217618e85e60b72b42dfd00446cab', 'license' => 'OFL-barlow-condensed.txt', 'license_sha256' => '186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f' ),
             self::BUNDLED_CHOICE => array( 'file' => self::BUNDLED_FILE, 'sha256' => self::BUNDLED_SHA256,
                 'license' => 'OFL.txt', 'license_sha256' => '74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e' ),
             self::IBM_PLEX_MONO => array( 'file' => 'easy-countdown-ibm-plex-mono-regular.ttf', 'sha256' => '6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46',
@@ -34,6 +36,7 @@ final class Email_Countdown_Timer_Fonts {
 
     public static function label( string $name ): string {
         return match ( $name ) {
+            self::BARLOW_CONDENSED_BLACK => __( 'Barlow Condensed Black (included)', 'easy-countdown' ),
             self::BUNDLED_CHOICE => __( 'Lato Regular (included)', 'easy-countdown' ),
             self::IBM_PLEX_MONO => __( 'IBM Plex Mono Regular (included)', 'easy-countdown' ),
             self::BARLOW_CONDENSED => __( 'Barlow Condensed Regular (included)', 'easy-countdown' ),

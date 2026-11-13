@@ -30,7 +30,7 @@ ok( str_contains( $alt_view, 'id="ect-help-alt"' ) && str_contains( $alt_view, '
 preg_match( '/<textarea[^>]*id="ect-manual-html"[^>]*>(.*?)<\/textarea>/s', $alt_view, $html_match );
 $copied_html = html_entity_decode( $html_match[1] ?? '', ENT_QUOTES, 'UTF-8' );
 ok( str_contains( $copied_html, 'alt="Sale &quot;summer&quot; &amp; deadline"' ), 'copied email HTML escapes alt at image sink' );
-ok( str_contains( $copied_html, 'Ends:' ) && str_contains( $copied_html, 'Europe/Warsaw' ), 'email retains visible deadline independent of alt' );
+ok( str_starts_with( $copied_html, '<img ' ) && ! str_contains( $copied_html, '<p>' ) && ! str_contains( $copied_html, 'Ends:' ), 'copied email HTML contains only the image; deadline text stays in the editor' );
 // Two markup contexts must remain safe, including deliberately corrupted stored metadata.
 $options['easy_countdown_timers']['alt-test']['alt'] = '" onerror="alert(1)';
 $attack = $plugin->renderShortcode( array( 'id' => 'alt-test' ) );

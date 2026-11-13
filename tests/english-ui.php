@@ -10,7 +10,7 @@ ok($english['tz'] === 'Europe/Warsaw', 'language change does not change the time
 $admin = true; $nonce = true; $_GET = ['view'=>'new']; $_POST = [];
 $options['easy_countdown_timers'] = [];
 ob_start(); $plugin->renderAdminPage(); $englishHtml = ob_get_clean();
-foreach (['New Timer','Timer ID','Deadline','Time Zone','Minimum Image Width (px)','Colors','Background',
+foreach (['New Timer','Timer name','Deadline','Time Zone','Minimum Image Width (px)','Colors','Background',
     'Digits','Labels','Font','Digit Size','Label Size','Schedule','Hide days when fewer than 24 hours remain',
     'Create Timer','Saved Preview','Embed Codes'] as $text) {
     ok(str_contains($englishHtml, $text), 'English create form: '.$text);
@@ -28,7 +28,7 @@ ok(ECD_Config::normalize($custom) === $custom, 'custom and deliberately empty la
 $options['easy_countdown_timers'] = ['legacy'=>$stored]; $_GET = ['edit'=>'legacy'];
 $beforeOptions = $options;
 ob_start(); $plugin->renderAdminPage(); $editHtml = ob_get_clean();
-foreach (['Edit: legacy','Save Changes','Delete permanently','Back to Timers','Embed Codes','Image URL'] as $text) {
+foreach (['Edit timer: Unnamed timer','Save Changes','Delete permanently','Back to Timers','Embed Codes','Image URL'] as $text) {
     ok(str_contains($editHtml, $text), 'English edit form: '.$text);
 }
 foreach (['label_d'=>'Dni','label_h'=>'Godz','label_m'=>'Min','label_s'=>'Sek'] as $field=>$label) {

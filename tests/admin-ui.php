@@ -75,7 +75,9 @@ if ( function_exists( 'imagecreatetruecolor' ) ) {
     ok( $named_pixels === $renamed_pixels && $writes === 1 && ! str_contains( serialize( $transients ), $private_name ), 'renaming private metadata does not change image pixels, cache signature or cached content' );
     $transients = $old_transients; $writes = $old_writes; $_GET = $old_get;
 }
-ok( str_starts_with( $submit_admin( array_replace( $valid_post, array( 'campaign_name' => '' ) ) ), 'redirect:' ) && $options['easy_countdown_timers']['existing'] === $ui_config, 'explicitly empty name removes only that optional metadata' );
+$before_empty_name = $options;
+$submit_admin( array_replace( $valid_post, array( 'campaign_name' => '' ) ) );
+ok( $options === $before_empty_name && isset( Email_Countdown_Timer_Admin::state()['errors']['campaign_name'] ), 'an older form cannot explicitly erase the now-required name' );
 $options = $before_names; $reset_admin(); $_GET = array();
 $quick = array( 'ecd_action' => 'email_countdown_timer_save', 'creation_mode' => 'quick', 'original_id' => '', 'timer_id' => 'quick-new', 'deadline' => '2031-08-20T12:30:00', 'tz' => 'America/New_York', 'appearance_preset' => 'midnight' );
 $before_quick = $options;
@@ -148,6 +150,12 @@ ok( str_contains( $markup, 'data-ect-copy="ect-manual-shortcode"' ) && str_conta
 ok( str_contains( $markup, '2030-12-31' ) && str_contains( $markup, 'Europe/Warsaw' ), 'absolute deadline and zone accompany image' );
 $styles = $scripts = array();
 Email_Countdown_Timer_Admin::add_screen( 'toplevel_page_ecd-timers' );
+$styles = $scripts = array();
+$admin=false; Email_Countdown_Timer_Admin::enqueue('index.php');
+ok(empty($styles) && empty($scripts), 'dashboard script excluded for non-administrators');
+$admin=true; Email_Countdown_Timer_Admin::enqueue('index.php');
+ok(empty($styles) && isset($scripts['email-countdown-timer-admin']) && count($scripts)===1, 'dashboard enqueues only the timezone initialization script for timer administrators');
+$styles = $scripts = array();
 Email_Countdown_Timer_Admin::enqueue( 'dashboard' );
 ok( empty( $styles ) && empty( $scripts ), 'admin assets not enqueued on unrelated screens' );
 Email_Countdown_Timer_Admin::enqueue( 'toplevel_page_ecd-timers' );
@@ -166,7 +174,7 @@ ok( $dashboard_widget[0] === 'email_countdown_timer_quick_access' && is_callable
 ob_start(); call_user_func( $dashboard_widget[2] ); $dashboard = ob_get_clean();
 ok( str_contains( $dashboard, 'id="ect-dashboard-create"' ) && str_contains( $dashboard, 'name="creation_mode" value="quick"' ) && str_contains( $dashboard, 'value="midnight"' ), 'dashboard uses the shared no-JS quick form with presets' );
 ok( str_contains( $dashboard, 'name="_wpnonce"' ) && str_contains( $dashboard, 'email_countdown_timer_save' ), 'dashboard posts to the same nonce-protected save controller' );
-ok( substr_count( $dashboard, 'aria-label="Edit campaign-' ) === 5 && str_contains( $dashboard, 'All timers' ), 'dashboard offers five edit shortcuts and access to every campaign' );
+ok( substr_count( $dashboard, 'aria-label="Edit ' ) === 5 && str_contains( $dashboard, 'All timers' ), 'dashboard offers five edit shortcuts and access to every campaign' );
 ok( ! str_contains( $dashboard, '<img' ) && empty( $styles ) && empty( $scripts ) && $options === $snapshot_dashboard, 'dashboard renders no image, adds no assets and never rewrites existing timers' );
 $options['easy_countdown_timers'] = array( 'bad\"><script>' => $ui_config, 'not-a-timer' => 'invalid' );
 ob_start(); Email_Countdown_Timer_Admin::render_dashboard_widget(); $dashboard_empty = ob_get_clean();

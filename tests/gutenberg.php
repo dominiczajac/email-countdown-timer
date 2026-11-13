@@ -29,7 +29,7 @@ ok( ! isset( Email_Countdown_Timer_Block::editor_settings( array( 'easyCountdown
 ok( $GLOBALS['block_bootstrap'][1] === 'window.emailCountdownTimerBlock = {};', 'denied context clears previous editor payload' );
 $admin = true;
 $data = Email_Countdown_Timer_Block::editor_settings( array(), $context )['easyCountdown'];
-ok( $data['timers'] === array( array( 'value' => 'block-test', 'label' => 'block-test' ) ), 'choices contain IDs only' );
+ok( $data['timers'] === array( array( 'value' => 'block-test', 'label' => 'Private campaign sentinel' ) ), 'administrator choices show names with stable ID values' );
 ok( str_contains( $data['imageUrl'], 'mode=static' ), 'preview URL is static' );
 ok( $data['manageUrl'] !== '', 'administrator settings link' );
 ok( str_ends_with( $data['createUrl'], '#ect-quick-create' ), 'administrator empty state links directly to quick creation' );
@@ -38,8 +38,20 @@ ok( $GLOBALS['block_bootstrap'][0] === 'easy-countdown-block-editor' && $GLOBALS
 $bootstrap = substr( $GLOBALS['block_bootstrap'][1], strlen( 'window.emailCountdownTimerBlock = ' ), -1 );
 ok( json_decode( $bootstrap, true ) === $data, 'native script bridge carries the authorized list without relying on store keys' );
 ok( !str_contains( $bootstrap, '<' ) && !str_contains( $bootstrap, 'deadline' ), 'bootstrap excludes raw HTML and campaign configuration' );
-ok( ! str_contains( $bootstrap, 'Private campaign sentinel' ) && ! str_contains( $bootstrap, 'campaign_name' ), 'editor catalog excludes private campaign names even for administrators' );
+ok( str_contains( $bootstrap, 'Private campaign sentinel' ) && ! str_contains( $bootstrap, 'campaign_name' ), 'administrator catalog supplies only the display label rather than raw metadata' );
 ok( ! str_contains( $bootstrap, 'archived' ) && str_contains( $bootstrap, 'block-test' ), 'archived timer IDs remain selectable without exposing private archive metadata' );
+foreach (array(str_repeat('x',201), '', array('corrupt')) as $bad_label) {
+    $options['easy_countdown_timers']['block-test']['campaign_name']=$bad_label;
+    $bounded_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+    ok($bounded_catalog['timers'] === array(array('value'=>'block-test','label'=>($bad_label === '' || is_array($bad_label) ? 'Unnamed timer (block-test)' : 'block-test'))), 'malformed legacy names fall back to IDs without invalidating the catalog');
+}
+$options['easy_countdown_timers']=array('legacy-a'=>$base+array('campaign_name'=>'Shared name'),'legacy-b'=>$base+array('campaign_name'=>'Shared name'));
+$collision_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+ok(array_column($collision_catalog['timers'],'label') === array('Shared name (legacy-a)','Shared name (legacy-b)'), 'colliding legacy names have distinguishable picker labels with immutable values');
+$options['easy_countdown_timers']['legacy-c']=$base+array('campaign_name'=>'Shared name (legacy-a)');
+$nested_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+ok(array_column($nested_catalog['timers'],'label') === array('legacy-a','legacy-b','legacy-c'), 'names imitating suffixes fall back to unique IDs without ambiguous options');
+$options=$before;
 foreach ( array( '', null, array(), 'unknown', 'BLOCK-TEST', 'block-test ', str_repeat( 'a', 201 ) ) as $invalid ) {
     ok( Email_Countdown_Timer_Block::render( array( 'timerId' => $invalid ), $plugin ) === '', 'invalid or missing reference has no public image' );
 }
@@ -63,7 +75,9 @@ $refresh = static function ( array $post, string $method = 'POST' ) {
 $request = array( 'post_id' => '1', 'nonce' => wp_create_nonce( 'email_countdown_timer_campaigns_1' ) );
 $block_posts = array( 1 => new WP_Post( 1 ), 2 => new WP_Post( 2 ) );
 $test_capabilities = array( 'edit_post' => array( 1 => true, 2 => false ), 'manage_options' => false, 'edit_theme_options' => false );
+$options['easy_countdown_timers']['block-test']['campaign_name'] = 'Private campaign sentinel';
 $author_data = Email_Countdown_Timer_Block::editor_settings( array(), $context )['easyCountdown'];
+ok( !str_contains(json_encode($author_data), 'Private campaign sentinel'), 'ordinary content editors never receive private timer names' );
 ok( $author_data['manageUrl'] === '' && $author_data['createUrl'] === '', 'content editor gets catalog access without administration links' );
 $response = $refresh( $request );
 ok( $response->success && count( $response->data['timers'] ) === 250 && $response->data['truncated'], 'authorized refresh keeps the 250-ID bound' );

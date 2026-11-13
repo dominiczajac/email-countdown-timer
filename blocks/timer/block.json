@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "easy-countdown/timer",
-  "version": "12.6.1",
+  "version": "12.7.0",
   "title": "Easy Countdown",
   "category": "widgets",
   "icon": "clock",

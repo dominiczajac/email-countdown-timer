@@ -6,6 +6,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 wpdir="$(mktemp -d "$RUNNER_TEMP/ecd-admin.XXXXXX")"
 mkdir -p "$RUNNER_TEMP/admin-evidence"
 wp=(wp --path="$wpdir" --no-color)
+export ECD_BROWSER_WP="$wpdir"
 export ECD_BROWSER_PASSWORD="$(openssl rand -hex 20)"
 "${wp[@]}" core download --locale=en_US
 "${wp[@]}" config create --dbname=ecd_ci --dbuser=root --dbpass=ecd-ci-only --dbhost=127.0.0.1:3307 --dbprefix=ecdui_
