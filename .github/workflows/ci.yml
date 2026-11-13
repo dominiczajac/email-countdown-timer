@@ -88,6 +88,7 @@ jobs:
       - name: Gutenberg adapter contracts
         run: |
           php tests/gutenberg.php
+          php tests/frame.php
           node tests/gutenberg/editor-unit.cjs
           node tests/live-countdown.cjs
       - name: Uninstall safety regression tests

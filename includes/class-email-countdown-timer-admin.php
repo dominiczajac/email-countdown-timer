@@ -179,7 +179,7 @@ final class Email_Countdown_Timer_Admin {
 
     public static function register_dashboard_widget(): void {
         if ( current_user_can( 'manage_options' ) ) {
-            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', '<span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html__( 'Easy Countdown', 'easy-countdown' ), array( self::class, 'render_dashboard_widget' ) );
+            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', '<span><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html__( 'Easy Countdown', 'easy-countdown' ) . '</span>', array( self::class, 'render_dashboard_widget' ) );
         }
     }
 

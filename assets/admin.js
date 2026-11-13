@@ -42,9 +42,6 @@
         const initial = serialize();
 
         const dirty = () => serialize() !== initial;
-        const state = root.querySelector('#ect-save-state');
-        const initialState = state ? state.textContent : '';
-        form.addEventListener('input', () => { if (state) state.textContent = dirty() ? state.dataset.dirty : initialState; });
         window.addEventListener('beforeunload', event => { if (!allowNavigation && dirty()) { event.preventDefault(); event.returnValue = ''; } });
         form.noValidate = true;
         form.addEventListener('submit', event => {
@@ -126,32 +123,6 @@
                 announce(result.textContent);
             });
         }
-    }
-    const image = root.querySelector('#ect-preview');
-    if (image) {
-        const error = root.querySelector('#ect-image-error');
-        const failed = () => { error.hidden = false; announce(error.textContent); };
-        image.addEventListener('error', failed);
-        image.addEventListener('load', () => { error.hidden = image.naturalWidth > 1; });
-        if (image.complete && image.naturalWidth <= 1) error.hidden = false;
-    }
-    if (image && image.dataset.animated) {
-        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-        let refresh = null;
-        const update = () => {
-            clearTimeout(refresh);
-            if (document.hidden) return;
-            if (reduced.matches) { image.src = image.dataset.static; return; }
-            const url = new URL(image.dataset.animated, document.baseURI);
-            url.searchParams.set('_t', String(Date.now()));
-            image.src = url.href;
-            refresh = setTimeout(update, 58000);
-        };
-        document.addEventListener('visibilitychange', update);
-        if (reduced.addEventListener) reduced.addEventListener('change', update);
-        window.addEventListener('pagehide', () => clearTimeout(refresh));
-        window.addEventListener('pageshow', event => { if (event.persisted) update(); });
-        update();
     }
     root.querySelectorAll('[data-ect-copy]').forEach(button => {
         const code = document.getElementById(button.dataset.ectCopy);

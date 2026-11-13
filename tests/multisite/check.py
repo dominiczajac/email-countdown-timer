@@ -222,8 +222,9 @@ def main():
                 phase = 'timer-editor'; visit(page, '/wp-admin/admin.php?page=ecd-timers&edit=shared-timer')
                 expect(page.locator('[name=campaign_name]')).to_have_value('PRIVATE-NETWORK-' + role)
                 expect(page.locator('[name=fixed_width]')).to_have_value(str(WIDTHS[role]))
-                expect(page.locator('#ect-preview')).to_have_js_property('complete', True)
-                check(page.locator('#ect-preview').evaluate('(img)=>img.naturalWidth') == WIDTHS[role], 'preview_width')
+                live_preview=page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')
+                expect(live_preview).to_be_visible()
+                check(live_preview.evaluate('(canvas)=>canvas.width') == WIDTHS[role], 'preview_width')
                 row['checks'].append('preview')
                 if role == 'blue':
                     mutation = {'before': hashes()}

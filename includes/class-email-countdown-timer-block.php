@@ -110,6 +110,7 @@ final class Email_Countdown_Timer_Block {
     private static function catalog(): array {
         $timers = get_option( 'easy_countdown_timers', array() );
         $choices = array();
+        $frame_sizes = array();
         $truncated = false;
         if ( is_array( $timers ) ) {
             foreach ( $timers as $key => $config ) {
@@ -128,6 +129,7 @@ final class Email_Countdown_Timer_Block {
                     $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id );
                 }
                 $choices[] = array( 'value' => $id, 'label' => $label );
+                $frame_sizes[$id] = Email_Countdown_Timer_Frame::dimensions($config);
             }
         }
         // Older records can share names. Keep their selectable references distinguishable.
@@ -146,6 +148,8 @@ final class Email_Countdown_Timer_Block {
         return array(
             'timers' => $choices,
             'truncated' => $truncated,
+            'frameUrl' => add_query_arg(array('ecd_action'=>'frame'),home_url('/')),
+            'frameSizes' => $frame_sizes,
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
             'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
             'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',

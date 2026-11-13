@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.7.0
+Stable tag: 12.8.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -107,7 +107,7 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
-= 12.7.0 =
+= 12.8.0 =
 * Simplify creation with required unique timer names and internal IDs.
 * Initialize new time zones locally; animate saved previews automatically.
 * Add Barlow Condensed Black for Black Friday; simplify email HTML.
@@ -131,5 +131,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.7.0 =
+= 12.8.0 =
 Unnamed/colliding legacy timers need a unique name on the next save; IDs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.

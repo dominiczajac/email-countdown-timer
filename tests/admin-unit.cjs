@@ -7,7 +7,7 @@ let checks = 0;
 function check(value, message) { assert.ok(value, message); checks++; }
 function editor({ clipboard = true, secure = true, reject = false } = {}) {
     const fields = new Map(), buttons = [], writes = [], announcements = [];
-    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email']]) {
+    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email'], ['ect-manual-iframe', '<iframe src="https://example.invalid/?ecd_action=frame"></iframe>']]) {
         const code = { value, focused: false, selected: false, focus() { this.focused = true; }, select() { this.selected = true; } };
         fields.set(id, code); fields.set(id + '-result', { textContent: '' });
         buttons.push({ hidden: true, dataset: { ectCopy: id, success: 'Copied.', fallback: 'Select and copy manually.' }, addEventListener(name, action) { this[name] = action; } });
@@ -47,22 +47,4 @@ for (const [zone, expected] of [['Asia/Calcutta','Asia/Kolkata'], ['Unsupported/
     const Intl = { DateTimeFormat: (_locale, options) => ({ resolvedOptions: () => ({ timeZone:options ? (options.timeZone==='Asia/Kolkata'?'Asia/Calcutta':options.timeZone) : zone }) }) };
     vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, Intl });
     assert.equal(select.value,expected,'alias selects equivalent supported zone, unknown zone keeps site fallback');
-}
-// Saved-preview lifecycle with deterministic browser event/timer doubles.
-{
-    let next = 0;
-    const timers = new Map(), events = {}, media = { matches: false, addEventListener(name, fn) { events['media-' + name] = fn; } };
-    const image = { src: '', dataset: { animated: 'https://example.invalid/?mode=email', static: 'https://example.invalid/?mode=static' }, naturalWidth:600, complete:true, addEventListener() {} };
-    const error = { hidden:true };
-    const root = { querySelector: s => s === '#ect-preview' ? image : s === '#ect-image-error' ? error : null, querySelectorAll: () => [] };
-    const document = { hidden:false, baseURI:'https://example.invalid/', querySelectorAll:()=>[], querySelector:()=>root, addEventListener(name,fn){ events[name]=fn; } };
-    const window = { matchMedia:()=>media, addEventListener(name,fn){ events[name]=fn; } };
-    vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, window, URL, setTimeout: (fn,delay) => { timers.set(++next,{fn,delay}); return next; }, clearTimeout:id=>timers.delete(id) });
-    assert.match(image.src,/mode=email/);assert.equal([...timers.values()][0].delay,58000);
-    document.hidden=true;events.visibilitychange();assert.equal(timers.size,0,'hidden preview stops renewal');
-    document.hidden=false;events.visibilitychange();assert.equal(timers.size,1,'visible preview resumes');
-    events.pagehide();assert.equal(timers.size,0,'leaving page clears renewal');
-    events.pageshow({persisted:true});assert.equal(timers.size,1,'bfcache restoration resumes renewal');
-    media.matches=true;events['media-change']();assert.equal(timers.size,0);assert.match(image.src,/mode=static/);
-    console.log('ADMIN PREVIEW LIFECYCLE DOUBLES PASS: visible, hidden, pagehide, bfcache and reduced motion');
 }

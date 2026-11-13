@@ -3,7 +3,7 @@
     'use strict';
     var el = wp.element.createElement;
     var __ = wp.i18n.__;
-    var emptySettings = { timers: [], truncated: false, imageUrl: '', manageUrl: '', createUrl: '' };
+    var emptySettings = { timers: [], truncated: false, imageUrl: '', frameUrl: '', manageUrl: '', createUrl: '' };
     var positions = { left: 'flex-start', center: 'center', right: 'flex-end' };
     // One explicit request updates every mounted timer block, without polling or
     // changing post attributes. The server rechecks the concrete editor capability.
@@ -81,10 +81,12 @@
         var draft = draftState[0];
         var setDraft = draftState[1];
         wp.element.useEffect(function () { setFailed(false); setDraft(timerId); }, [timerId]);
+        var pauseState = wp.element.useState(false);
+        var paused = pauseState[0];
         var previewUrl = wp.element.useMemo(function () {
-            if (!timerId || !settings.imageUrl) return '';
-            return settings.imageUrl + '&ecd=' + encodeURIComponent(timerId) + '&_t=' + Date.now() + '-' + refresh;
-        }, [timerId, settings.imageUrl, refresh]);
+            if (!timerId || !settings.frameUrl) return '';
+            return settings.frameUrl + '&paused=' + (paused ? '1' : '0') + '&ecd=' + encodeURIComponent(timerId) + '&_t=' + Date.now() + '-' + refresh;
+        }, [timerId, settings.frameUrl, refresh, paused]);
         var found = timers.some(function (timer) { return timer.value === timerId; });
         var missing = !!timerId && !found && !settings.truncated;
         var blockProps = wp.blockEditor.useBlockProps();
@@ -118,6 +120,11 @@
                     el(wp.components.TextControl, { label: __('Timer ID', 'easy-countdown'), value: draft, maxLength: 200, onChange: setDraft }),
                     el(wp.components.Button, { variant: 'secondary', onClick: function () { props.setAttributes({ timerId: draft }); } }, __('Use timer ID', 'easy-countdown'))
                 ) : null,
+                settings.refresh && settings.refresh.url ? el(wp.components.Button, {
+                    variant: 'secondary', disabled: catalog.loading, isBusy: catalog.loading, onClick: refreshCampaigns
+                }, __('Refresh campaigns', 'easy-countdown')) : null,
+                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function(value){return value+1;}); } }, __('Refresh preview', 'easy-countdown')) : null,
+                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { pauseState[1](!paused); } }, paused ? __('Resume preview', 'easy-countdown') : __('Pause preview', 'easy-countdown')) : null,
                 settings.manageUrl ? el('a', { href: settings.manageUrl + (timerId ? '&edit=' + encodeURIComponent(timerId) : ''), target: '_blank', rel: 'noopener noreferrer' },
                     __('Open timer settings (new tab)', 'easy-countdown')) : null
             )
@@ -132,27 +139,21 @@
                     label: __('No campaigns yet', 'easy-countdown'),
                     instructions: settings.createUrl ? __('Create your first campaign in Easy Countdown, then return here and refresh the campaign list.', 'easy-countdown') : __('Ask a site administrator to create a campaign, then refresh the campaign list.', 'easy-countdown')
                 }, settings.createUrl ? el('a', { href: settings.createUrl, target: '_blank', rel: 'noopener noreferrer' }, __('Create a campaign (new tab)', 'easy-countdown')) : null) : null,
-                settings.refresh && settings.refresh.url ? el(wp.components.Button, {
-                    variant: 'secondary', disabled: catalog.loading, isBusy: catalog.loading, onClick: refreshCampaigns
-                }, __('Refresh campaigns', 'easy-countdown')) : null,
                 catalog.loading ? el('p', { role: 'status' }, __('Refreshing campaigns…', 'easy-countdown')) : null,
                 catalog.updated ? el('p', { role: 'status' }, __('Campaign list updated.', 'easy-countdown')) : null,
                 catalog.error ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The campaign list could not refresh. Check your connection and editor access, then try again. Your selection has been kept. If your session expired, save your work before reopening the editor.', 'easy-countdown')) : null,
                 missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or refresh campaigns. A deleted timer displays nothing on the website.', 'easy-countdown')) : null,
-                failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The static preview could not load. Check the timer and image cache settings.', 'easy-countdown')) : null,
+                failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The countdown preview could not load. Check the timer and image cache settings.', 'easy-countdown')) : null,
                 previewUrl && !missing ? el('div', { style: { display: 'flex', justifyContent: positions[alignment] } },
-                    el('img', {
-                        key: previewUrl, src: previewUrl, alt: __('Static preview of the selected countdown.', 'easy-countdown'),
-                        referrerPolicy: 'no-referrer', draggable: false, loading: 'eager',
-                        style: { display: failed ? 'none' : 'block', maxWidth: '100%', height: 'auto' },
+                    el('iframe', {
+                        key: previewUrl, src: previewUrl, title: __('Active countdown preview', 'easy-countdown'),
+                        sandbox: 'allow-scripts', referrerPolicy: 'no-referrer', tabIndex: -1,
+                        width: (settings.frameSizes && settings.frameSizes[timerId] || {}).width || 600,
+                        height: (settings.frameSizes && settings.frameSizes[timerId] || {}).height || 180,
+                        style: { display: 'block', border: 0, maxWidth: '100%', pointerEvents: 'none' },
                         onError: function () { setFailed(true); }, onLoad: function () { setFailed(false); }
                     })
-                ) : null,
-                previewUrl && !missing ? el(wp.components.Button, {
-                    variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function (value) { return value + 1; }); }
-                }, __('Refresh preview', 'easy-countdown')) : null,
-                displayMode === 'live' ? el('p', {}, __('Live text is enabled on the website. This image previews the campaign only; open the page to check theme typography and pause/resume. Clear any page cache after editing a campaign.', 'easy-countdown')) : null,
-                timerId ? el('p', {}, __('Static editor preview. The website uses the saved timer, deadline, alternative text and end image. No campaign settings are copied into this block.', 'easy-countdown')) : null
+                ) : null
             )
         );
     }
