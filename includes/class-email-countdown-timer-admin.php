@@ -55,8 +55,8 @@ final class Email_Countdown_Timer_Admin {
         return is_string( $name ) && strlen( $name ) <= 200 ? sanitize_text_field( $name ) : '';
     }
 
-    public static function display_name( array $config ): string {
-        return self::campaign_name( $config ) ?: __( 'Unnamed timer', 'easy-countdown' );
+    public static function display_name( array $config, string $id = '' ): string {
+        return self::campaign_name( $config ) ?: ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id ) : __( 'Unnamed timer', 'easy-countdown' ) );
     }
 
     private static function name_key( string $name ): string {
@@ -188,7 +188,7 @@ final class Email_Countdown_Timer_Admin {
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::display_name( $timer ) ) ); ?>"><?php echo esc_html( self::display_name( $timer ) ); ?></a></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'easy-countdown' ), self::display_name( $timer, (string) $id ) ) ); ?>"><?php echo esc_html( self::display_name( $timer, (string) $id ) ); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
                 <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'easy-countdown' ); ?></p>

@@ -31,4 +31,5 @@ $legacy_name_post=array_replace($names_edit,array('original_id'=>'legacy-a','cam
 $legacy_before=$options;$submit_admin($legacy_name_post);
 ok($options===$legacy_before && isset(Email_Countdown_Timer_Admin::state()['errors']['campaign_name']), 'legacy colliding names require a unique name on the next modern save');
 ok(str_starts_with($submit_admin(array_replace($legacy_name_post,array('campaign_name'=>'Unique legacy name'))),'redirect:') && $options['easy_countdown_timers']['legacy-a']['campaign_name']==='Unique legacy name', 'renaming a colliding legacy record restores normal editing without changing its ID');
+ok(Email_Countdown_Timer_Admin::display_name(array(), 'legacy-a') === 'Unnamed timer (legacy-a)' && Email_Countdown_Timer_Admin::display_name(array(), 'legacy-b') === 'Unnamed timer (legacy-b)', 'unnamed legacy records keep distinct fallback identities until explicitly named');
 $options=$names_snapshot;$reset_admin();$_GET=$_POST=array();
