@@ -32,15 +32,18 @@
         var x = (data.logicalW-total)/2;
         for(var i=first;i<4;i++) {
             var text = String(values[i]).padStart(2,'0'), vx = x+(data.cols[i]-text.length*data.dw)/2;
-            for(var j=0;j<text.length;j++) { var s=data.digits[text[j]]; ctx.drawImage(s.image,vx+(data.dw-s.w)/2,10+data.dh-s.h); vx+=data.dw; }
-            var label=data.labels[i]; ctx.drawImage(label.image,x+(data.cols[i]-label.w)/2,10+data.dh+data.gap);
+            if(data.text) {
+                ctx.textAlign='center';ctx.font=data.dh+'px monospace';ctx.fillStyle=data.dc;ctx.fillText(text,x+data.cols[i]/2,10+data.dh,data.cols[i]);
+                ctx.font='12px sans-serif';ctx.fillStyle=data.lc;ctx.fillText(data.labels[i],x+data.cols[i]/2,data.h-5,data.cols[i]);
+            } else for(var j=0;j<text.length;j++) { var s=data.digits[text[j]]; ctx.drawImage(s.image,vx+(data.dw-s.w)/2,10+data.dh-s.h); vx+=data.dw; }
+            if(!data.text) { var label=data.labels[i]; ctx.drawImage(label.image,x+(data.cols[i]-label.w)/2,10+data.dh+data.gap); }
             x+=data.cols[i];
-            if(i<3) { var colon=data.digits[':']; ctx.drawImage(colon.image,x+10,10+data.dh-colon.h); x+=20+colon.w; }
+            if(i<3) { var colon=data.digits[':']; if(data.text) { ctx.font=data.dh+'px monospace';ctx.fillStyle=data.dc;ctx.fillText(':',x+15,10+data.dh,10); } else ctx.drawImage(colon.image,x+10,10+data.dh-colon.h); x+=20+colon.w; }
         }
         button.textContent = button.dataset[paused ? 'resume' : 'pause']; button.disabled = left === 0;
         if(!paused && left > 0) timer = setTimeout(draw,1000);
     }
-    Promise.all(Object.values(data.digits).concat(data.labels).map(load)).then(function () {
+    Promise.all(data.text?[]:Object.values(data.digits).concat(data.labels).map(load)).then(function () {
         document.getElementById('ect-frame-fallback').hidden=true; canvas.hidden=false; button.hidden=false; draw(); status(true);
         button.addEventListener('click',function(){paused=!paused;draw();});
         document.addEventListener('visibilitychange',function(){if(!paused)draw();});

@@ -30,7 +30,7 @@ Create countdowns locally for WordPress, external websites and email. No externa
 
 **Requirements and limitations**
 
-Requires WordPress 6.4+, PHP 8.1+ and GD. FreeType enables fonts; Imagick animates GIFs. GIF generation and iframe cache misses require MySQL/MariaDB session locks. The iframe ticks locally without Imagick; email GIFs retain their static fallback.
+Requires WordPress 6.4+, PHP 8.1+ and GD. FreeType enables fonts; Imagick animates GIFs. Raster cache misses use session locks; if unavailable, iframes use system fonts. The iframe ticks locally without Imagick; email GIFs retain their static fallback.
 
 Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache images, or show a still frame. A downloaded GIF cannot refresh itself. Retain the visible deadline and test your complete campaign.
 

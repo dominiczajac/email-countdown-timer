@@ -21,6 +21,9 @@ $empty_frame=Email_Countdown_Timer_Frame::payload('empty',array_replace($base,ar
 ok($empty_frame['labels'][1]['w']>=1,'empty labels render safely');
 $wide=Email_Countdown_Timer_Frame::payload('wide',array_replace($base,array('font'=>'','label_d'=>str_repeat('A',139),'label_h'=>str_repeat('A',139),'label_m'=>str_repeat('A',139),'label_s'=>str_repeat('A',139))));
 ok($wide['w']<=4000 && $wide['h']<=1000,'valid boundary canvas stays within the original limits');
+$saved_db=$GLOBALS['wpdb'];$GLOBALS['wpdb']=new stdClass();
+try { $degraded=Email_Countdown_Timer_Frame::document('unsupported-frame',$base); ok(str_contains($degraded,'&quot;') || str_contains($degraded,'"text":true'),'unsupported locking retains an active system-font frame'); }
+finally { $GLOBALS['wpdb']=$saved_db; }
 $raw=array_replace($base,array('alt'=>'" onload="alert(1)','campaign_name'=>'PRIVATE-FRAME-NAME'));
 $html=Email_Countdown_Timer_Frame::document('frame-test',$raw);
 ok(!str_contains($html,' onload="alert') && !str_contains($html,'PRIVATE-FRAME-NAME'),'frame HTML escapes metadata and excludes private name');
