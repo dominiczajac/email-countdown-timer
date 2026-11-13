@@ -150,6 +150,12 @@ ok( str_contains( $markup, 'data-ect-copy="ect-manual-shortcode"' ) && str_conta
 ok( str_contains( $markup, '2030-12-31' ) && str_contains( $markup, 'Europe/Warsaw' ), 'absolute deadline and zone accompany image' );
 $styles = $scripts = array();
 Email_Countdown_Timer_Admin::add_screen( 'toplevel_page_ecd-timers' );
+$styles = $scripts = array();
+$admin=false; Email_Countdown_Timer_Admin::enqueue('index.php');
+ok(empty($styles) && empty($scripts), 'dashboard script excluded for non-administrators');
+$admin=true; Email_Countdown_Timer_Admin::enqueue('index.php');
+ok(empty($styles) && isset($scripts['email-countdown-timer-admin']) && count($scripts)===1, 'dashboard enqueues only the timezone initialization script for timer administrators');
+$styles = $scripts = array();
 Email_Countdown_Timer_Admin::enqueue( 'dashboard' );
 ok( empty( $styles ) && empty( $scripts ), 'admin assets not enqueued on unrelated screens' );
 Email_Countdown_Timer_Admin::enqueue( 'toplevel_page_ecd-timers' );

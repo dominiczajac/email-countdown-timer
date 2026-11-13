@@ -132,4 +132,4 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Upgrade Notice ==
 
 = 12.7.0 =
-Use unique timer names in the current editor; existing URLs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.
+Unnamed/colliding legacy timers need a unique name on the next save; IDs and labels stay intact. Black Friday uses a genuine Black face. Copied email HTML is image-only. Previously copied HTML is unchanged.

@@ -123,7 +123,7 @@ final class Email_Countdown_Timer_Block {
                 }
                 // Do not expose raw settings, attachment IDs, deadlines, alt or disk paths.
                 $name = current_user_can( 'manage_options' ) ? Email_Countdown_Timer_Config::text( $config, 'campaign_name' ) : '';
-                $choices[] = array( 'value' => $id, 'label' => '' !== trim( $name ) ? $name : $id );
+                $choices[] = array( 'value' => $id, 'label' => '' !== trim( $name ) && strlen( $name ) <= 200 ? $name : $id );
             }
         }
         usort( $choices, static fn( $a, $b ) => strnatcasecmp( $a['label'], $b['label'] ) );

@@ -2,7 +2,7 @@
 
 ## 12.7.0 (review candidate)
 
-- Use required unique Timer names in current creation/editing forms and server-generated opaque internal IDs, hidden from ordinary management fields. Preserve existing IDs, image URLs and private metadata; validate submitted names against active and archived timers. Older integrations that omit the new metadata retain their compatibility path.
+- Use required unique Timer names in current creation/editing forms and server-generated opaque internal IDs, hidden from ordinary management fields. Preserve existing IDs, image URLs and private metadata; validate submitted names against active and archived timers. Older integrations that omit the new metadata retain their compatibility path. Unnamed or colliding legacy names require a unique name on the next save in the current editor.
 - Initialize fresh forms from the supported browser time zone with WordPress site-zone fallback. Preserve saved/duplicated time zones and explicit overrides. Add a native dashboard clock icon and Countdown preset wording.
 - Start the saved preview automatically with motion enabled, refreshing while visible after 58 seconds; retain static reduced-motion/no-JavaScript views. Remove the manual animation button. Copied email HTML contains only the image, without an appended Ends paragraph.
 - Bundle original static Barlow Condensed Black (900) for Black Friday with its pinned hash and unchanged existing family OFL notice. Other presets retain their reviewed faces. Use Dni / Godzin / Minut / Sekund for explicitly applied Polish labels; do not rewrite existing labels.

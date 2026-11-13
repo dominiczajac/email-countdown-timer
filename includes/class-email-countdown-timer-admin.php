@@ -528,7 +528,7 @@ final class Email_Countdown_Timer_Admin {
 
     /** PHP identifiers match the renderer; WordPress's manual-offset option values do not. */
     public static function timezone_input( string $id, string $value, string $error = '' ): void {
-        $zones = DateTimeZone::listIdentifiers( DateTimeZone::ALL_WITH_BC );
+        $zones = DateTimeZone::listIdentifiers( DateTimeZone::ALL );
         $help_id = 'ect-tz' === $id ? 'ect-help-tz' : $id . '-help';
         $error_id = 'ect-tz' === $id ? 'ect-error-tz' : $id . '-error';
         // Keep exact saved aliases, fixed offsets and offending input selected.

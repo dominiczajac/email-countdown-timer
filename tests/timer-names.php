@@ -25,4 +25,10 @@ ob_start(); $plugin->renderAdminPage(); $failed_name_view=ob_get_clean();
 foreach (array('Existing emails and pages', 'This cannot be undone') as $warning) {
     ok(str_contains($failed_name_view, 'Permanently delete Renamed launch? '.$warning) && !str_contains($failed_name_view, 'Permanently delete Reserved name?'), 'failed rename deletion warning identifies the saved timer: '.$warning);
 }
+$options['easy_countdown_timers']['legacy-a']=array_replace($names_created[$names_id],array('campaign_name'=>'Old shared name'));
+$options['easy_countdown_timers']['legacy-b']=$options['easy_countdown_timers']['legacy-a'];
+$legacy_name_post=array_replace($names_edit,array('original_id'=>'legacy-a','campaign_name'=>'Old shared name'));
+$legacy_before=$options;$submit_admin($legacy_name_post);
+ok($options===$legacy_before && isset(Email_Countdown_Timer_Admin::state()['errors']['campaign_name']), 'legacy colliding names require a unique name on the next modern save');
+ok(str_starts_with($submit_admin(array_replace($legacy_name_post,array('campaign_name'=>'Unique legacy name'))),'redirect:') && $options['easy_countdown_timers']['legacy-a']['campaign_name']==='Unique legacy name', 'renaming a colliding legacy record restores normal editing without changing its ID');
 $options=$names_snapshot;$reset_admin();$_GET=$_POST=array();

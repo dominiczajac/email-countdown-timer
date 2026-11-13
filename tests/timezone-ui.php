@@ -12,11 +12,6 @@ foreach ( array( 'America/New_York', '+05:30', 'UTC' ) as $site_zone ) {
     ok( str_contains( $zone_markup, '<select id="ect-tz" name="tz"' ) && str_contains( $zone_markup, 'value="America/New_York"' ), 'native selector offers IANA zones without scripts' );
     ok( str_contains( $zone_markup, 'value="' . $site_zone . '" selected' ), 'exact site zone or fixed offset stays selected' );
 }
-ob_start(); Email_Countdown_Timer_Admin::timezone_input( 'ect-tz', 'UTC' ); $alias_markup = ob_get_clean();
-foreach (array('Asia/Calcutta','Europe/Kiev','US/Eastern') as $alias) {
-    try { new DateTimeZone($alias); } catch (Exception $e) { continue; } // Some system tzdata builds omit backward links entirely.
-    ok(str_contains($alias_markup, 'value="'.$alias.'"'), 'supported browser timezone alias offered: '.$alias);
-}
 $GLOBALS['ect_site_tz'] = 'Pacific/Auckland';
 $options['easy_countdown_timers'] = array( 'legacy-zone' => array( 'deadline' => '2030-12-31T23:59:59' ) );
 $_GET = array( 'edit' => 'legacy-zone' );

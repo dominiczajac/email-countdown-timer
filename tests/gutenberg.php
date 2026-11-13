@@ -40,6 +40,12 @@ ok( json_decode( $bootstrap, true ) === $data, 'native script bridge carries the
 ok( !str_contains( $bootstrap, '<' ) && !str_contains( $bootstrap, 'deadline' ), 'bootstrap excludes raw HTML and campaign configuration' );
 ok( str_contains( $bootstrap, 'Private campaign sentinel' ) && ! str_contains( $bootstrap, 'campaign_name' ), 'administrator catalog supplies only the display label rather than raw metadata' );
 ok( ! str_contains( $bootstrap, 'archived' ) && str_contains( $bootstrap, 'block-test' ), 'archived timer IDs remain selectable without exposing private archive metadata' );
+foreach (array(str_repeat('x',201), '', array('corrupt')) as $bad_label) {
+    $options['easy_countdown_timers']['block-test']['campaign_name']=$bad_label;
+    $bounded_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+    ok($bounded_catalog['timers'] === array(array('value'=>'block-test','label'=>'block-test')), 'malformed legacy names fall back to IDs without invalidating the catalog');
+}
+$options=$before;
 foreach ( array( '', null, array(), 'unknown', 'BLOCK-TEST', 'block-test ', str_repeat( 'a', 201 ) ) as $invalid ) {
     ok( Email_Countdown_Timer_Block::render( array( 'timerId' => $invalid ), $plugin ) === '', 'invalid or missing reference has no public image' );
 }

@@ -12,7 +12,7 @@ Renaming preserves the existing internal ID and every published image URL. Dupli
 
 **Quick Create** on the timer list and dashboard offers Classic, Midnight, Ocean, Warm, Christmas, New Year, Easter, Valentine's Day, Halloween, Black Friday, Birthday and Wedding presets. The full editor offers the same choices in **Appearance**. They set background, digit/label colors and an available included font; choose your own deadline and time zone. Applying an editor preset changes the unsaved form, preserving custom/empty labels and schedule until you explicitly save. Quick Create also works without JavaScript. Classic uses Lato; Midnight/New Year use IBM Plex Mono; Ocean/Easter/Halloween/Birthday use Barlow Condensed Regular; Black Friday uses Barlow Condensed Black (900); Warm/Christmas/Valentine's Day/Wedding use Crimson Text. If a face or FreeType is unavailable, Quick Create uses bitmap fallback and the full editor preserves its selected font.
 
-The required **Timer name** stays in administration only, never in generated IDs, image alt text, email HTML or Gutenberg’s ID catalog. The dashboard widget shows friendly names with a clock icon and a **Countdown preset** selector. Its lightweight script initializes browser time zones; native WordPress styling is retained.
+The required **Timer name** stays in administration only, never in generated IDs, image alt text, email HTML or public image caches. In Gutenberg only timer administrators receive names as choice labels; other content editors receive IDs. The dashboard widget shows friendly names with a clock icon and a **Countdown preset** selector. Its lightweight script initializes browser time zones; native WordPress styling is retained.
 
 ## Save and correct errors
 
