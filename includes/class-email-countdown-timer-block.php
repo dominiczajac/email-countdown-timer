@@ -123,8 +123,24 @@ final class Email_Countdown_Timer_Block {
                 }
                 // Do not expose raw settings, attachment IDs, deadlines, alt or disk paths.
                 $name = current_user_can( 'manage_options' ) ? Email_Countdown_Timer_Config::text( $config, 'campaign_name' ) : '';
-                $choices[] = array( 'value' => $id, 'label' => '' !== trim( $name ) && strlen( $name ) <= 200 ? $name : $id );
+                $label = '' !== trim( $name ) && strlen( $name ) <= 200 ? $name : $id;
+                if ( current_user_can( 'manage_options' ) && '' === trim( $name ) ) {
+                    $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id );
+                }
+                $choices[] = array( 'value' => $id, 'label' => $label );
             }
+        }
+        // Older records can share names. Keep their selectable references distinguishable.
+        $counts = array_count_values( array_column( $choices, 'label' ) );
+        foreach ( $choices as &$choice ) {
+            if ( $counts[ $choice['label'] ] > 1 ) $choice['label'] .= ' (' . $choice['value'] . ')';
+            if ( strlen( $choice['label'] ) > 403 ) $choice['label'] = $choice['value'];
+        }
+        unset( $choice );
+        // A saved name can itself imitate a disambiguated label. IDs are unique.
+        if ( count( array_unique( array_column( $choices, 'label' ) ) ) !== count( $choices ) ) {
+            foreach ( $choices as &$choice ) $choice['label'] = $choice['value'];
+            unset( $choice );
         }
         usort( $choices, static fn( $a, $b ) => strnatcasecmp( $a['label'], $b['label'] ) );
         return array(

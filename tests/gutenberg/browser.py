@@ -61,7 +61,7 @@ def insert(page, attributes):
     }""", attributes)
 
 def select_timer_with_keyboard(page, block_id, timer_id, label=None):
-    label = label or timer_id
+    label = label or page.evaluate('(id)=>window.emailCountdownTimerBlock.timers.find(t=>t.value===id)?.label || id', timer_id)
     combo = page.get_by_role('combobox', name='Timer', exact=True).first
     try:
         # Focus in a separate gesture. Core 6.4 need not reopen a collapsed,

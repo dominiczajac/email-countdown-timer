@@ -48,3 +48,21 @@ for (const [zone, expected] of [['Asia/Calcutta','Asia/Kolkata'], ['Unsupported/
     vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, Intl });
     assert.equal(select.value,expected,'alias selects equivalent supported zone, unknown zone keeps site fallback');
 }
+// Saved-preview lifecycle with deterministic browser event/timer doubles.
+{
+    let next = 0;
+    const timers = new Map(), events = {}, media = { matches: false, addEventListener(name, fn) { events['media-' + name] = fn; } };
+    const image = { src: '', dataset: { animated: 'https://example.invalid/?mode=email', static: 'https://example.invalid/?mode=static' }, naturalWidth:600, complete:true, addEventListener() {} };
+    const error = { hidden:true };
+    const root = { querySelector: s => s === '#ect-preview' ? image : s === '#ect-image-error' ? error : null, querySelectorAll: () => [] };
+    const document = { hidden:false, baseURI:'https://example.invalid/', querySelectorAll:()=>[], querySelector:()=>root, addEventListener(name,fn){ events[name]=fn; } };
+    const window = { matchMedia:()=>media, addEventListener(name,fn){ events[name]=fn; } };
+    vm.runInNewContext(fs.readFileSync('assets/admin.js','utf8'), { document, window, URL, setTimeout: (fn,delay) => { timers.set(++next,{fn,delay}); return next; }, clearTimeout:id=>timers.delete(id) });
+    assert.match(image.src,/mode=email/);assert.equal([...timers.values()][0].delay,58000);
+    document.hidden=true;events.visibilitychange();assert.equal(timers.size,0,'hidden preview stops renewal');
+    document.hidden=false;events.visibilitychange();assert.equal(timers.size,1,'visible preview resumes');
+    events.pagehide();assert.equal(timers.size,0,'leaving page clears renewal');
+    events.pageshow({persisted:true});assert.equal(timers.size,1,'bfcache restoration resumes renewal');
+    media.matches=true;events['media-change']();assert.equal(timers.size,0);assert.match(image.src,/mode=static/);
+    console.log('ADMIN PREVIEW LIFECYCLE DOUBLES PASS: visible, hidden, pagehide, bfcache and reduced motion');
+}

@@ -130,7 +130,7 @@ async function main() {
     check(all(tree, 'Notice').some(n => n.children[0].includes('could not refresh')) && all(tree, 'ComboboxControl')[0].props.value === 'alpha', 'permission/network failure retains last list and selected ID with a retry message');
     const malformed = button(tree, 'Refresh campaigns').props.onClick();
     await Promise.resolve();
-    respond({ ok: true, json: async () => ({ success: true, data: { ...next, timers: [{ value: 'bad', label: 'x'.repeat(201) }] } }) });
+    respond({ ok: true, json: async () => ({ success: true, data: { ...next, timers: [{ value: 'bad', label: 'x'.repeat(404) }] } }) });
     await malformed;
     tree = h.render({ timerId: 'alpha' });
     check(all(tree, 'ComboboxControl')[0].props.options.some(t => t.value === 'gamma'), 'malformed success response cannot replace the safe list');

@@ -6,6 +6,7 @@
 - Initialize fresh forms from the supported browser time zone with WordPress site-zone fallback. Preserve saved/duplicated time zones and explicit overrides. Add a native dashboard clock icon and Countdown preset wording.
 - Start the saved preview automatically with motion enabled, refreshing while visible after 58 seconds; retain static reduced-motion/no-JavaScript views. Remove the manual animation button. Copied email HTML contains only the image, without an appended Ends paragraph.
 - Bundle original static Barlow Condensed Black (900) for Black Friday with its pinned hash and unchanged existing family OFL notice. Other presets retain their reviewed faces. Use Dni / Godzin / Minut / Sekund for explicitly applied Polish labels; do not rewrite existing labels.
+- Disambiguate colliding legacy names in the administrator block picker, retaining immutable ID values and the ordinary editor privacy boundary. Resume the visible saved preview after browser back/forward-cache restoration.
 - Keep Custom CSS, per-timer uninstall settings and forced Outlook playback outside the requested scope. No release, submission or deployment is implied.
 
 ## 12.6.1 (review candidate)

@@ -150,6 +150,7 @@
         document.addEventListener('visibilitychange', update);
         if (reduced.addEventListener) reduced.addEventListener('change', update);
         window.addEventListener('pagehide', () => clearTimeout(refresh));
+        window.addEventListener('pageshow', event => { if (event.persisted) update(); });
         update();
     }
     root.querySelectorAll('[data-ect-copy]').forEach(button => {

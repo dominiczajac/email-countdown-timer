@@ -43,8 +43,14 @@ ok( ! str_contains( $bootstrap, 'archived' ) && str_contains( $bootstrap, 'block
 foreach (array(str_repeat('x',201), '', array('corrupt')) as $bad_label) {
     $options['easy_countdown_timers']['block-test']['campaign_name']=$bad_label;
     $bounded_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
-    ok($bounded_catalog['timers'] === array(array('value'=>'block-test','label'=>'block-test')), 'malformed legacy names fall back to IDs without invalidating the catalog');
+    ok($bounded_catalog['timers'] === array(array('value'=>'block-test','label'=>($bad_label === '' || is_array($bad_label) ? 'Unnamed timer (block-test)' : 'block-test'))), 'malformed legacy names fall back to IDs without invalidating the catalog');
 }
+$options['easy_countdown_timers']=array('legacy-a'=>$base+array('campaign_name'=>'Shared name'),'legacy-b'=>$base+array('campaign_name'=>'Shared name'));
+$collision_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+ok(array_column($collision_catalog['timers'],'label') === array('Shared name (legacy-a)','Shared name (legacy-b)'), 'colliding legacy names have distinguishable picker labels with immutable values');
+$options['easy_countdown_timers']['legacy-c']=$base+array('campaign_name'=>'Shared name (legacy-a)');
+$nested_catalog=Email_Countdown_Timer_Block::editor_settings(array(), $context)['easyCountdown'];
+ok(array_column($nested_catalog['timers'],'label') === array('legacy-a','legacy-b','legacy-c'), 'names imitating suffixes fall back to unique IDs without ambiguous options');
 $options=$before;
 foreach ( array( '', null, array(), 'unknown', 'BLOCK-TEST', 'block-test ', str_repeat( 'a', 201 ) ) as $invalid ) {
     ok( Email_Countdown_Timer_Block::render( array( 'timerId' => $invalid ), $plugin ) === '', 'invalid or missing reference has no public image' );
