@@ -56,7 +56,8 @@ final class Email_Countdown_Timer_Admin {
     }
 
     public static function display_name( array $config, string $id = '' ): string {
-        return self::campaign_name( $config ) ?: ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id ) : __( 'Unnamed timer', 'easy-countdown' ) );
+        $name = self::campaign_name( $config );
+        return '' !== $name ? $name : ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'easy-countdown' ), $id ) : __( 'Unnamed timer', 'easy-countdown' ) );
     }
 
     private static function name_key( string $name ): string {
