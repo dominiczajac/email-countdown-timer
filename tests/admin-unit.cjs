@@ -7,13 +7,13 @@ let checks = 0;
 function check(value, message) { assert.ok(value, message); checks++; }
 function editor({ clipboard = true, secure = true, reject = false } = {}) {
     const fields = new Map(), buttons = [], writes = [], announcements = [];
-    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">\n<p>Ends: 2031-08-20 UTC</p>'], ['ect-embed-code', 'https://example.invalid/?mode=email']]) {
+    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email']]) {
         const code = { value, focused: false, selected: false, focus() { this.focused = true; }, select() { this.selected = true; } };
         fields.set(id, code); fields.set(id + '-result', { textContent: '' });
         buttons.push({ hidden: true, dataset: { ectCopy: id, success: 'Copied.', fallback: 'Select and copy manually.' }, addEventListener(name, action) { this[name] = action; } });
     }
     const root = { querySelector: () => null, querySelectorAll: selector => selector === '[data-ect-copy]' ? buttons : [] };
-    const document = { querySelector: () => root, getElementById: id => fields.get(id) };
+    const document = { querySelectorAll: () => [], querySelector: () => root, getElementById: id => fields.get(id) };
     const wp = { a11y: { speak: message => announcements.push(message) } };
     const navigator = clipboard ? { clipboard: { writeText: async value => { if (reject) throw new Error('denied'); writes.push(value); } } } : {};
     vm.runInNewContext(fs.readFileSync('assets/admin.js', 'utf8'), { document, window: { wp, isSecureContext: secure }, wp, navigator });

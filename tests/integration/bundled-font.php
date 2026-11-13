@@ -53,4 +53,4 @@ $oversized = array_replace($font_config, ['size_digit'=>200,'size_label'=>100,'f
 $expect(isset(Email_Countdown_Timer_Admin::preflight($oversized)['font']), 'pixel budget still enforced');
 }
 $expect(get_option('easy_countdown_timers', []) === $before, 'no campaign settings changed');
-WP_CLI::success("BUNDLED FONTS: $checks assertions, four installed faces and real GD/FreeType.");
+WP_CLI::success("BUNDLED FONTS: $checks assertions, five installed faces and real GD/FreeType.");

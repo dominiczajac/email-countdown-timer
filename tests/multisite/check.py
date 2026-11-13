@@ -207,7 +207,8 @@ def main():
             finally: navigating = False
             check(response is not None and response.status == 200, 'admin_http')
             response_runtime(response, role, active)
-        with browser.new_context(viewport={'width': 1280, 'height': 900}) as admin:
+        # Keep this metadata/width check static; the admin suite separately proves automatic animation.
+        with browser.new_context(viewport={'width': 1280, 'height': 900}, reduced_motion='reduce') as admin:
             isolate(admin, role); page = admin.new_page()
             page.on('dialog', lambda d: d.accept() if d.type == 'beforeunload' else d.dismiss())
             phase = 'admin-login'; navigating = True
