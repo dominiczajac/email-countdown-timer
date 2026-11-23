@@ -20,7 +20,7 @@ $name = 'ect-storage-' . bin2hex(random_bytes(8)) . '.ttf';
 $original = $legacy . '/' . $name;
 $owned = [];
 try {
-    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/email-countdown-timer'), 'font reads do not mkdir');
+    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/actnow-countdown-timers'), 'font reads do not mkdir');
     foreach (['../x.ttf', "x\0.ttf", 'dir\\x.ttf', 'file.php', 'x.woff2'] as $bad) ok(!Email_Countdown_Timer_Fonts::valid_name($bad), 'reject unsafe font name');
     file_put_contents($original, "\0\1\0\0" . str_repeat('synthetic-test-not-a-font', 3));
     $owned[]=$original;
@@ -85,7 +85,7 @@ try {
     ok($site2!==$site3 && str_ends_with($site2,'site-2') && str_ends_with($site3,'site-3'),'per-site roots stay isolated with shared uploads');
     $font_multisite=false;
     $safe_base=$font_test_root;$font_test_root.='/bad-root';mkdir($font_test_root);
-    symlink($safe_base,$font_test_root.'/email-countdown-timer');
+    symlink($safe_base,$font_test_root.'/actnow-countdown-timers');
     ok(Email_Countdown_Timer_Fonts::persistent_directory(true)===null, 'reject symlink inside persistent root');
     $font_test_root=$safe_base;
     if (function_exists('imagecreatetruecolor')) {
