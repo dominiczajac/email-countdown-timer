@@ -23,9 +23,13 @@ try {
     $assert(!array_key_exists(Email_Countdown_Timer_Fonts::BUNDLED_FILE, get_option(Email_Countdown_Timer_Fonts::OPTION, [])), 'Bundled example is not adopted as migrated user data');
     require_once EMAIL_COUNTDOWN_TIMER_DIR . 'includes/class-email-countdown-timer-font-access.php';
     $rules = Email_Countdown_Timer_Font_Access::install();
-    $assert($rules['failed'] === 0, 'Font access rules created without modifying fonts');
+    $assert($rules === ['created'=>2, 'existing'=>0, 'failed'=>0], 'Exactly two rules installed in a fresh WordPress uploads font directory');
     $directory = Email_Countdown_Timer_Fonts::persistent_directory();
     $assert(is_string($directory), 'Persistent directory exists');
+    foreach (Email_Countdown_Timer_Font_Access::templates() as $file => $content) {
+        $assert(file_get_contents($directory . '/' . $file) === $content, 'Expected rule written in uploads');
+        $assert(!file_exists($legacy . '/' . $file), 'No rule written into the installed plugin');
+    }
     $destination = $directory . '/' . $name;
     $assert($copied['copied'] === 1 && is_file($original) && is_file($destination), 'Real copy preserves source');
     $assert(hash_file('sha256', $source) === hash_file('sha256', $destination), 'Real copy preserves bytes');

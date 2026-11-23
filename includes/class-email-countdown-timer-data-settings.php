@@ -109,7 +109,7 @@ final class Email_Countdown_Timer_Data_Settings {
             </section>
             <section class="ect-card" aria-labelledby="email-countdown-font-access-title">
                 <h2 id="email-countdown-font-access-title"><?php echo esc_html__( 'Font File Access', 'easy-countdown' ); ?></h2>
-                <p><?php echo esc_html__( 'Local fonts may be publicly downloadable unless your host blocks HTTP access. This tool creates an Apache 2.4 deny rule and a blank index in this site\'s persistent font directory. Existing legacy font directories are included only for single-site or network administrators. Existing rules and symlinks are never replaced.', 'easy-countdown' ); ?></p>
+                <p><?php echo esc_html__( 'Local fonts may be publicly downloadable unless your host blocks HTTP access. This tool creates an Apache 2.4 deny rule and a blank index in this site\'s persistent font directory under uploads. Existing rules and symlinks are never replaced. For fonts still in the legacy plugin directory, use the copy tool and ask your host to protect any originals that remain.', 'easy-countdown' ); ?></p>
                 <p><?php echo esc_html__( 'Apache must allow the Require directive in .htaccess. nginx ignores .htaccess and needs a host-managed location rule. Writing these files does not verify protection: ask your host to check that direct GET and HEAD font requests are denied while timer images still work. No remote probe is performed.', 'easy-countdown' ); ?></p>
                 <p><?php echo esc_html__( 'Rules are retained on uninstall because manually managed fonts may remain. Blocking downloads does not grant a font license; verify permission for server-side rendering.', 'easy-countdown' ); ?></p>
                 <?php
