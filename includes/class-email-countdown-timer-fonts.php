@@ -8,6 +8,7 @@ final class Email_Countdown_Timer_Fonts {
     public const BARLOW_CONDENSED_BLACK = 'builtin:barlow-condensed-black';
     public const OPTION = 'email_countdown_timer_actnow_copied_fonts';
     private const LEGACY_OPTION = 'email_countdown_timer_copied_fonts';
+    private const LEGACY_SLUGS = array( 'easy-countdown', 'email-countdown-timer' );
     public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
     public const BUNDLED_CHOICE = 'builtin:lato-regular';
     public const IBM_PLEX_MONO = 'builtin:ibm-plex-mono-regular';
@@ -65,7 +66,7 @@ final class Email_Countdown_Timer_Fonts {
         $dirs = array_filter( array( self::legacy_directory() ) );
         $root = defined( 'WP_PLUGIN_DIR' ) ? realpath( WP_PLUGIN_DIR ) : false;
         if ( false !== $root ) {
-            foreach ( array( 'easy-countdown', 'email-countdown-timer' ) as $slug ) {
+            foreach ( self::LEGACY_SLUGS as $slug ) {
                 $plugin = $root . DIRECTORY_SEPARATOR . $slug;
                 $fonts = $plugin . DIRECTORY_SEPARATOR . 'fonts';
                 $main = $plugin . DIRECTORY_SEPARATOR . 'email-countdown-timer.php';
@@ -75,6 +76,18 @@ final class Email_Countdown_Timer_Fonts {
             }
         }
         return array_unique( $dirs );
+    }
+
+    private static function previous_plugin_installed(): bool {
+        if ( ! defined( 'WP_PLUGIN_DIR' ) ) return false;
+        $current = defined( 'EMAIL_COUNTDOWN_TIMER_DIR' ) ? EMAIL_COUNTDOWN_TIMER_DIR : dirname( __DIR__ ) . '/';
+        $current_main = realpath( $current . 'email-countdown-timer.php' );
+        foreach ( self::LEGACY_SLUGS as $slug ) {
+            $old_main = WP_PLUGIN_DIR . '/' . $slug . '/email-countdown-timer.php';
+            // Even a linked install can still need its previous uploads files.
+            if ( is_file( $old_main ) && realpath( $old_main ) !== $current_main ) return true;
+        }
+        return false;
     }
 
     /** Reject a misconfigured uploads path that resolves into plugin code. */
@@ -329,8 +342,13 @@ final class Email_Countdown_Timer_Fonts {
 
     /** Called only after this site's explicit uninstall opt-in. Never recurse. */
     public static function delete_owned(): void {
-        // The old ownership map can authorize deletion only in its original root.
-        foreach ( array( self::OPTION => self::persistent_directory(), self::LEGACY_OPTION => self::legacy_uploads_directory() ) as $option => $directory ) {
+        $owned_roots = array( self::OPTION => self::persistent_directory() );
+        // The previous copy may still be used for rollback. Keep its files and
+        // ownership map until it is absent, then clean only its original root.
+        if ( ! self::previous_plugin_installed() ) {
+            $owned_roots[ self::LEGACY_OPTION ] = self::legacy_uploads_directory();
+        }
+        foreach ( $owned_roots as $option => $directory ) {
             $manifest = get_option( $option, array() );
             if ( null !== $directory && ! self::plugin_code_directory( $directory ) && is_array( $manifest ) ) {
                 foreach ( $manifest as $name => $hash ) {

@@ -89,6 +89,9 @@ try {
     file_put_contents($dir.'/owned-copy.ttf',file_get_contents($legacy_file));
     $options['email_countdown_timer_copied_fonts']=['owned-copy.ttf'=>hash_file('sha256',$legacy_file)];
     Email_Countdown_Timer_Fonts::delete_owned();
+    check(is_file($legacy_file) && isset($options['email_countdown_timer_copied_fonts']),'installed previous copy keeps its own fonts and ownership record');
+    unlink($previous_install.'/email-countdown-timer.php');
+    Email_Countdown_Timer_Fonts::delete_owned();
     check(!file_exists($legacy_file)&&is_file($dir.'/owned-copy.ttf')&&is_file($legacy_plugin_font),'legacy cleanup never adopts a same-name new-root manual file or deletes plugin-local fonts');
     check(!isset($options['email_countdown_timer_copied_fonts']),'legacy ownership option is cleared on opt-in cleanup');
     check(!file_exists($legacy_uploads.'/.htaccess')&&!file_exists($previous_install.'/fonts/.htaccess'),'rule installer leaves both previous roots untouched');

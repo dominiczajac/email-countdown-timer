@@ -88,13 +88,13 @@ Create a Cache Rule scoped to your hostname and the render query parameter. Repl
 
 Set Cache eligibility to Bypass cache and place this exception after conflicting forced-cache rules. Purge old timer responses and retain the ecd and mode parameters. Do not bypass caching for the entire homepage or every page containing a timer.
 
-Check that repeated GETs return an actual image with no-store/no-transform and a cache status of DYNAMIC or BYPASS. Investigate HTML challenges in Security Events.
+Check that repeated GETs return an actual image with no-store/no-transform and a cache status of DYNAMIC or BYPASS. Live Cloudflare settings are site-specific and were not tested.
 
 = Which other plugins and email applications were tested? =
 Named cache, builder, commerce, theme and multisite profiles have [versioned reports](https://github.com/dominiczajac/email-countdown-timer/issues/20), including retained failures. Paid optimizers, Cloudflare zones and real sender/client delivery remain unverified. Local Thunderbird tests covered image blocking, playback and expiry. Test your sender/clients and retain a visible deadline.
 
 = What happens when I deactivate or uninstall? =
-Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned options/cache and unchanged files created by the font-copy tool. It keeps media, manual/replaced fonts, unrelated data/cron, backups, infrastructure logs and font-access rules. No cron is scheduled.
+Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned options/cache and unchanged files created by the font-copy tool. Font copies owned by a still-installed previous version are kept. Media, manual/replaced fonts and font-access rules are kept. No cron is scheduled.
 
 == Screenshots ==
 
@@ -141,4 +141,4 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 == Upgrade Notice ==
 
 = 12.9.0 =
-Back up data and fonts, deactivate Easy Countdown without uninstalling it, then install ActNow. Existing timers, embed links and blocks carry over.
+Back up data and fonts, deactivate Easy Countdown without uninstalling it, then install ActNow. Existing timers, embed links and blocks carry over. Update path-based asset exclusions to the new slug and clear affected page caches.

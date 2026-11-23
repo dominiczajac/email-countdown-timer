@@ -16,7 +16,7 @@ Read/render paths never create directories. Each uploads namespace has a per-sit
 
 ## Retention
 
-Deactivation and ordinary settings saves retain all files. On opt-in uninstall, the copy tool's files are removed **only if** they remain ordinary contained files with the recorded hash. Manually uploaded, replaced, unrecognized and symlinked files are retained. Shared directories are never recursively deleted and empty directories may remain. Database option cleanup follows the existing per-site consent. Backups and infrastructure logs are outside this scope.
+Deactivation and ordinary settings saves retain all files. On opt-in uninstall, the copy tool's files are removed **only if** they remain ordinary contained files with the recorded hash. While a previous plugin copy is installed, its uploads fonts and ownership map are kept. Cleanup of the previous map applies only to matching copies in the old uploads root. Manually uploaded, replaced, unrecognized and symlinked files are retained. Shared directories are never recursively deleted and empty directories may remain. Database option cleanup follows the existing per-site consent. Backups and infrastructure logs are outside this scope.
 
 ## Save-time renderability
 
