@@ -59,6 +59,28 @@ final class Email_Countdown_Timer_Fonts {
         return ! is_link( $path ) && is_dir( $path ) ? ( realpath( $path ) ?: null ) : null;
     }
 
+    /** Reject a misconfigured uploads path that resolves into plugin code. */
+    private static function plugin_code_directory( string $path ): bool {
+        // Be conservative where a case-insensitive filesystem preserves path casing.
+        $path = strtolower( $path );
+        $roots = array( defined( 'EMAIL_COUNTDOWN_TIMER_DIR' ) ? EMAIL_COUNTDOWN_TIMER_DIR : dirname( __DIR__ ) );
+        foreach ( array( 'WP_PLUGIN_DIR', 'WPMU_PLUGIN_DIR' ) as $constant ) {
+            if ( defined( $constant ) ) {
+                $roots[] = constant( $constant );
+            }
+        }
+        foreach ( $roots as $root ) {
+            $resolved = realpath( $root );
+            if ( false !== $resolved ) {
+                $resolved = strtolower( $resolved );
+                if ( $path === $resolved || str_starts_with( $path, $resolved . DIRECTORY_SEPARATOR ) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /** No mkdir in read/render paths. Multisite gets a suffix even with shared uploads. */
     public static function persistent_directory( bool $create = false ): ?string {
         if ( ! function_exists( 'wp_get_upload_dir' ) ) {
@@ -69,11 +91,23 @@ final class Email_Countdown_Timer_Fonts {
         if ( ! empty( $uploads['error'] ) || ! is_string( $base ) || '' === $base || str_contains( $base, '://' ) || str_contains( $base, "\0" ) ) {
             return null;
         }
-        if ( ! is_dir( $base ) && ( ! $create || ! wp_mkdir_p( $base ) ) ) {
-            return null;
+        if ( ! is_dir( $base ) ) {
+            // A nonexistent base cannot be canonicalized. Check its nearest
+            // existing parent without allowing a parent hop during creation.
+            if ( ! $create || in_array( '..', explode( '/', str_replace( '\\', '/', $base ) ), true ) ) {
+                return null;
+            }
+            $ancestor = $base;
+            while ( ! is_dir( $ancestor ) && dirname( $ancestor ) !== $ancestor ) {
+                $ancestor = dirname( $ancestor );
+            }
+            $resolved = realpath( $ancestor );
+            if ( false === $resolved || self::plugin_code_directory( $resolved ) || ! wp_mkdir_p( $base ) ) {
+                return null;
+            }
         }
         $path = realpath( $base );
-        if ( false === $path ) {
+        if ( false === $path || ( $create && self::plugin_code_directory( $path ) ) ) {
             return null;
         }
         $parts = array( 'email-countdown-timer', 'fonts' );
@@ -86,7 +120,7 @@ final class Email_Countdown_Timer_Fonts {
                 return null;
             }
             $resolved = realpath( $next );
-            if ( false === $resolved || dirname( $resolved ) !== $path ) {
+            if ( false === $resolved || dirname( $resolved ) !== $path || ( $create && self::plugin_code_directory( $resolved ) ) ) {
                 return null;
             }
             $path = $resolved;
@@ -260,7 +294,7 @@ final class Email_Countdown_Timer_Fonts {
     public static function delete_owned(): void {
         $directory = self::persistent_directory();
         $manifest = get_option( self::OPTION, array() );
-        if ( null !== $directory && is_array( $manifest ) ) {
+        if ( null !== $directory && ! self::plugin_code_directory( $directory ) && is_array( $manifest ) ) {
             foreach ( $manifest as $name => $hash ) {
                 if ( ! is_string( $name ) || ! is_string( $hash ) || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) {
                     continue;

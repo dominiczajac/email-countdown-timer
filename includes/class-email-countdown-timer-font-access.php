@@ -18,7 +18,7 @@ final class Email_Countdown_Timer_Font_Access {
     }
 
     /**
-     * Install rules only in this site's owned font roots, never the uploads root.
+     * Install rules in this site's dedicated uploads font directory.
      * Existing files and symlinks are not replaced, even if they appear equivalent.
      * Guard files intentionally survive uninstall: manual fonts may remain there.
      */
@@ -27,39 +27,31 @@ final class Email_Countdown_Timer_Font_Access {
         if ( null === $target ) {
             throw new RuntimeException( 'The persistent font directory is unavailable.' );
         }
-        // Legacy files live in the shared plugin directory on multisite. A site
-        // administrator may protect their own uploads, not change shared server rules.
-        $legacy = ! is_multisite() || current_user_can( 'manage_network_options' )
-            ? Email_Countdown_Timer_Fonts::legacy_directory() : null;
-        $directories = array_unique( array_filter( array( $target, $legacy ) ) );
         $result = array( 'created' => 0, 'existing' => 0, 'failed' => 0 );
-        foreach ( $directories as $directory ) {
-            foreach ( self::templates() as $name => $content ) {
-                $path = $directory . DIRECTORY_SEPARATOR . $name;
-                if ( file_exists( $path ) || is_link( $path ) ) {
-                    ++$result['existing'];
-                    continue;
-                }
-                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Exclusive local create: fixed names/content, contained font root, no overwrite, no network stream.
-                $stream = fopen( $path, 'xb' );
-                if ( false === $stream ) {
+        foreach ( self::templates() as $name => $content ) {
+            $path = $target . DIRECTORY_SEPARATOR . $name;
+            if ( file_exists( $path ) || is_link( $path ) ) {
+                ++$result['existing'];
+                continue;
+            }
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Exclusive local create: fixed names/content under uploads, no overwrite, no network stream.
+            $stream = fopen( $path, 'xb' );
+            if ( false === $stream ) {
+                ++$result['failed'];
+                continue;
+            }
+            try {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Fixed short server-rule text to the exclusively created local file, never user input.
+                $written = fwrite( $stream, $content );
+                if ( strlen( $content ) === $written && fflush( $stream ) ) {
+                    ++$result['created'];
+                } else {
+                    // Keep a failed/partial rule for inspection, never delete a replacement.
                     ++$result['failed'];
-                    continue;
                 }
-                try {
-                    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Fixed short server-rule text to the exclusively created local file, never user input.
-                    $written = fwrite( $stream, $content );
-                    $complete = strlen( $content ) === $written && fflush( $stream );
-                    if ( $complete ) {
-                        ++$result['created'];
-                    } else {
-                        // Keep a failed/partial rule for inspection, never delete a replacement.
-                        ++$result['failed'];
-                    }
-                } finally {
-                    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Close only our local rule-file handle.
-                    fclose( $stream );
-                }
+            } finally {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Close only our local rule-file handle.
+                fclose( $stream );
             }
         }
         return $result;

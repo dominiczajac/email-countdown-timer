@@ -80,7 +80,7 @@ The public query names, shortcode and `easy_countdown_timers` option remain comp
 
 ## Local fonts
 
-**Protect the font directory from direct HTTP downloads.** **Data Settings > Font File Access > Install Font Access Rules (Apache)** creates fixed deny rules without replacing existing files; it does not verify their enforcement. nginx requires host-managed configuration. Site administrators on multisite can protect their own font root; changing the shared legacy root requires network-administrator permission. [Host rules, GET/HEAD verification and licensing boundaries](docs/FONT-HTTP-ACCESS.md).
+**Protect the font directory from direct HTTP downloads.** **Data Settings > Font File Access > Install Font Access Rules (Apache)** writes fixed deny rules only in the current site’s dedicated uploads font folder. It preserves existing files and cannot verify enforcement. nginx and plugin-local legacy files require host-managed protection. [Host rules, GET/HEAD verification and licensing boundaries](docs/FONT-HTTP-ACCESS.md).
 
 Upload trusted, licensed static TTF/OTF files through SFTP to persistent per-site storage; no browser upload endpoint is provided. For older plugin-local files, use the [existing migration tool and instructions](docs/LOCAL-FONT-STORAGE.md); legacy filename precedence is preserved. Keep license notices and verify permission for server-side rendering.
 

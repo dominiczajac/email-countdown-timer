@@ -2,16 +2,16 @@
 
 The countdown renderer reads font files from disk. It does not need their public URLs. Storing files under `uploads/` or the plugin directory does **not** make them private: a web server can deliver a known filename directly even when directory listing is disabled.
 
-## Explicit local rule installer (12.4.3)
+## Explicit local rule installer
 
-Open **Easy Countdown > Data Settings > Font File Access > Install Font Access Rules (Apache)**. The action requires `manage_options`, POST and a valid nonce. It creates these fixed files in the current site's persistent font root, and in an existing legacy font root where permitted:
+Open **Easy Countdown > Data Settings > Font File Access > Install Font Access Rules (Apache)**. The action requires `manage_options`, POST and a valid nonce. It creates these fixed files only in the current site’s persistent font directory, resolved from WordPress uploads:
 
 - `.htaccess` containing `Require all denied`, covering the dedicated directory and its descendants.
 - A non-executable `index.html` as a directory-index fallback. This index alone does **not** deny direct downloads.
 
 Existing files, including symlinks, are never overwritten, merged, adopted or removed. If a file already exists, inspect it with your host; the plugin does not certify its content. Failures/partial writes require inspection. The parent uploads directory, WordPress configuration, font bytes and other assets are not modified. No external HTTP probe or automatic activation/update write is performed. Access-rule files remain after uninstall because manually managed fonts may remain.
 
-On multisite, ordinary site administrators can install rules only in their site's persistent font root. The shared plugin-local legacy directory additionally requires `manage_network_options`. Do not place browser-served web fonts or unrelated files in these dedicated server-side directories: the rule intentionally denies **all** HTTP access there.
+On multisite, the action writes only to the current site’s uploads font folder, including when run by a network administrator. To move custom fonts to persistent storage, use **Copy Legacy Fonts to Persistent Storage**. Originals that remain under the plugin directory require host-level protection if they must be private. Do not place browser-served web fonts or unrelated files in these dedicated server-side directories: the rule intentionally denies **all** HTTP access there.
 
 **A successful local write is not verification of HTTP protection.** Apache must permit the directive; nginx ignores `.htaccess`; upstream static serving or hosting aliases can bypass a different server's rules. Protection is not automatic merely because this plugin version is installed.
 
@@ -71,7 +71,7 @@ curl --max-time 10 -sSI \
 
 For the examples above, expect **403**, not 200. A deliberate host-level 404 can also conceal a file, but confirm that a real file exists and that denial, not a typo, caused the response. A 500 is a configuration error, not successful verification. Check alternate public aliases and any cache that might already hold a copy. Separately request a timer using that local font: it must still return a valid image. File permissions must continue to allow the PHP process to read the font.
 
-CI exercises synthetic GET/HEAD requests against isolated Apache/nginx instances, unrelated-asset preservation and the negative case with ignored/absent rules. Real WordPress integration separately verifies local TTF rendering after rule installation. This is not a test of your production server, and no font bytes are bundled in the plugin or verification artifacts.
+CI exercises synthetic GET/HEAD requests against isolated Apache/nginx instances, unrelated-asset preservation and the negative case with ignored/absent rules. Real WordPress integration separately verifies local TTF rendering after rule installation. This is not a test of your production server, and synthetic test fonts are excluded from the installation ZIP.
 
 ## Licensing and scope
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Restrict the explicit Apache font-rule installer to this site’s persistent uploads font directory. Preserve existing rules, legacy font reads and the no-overwrite font copy workflow.
+- Refuse font rule installation, migration writes and font cleanup when the configured uploads path resolves into plugin code.
+
 ## 12.8.0 (review candidate)
 
 - Add active canvas previews to the saved editor and Gutenberg, independent of Imagick/GIF playback and without per-second PHP requests. Rasterize saved local fonts into bounded PNG glyphs; do not expose font files or paths. Preserve the original GIF renderer and email output.
