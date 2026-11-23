@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Restrict the explicit Apache font-rule installer to this site’s persistent uploads font directory. Preserve existing rules, legacy font reads and the no-overwrite font copy workflow.
+- Refuse font rule installation, migration writes and font cleanup when the configured uploads path resolves into plugin code.
 
 ## 12.8.0 (review candidate)
 

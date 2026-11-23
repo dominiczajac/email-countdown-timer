@@ -61,6 +61,8 @@ final class Email_Countdown_Timer_Fonts {
 
     /** Reject a misconfigured uploads path that resolves into plugin code. */
     private static function plugin_code_directory( string $path ): bool {
+        // Be conservative where a case-insensitive filesystem preserves path casing.
+        $path = strtolower( $path );
         $roots = array( defined( 'EMAIL_COUNTDOWN_TIMER_DIR' ) ? EMAIL_COUNTDOWN_TIMER_DIR : dirname( __DIR__ ) );
         foreach ( array( 'WP_PLUGIN_DIR', 'WPMU_PLUGIN_DIR' ) as $constant ) {
             if ( defined( $constant ) ) {
@@ -69,8 +71,11 @@ final class Email_Countdown_Timer_Fonts {
         }
         foreach ( $roots as $root ) {
             $resolved = realpath( $root );
-            if ( false !== $resolved && ( $path === $resolved || str_starts_with( $path, $resolved . DIRECTORY_SEPARATOR ) ) ) {
-                return true;
+            if ( false !== $resolved ) {
+                $resolved = strtolower( $resolved );
+                if ( $path === $resolved || str_starts_with( $path, $resolved . DIRECTORY_SEPARATOR ) ) {
+                    return true;
+                }
             }
         }
         return false;
@@ -87,7 +92,9 @@ final class Email_Countdown_Timer_Fonts {
             return null;
         }
         if ( ! is_dir( $base ) ) {
-            if ( ! $create ) {
+            // A nonexistent base cannot be canonicalized. Check its nearest
+            // existing parent without allowing a parent hop during creation.
+            if ( ! $create || in_array( '..', explode( '/', str_replace( '\\', '/', $base ) ), true ) ) {
                 return null;
             }
             $ancestor = $base;
@@ -287,7 +294,7 @@ final class Email_Countdown_Timer_Fonts {
     public static function delete_owned(): void {
         $directory = self::persistent_directory();
         $manifest = get_option( self::OPTION, array() );
-        if ( null !== $directory && is_array( $manifest ) ) {
+        if ( null !== $directory && ! self::plugin_code_directory( $directory ) && is_array( $manifest ) ) {
             foreach ( $manifest as $name => $hash ) {
                 if ( ! is_string( $name ) || ! is_string( $hash ) || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) {
                     continue;
