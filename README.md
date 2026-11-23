@@ -145,7 +145,7 @@ The **WordPress Privacy Policy Guide** contains suggested wording and administra
 Read [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Work through focused PRs and current-head checks; never bypass `main` protection or change the frozen renderer test oracle to hide a regression.
 
 ```sh
-bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json
+bash scripts/build-zip.sh --output dist/actnow-countdown-timers.zip --report dist/distribution.json
 python3 tests/test-build.py
 php tests/run.php
 php tests/uninstall.php
