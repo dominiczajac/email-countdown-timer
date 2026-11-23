@@ -1,30 +1,31 @@
 <?php
 /**
- * Plugin Name: Easy Countdown
- * Description: Countdown timers for WordPress pages and email campaigns.
- * Version: 12.8.0
+ * Plugin Name: ActNow – Countdown Timers
+ * Description: Create one countdown in WordPress and use it in emails and on websites. No external account required.
+ * Version: 12.9.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Dominic Zajac
  * License: GPL-3.0-only
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain: easy-countdown
+ * Text Domain: actnow-countdown-timers
  */
 if (!defined('ABSPATH')) exit;
 // A slug transition must not run two versions of the same implementation together.
-if (function_exists('plugin_basename') && plugin_basename(__FILE__) !== 'email-countdown-timer/email-countdown-timer.php') {
+if (function_exists('plugin_basename')) {
     $email_countdown_timer_active = (array)get_option('active_plugins', []);
     if (is_multisite()) $email_countdown_timer_active = array_merge($email_countdown_timer_active, array_keys((array)get_site_option('active_sitewide_plugins', [])));
-    if (in_array('email-countdown-timer/email-countdown-timer.php', $email_countdown_timer_active, true)) {
+    $email_countdown_timer_previous = array_diff(['easy-countdown/email-countdown-timer.php', 'email-countdown-timer/email-countdown-timer.php'], [plugin_basename(__FILE__)]);
+    if (array_intersect($email_countdown_timer_previous, $email_countdown_timer_active)) {
         add_action('admin_notices', static function (): void {
-            echo '<div class="notice notice-warning"><p>'.esc_html__('Easy Countdown is not running because the older email-countdown-timer copy is active. Back up fonts and deactivate the old copy, without uninstalling it, before activating Easy Countdown.', 'easy-countdown').'</p></div>';
+            echo '<div class="notice notice-warning"><p>'.esc_html__('ActNow cannot start while an older copy of this countdown plugin is active. Back up your fonts and deactivate the old copy before activating ActNow.', 'actnow-countdown-timers').'</p></div>';
         });
         register_activation_hook(__FILE__, static function (): void {
-            wp_die(esc_html__('Deactivate the older email-countdown-timer copy before activating Easy Countdown. Do not uninstall it while data removal is enabled.', 'easy-countdown'));
+            wp_die(esc_html__('Deactivate the older countdown plugin before activating ActNow. Keep the old copy if you still need its data or fonts.', 'actnow-countdown-timers'));
         });
         return;
     }
-    unset($email_countdown_timer_active);
+    unset($email_countdown_timer_active, $email_countdown_timer_previous);
 }
 if (defined('EMAIL_COUNTDOWN_TIMER_VERSION')) return;
 // Best effort for optimizers running after normal plugins. Cache drop-ins and
@@ -34,7 +35,7 @@ if (isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) && in_array($_G
     // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard cache-plugin interoperability flag, not a plugin-owned global.
     define('DONOTCACHEPAGE', true);
 }
-define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.8.0');
+define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.9.0');
 define('EMAIL_COUNTDOWN_TIMER_FILE', __FILE__);
 define('EMAIL_COUNTDOWN_TIMER_DIR', __DIR__.'/');
 require_once __DIR__.'/includes/class-email-countdown-timer-fonts.php';

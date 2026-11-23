@@ -42,9 +42,9 @@ fi
 "${wp[@]}" rewrite structure '/%postname%/'
 if [[ "$ECD_CACHE_SERVER" == openlitespeed ]]; then cp "$root/tests/litespeed/wordpress.htaccess" "$ECD_CACHE_WP/.htaccess"; fi
 phase=candidate-install
-bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown-cache.zip" --report "$ECD_CACHE_EVIDENCE/distribution.json"
-"${wp[@]}" plugin install "$RUNNER_TEMP/easy-countdown-cache.zip" --activate
-python3 "$root/scripts/verify-distribution.py" "$ECD_CACHE_EVIDENCE/distribution.json" "$ECD_CACHE_WP/wp-content/plugins/easy-countdown"
+bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/actnow-countdown-timers-cache.zip" --report "$ECD_CACHE_EVIDENCE/distribution.json"
+"${wp[@]}" plugin install "$RUNNER_TEMP/actnow-countdown-timers-cache.zip" --activate
+python3 "$root/scripts/verify-distribution.py" "$ECD_CACHE_EVIDENCE/distribution.json" "$ECD_CACHE_WP/wp-content/plugins/actnow-countdown-timers"
 case "$ECD_CACHE_PROFILE" in
   wp-super-cache) version=3.1.3 ;;
   w3-total-cache) version=2.10.6 ;;

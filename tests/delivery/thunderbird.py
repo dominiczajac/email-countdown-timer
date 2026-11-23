@@ -39,9 +39,9 @@ def display(name, html, allowed, crossing=False):
     message = EmailMessage(policy=email.policy.SMTP)
     message['From'] = 'fixture@example.invalid'
     message['To'] = 'recipient@example.invalid'
-    message['Subject'] = 'Easy Countdown isolated rendering test'
+    message['Subject'] = 'ActNow – Countdown Timers isolated rendering test'
     message.set_content('Synthetic countdown. Read the absolute deadline in the HTML part. No message is sent.')
-    message.add_alternative('<!doctype html><html><body><h1>Easy Countdown fixture</h1>' + html + '</body></html>', subtype='html')
+    message.add_alternative('<!doctype html><html><body><h1>ActNow – Countdown Timers fixture</h1>' + html + '</body></html>', subtype='html')
     path = out / ('native-' + name + '.eml')
     path.write_bytes(message.as_bytes())
     profile = out / ('tb-profile-' + name)

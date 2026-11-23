@@ -4,7 +4,7 @@ The countdown renderer reads font files from disk. It does not need their public
 
 ## Explicit local rule installer
 
-Open **Easy Countdown > Data Settings > Font File Access > Install Font Access Rules (Apache)**. The action requires `manage_options`, POST and a valid nonce. It creates these fixed files only in the current site’s persistent font directory, resolved from WordPress uploads:
+Open **ActNow > Data Settings > Font File Access > Install Font Access Rules (Apache)**. The action requires `manage_options`, POST and a valid nonce. It creates these fixed files only in the current site’s persistent font directory, resolved from WordPress uploads:
 
 - `.htaccess` containing `Require all denied`, covering the dedicated directory and its descendants.
 - A non-executable `index.html` as a directory-index fallback. This index alone does **not** deny direct downloads.
@@ -29,19 +29,19 @@ Apache must load authorization support and permit `Require` in this directory, f
 When you control the virtual host, a server-level rule is preferable:
 
 ```apache
-<Directory "/absolute/site/path/wp-content/uploads/email-countdown-timer/fonts">
+<Directory "/absolute/site/path/wp-content/uploads/actnow-countdown-timers/fonts">
     Require all denied
 </Directory>
 ```
 
-Substitute the actual filesystem path shown by the plugin, repeat for any shared legacy font root, and validate/reload the server configuration. Do not copy a placeholder path unchanged. Apache-compatible products and proxy combinations need their own verification; the repository tests Apache 2.4 and nginx, not every LiteSpeed deployment.
+Substitute the actual filesystem path shown by the plugin, repeat for any legacy font root still serving custom fonts, and validate/reload the server configuration. Do not copy a placeholder path unchanged. Apache-compatible products and proxy combinations need their own verification; the repository tests Apache 2.4 and nginx, not every LiteSpeed deployment.
 
 ## nginx
 
 Ask the host to add a narrow rule to the relevant `server` block. For standard single-site public paths:
 
 ```nginx
-location ^~ /wp-content/uploads/email-countdown-timer/fonts/ {
+location ^~ /wp-content/uploads/actnow-countdown-timers/fonts/ {
     deny all;
 }
 
@@ -51,7 +51,7 @@ location ^~ /wp-content/plugins/email-countdown-timer/fonts/ {
 }
 ```
 
-These are URL prefixes, not filesystem paths. Adjust them for subdirectory WordPress installations, custom uploads, aliases and multisite (for example `/wp-content/uploads/sites/2/email-countdown-timer/fonts/`). Repeat for the actual public prefixes that serve font files. The `^~` prefix avoids ordinary regex static-file locations taking precedence; exact or nested locations and external serving layers still require review. Run `nginx -t` and reload through the host's normal procedure. Do not put nginx directives into `.htaccess`.
+These are URL prefixes, not filesystem paths. Adjust them for subdirectory WordPress installations, custom uploads, aliases and multisite (for example `/wp-content/uploads/sites/2/actnow-countdown-timers/fonts/`). Repeat for the actual public prefixes that serve font files. The `^~` prefix avoids ordinary regex static-file locations taking precedence; exact or nested locations and external serving layers still require review. Run `nginx -t` and reload through the host's normal procedure. Do not put nginx directives into `.htaccess`.
 
 The WordPress render route `/?ecd_action=render&ecd=...&mode=email` must remain accessible. Do **not** deny the entire uploads directory, plugin assets or WordPress page containing a shortcode. FlyingPress is not a replacement for web-server access control, including installations without a CDN.
 
@@ -62,11 +62,11 @@ Use an existing harmless test filename in the protected font root. Do not upload
 ```sh
 # GET: discard the response body and report only the status.
 curl --max-time 10 -sS -o /dev/null -w '%{http_code}\n' \
-  'https://example.com/wp-content/uploads/email-countdown-timer/fonts/test.ttf'
+  'https://example.com/wp-content/uploads/actnow-countdown-timers/fonts/test.ttf'
 
 # HEAD must also be denied.
 curl --max-time 10 -sSI \
-  'https://example.com/wp-content/uploads/email-countdown-timer/fonts/test.ttf'
+  'https://example.com/wp-content/uploads/actnow-countdown-timers/fonts/test.ttf'
 ```
 
 For the examples above, expect **403**, not 200. A deliberate host-level 404 can also conceal a file, but confirm that a real file exists and that denial, not a typo, caused the response. A 500 is a configuration error, not successful verification. Check alternate public aliases and any cache that might already hold a copy. Separately request a timer using that local font: it must still return a valid image. File permissions must continue to allow the PHP process to read the font.

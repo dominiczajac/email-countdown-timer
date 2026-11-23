@@ -31,9 +31,9 @@ rm -f "$core_archive"
 "${wp[@]}" core install --url=http://localhost:8093 --title='Block acceptance' --admin_user=ci-admin --admin_password="$ECD_BLOCK_PASSWORD" --admin_email=ci@example.invalid --skip-email
 "${wp[@]}" theme install "${ECD_BLOCK_THEME:?}" --activate
 "${wp[@]}" core verify-checksums
-bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown-block.zip" --report "$ECD_BLOCK_EVIDENCE/distribution.json"
-"${wp[@]}" plugin install "$RUNNER_TEMP/easy-countdown-block.zip" --activate
-python3 "$root/scripts/verify-distribution.py" "$ECD_BLOCK_EVIDENCE/distribution.json" "$wpdir/wp-content/plugins/easy-countdown"
+bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/actnow-countdown-timers-block.zip" --report "$ECD_BLOCK_EVIDENCE/distribution.json"
+"${wp[@]}" plugin install "$RUNNER_TEMP/actnow-countdown-timers-block.zip" --activate
+python3 "$root/scripts/verify-distribution.py" "$ECD_BLOCK_EVIDENCE/distribution.json" "$wpdir/wp-content/plugins/actnow-countdown-timers"
 "${wp[@]}" eval-file "$root/tests/integration/gutenberg.php" > "$ECD_BLOCK_EVIDENCE/integration.txt"
 export ECD_BLOCK_POST_ID="$("${wp[@]}" eval-file "$root/tests/gutenberg/fixture.php")"
 { git rev-parse HEAD; php -v; "${wp[@]}" core version --extra; "${wp[@]}" theme list --status=active --format=json; } > "$ECD_BLOCK_EVIDENCE/versions.txt"
