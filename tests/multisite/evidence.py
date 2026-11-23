@@ -14,7 +14,7 @@ from cache_evidence import HITS, SETTINGS, VENDOR, browser_proof, hit_proof, sna
 import edit_refresh
 
 BASE = 'http://localhost:8097'
-PLUGIN = 'easy-countdown/email-countdown-timer.php'
+PLUGIN = 'actnow-countdown-timers/email-countdown-timer.php'
 THEMES = {'twentytwentyone': ('2.9', False), 'twentytwentyfour': ('1.6', True)}
 ROLES = ('root', 'blue', 'red')
 PATHS = {'root': '/', 'blue': '/blue/', 'red': '/red/'}

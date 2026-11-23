@@ -9,7 +9,7 @@ def verify_status(page, browser, context, base, evidence, check, campaign='copie
     page.on('request', listener)
     target = base + '/wp-admin/admin.php?page=email-countdown-timer-status'
     page.goto(target)
-    expect(page.get_by_role('heading', name='Easy Countdown: Status & Troubleshooting')).to_be_visible()
+    expect(page.get_by_role('heading', name='ActNow – Countdown Timers: Status & Troubleshooting')).to_be_visible()
     check(page.locator('#ect-status-report').count() == 0 and not any('ecd_action=render' in r.url for r in requests), 'opening Status makes no image request and generates no report')
     page.get_by_label('Campaign ID (optional)', exact=True).fill(campaign)
     page.get_by_role('button', name='Run local checks', exact=True).click()

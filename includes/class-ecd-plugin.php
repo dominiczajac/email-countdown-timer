@@ -20,7 +20,7 @@ class Email_Countdown_Timer_Plugin {
     }
     public function registerAdminMenu(): void {
         require_once __DIR__.'/class-email-countdown-timer-admin.php';
-        $hook = add_menu_page(__('Easy Countdown', 'easy-countdown'), __('Easy Countdown', 'easy-countdown'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
+        $hook = add_menu_page(__('ActNow – Countdown Timers', 'actnow-countdown-timers'), __('ActNow – Countdown Timers', 'actnow-countdown-timers'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
         Email_Countdown_Timer_Admin::add_screen($hook);
     }
     public function enqueueAdminAssets(string $hook): void {
@@ -47,7 +47,7 @@ class Email_Countdown_Timer_Plugin {
         check_admin_referer('ecd_save_timer_nonce');
         // Old forms cannot bypass the current editor's validation and delete confirmation.
         // Keep the old nonce/capability gate, but perform no legacy mutation or redirect.
-        wp_die(esc_html__('This form version is no longer supported. Reload Easy Countdown and use the current editor. No timer data was changed.', 'easy-countdown'), '', ['response'=>409]);
+        wp_die(esc_html__('This form version is no longer supported. Reload ActNow – Countdown Timers and use the current editor. No timer data was changed.', 'actnow-countdown-timers'), '', ['response'=>409]);
         return;
     }
     public function renderAdminPage(): void {
@@ -59,7 +59,7 @@ class Email_Countdown_Timer_Plugin {
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
         if ($id === '') return '';
         $timers = $this->getTimers();
-        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'easy-countdown'));
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'actnow-countdown-timers'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
         $html = sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',

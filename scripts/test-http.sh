@@ -18,7 +18,7 @@ if [[ "${ECD_CACHE:-database}" == redis ]]; then
   "${wp[@]}" plugin install redis-cache --version=3.0.0 --activate
   "${wp[@]}" redis enable
 fi
-target="$wpdir/wp-content/plugins/easy-countdown"
+target="$wpdir/wp-content/plugins/actnow-countdown-timers"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
@@ -26,7 +26,7 @@ rm -f "$archive"
 mkdir -p "$target/fonts" "$wpdir/wp-content/mu-plugins"
 # Test-only local runner font, never included in the ZIP or repository.
 cp /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf "$target/fonts/fixture.ttf"
-"${wp[@]}" plugin activate easy-countdown
+"${wp[@]}" plugin activate actnow-countdown-timers
 cp "$root/tests/http/observer.php" "$wpdir/wp-content/mu-plugins/ect-http-observer.php"
 "${wp[@]}" eval-file "$root/tests/http/fixture.php" seed
 "${wp[@]}" eval-file "$root/tests/http/fixture.php" versions > "$ECD_HTTP_EVIDENCE/versions.json"

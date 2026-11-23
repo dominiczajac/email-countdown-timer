@@ -296,12 +296,12 @@ def main():
             check(executable, 'chromium_missing')
             with p.chromium.launch(executable_path=executable, args=['--no-sandbox']) as browser:
                 report['browser'] = browser.version
-                wp('plugin', 'deactivate', 'easy-countdown', '--network')
+                wp('plugin', 'deactivate', 'actnow-countdown-timers', '--network')
                 for key in ORDER:
                     current = {'key': key, 'complete': False, 'failures': [], 'sites': [], 'mutation': None, 'visible_edit': None}; report['states'].append(current)
                     try:
                         phase = 'plugin-state'
-                        args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'easy-countdown']
+                        args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'actnow-countdown-timers']
                         args += ['--network'] if activation == 'network' else ['--url=' + BASE + PATHS['blue']]
                         wp(*args)
                         if cached: wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'purge-cache')

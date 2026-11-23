@@ -6,7 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Email_Countdown_Timer_Fonts {
     public const BARLOW_CONDENSED_BLACK = 'builtin:barlow-condensed-black';
-    public const OPTION = 'email_countdown_timer_copied_fonts';
+    public const OPTION = 'email_countdown_timer_actnow_copied_fonts';
+    private const LEGACY_OPTION = 'email_countdown_timer_copied_fonts';
+    private const LEGACY_SLUGS = array( 'easy-countdown', 'email-countdown-timer' );
     public const BUNDLED_FILE = 'easy-countdown-lato-regular.ttf';
     public const BUNDLED_CHOICE = 'builtin:lato-regular';
     public const IBM_PLEX_MONO = 'builtin:ibm-plex-mono-regular';
@@ -36,11 +38,11 @@ final class Email_Countdown_Timer_Fonts {
 
     public static function label( string $name ): string {
         return match ( $name ) {
-            self::BARLOW_CONDENSED_BLACK => __( 'Barlow Condensed Black (included)', 'easy-countdown' ),
-            self::BUNDLED_CHOICE => __( 'Lato Regular (included)', 'easy-countdown' ),
-            self::IBM_PLEX_MONO => __( 'IBM Plex Mono Regular (included)', 'easy-countdown' ),
-            self::BARLOW_CONDENSED => __( 'Barlow Condensed Regular (included)', 'easy-countdown' ),
-            self::CRIMSON_TEXT => __( 'Crimson Text Regular (included)', 'easy-countdown' ),
+            self::BARLOW_CONDENSED_BLACK => __( 'Barlow Condensed Black (included)', 'actnow-countdown-timers' ),
+            self::BUNDLED_CHOICE => __( 'Lato Regular (included)', 'actnow-countdown-timers' ),
+            self::IBM_PLEX_MONO => __( 'IBM Plex Mono Regular (included)', 'actnow-countdown-timers' ),
+            self::BARLOW_CONDENSED => __( 'Barlow Condensed Regular (included)', 'actnow-countdown-timers' ),
+            self::CRIMSON_TEXT => __( 'Crimson Text Regular (included)', 'actnow-countdown-timers' ),
             default => $name,
         };
     }
@@ -57,6 +59,35 @@ final class Email_Countdown_Timer_Fonts {
     public static function legacy_directory(): ?string {
         $path = ( defined( 'EMAIL_COUNTDOWN_TIMER_DIR' ) ? EMAIL_COUNTDOWN_TIMER_DIR : dirname( __DIR__ ) . '/' ) . 'fonts';
         return ! is_link( $path ) && is_dir( $path ) ? ( realpath( $path ) ?: null ) : null;
+    }
+
+    /** Previous installed copies are read sources, never write targets. */
+    private static function plugin_font_directories(): array {
+        $dirs = array_filter( array( self::legacy_directory() ) );
+        $root = defined( 'WP_PLUGIN_DIR' ) ? realpath( WP_PLUGIN_DIR ) : false;
+        if ( false !== $root ) {
+            foreach ( self::LEGACY_SLUGS as $slug ) {
+                $plugin = $root . DIRECTORY_SEPARATOR . $slug;
+                $fonts = $plugin . DIRECTORY_SEPARATOR . 'fonts';
+                $main = $plugin . DIRECTORY_SEPARATOR . 'email-countdown-timer.php';
+                if ( ! is_link( $plugin ) && ! is_link( $main ) && is_file( $main ) && ! is_link( $fonts ) && is_dir( $fonts ) && realpath( $fonts ) === $fonts ) {
+                    $dirs[] = $fonts;
+                }
+            }
+        }
+        return array_unique( $dirs );
+    }
+
+    private static function previous_plugin_installed(): bool {
+        if ( ! defined( 'WP_PLUGIN_DIR' ) ) return false;
+        $current = defined( 'EMAIL_COUNTDOWN_TIMER_DIR' ) ? EMAIL_COUNTDOWN_TIMER_DIR : dirname( __DIR__ ) . '/';
+        $current_main = realpath( $current . 'email-countdown-timer.php' );
+        foreach ( self::LEGACY_SLUGS as $slug ) {
+            $old_main = WP_PLUGIN_DIR . '/' . $slug . '/email-countdown-timer.php';
+            // Even a linked install can still need its previous uploads files.
+            if ( is_file( $old_main ) && realpath( $old_main ) !== $current_main ) return true;
+        }
+        return false;
     }
 
     /** Reject a misconfigured uploads path that resolves into plugin code. */
@@ -83,6 +114,14 @@ final class Email_Countdown_Timer_Fonts {
 
     /** No mkdir in read/render paths. Multisite gets a suffix even with shared uploads. */
     public static function persistent_directory( bool $create = false ): ?string {
+        return self::uploads_font_directory( 'actnow-countdown-timers', $create );
+    }
+
+    private static function legacy_uploads_directory(): ?string {
+        return self::uploads_font_directory( 'email-countdown-timer', false );
+    }
+
+    private static function uploads_font_directory( string $folder, bool $create ): ?string {
         if ( ! function_exists( 'wp_get_upload_dir' ) ) {
             return null;
         }
@@ -110,7 +149,7 @@ final class Email_Countdown_Timer_Fonts {
         if ( false === $path || ( $create && self::plugin_code_directory( $path ) ) ) {
             return null;
         }
-        $parts = array( 'email-countdown-timer', 'fonts' );
+        $parts = array( $folder, 'fonts' );
         if ( function_exists( 'is_multisite' ) && is_multisite() ) {
             $parts[] = 'site-' . (int) get_current_blog_id();
         }
@@ -148,12 +187,15 @@ final class Email_Countdown_Timer_Fonts {
         if ( ! self::valid_name( $name ) ) {
             return null;
         }
-        // An old filename selection must never become a newly shipped face.
-        if ( in_array( $name, array_column( $bundled, 'file' ), true ) ) {
-            return self::contained_file( self::persistent_directory(), $name );
+        // An old filename selection must never become a shipped face.
+        if ( ! in_array( $name, array_column( $bundled, 'file' ), true ) ) {
+            foreach ( self::plugin_font_directories() as $directory ) {
+                $file = self::contained_file( $directory, $name );
+                if ( null !== $file ) return $file;
+            }
         }
-        return self::contained_file( self::legacy_directory(), $name )
-            ?? self::contained_file( self::persistent_directory(), $name );
+        return self::contained_file( self::persistent_directory(), $name )
+            ?? self::contained_file( self::legacy_uploads_directory(), $name );
     }
 
     public static function names(): array {
@@ -161,12 +203,13 @@ final class Email_Countdown_Timer_Fonts {
         $bundled = self::bundled();
         $shipped_files = array_column( $bundled, 'file' );
         $legacy = self::legacy_directory();
-        foreach ( array( $legacy, self::persistent_directory() ) as $directory ) {
+        $plugin_dirs = self::plugin_font_directories();
+        foreach ( array_merge( $plugin_dirs, array( self::persistent_directory(), self::legacy_uploads_directory() ) ) as $directory ) {
             if ( null === $directory || ! is_readable( $directory ) ) {
                 continue;
             }
             foreach ( scandir( $directory ) ?: array() as $name ) {
-                if ( $directory === $legacy && in_array( $name, $shipped_files, true ) ) {
+                if ( in_array( $directory, $plugin_dirs, true ) && in_array( $name, $shipped_files, true ) ) {
                     // Shipped faces are exposed only through reserved choices.
                     continue;
                 }
@@ -186,9 +229,10 @@ final class Email_Countdown_Timer_Fonts {
 
     /** Copy, never move/overwrite. A session lock serializes the ownership manifest. */
     public static function copy_legacy(): array {
-        $source = self::legacy_directory();
+        $previous_uploads = self::legacy_uploads_directory();
+        $sources = array_filter( array_merge( self::plugin_font_directories(), array( $previous_uploads ) ) );
         $target = self::persistent_directory( true );
-        if ( null === $source || null === $target ) {
+        if ( empty( $sources ) || null === $target ) {
             throw new RuntimeException( 'Local font directories are unavailable or not writable.' );
         }
         require_once __DIR__ . '/class-email-countdown-timer-render-lock.php';
@@ -207,11 +251,7 @@ final class Email_Countdown_Timer_Fonts {
                 throw new RuntimeException( 'The font ownership record is invalid.' );
             }
             $shipped_hashes = array_column( self::bundled(), 'sha256', 'file' );
-            foreach ( scandir( $source ) ?: array() as $name ) {
-                $file = self::contained_file( $source, $name );
-                if ( null === $file ) {
-                    continue;
-                }
+            foreach ( self::font_sources( $sources ) as $name => $file ) {
                 $size = filesize( $file );
                 $header = file_get_contents( $file, false, null, 0, 4 );
                 if ( false === $size || $size < 12 || $size > self::MAX_BYTES || ! in_array( $header, array( "\x00\x01\x00\x00", 'OTTO', 'true' ), true ) ) {
@@ -220,7 +260,7 @@ final class Email_Countdown_Timer_Fonts {
                 }
                 $hash = hash_file( 'sha256', $file );
                 // An unchanged shipped font is restored by updates, not user migration data.
-                if ( isset( $shipped_hashes[ $name ] ) && $shipped_hashes[ $name ] === $hash ) {
+                if ( dirname( $file ) !== $previous_uploads && isset( $shipped_hashes[ $name ] ) && $shipped_hashes[ $name ] === $hash ) {
                     continue;
                 }
                 $destination = $target . DIRECTORY_SEPARATOR . $name;
@@ -270,20 +310,30 @@ final class Email_Countdown_Timer_Fonts {
         return array( 'copied' => $copied, 'skipped' => $skipped );
     }
 
+    private static function font_sources( array $directories ): Generator {
+        foreach ( $directories as $directory ) {
+            if ( ! is_readable( $directory ) ) continue;
+            foreach ( scandir( $directory ) ?: array() as $name ) {
+                $file = self::contained_file( $directory, $name );
+                if ( null !== $file ) yield $name => $file;
+            }
+        }
+    }
+
     public static function handle_copy(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You are not allowed to manage fonts.', 'easy-countdown' ), '', array( 'response' => 403 ) );
+            wp_die( esc_html__( 'You are not allowed to manage fonts.', 'actnow-countdown-timers' ), '', array( 'response' => 403 ) );
             return;
         }
         if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
-            wp_die( esc_html__( 'Use the font copy form.', 'easy-countdown' ), '', array( 'response' => 405 ) );
+            wp_die( esc_html__( 'Use the font copy form.', 'actnow-countdown-timers' ), '', array( 'response' => 405 ) );
             return;
         }
         check_admin_referer( 'email_countdown_timer_copy_fonts' );
         try {
             $result = self::copy_legacy();
         } catch ( Throwable $error ) {
-            wp_die( esc_html__( 'Local font copying failed. Check directory permissions and database locks, or use SFTP. Original files were not removed.', 'easy-countdown' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'Local font copying failed. Check directory permissions and database locks, or use SFTP. Original files were not removed.', 'actnow-countdown-timers' ), '', array( 'response' => 500 ) );
             return;
         }
         wp_safe_redirect( add_query_arg( array( 'page' => 'email-countdown-timer-data', 'fonts_copied' => $result['copied'], 'fonts_skipped' => $result['skipped'] ), admin_url( 'admin.php' ) ) );
@@ -292,19 +342,24 @@ final class Email_Countdown_Timer_Fonts {
 
     /** Called only after this site's explicit uninstall opt-in. Never recurse. */
     public static function delete_owned(): void {
-        $directory = self::persistent_directory();
-        $manifest = get_option( self::OPTION, array() );
-        if ( null !== $directory && ! self::plugin_code_directory( $directory ) && is_array( $manifest ) ) {
-            foreach ( $manifest as $name => $hash ) {
-                if ( ! is_string( $name ) || ! is_string( $hash ) || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) {
-                    continue;
-                }
-                $file = self::contained_file( $directory, $name );
-                if ( null !== $file && hash_file( 'sha256', $file ) === $hash ) {
-                    wp_delete_file( $file );
+        $owned_roots = array( self::OPTION => self::persistent_directory() );
+        // The previous copy may still be used for rollback. Keep its files and
+        // ownership map until it is absent, then clean only its original root.
+        if ( ! self::previous_plugin_installed() ) {
+            $owned_roots[ self::LEGACY_OPTION ] = self::legacy_uploads_directory();
+        }
+        foreach ( $owned_roots as $option => $directory ) {
+            $manifest = get_option( $option, array() );
+            if ( null !== $directory && ! self::plugin_code_directory( $directory ) && is_array( $manifest ) ) {
+                foreach ( $manifest as $name => $hash ) {
+                    if ( ! is_string( $name ) || ! is_string( $hash ) || ! preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) continue;
+                    $file = self::contained_file( $directory, $name );
+                    if ( null !== $file && hash_file( 'sha256', $file ) === $hash ) {
+                        wp_delete_file( $file );
+                    }
                 }
             }
+            delete_option( $option );
         }
-        delete_option( self::OPTION );
     }
 }

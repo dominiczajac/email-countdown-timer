@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 12.9.0 (review candidate)
+
+- Rename the display name, package directory and translation domain to ActNow – Countdown Timers. Continue using the persisted block name, saved timer settings and public URLs.
+- Store new fonts and rules under the ActNow uploads directory. Read legacy fonts and restrict opt-in cleanup to each original ownership directory.
 
 - Restrict the explicit Apache font-rule installer to this site’s persistent uploads font directory. Preserve existing rules, legacy font reads and the no-overwrite font copy workflow.
 - Refuse font rule installation, migration writes and font cleanup when the configured uploads path resolves into plugin code.

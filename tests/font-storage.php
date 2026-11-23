@@ -13,6 +13,7 @@ function get_current_blog_id() { return $GLOBALS['font_site'] ?? 1; }
 $start_checks = $checks;
 $font_test_root = sys_get_temp_dir() . '/ect-font-tests-' . bin2hex(random_bytes(8));
 mkdir($font_test_root);
+define('WP_PLUGIN_DIR', $font_test_root.'/fixture-plugins');
 $legacy = EMAIL_COUNTDOWN_TIMER_DIR . 'fonts';
 $created_legacy = !is_dir($legacy);
 if ($created_legacy) mkdir($legacy);
@@ -20,7 +21,7 @@ $name = 'ect-storage-' . bin2hex(random_bytes(8)) . '.ttf';
 $original = $legacy . '/' . $name;
 $owned = [];
 try {
-    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/email-countdown-timer'), 'font reads do not mkdir');
+    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/actnow-countdown-timers'), 'font reads do not mkdir');
     foreach (['../x.ttf', "x\0.ttf", 'dir\\x.ttf', 'file.php', 'x.woff2'] as $bad) ok(!Email_Countdown_Timer_Fonts::valid_name($bad), 'reject unsafe font name');
     file_put_contents($original, "\0\1\0\0" . str_repeat('synthetic-test-not-a-font', 3));
     $owned[]=$original;
@@ -84,8 +85,23 @@ try {
     $font_site=3;$site3=Email_Countdown_Timer_Fonts::persistent_directory(true);
     ok($site2!==$site3 && str_ends_with($site2,'site-2') && str_ends_with($site3,'site-3'),'per-site roots stay isolated with shared uploads');
     $font_multisite=false;
+    unlink($original);
+    $previous_plugin=WP_PLUGIN_DIR.'/easy-countdown';
+    $previous_uploads=$font_test_root.'/email-countdown-timer/fonts';
+    mkdir($previous_plugin.'/fonts',0755,true);
+    mkdir($previous_uploads,0755,true);
+    file_put_contents($previous_plugin.'/email-countdown-timer.php','<?php /* Synthetic marker for the previous installed plugin. */');
+    $previous_plugin_font=$previous_plugin.'/fonts/previous-plugin.ttf';
+    file_put_contents($previous_plugin_font,"\0\1\0\0".str_repeat('previous-plugin',3));
+    file_put_contents($previous_uploads.'/previous-plugin.ttf',"\0\1\0\0".str_repeat('previous-uploads-conflict',3));
+    $stock=Email_Countdown_Timer_Fonts::BUNDLED_FILE;
+    copy($legacy.'/'.$stock,$previous_uploads.'/'.$stock);
+    $migration=Email_Countdown_Timer_Fonts::copy_legacy();
+    ok($migration['copied']===2 && hash_file('sha256',$dir.'/previous-plugin.ttf')===hash_file('sha256',$previous_plugin_font),'copy imports the previous plugin font ahead of a conflicting legacy uploads file');
+    ok(hash_file('sha256',$dir.'/'.$stock)===hash_file('sha256',$previous_uploads.'/'.$stock),'copy keeps a stock-named customer font from legacy uploads even when the bytes match the bundled face');
+    ok(is_file($previous_plugin_font) && is_file($previous_uploads.'/'.$stock),'migration preserves both previous sources');
     $safe_base=$font_test_root;$font_test_root.='/bad-root';mkdir($font_test_root);
-    symlink($safe_base,$font_test_root.'/email-countdown-timer');
+    symlink($safe_base,$font_test_root.'/actnow-countdown-timers');
     ok(Email_Countdown_Timer_Fonts::persistent_directory(true)===null, 'reject symlink inside persistent root');
     $font_test_root=$safe_base;
     if (function_exists('imagecreatetruecolor')) {

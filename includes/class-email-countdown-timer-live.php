@@ -20,7 +20,7 @@ final class Email_Countdown_Timer_Live {
         $values = array( 'd' => intdiv( $remaining, 86400 ), 'h' => intdiv( $remaining % 86400, 3600 ), 'm' => intdiv( $remaining % 3600, 60 ), 's' => $remaining % 60 );
         $omit_days = $config['hide_days'] && 0 === $values['d'];
         $end_url = empty( $config['expiry_image_id'] ) ? '' : add_query_arg( array( 'ecd_action' => 'render', 'ecd' => $id, 'mode' => 'end' ), home_url( '/' ) );
-        $alt = Email_Countdown_Timer_Config::alt( $config, __( 'Countdown', 'easy-countdown' ) );
+        $alt = Email_Countdown_Timer_Config::alt( $config, __( 'Countdown', 'actnow-countdown-timers' ) );
         $style = '--ecd-bg:' . $config['bg'] . ';--ecd-digit:' . $config['dc'] . ';--ecd-label:' . $config['lc'] . ';';
         ob_start();
         ?>
@@ -35,9 +35,9 @@ final class Email_Countdown_Timer_Live {
                     <?php endforeach; ?>
                 </div>
             </div>
-            <p class="ecd-live__deadline"><?php echo esc_html__( 'Deadline:', 'easy-countdown' ); ?> <time datetime="<?php echo esc_attr( $date->format( DATE_ATOM ) ); ?>"><?php echo esc_html( $date->format( 'Y-m-d H:i:s P' ) . ' (' . $config['tz'] . ')' ); ?></time></p>
-            <div class="ecd-live__controls"><button type="button" style="visibility:hidden" data-ecd-pause="<?php echo esc_attr__( 'Pause countdown', 'easy-countdown' ); ?>" data-ecd-resume="<?php echo esc_attr__( 'Resume countdown', 'easy-countdown' ); ?>" data-ecd-ended="<?php echo esc_attr__( 'Countdown ended', 'easy-countdown' ); ?>"><?php echo esc_html__( 'Pause countdown', 'easy-countdown' ); ?></button></div>
-            <p class="ecd-live__help"><?php echo esc_html__( 'Without JavaScript, these digits are a snapshot. Use the deadline above for the exact end time.', 'easy-countdown' ); ?></p>
+            <p class="ecd-live__deadline"><?php echo esc_html__( 'Deadline:', 'actnow-countdown-timers' ); ?> <time datetime="<?php echo esc_attr( $date->format( DATE_ATOM ) ); ?>"><?php echo esc_html( $date->format( 'Y-m-d H:i:s P' ) . ' (' . $config['tz'] . ')' ); ?></time></p>
+            <div class="ecd-live__controls"><button type="button" style="visibility:hidden" data-ecd-pause="<?php echo esc_attr__( 'Pause countdown', 'actnow-countdown-timers' ); ?>" data-ecd-resume="<?php echo esc_attr__( 'Resume countdown', 'actnow-countdown-timers' ); ?>" data-ecd-ended="<?php echo esc_attr__( 'Countdown ended', 'actnow-countdown-timers' ); ?>"><?php echo esc_html__( 'Pause countdown', 'actnow-countdown-timers' ); ?></button></div>
+            <p class="ecd-live__help"><?php echo esc_html__( 'Without JavaScript, these digits are a snapshot. Use the deadline above for the exact end time.', 'actnow-countdown-timers' ); ?></p>
         </div>
         <?php
         return (string) ob_get_clean();

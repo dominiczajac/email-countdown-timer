@@ -12,8 +12,8 @@ wp=(wp --path="$wpdir" --no-color)
 "${wp[@]}" config set WP_ENVIRONMENT_TYPE local
 "${wp[@]}" config set DISABLE_WP_CRON true --raw
 "${wp[@]}" core install --url=http://localhost:8092 --title='Delivery test' --admin_user=ci-admin --admin_password="$(openssl rand -hex 20)" --admin_email=ci@example.invalid --skip-email
-bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/easy-countdown-delivery.zip" --report "$ECD_DELIVERY_EVIDENCE/distribution.json"
-"${wp[@]}" plugin install "$RUNNER_TEMP/easy-countdown-delivery.zip" --activate
+bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/actnow-countdown-timers-delivery.zip" --report "$ECD_DELIVERY_EVIDENCE/distribution.json"
+"${wp[@]}" plugin install "$RUNNER_TEMP/actnow-countdown-timers-delivery.zip" --activate
 "${wp[@]}" eval-file "$root/tests/delivery/fixture.php"
 "${wp[@]}" core version --extra > "$ECD_DELIVERY_EVIDENCE/versions.txt"
 php -v >> "$ECD_DELIVERY_EVIDENCE/versions.txt"

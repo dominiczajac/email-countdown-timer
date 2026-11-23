@@ -18,7 +18,7 @@ with sync_playwright() as p:
     ctx=browser.new_context();page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
     login(page);check(page.locator('[src*="assets/end-image.js"]').count()==0,'no picker script on Dashboard')
     page.goto(base+'/wp-admin/admin.php?page=ecd-timers');check(page.locator('[src*="assets/end-image.js"]').count()==0,'no picker script on timer list')
-    page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new');expect(page.get_by_role('heading',name='Easy Countdown',exact=True)).to_be_visible()
+    page.goto(base+'/wp-admin/admin.php?page=ecd-timers&view=new');expect(page.get_by_role('heading',name='ActNow – Countdown Timers',exact=True)).to_be_visible()
     check(page.locator('[src*="assets/end-image.js"]').count()==1,'picker script only once on editor')
     page.locator('#ect-campaign_name').fill('End image browser');page.locator('#ect-deadline').fill('2030-01-01T00:00:05')
     page.get_by_role('button',name='Choose Image',exact=True).click()

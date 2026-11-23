@@ -170,7 +170,7 @@ ob_start(); Email_Countdown_Timer_Admin::render_dashboard_widget(); $dashboard_d
 ok( ! isset( $dashboard_widget ) && $dashboard_denied === '', 'dashboard widget registration and rendering both require timer management capability' );
 $admin = true;
 $plugin->registerDashboardWidget();
-ok( $dashboard_widget[0] === 'email_countdown_timer_quick_access' && is_callable( $dashboard_widget[2] ), 'ordinary WordPress dashboard gets the native Easy Countdown widget' );
+ok( $dashboard_widget[0] === 'email_countdown_timer_quick_access' && is_callable( $dashboard_widget[2] ), 'ordinary WordPress dashboard gets the native ActNow – Countdown Timers widget' );
 ob_start(); call_user_func( $dashboard_widget[2] ); $dashboard = ob_get_clean();
 ok( str_contains( $dashboard, 'id="ect-dashboard-create"' ) && str_contains( $dashboard, 'name="creation_mode" value="quick"' ) && str_contains( $dashboard, 'value="midnight"' ), 'dashboard uses the shared no-JS quick form with presets' );
 ok( str_contains( $dashboard, 'name="_wpnonce"' ) && str_contains( $dashboard, 'email_countdown_timer_save' ), 'dashboard posts to the same nonce-protected save controller' );

@@ -1,8 +1,8 @@
-# Easy Countdown
+# ActNow – Countdown Timers
 
 Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.8.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Easy Countdown
+**Source version:** 12.9.0 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** ActNow – Countdown Timers
 
 ## Requirements
 
@@ -20,7 +20,7 @@ There are no bundled runtime Composer/npm dependencies. Five static faces across
 
 ## Existing WordPress.org submission
 
-The display name is **Easy Countdown** and the assigned submission slug, translation domain and installation directory are **`easy-countdown`**. The GitHub repository keeps its current name. This package is intended as an update to that existing submission, not a second plugin submission; no directory approval is claimed. `Contributors: ddoomm` identifies the maintainer's confirmed WordPress.org account. The submitted package must be the same archive validated by CI and the maintainer's live checks; see the [12.8.0 handoff and live checks](docs/REVIEW-HANDOFF-12.8.0.md). The maintainer handles WordPress.org submission personally.
+The display name is **ActNow – Countdown Timers**. The proposed WordPress.org slug, ZIP root and translation domain are `actnow-countdown-timers`. Upload the revised ZIP to the existing Easy Countdown submission and request the new slug in the existing review thread. The contributor remains `ddoomm`. See the [12.9.0 handoff](docs/REVIEW-HANDOFF-12.9.0.md).
 
 ## Image after the countdown
 
@@ -34,13 +34,13 @@ A previously delivered GIF cannot request new bytes after its playback ends, and
 
 ## Install or update
 
-**Slug transition:** if the earlier GitHub copy is installed under `email-countdown-timer/`, back up data/fonts and deactivate it without uninstalling before activating the new `easy-countdown/` copy. Both names share data; do not activate both or uninstall either with cleanup enabled while the other needs that data. The new copy detects the known active legacy basename and refuses duplicate initialization. This does not rename files on your live site automatically.
+**Slug transition:** back up data and fonts, then deactivate `easy-countdown/` or `email-countdown-timer/` before activating `actnow-countdown-timers/`. All copies share the same timer settings. Keep the old copy deactivated while migrating custom fonts. Uninstall with cleanup enabled removes shared data. Existing blocks and public embed URLs need no changes.
 
 Use the installation ZIP, not a working directory containing developer/test files. In WordPress, open **Plugins > Add New > Upload Plugin** and install it. For an update, replace the installed plugin rather than uninstalling it; uninstall may remove data if you enabled that option. Back up your database and custom fonts first, and disable any older duplicate implementation or snippet.
 
-**Before the first update from 12.3.1 or older, copy/back up plugin-local fonts before WordPress replaces the old directory.** New code cannot recover files removed before it runs. Preserve font filenames and license notices. Persistent storage normally lives at `wp-content/uploads/email-countdown-timer/fonts/`; multisite adds `site-ID/`, and custom uploads paths can differ. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
+**Local fonts:** new storage is normally `wp-content/uploads/actnow-countdown-timers/fonts/`. ActNow reads the previous uploads font directory and font files from the deactivated older plugin while they remain installed. Back up plugin-local fonts before replacing or removing their directory. See [local font migration](docs/LOCAL-FONT-STORAGE.md).
 
-Use **Quick Create** in Easy Countdown or the **Easy Countdown dashboard widget**: choose a unique ID, deadline, time zone, color preset and countdown label language, then create the campaign. Both forms work without JavaScript and open the saved timer in the full editor. The widget also links to five existing timers in ID order and **All timers** for search; only users with the existing `manage_options` permission see it. WordPress Screen Options can hide the widget. **Create Timer** opens the full editor directly.
+Use **Quick Create** in ActNow or the **ActNow dashboard widget**: choose a unique name, deadline, time zone, color preset and countdown label language, then create the campaign. Both forms work without JavaScript and open the saved timer in the full editor. The widget also links to five existing timers in ID order and **All timers** for search; only users with the existing `manage_options` permission see it. WordPress Screen Options can hide the widget. **Create Timer** opens the full editor directly.
 
 New timers initialize to the browser time zone when available, with the configured WordPress site zone as fallback. Saved timers and duplicates retain their original zone; changing the computer/site zone does not reinterpret existing deadlines. The saved preview animates automatically while the editor is visible and motion is allowed, refreshing after 58 seconds; reduced-motion and no-JavaScript views use a static preview. Send a test through the actual sender and check public pages while logged out.
 
@@ -64,13 +64,13 @@ without per-second announcements, and no-JS output identifies its snapshot.
 Only a configured end image needs one static request at expiry. Purge page caches
 after campaign changes; live text trusts the visitor clock. [Behavior and limits](docs/LIVE-WEBSITE-COUNTDOWN.md).
 
-In the WordPress block editor, insert **Easy Countdown**, choose an existing timer and set alignment in the sidebar. The block uses the saved campaign and offers a static editor preview with manual refresh. See the [block guide](docs/GUTENBERG-BLOCK.md). Classic-editor and shortcode use remain supported.
+In the WordPress block editor, insert **ActNow – Countdown Timers**, choose an existing timer and set alignment in the sidebar. The block uses the saved campaign and offers an active preview with sidebar controls. See the [block guide](docs/GUTENBERG-BLOCK.md). Classic-editor and shortcode use remain supported.
 
 ```text
 [ecd_timer id="promotion"]
 ```
 
-**Embed Codes > Website** explains the native Easy Countdown block and provides the shortcode. Choose **Timer** in the block settings sidebar, where arrow-key navigation stays within the picker. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
+**Embed Codes > Website** explains the native ActNow block and provides the shortcode. Choose **Timer** in the block settings sidebar, where arrow-key navigation stays within the picker. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.
 
 **Embed Codes > Email** provides separate **Email HTML** and **Image URL** copy actions. All three code fields remain available for manual copying without JavaScript. WordPress shortcodes do not run in email.
 
@@ -98,7 +98,7 @@ The panel uses a small scoped stylesheet/script, system typography, a locally ti
 
 After at most one second of lock acquisition waiting, a busy or unavailable lock produces one frame at the current server time in the requested image format. It never returns a stale animated countdown or publishes a static fallback into the animation cache. A passed deadline shows the configured end image, or zeros when no valid end image is available. When a large GIF takes longer than the one-second wait, some followers can receive a static image while the owner finishes. If a completed image loses lock ownership, it can be returned only while still fresh and without crossing the deadline; it is never published to shared cache. Otherwise it is replaced by a current static frame. Missing GD, invalid data or encoder errors may still produce a sanitized error response. This is not a global rate limit or a timeout for the native encoder. **Data Settings > Rendering Diagnostics** provides an on-demand lock probe without visitor logging.
 
-FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `easy-countdown/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
+FlyingPress without CDN still requires correct local page-cache/lazy-load settings. Compatibility hints are narrow and do not disable normal page caching. If necessary, exclude `actnow-countdown-timers/assets/countdown.js` from delayed execution and `email-countdown-timer-image` from lazy loading; requests with `ecd_action=render` must not be page/edge cached or converted into static files. See [FlyingPress/WP Rocket instructions](docs/wiki/Optimization-and-Caching.md). Commercial optimizer binaries are not installed in CI, so this is not a guarantee for every version or settings combination.
 
 ## Layout stability and email rendering
 
@@ -145,7 +145,7 @@ The **WordPress Privacy Policy Guide** contains suggested wording and administra
 Read [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Work through focused PRs and current-head checks; never bypass `main` protection or change the frozen renderer test oracle to hide a regression.
 
 ```sh
-bash scripts/build-zip.sh --output dist/easy-countdown.zip --report dist/distribution.json
+bash scripts/build-zip.sh --output dist/actnow-countdown-timers.zip --report dist/distribution.json
 python3 tests/test-build.py
 php tests/run.php
 php tests/uninstall.php
@@ -160,7 +160,7 @@ GitHub is the development repository. This README is not a claim of WordPress.or
 
 ## On-demand troubleshooting
 
-Open **Easy Countdown > Status & Troubleshooting** and choose **Run local checks**
+Open **ActNow > Status & Troubleshooting** and choose **Run local checks**
 for GD, FreeType, Imagick and zero-wait database locking. An optional saved campaign
 ID adds its font-resolution check. Nothing runs on page opening or changes saved
 data. Each result has a severity and next action. **Copy report** includes only

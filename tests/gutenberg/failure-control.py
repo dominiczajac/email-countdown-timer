@@ -71,7 +71,7 @@ try:
     original_content = wp("post", "get", str(post), "--field=post_content")
     wp("post", "update", str(post), "--post_content=")
     for enabled in (False, True):
-        wp("plugin", "activate" if enabled else "deactivate", "easy-countdown")
+        wp("plugin", "activate" if enabled else "deactivate", "actnow-countdown-timers")
         row = {"easy_countdown_active": enabled,
                "active_plugins": json.loads(wp("option", "get", "active_plugins", "--format=json")),
                "requests": []}
@@ -175,7 +175,7 @@ except Exception as error:
     result["error_type"] = type(error).__name__
 finally:
     try:
-        wp("plugin", "activate", "easy-countdown")
+        wp("plugin", "activate", "actnow-countdown-timers")
         if original_content is not None:
             wp("post", "update", str(post), "--post_content=" + original_content)
     except Exception:

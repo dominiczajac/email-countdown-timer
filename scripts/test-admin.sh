@@ -13,12 +13,12 @@ export ECD_BROWSER_PASSWORD="$(openssl rand -hex 20)"
 "${wp[@]}" config set WP_ENVIRONMENT_TYPE local
 "${wp[@]}" config set DISABLE_WP_CRON true --raw
 "${wp[@]}" core install --url=http://localhost:8081 --title='Disposable Admin UI' --admin_user=ci-admin --admin_password="$ECD_BROWSER_PASSWORD" --admin_email=ci@example.invalid --skip-email
-install_dir="$wpdir/wp-content/plugins/easy-countdown"
+install_dir="$wpdir/wp-content/plugins/actnow-countdown-timers"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
 rm -f "$archive"
-"${wp[@]}" plugin activate easy-countdown
+"${wp[@]}" plugin activate actnow-countdown-timers
 # Existing browser fixtures explicitly use Warsaw; new tests also exercise changed zones.
 "${wp[@]}" option update timezone_string Europe/Warsaw
 export ECD_BROWSER_END_ID="$("${wp[@]}" eval-file "$root/tests/browser/end-image-fixture.php")"

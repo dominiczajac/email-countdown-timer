@@ -10,7 +10,7 @@ if (getenv('ECD_INTEGRATION_DISPOSABLE') !== '1' || wp_get_environment_type() !=
 }
 $phase = $args[0] ?? '';
 $policy = 'email_countdown_timer_delete_data_on_uninstall';
-$plugin = 'easy-countdown/email-countdown-timer.php';
+$plugin = 'actnow-countdown-timers/email-countdown-timer.php';
 $checks = 0;
 $expect = static function ($condition, string $message) use (&$checks): void {
     ++$checks;

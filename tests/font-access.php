@@ -34,9 +34,10 @@ try {
     try{Email_Countdown_Timer_Font_Access::handle();}catch(Font_Access_Stop $e){check($e->getMessage()==='die:405','method required');}
     $_SERVER['REQUEST_METHOD']=['POST'];
     try{Email_Countdown_Timer_Font_Access::handle();}catch(Font_Access_Stop $e){check($e->getMessage()==='die:405','malformed request method rejected');}
-    check(!is_dir($root.'/uploads/email-countdown-timer'),'rejected actions do not mkdir');
+    check(!is_dir($root.'/uploads/actnow-countdown-timers'),'rejected actions do not mkdir');
     $r=Email_Countdown_Timer_Font_Access::install();$dir=Email_Countdown_Timer_Fonts::persistent_directory();
     check($r===['created'=>2,'existing'=>0,'failed'=>0],'exactly two rules in the persistent uploads font root');
+    check($dir===$root.'/uploads/actnow-countdown-timers/fonts','fresh storage uses the new slug');
     foreach(Email_Countdown_Timer_Font_Access::templates() as $name=>$content){
         check(file_get_contents($dir.'/'.$name)===$content,'exact code-owned content written');
         check(!file_exists($root.'/code/fonts/'.$name),'single-site installation does not create a rule in the plugin');
@@ -64,7 +65,7 @@ try {
     catch(RuntimeException $e){check($e->getMessage()==='Local font directories are unavailable or not writable.','copy also rejects an uploads base inside plugin code');}
     check(scandir(WP_PLUGIN_DIR)===['.','..'] && scandir(WPMU_PLUGIN_DIR)===['.','..'],'no directory changes in other plugin roots');
     $multisite=false;
-    $code_fixture=WP_PLUGIN_DIR.'/email-countdown-timer/fonts';
+    $code_fixture=WP_PLUGIN_DIR.'/actnow-countdown-timers/fonts';
     mkdir($code_fixture,0755,true);
     $code_font=$code_fixture.'/owned-copy.ttf';
     file_put_contents($code_font,'synthetic-code-font');
@@ -73,6 +74,27 @@ try {
     check(is_file($code_font) && !isset($options[Email_Countdown_Timer_Fonts::OPTION]),'cleanup clears its manifest without deleting matching files from plugin code');
     check(scandir($root.'/code')===['.','..','fonts'] && scandir($root.'/code/fonts')===['.','..'],'no directories or rules created inside plugin code');
     unset($uploads_root);
+    $legacy_uploads=$root.'/uploads/email-countdown-timer/fonts';
+    mkdir($legacy_uploads,0755,true);
+    $legacy_file=$legacy_uploads.'/owned-copy.ttf';
+    file_put_contents($legacy_file,'previous owned font');
+    check(Email_Countdown_Timer_Fonts::path('owned-copy.ttf')===$legacy_file,'saved fonts still resolve through the previous uploads root');
+    $previous_install=WP_PLUGIN_DIR.'/easy-countdown';
+    mkdir($previous_install.'/fonts',0755,true);
+    file_put_contents($previous_install.'/email-countdown-timer.php','<?php /* Synthetic legacy plugin marker. */');
+    $legacy_plugin_font=$previous_install.'/fonts/retained.ttf';
+    file_put_contents($legacy_plugin_font,'previous plugin-local font');
+    check(Email_Countdown_Timer_Fonts::path('retained.ttf')===$legacy_plugin_font,'inactive previous plugin remains a font read source');
+    check(in_array('retained.ttf',Email_Countdown_Timer_Fonts::names(),true) && in_array('owned-copy.ttf',Email_Countdown_Timer_Fonts::names(),true),'font picker retains choices from both older roots');
+    file_put_contents($dir.'/owned-copy.ttf',file_get_contents($legacy_file));
+    $options['email_countdown_timer_copied_fonts']=['owned-copy.ttf'=>hash_file('sha256',$legacy_file)];
+    Email_Countdown_Timer_Fonts::delete_owned();
+    check(is_file($legacy_file) && isset($options['email_countdown_timer_copied_fonts']),'installed previous copy keeps its own fonts and ownership record');
+    unlink($previous_install.'/email-countdown-timer.php');
+    Email_Countdown_Timer_Fonts::delete_owned();
+    check(!file_exists($legacy_file)&&is_file($dir.'/owned-copy.ttf')&&is_file($legacy_plugin_font),'legacy cleanup never adopts a same-name new-root manual file or deletes plugin-local fonts');
+    check(!isset($options['email_countdown_timer_copied_fonts']),'legacy ownership option is cleared on opt-in cleanup');
+    check(!file_exists($legacy_uploads.'/.htaccess')&&!file_exists($previous_install.'/fonts/.htaccess'),'rule installer leaves both previous roots untouched');
     $_SERVER['REQUEST_METHOD']='POST';
     try{Email_Countdown_Timer_Font_Access::handle();}catch(Font_Access_Stop $e){check(str_contains($e->getMessage(),'font_rules=written'),'authorized action redirects with unverified write status');}
 }finally{
