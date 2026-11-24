@@ -17,7 +17,7 @@ wp=(wp --path="$wpdir" --no-color)
 if [[ "${ECD_TOPOLOGY:?}" == multisite ]]; then
   "${wp[@]}" core multisite-convert --title='Disposable network'
 fi
-install_dir="$wpdir/wp-content/plugins/actnow-countdown-timers"
+install_dir="$wpdir/wp-content/plugins/tickloom-countdown-timers"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
@@ -32,7 +32,7 @@ if [[ "${ECD_CACHE:?}" == redis ]]; then
 fi
 network=()
 [[ "$ECD_TOPOLOGY" != multisite ]] || network=(--network)
-"${wp[@]}" plugin activate actnow-countdown-timers "${network[@]}"
+"${wp[@]}" plugin activate tickloom-countdown-timers "${network[@]}"
 "${wp[@]}" eval-file "$root/tests/integration/bundled-font.php"
 "${wp[@]}" eval-file "$root/tests/integration/embed-geometry.php"
 "${wp[@]}" eval-file "$root/tests/integration/gutenberg.php"
@@ -55,14 +55,14 @@ php -r '$a=new Imagick(); $a->readImageBlob(file_get_contents($argv[1])); if($a-
 status="$(curl -sS -o /dev/null -w '%{http_code}' 'http://localhost:8080/?ecd_action=render&ecd=unknown-ci-timer&mode=email')"
 [[ "$status" == 404 ]]
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
-"${wp[@]}" plugin deactivate actnow-countdown-timers "${network[@]}"
+"${wp[@]}" plugin deactivate tickloom-countdown-timers "${network[@]}"
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" invoke-uninstall
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" retained
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" optin
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" invoke-uninstall
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" deleted
-"${wp[@]}" plugin uninstall actnow-countdown-timers --skip-delete
+"${wp[@]}" plugin uninstall tickloom-countdown-timers --skip-delete
 "${wp[@]}" eval-file "$root/tests/integration/lifecycle.php" deleted
 # A fresh PHP process verifies persistent cache coherence after actual uninstall.
 echo "WORDPRESS LIFECYCLE PASS: version=$ECD_WORDPRESS_VERSION topology=$ECD_TOPOLOGY cache=$ECD_CACHE"

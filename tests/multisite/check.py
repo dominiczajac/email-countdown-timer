@@ -219,7 +219,7 @@ def main():
             phase = 'media-library'; visit(page, '/wp-admin/upload.php')
             expect(page.locator('#wp-media-grid .media-frame-content')).to_be_visible(); row['checks'].append('media-library')
             if active:
-                phase = 'timer-editor'; visit(page, '/wp-admin/admin.php?page=ecd-timers&edit=shared-timer')
+                phase = 'timer-editor'; visit(page, '/wp-admin/admin.php?page=tickloom-timers&edit=shared-timer')
                 expect(page.locator('[name=campaign_name]')).to_have_value('PRIVATE-NETWORK-' + role)
                 expect(page.locator('[name=fixed_width]')).to_have_value(str(WIDTHS[role]))
                 live_preview=page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')
@@ -296,12 +296,12 @@ def main():
             check(executable, 'chromium_missing')
             with p.chromium.launch(executable_path=executable, args=['--no-sandbox']) as browser:
                 report['browser'] = browser.version
-                wp('plugin', 'deactivate', 'actnow-countdown-timers', '--network')
+                wp('plugin', 'deactivate', 'tickloom-countdown-timers', '--network')
                 for key in ORDER:
                     current = {'key': key, 'complete': False, 'failures': [], 'sites': [], 'mutation': None, 'visible_edit': None}; report['states'].append(current)
                     try:
                         phase = 'plugin-state'
-                        args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'actnow-countdown-timers']
+                        args = ['plugin', 'activate' if key.endswith('-on') else 'deactivate', 'tickloom-countdown-timers']
                         args += ['--network'] if activation == 'network' else ['--url=' + BASE + PATHS['blue']]
                         wp(*args)
                         if cached: wp('eval-file', str(ROOT / 'tests/multisite/fixture.php'), 'purge-cache')

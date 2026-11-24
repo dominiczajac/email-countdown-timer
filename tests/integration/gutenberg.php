@@ -77,7 +77,7 @@ try {
     $inline=wp_scripts()->get_data('easy-countdown-block-editor','before');
     $expect(is_array($inline) && str_starts_with(end($inline),'window.emailCountdownTimerBlock = '),'server attaches editor bootstrap using core inline API');
     $expect(json_decode(substr(end($inline),strlen('window.emailCountdownTimerBlock = '),-1),true)===$settings,'inline data matches authorized bounded choices exactly');
-    $expect(str_contains($settings['manageUrl'],'page=ecd-timers'),'admin settings link');
+    $expect(str_contains($settings['manageUrl'],'page=tickloom-timers'),'admin settings link');
     $expect(isset(Email_Countdown_Timer_Block::editor_settings(array(),new WP_Block_Editor_Context())['easyCountdown']),'admin site editor supported');
     $expect(get_option('easy_countdown_timers')===$snapshot,'no campaign mutation');
     $changed=$snapshot;$changed['block-test']['alt']='Updated without resaving post';update_option('easy_countdown_timers',$changed,false);

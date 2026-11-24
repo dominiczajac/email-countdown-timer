@@ -4,7 +4,7 @@ Work on a focused branch, open a real PR early and describe the problem, scope, 
 
 Preserve `easy_countdown_timers`, `ecd_timer`, image URLs, saved labels, timezone, geometry and frame count/timing unless a compatibility change is explicit. The v12.1 test renderer is frozen; do not change expected results to hide regressions. Document invalid-input and resource-limit changes in the changelog.
 
-Use the distinctive `Email_Countdown_Timer_` and `EMAIL_COUNTDOWN_TIMER_` prefixes for new internals. English user-facing strings use the `actnow-countdown-timers` translation domain. Saved labels and default campaign data must not change when the administrator's locale changes. Test new, custom and empty saved labels.
+Use the distinctive `Email_Countdown_Timer_` and `EMAIL_COUNTDOWN_TIMER_` prefixes for new internals. English user-facing strings use the `tickloom-countdown-timers` translation domain. Saved labels and default campaign data must not change when the administrator's locale changes. Test new, custom and empty saved labels.
 
 Validate input, escape at the actual output boundary and preserve capability/nonce checks. Do not add secrets, production data, fonts, telemetry, dependencies or external services without authorization and licensing review. Pin CI actions to full SHAs and retain minimal token permissions. Explain necessary code-local static-analysis annotations; do not globally suppress findings to obtain a green build.
 
@@ -28,4 +28,4 @@ CODEOWNERS routes review; it is not independent approval. Do not approve your ow
 
 ## Installation artifact
 
-Use `bash scripts/build-zip.sh --output dist/actnow-countdown-timers.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Only the five reviewed static faces and original OFL notices pinned in `scripts/build-zip.py` may be bundled; do not add other font binaries or site data without authorization, licensing review and an explicit manifest/hash update. See [build instructions](docs/DISTRIBUTION-BUILD.md).
+Use `bash scripts/build-zip.sh --output dist/tickloom-countdown-timers.zip --report dist/distribution.json`. The explicit `scripts/distribution-files.txt` manifest is shared by all installation tests and release packaging. Run `python3 tests/test-build.py` and the relevant runtime checks. Only the five reviewed static faces and original OFL notices pinned in `scripts/build-zip.py` may be bundled; do not add other font binaries or site data without authorization, licensing review and an explicit manifest/hash update. See [build instructions](docs/DISTRIBUTION-BUILD.md).

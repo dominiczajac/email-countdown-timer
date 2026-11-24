@@ -203,7 +203,7 @@ def navigation_cancel(failure, url, phase, navigating, method='GET', post_data=N
             and parts.path.startswith(('/wp-includes/', '/wp-admin/', '/wp-json/'))
             and 'render' not in query.get('ecd_action', [])
             and not any(action.startswith('email_countdown_timer_') for action in query.get('action', []))
-            and '/actnow-countdown-timers/' not in url
+            and '/tickloom-countdown-timers/' not in url
             and '/cache/autoptimize/' not in url)
 
 
@@ -221,7 +221,7 @@ def navigation_request_cancel(request, phase, navigating):
 
 
 def expected_plugins(profile, active):
-    plugins = {'actnow-countdown-timers/email-countdown-timer.php'} if active else set()
+    plugins = {'tickloom-countdown-timers/email-countdown-timer.php'} if active else set()
     if profile != 'baseline':
         plugins.add(PLUGIN_FILES[profile])
     return plugins

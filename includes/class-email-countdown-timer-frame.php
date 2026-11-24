@@ -116,17 +116,17 @@ final class Email_Countdown_Timer_Frame {
         $data=self::cached_payload($id,$raw); $data['paused']=$paused;
         if($data['deadline']<=time() && $data['end']!=='') $data['fallback']=add_query_arg(array('ecd_action'=>'render','ecd'=>$id,'mode'=>'static'),home_url('/'));
         $fallback=$data['fallback']; unset($data['fallback']);
-        $alt=Email_Countdown_Timer_Config::alt($raw,__('Countdown','actnow-countdown-timers'));
+        $alt=Email_Countdown_Timer_Config::alt($raw,__('Countdown','tickloom-countdown-timers'));
         $nonce=base64_encode(random_bytes(18));
         header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; style-src 'nonce-$nonce'; img-src 'self' data:; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
         header_remove('X-Frame-Options');
         ob_start(); ?>
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo esc_html__('Countdown timer','actnow-countdown-timers'); ?></title>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo esc_html__('Countdown timer','tickloom-countdown-timers'); ?></title>
 <style nonce="<?php echo esc_attr($nonce); ?>">html,body{margin:0;padding:0;background:transparent;font:13px system-ui,sans-serif}main{text-align:center}canvas,img{display:block;max-width:100%;height:auto;margin:auto}[hidden]{display:none!important}button{font:inherit;min-height:30px;margin:4px;cursor:pointer}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}</style></head><body><main>
 <img id="ect-frame-fallback" src="<?php echo esc_attr($fallback); ?>" alt="<?php echo esc_attr($alt); ?>">
 <canvas id="ect-frame-canvas" width="<?php echo esc_attr((string)$data['w']); ?>" height="<?php echo esc_attr((string)$data['h']); ?>" role="img" aria-label="<?php echo esc_attr($alt); ?>" hidden></canvas>
-<button id="ect-frame-pause" type="button" data-pause="<?php echo esc_attr__('Pause countdown','actnow-countdown-timers'); ?>" data-resume="<?php echo esc_attr__('Resume countdown','actnow-countdown-timers'); ?>" hidden><?php echo esc_html__('Pause countdown','actnow-countdown-timers'); ?></button>
-<p class="sr"><?php echo esc_html__('Deadline:','actnow-countdown-timers').' '.esc_html(Email_Countdown_Timer_Config::text($raw,'deadline')).' '.esc_html(Email_Countdown_Timer_Config::text($raw,'tz')); ?></p>
+<button id="ect-frame-pause" type="button" data-pause="<?php echo esc_attr__('Pause countdown','tickloom-countdown-timers'); ?>" data-resume="<?php echo esc_attr__('Resume countdown','tickloom-countdown-timers'); ?>" hidden><?php echo esc_html__('Pause countdown','tickloom-countdown-timers'); ?></button>
+<p class="sr"><?php echo esc_html__('Deadline:','tickloom-countdown-timers').' '.esc_html(Email_Countdown_Timer_Config::text($raw,'deadline')).' '.esc_html(Email_Countdown_Timer_Config::text($raw,'tz')); ?></p>
 <script type="application/json" id="ect-frame-data"><?php echo wp_json_encode($data, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON is hex escaped for this inert data element. ?></script>
 <script nonce="<?php echo esc_attr($nonce); ?>" src="<?php echo esc_url(add_query_arg('ver',EMAIL_COUNTDOWN_TIMER_VERSION,plugins_url('assets/frame.js',EMAIL_COUNTDOWN_TIMER_FILE))); ?>"></script></main></body></html>
 <?php return (string)ob_get_clean();
@@ -137,24 +137,25 @@ final class Email_Countdown_Timer_Frame {
         if($head) return;
         $nonce=base64_encode(random_bytes(18));
         header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
-        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','actnow-countdown-timers').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
+        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','tickloom-countdown-timers').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
     }
 
     public static function listen(): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only presentation of an existing public timer; no writes, sessions or arbitrary settings.
-        if(Email_Countdown_Timer_Config::text($_GET,'ecd_action')!=='frame') return;
+        if(Email_Countdown_Timer_Config::public_action()!=='frame') return;
         while(ob_get_level()>0) { $buffer=ob_get_status(); if(!(($buffer['flags']??0)&PHP_OUTPUT_HANDLER_REMOVABLE)) break; ob_end_clean(); }
         header('Content-Type: text/html; charset=UTF-8'); header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, no-transform'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: no-referrer');
         header_remove('X-Frame-Options'); header("Content-Security-Policy: default-src 'none'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
-        $method=Email_Countdown_Timer_Config::text($_SERVER,'REQUEST_METHOD','GET');
+        $method=Email_Countdown_Timer_Config::request_method('GET');
         if(!in_array($method,array('GET','HEAD'),true)) { header('Allow: GET, HEAD'); status_header(405); exit; }
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Validated canonical public identifier; does not authorize a mutation.
-        $id=Email_Countdown_Timer_Config::text($_GET,'ecd'); $timers=get_option('easy_countdown_timers',array());
-        if($id==='' || strlen($id)>200 || Email_Countdown_Timer_Config::id($id)!==$id || !is_array($timers) || !isset($timers[$id]) || !is_array($timers[$id])) { self::failure(404,$method==='HEAD'); exit; }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput -- request_id unslashes, sanitizes and requires a canonical timer ID.
+        $id=Email_Countdown_Timer_Config::request_id($_GET['ecd'] ?? null, true);
+        $timers=get_option('easy_countdown_timers',array());
+        if($id==='' || !is_array($timers) || !isset($timers[$id]) || !is_array($timers[$id])) { self::failure(404,$method==='HEAD'); exit; }
         try {
             if($method==='HEAD') { Email_Countdown_Timer_Config::normalize($timers[$id]); if(!function_exists('imagecreatetruecolor')) throw new RuntimeException('GD unavailable.'); exit; }
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only initial playback preference, not saved configuration.
-            $html=self::document($id,$timers[$id],Email_Countdown_Timer_Config::text($_GET,'paused')==='1');
+            $paused=isset($_GET['paused']) && $_GET['paused']==='1';
+            $html=self::document($id,$timers[$id],$paused);
             if($method!=='HEAD') echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Complete document escapes text/attributes and uses hex-encoded JSON above.
         } catch(Throwable $error) { self::failure(503,$method==='HEAD'); }
         exit;

@@ -2,7 +2,7 @@
 /** On-demand admin/report contracts with DB doubles; native HTTP/browser stays separate. */
 require __DIR__ . '/run.php';
 require_once __DIR__ . '/../includes/class-email-countdown-timer-status.php';
-function add_submenu_page( ...$args ) { $GLOBALS['status_menu'] = $args; return 'ecd-timers_page_email-countdown-timer-status'; }
+function add_submenu_page( ...$args ) { $GLOBALS['status_menu'] = $args; return 'tickloom-timers_page_email-countdown-timer-status'; }
 $start = $checks;
 $admin = $nonce = true;
 $wp_version = '7.1.4';
@@ -83,6 +83,6 @@ ok( $status_menu[3] === 'manage_options', 'native submenu requires administrator
 $scripts = $styles = array();
 Email_Countdown_Timer_Status::enqueue( 'dashboard' );
 ok( $scripts === array() && $styles === array(), 'diagnostic assets absent from unrelated screens' );
-Email_Countdown_Timer_Status::enqueue( 'ecd-timers_page_email-countdown-timer-status' );
+Email_Countdown_Timer_Status::enqueue( 'tickloom-timers_page_email-countdown-timer-status' );
 ok( isset( $scripts['email-countdown-timer-status'], $scripts['email-countdown-timer-admin'], $styles['email-countdown-timer-admin'] ), 'status and existing clipboard/style assets stay scoped' );
 echo 'STATUS DOUBLES PASS: ' . ( $checks - $start ) . " assertions\n";

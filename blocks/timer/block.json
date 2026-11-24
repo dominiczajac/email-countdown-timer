@@ -2,8 +2,8 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "easy-countdown/timer",
-  "version": "12.9.0",
-  "title": "ActNow – Countdown Timers",
+  "version": "12.9.2",
+  "title": "Tickloom Countdown Timers",
   "category": "widgets",
   "icon": "clock",
   "description": "Display an existing countdown with its saved appearance and deadline.",
@@ -12,7 +12,7 @@
     "timer",
     "campaign"
   ],
-  "textdomain": "actnow-countdown-timers",
+  "textdomain": "tickloom-countdown-timers",
   "attributes": {
     "timerId": {
       "type": "string",

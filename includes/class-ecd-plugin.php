@@ -1,26 +1,30 @@
 <?php
-/** Controller retaining the original option, admin slug, shortcode and endpoint. */
+/** Timer administration and public image output. */
 if (!defined('ABSPATH')) exit;
 class Email_Countdown_Timer_Plugin {
+    public const MENU_PAGE = 'tickloom-timers';
+    public const SHORTCODE = 'tickloom_timer';
     private const OPTION_KEY = 'easy_countdown_timers';
     private const VERSION = EMAIL_COUNTDOWN_TIMER_VERSION;
     private const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     public function __construct() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only cache bypass for the explicitly requested public frame route.
-        if ($this->isImageRequest() || Email_Countdown_Timer_Config::text($_GET, 'ecd_action') === 'frame') {
+        if (Email_Countdown_Timer_Config::public_action() !== '') {
             // Dynamic images only; the bootstrap also sets DONOTCACHEPAGE.
             add_filter('flying_press_is_cacheable', '__return_false');
         }
+        add_action('admin_menu', [$this, 'redirectLegacyAdmin'], 0);
         add_action('admin_menu', [$this, 'registerAdminMenu']);
         add_action('wp_dashboard_setup', [$this, 'registerDashboardWidget']);
         add_action('admin_init', [$this, 'handleFormSave']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('init', [$this, 'listenForImageRequest']);
-        add_shortcode('ecd_timer', [$this, 'renderShortcode']);
+        add_shortcode(self::SHORTCODE, [$this, 'renderShortcode']);
+        // Retain saved embeds during upgrades and defer to an existing handler.
+        if (!shortcode_exists('ecd_timer')) add_shortcode('ecd_timer', [$this, 'renderShortcode']);
     }
     public function registerAdminMenu(): void {
         require_once __DIR__.'/class-email-countdown-timer-admin.php';
-        $hook = add_menu_page(__('ActNow – Countdown Timers', 'actnow-countdown-timers'), __('ActNow – Countdown Timers', 'actnow-countdown-timers'), 'manage_options', 'ecd-timers', [$this, 'renderAdminPage'], 'dashicons-clock', 100);
+        $hook = add_menu_page(__('Tickloom Countdown Timers', 'tickloom-countdown-timers'), __('Tickloom Countdown Timers', 'tickloom-countdown-timers'), 'manage_options', self::MENU_PAGE, [$this, 'renderAdminPage'], 'dashicons-clock', 100);
         Email_Countdown_Timer_Admin::add_screen($hook);
     }
     public function enqueueAdminAssets(string $hook): void {
@@ -36,19 +40,28 @@ class Email_Countdown_Timer_Plugin {
         return is_array($timers) ? array_filter($timers, 'is_array') : [];
     }
     public function handleFormSave(): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Routing only; the admin controller verifies capability, POST and nonce before reading form data.
-        if (in_array(Email_Countdown_Timer_Config::text($_POST, 'ecd_action'), ['email_countdown_timer_save', 'email_countdown_timer_delete', 'email_countdown_timer_archive', 'email_countdown_timer_restore'], true)) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Selects a handler; capability, POST and nonce are checked before saving.
+        $action = isset($_POST['ecd_action']) && is_string($_POST['ecd_action']) ? sanitize_text_field(wp_unslash($_POST['ecd_action'])) : '';
+        if (in_array($action, ['email_countdown_timer_save', 'email_countdown_timer_delete', 'email_countdown_timer_archive', 'email_countdown_timer_restore'], true)) {
             require_once __DIR__.'/class-email-countdown-timer-admin.php';
             Email_Countdown_Timer_Admin::handle_post();
             return;
         }
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- This only identifies the form; nonce is verified before any write below.
-        if (Email_Countdown_Timer_Config::text($_POST, 'ecd_action') !== 'save_timer' || !current_user_can('manage_options')) return;
+        if ($action !== 'save_timer' || !current_user_can('manage_options')) return;
         check_admin_referer('ecd_save_timer_nonce');
         // Old forms cannot bypass the current editor's validation and delete confirmation.
         // Keep the old nonce/capability gate, but perform no legacy mutation or redirect.
-        wp_die(esc_html__('This form version is no longer supported. Reload ActNow – Countdown Timers and use the current editor. No timer data was changed.', 'actnow-countdown-timers'), '', ['response'=>409]);
+        wp_die(esc_html__('This form version is no longer supported. Reload Tickloom Countdown Timers and use the current editor. No timer data was changed.', 'tickloom-countdown-timers'), '', ['response'=>409]);
         return;
+    }
+    public function redirectLegacyAdmin(): void {
+        if (($GLOBALS['pagenow'] ?? '') !== 'admin.php' || Email_Countdown_Timer_Config::request_method('GET') !== 'GET' || !current_user_can('manage_options')) return;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation on the same site's admin screen.
+        $page = isset($_GET['page']) && is_string($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+        if ($page !== 'ecd-timers') return;
+        require_once __DIR__.'/class-email-countdown-timer-admin.php';
+        wp_safe_redirect(Email_Countdown_Timer_Admin::url(Email_Countdown_Timer_Admin::query()));
+        exit;
     }
     public function renderAdminPage(): void {
         require_once __DIR__.'/class-email-countdown-timer-admin.php';
@@ -59,7 +72,7 @@ class Email_Countdown_Timer_Plugin {
         $id = Email_Countdown_Timer_Config::id(Email_Countdown_Timer_Config::text($a, 'id'));
         if ($id === '') return '';
         $timers = $this->getTimers();
-        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'actnow-countdown-timers'));
+        $alt = Email_Countdown_Timer_Config::alt($timers[$id] ?? [], __('Countdown', 'tickloom-countdown-timers'));
         $base = add_query_arg(['ecd_action'=>'render', 'ecd'=>$id, 'mode'=>'anim'], home_url('/'));
         wp_enqueue_script('ecd-refresh', plugins_url('assets/countdown.js', EMAIL_COUNTDOWN_TIMER_FILE), [], self::VERSION, true);
         $html = sprintf('<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" id="%s" src="%s" data-ecd-src="%s" alt="%s" style="display:block; max-width:100%%; height:auto;">',
@@ -68,8 +81,7 @@ class Email_Countdown_Timer_Plugin {
         return Email_Countdown_Timer_Embed::reserve($html, $timers[$id] ?? []);
     }
     private function isImageRequest(): bool {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check; no mutation or request value is output.
-        return Email_Countdown_Timer_Config::text($_GET, 'ecd_action') === 'render';
+        return Email_Countdown_Timer_Config::public_action() === 'render';
     }
     public function listenForImageRequest(): void {
         if (!$this->isImageRequest()) return;
@@ -79,7 +91,7 @@ class Email_Countdown_Timer_Plugin {
             if (!(($status['flags'] ?? 0) & PHP_OUTPUT_HANDLER_REMOVABLE)) break;
             ob_end_clean();
         }
-        $method = Email_Countdown_Timer_Config::text($_SERVER, 'REQUEST_METHOD', 'GET');
+        $method = Email_Countdown_Timer_Config::request_method('GET');
         if (!in_array($method, ['GET','HEAD'], true)) {
             header('Allow: GET, HEAD');
             $this->pixel(405, false);
@@ -118,8 +130,8 @@ class Email_Countdown_Timer_Plugin {
         return $webp > 0 && $webp >= $png;
     }
     private function generateImage(bool $head = false, ?int $now = null): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
-        $id = Email_Countdown_Timer_Config::id(wp_unslash(Email_Countdown_Timer_Config::text($_GET, 'ecd')));
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput -- request_id checks type and length and applies unslashing and sanitize_title for legacy IDs.
+        $id = Email_Countdown_Timer_Config::request_id($_GET['ecd'] ?? null);
         $timers = $this->getTimers();
         if ($id === '' || !isset($timers[$id])) { $this->pixel(404, $head); return; }
         $imageInput = $timers[$id];
@@ -129,13 +141,14 @@ class Email_Countdown_Timer_Plugin {
         catch (InvalidArgumentException $e) { $this->pixel(422, $head); return; }
         if (!function_exists('imagecreatetruecolor')) { $this->pixel(503, $head); return; }
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only image endpoint; values are normalized, no user session or state change.
-        $mode = Email_Countdown_Timer_Config::text($_GET, 'mode');
+        $mode = isset($_GET['mode']) && is_string($_GET['mode']) ? sanitize_text_field(wp_unslash($_GET['mode'])) : '';
         $endOnly = $mode === 'end';
         // Explicit opt-in end-image output is independent of the visitor clock.
         // Missing/private/unavailable assets never become an ordinary countdown.
         if ($endOnly && Email_Countdown_Timer_End_Image::resolve((int)($config['expiry_image_id'] ?? 0)) === null) { $this->pixel(404, $head); return; }
         $fmt = in_array($mode, ['email','anim'], true) ? 'gif' : 'png';
-        if ($fmt === 'png' && function_exists('imagewebp') && self::prefersWebp(Email_Countdown_Timer_Config::text($_SERVER, 'HTTP_ACCEPT'))) $fmt = 'webp';
+        $accept = isset($_SERVER['HTTP_ACCEPT']) && is_string($_SERVER['HTTP_ACCEPT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_ACCEPT'])) : '';
+        if ($fmt === 'png' && function_exists('imagewebp') && self::prefersWebp($accept)) $fmt = 'webp';
         if ($head) { $this->outputHeaders($fmt); return; }
         $deadline = Email_Countdown_Timer_Config::deadline($config);
         $fixedTime = $endOnly ? $deadline : $now;

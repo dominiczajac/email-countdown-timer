@@ -4,7 +4,7 @@ if ( PHP_SAPI !== 'cli' || getenv( 'ECD_INTEGRATION_DISPOSABLE' ) !== '1' || wp_
     || $GLOBALS['wpdb']->base_prefix !== 'ecdnetwork_' || ! is_multisite() || is_subdomain_install() ) { exit( 1 ); }
 // Inventory runs while the root plugin is inactive, including site-only on
 // states. Load this pure helper without bootstrapping/registering the plugin.
-require_once WP_PLUGIN_DIR . '/actnow-countdown-timers/includes/class-ecd-config.php';
+require_once WP_PLUGIN_DIR . '/tickloom-countdown-timers/includes/class-ecd-config.php';
 if ( getenv( 'ECD_NETWORK_PROFILE' ) === 'wp-super-cache' ) { require_once __DIR__ . '/super-cache.php'; }
 
 final class Email_Countdown_Timer_Network_Lab {

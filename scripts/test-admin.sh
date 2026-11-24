@@ -13,18 +13,18 @@ export ECD_BROWSER_PASSWORD="$(openssl rand -hex 20)"
 "${wp[@]}" config set WP_ENVIRONMENT_TYPE local
 "${wp[@]}" config set DISABLE_WP_CRON true --raw
 "${wp[@]}" core install --url=http://localhost:8081 --title='Disposable Admin UI' --admin_user=ci-admin --admin_password="$ECD_BROWSER_PASSWORD" --admin_email=ci@example.invalid --skip-email
-install_dir="$wpdir/wp-content/plugins/actnow-countdown-timers"
+install_dir="$wpdir/wp-content/plugins/tickloom-countdown-timers"
 archive="$(mktemp "$RUNNER_TEMP/ect-package.XXXXXX.zip")"
 bash "$root/scripts/build-zip.sh" --output "$archive"
 "${wp[@]}" plugin install "$archive"
 rm -f "$archive"
-"${wp[@]}" plugin activate actnow-countdown-timers
+"${wp[@]}" plugin activate tickloom-countdown-timers
 # Existing browser fixtures explicitly use Warsaw; new tests also exercise changed zones.
 "${wp[@]}" option update timezone_string Europe/Warsaw
 export ECD_BROWSER_END_ID="$("${wp[@]}" eval-file "$root/tests/browser/end-image-fixture.php")"
 policy_id="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Privacy fixture' --post_content='ECT privacy sentinel' --porcelain)"
 "${wp[@]}" option update wp_page_for_privacy_policy "$policy_id"
-export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[ecd_timer id="alt-browser-test"]' --porcelain)"
+export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[tickloom_timer id="alt-browser-test"]' --porcelain)"
 php -S 127.0.0.1:8081 -t "$wpdir" > "$RUNNER_TEMP/admin-evidence/http.log" 2>&1 &
 server=$!
 trap 'kill "$server" 2>/dev/null || true; unset ECD_BROWSER_PASSWORD' EXIT

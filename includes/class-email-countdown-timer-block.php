@@ -18,7 +18,7 @@ final class Email_Countdown_Timer_Block {
             EMAIL_COUNTDOWN_TIMER_VERSION,
             true
         );
-        wp_set_script_translations( 'easy-countdown-block-editor', 'actnow-countdown-timers' );
+        wp_set_script_translations( 'easy-countdown-block-editor', 'tickloom-countdown-timers' );
         register_block_type(
             EMAIL_COUNTDOWN_TIMER_DIR . 'blocks/timer',
             array( 'render_callback' => static function ( $attributes ) use ( $plugin ): string {
@@ -82,12 +82,12 @@ final class Email_Countdown_Timer_Block {
 
     /** Refresh IDs after creation in another tab, rechecking the original editing context. */
     public static function refresh_campaigns(): void {
-        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
+        if ( 'POST' !== Email_Countdown_Timer_Config::request_method() ) {
             wp_send_json_error( null, 405 );
             return;
         }
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read only to choose the context-bound nonce; capability and nonce are checked before reading campaign data.
-        $post_id = filter_var( Email_Countdown_Timer_Config::text( $_POST, 'post_id' ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Strict integer validation selects the nonce; capability and nonce are checked before reading any campaign data.
+        $post_id = isset( $_POST['post_id'] ) && is_string( $_POST['post_id'] ) ? filter_var( wp_unslash( $_POST['post_id'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) ) : false;
         if ( false === $post_id ) {
             wp_send_json_error( null, 400 );
             return;
@@ -126,7 +126,7 @@ final class Email_Countdown_Timer_Block {
                 $name = current_user_can( 'manage_options' ) ? Email_Countdown_Timer_Config::text( $config, 'campaign_name' ) : '';
                 $label = '' !== trim( $name ) && strlen( $name ) <= 200 ? $name : $id;
                 if ( current_user_can( 'manage_options' ) && '' === trim( $name ) ) {
-                    $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'actnow-countdown-timers' ), $id );
+                    $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'tickloom-countdown-timers' ), $id );
                 }
                 $choices[] = array( 'value' => $id, 'label' => $label );
                 $frame_sizes[$id] = Email_Countdown_Timer_Frame::dimensions($config);
@@ -151,8 +151,8 @@ final class Email_Countdown_Timer_Block {
             'frameUrl' => add_query_arg(array('ecd_action'=>'frame'),home_url('/')),
             'frameSizes' => $frame_sizes,
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
-            'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
-            'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',
+            'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', Email_Countdown_Timer_Plugin::MENU_PAGE, admin_url( 'admin.php' ) ) : '',
+            'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', Email_Countdown_Timer_Plugin::MENU_PAGE, admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',
         );
     }
 

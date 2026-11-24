@@ -14,7 +14,8 @@ class ECD_Test_Stop extends RuntimeException {}
 function add_action(...$args) {}
 function do_action($name, ...$args) { foreach ($GLOBALS['test_actions'][$name] ?? [] as $handler) $handler(...$args); }
 function apply_filters($name, $value, ...$args) { foreach ($GLOBALS['test_filters'][$name] ?? [] as $handler) $value=$handler($value, ...$args); return $value; }
-function add_shortcode(...$args) {}
+function add_shortcode($tag, $handler) { $GLOBALS['shortcodes'][$tag] = $handler; }
+function shortcode_exists($tag) { return isset($GLOBALS['shortcodes'][$tag]); }
 function add_menu_page(...$args) {}
 function current_user_can($cap, ...$args) {
     if (array_key_exists($cap, $GLOBALS['test_capabilities'] ?? [])) {

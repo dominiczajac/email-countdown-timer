@@ -383,7 +383,7 @@ class Evidence(unittest.TestCase):
             self.assertTrue(navigation_abort('net::ERR_ABORTED', url, 'media-library', True, 'POST', 'action=query-attachments', 'application/x-www-form-urlencoded'))
             for body in ('action=email_countdown_timer_campaigns', 'bad', 'action=a&action=email_countdown_timer_save', 'x' * 65537):
                 self.assertFalse(navigation_abort('net::ERR_ABORTED', url, 'media-library', True, 'POST', body, 'application/x-www-form-urlencoded'))
-        for url in ('https://example.invalid/wp-admin/a', BASE + '/bluex/wp-admin/a', BASE + '/blue/?ecd_action=render', BASE + '/blue/wp-content/plugins/actnow-countdown-timers/assets/admin.js'):
+        for url in ('https://example.invalid/wp-admin/a', BASE + '/bluex/wp-admin/a', BASE + '/blue/?ecd_action=render', BASE + '/blue/wp-content/plugins/tickloom-countdown-timers/assets/admin.js'):
             self.assertFalse(navigation_abort('net::ERR_ABORTED', url, 'timer-editor', True))
         self.assertFalse(navigation_abort('net::ERR_ABORTED', BASE + '/blue/wp-admin/a', 'public-browser', True))
 

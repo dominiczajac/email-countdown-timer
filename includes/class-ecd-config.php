@@ -12,6 +12,22 @@ final class Email_Countdown_Timer_Config {
     public static function id(string $id): string {
         return strlen($id) <= 200 ? sanitize_title($id) : '';
     }
+    /** Sanitize an unslashed request ID with the same slug rules as stored timers. */
+    public static function request_id(mixed $value, bool $canonical = false): string {
+        if (!is_string($value)) return '';
+        $value = wp_unslash($value);
+        $id = self::id($value);
+        return !$canonical || $value === $id ? $id : '';
+    }
+    public static function request_method(string $default = ''): string {
+        return isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])
+            ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : $default;
+    }
+    public static function public_action(): string {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only routing only.
+        $action = isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) ? sanitize_text_field(wp_unslash($_GET['ecd_action'])) : '';
+        return in_array($action, ['render', 'frame'], true) ? $action : '';
+    }
     public static function normalize(array $input): array {
         $defaults = ['deadline'=>'', 'tz'=>'Europe/Warsaw', 'bg'=>'#FFFFFF', 'dc'=>'#000000', 'lc'=>'#666666',
             'font'=>'', 'size_digit'=>40, 'size_label'=>12, 'hide_days'=>0, 'label_d'=>'Days', 'label_h'=>'Hours',
@@ -20,14 +36,14 @@ final class Email_Countdown_Timer_Config {
         foreach ($defaults as $key=>$default) {
             $value = $input[$key] ?? $default;
             if (!is_scalar($value)) {
-                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid field type: %s', 'actnow-countdown-timers'), $key));
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid field type: %s', 'tickloom-countdown-timers'), $key));
             }
             $c[$key] = is_string($default) ? sanitize_text_field((string)$value) : $value;
         }
         foreach (['size_digit'=>[1,200], 'size_label'=>[1,100], 'fixed_width'=>[0,4000]] as $key=>$range) {
             $value = filter_var($c[$key], FILTER_VALIDATE_INT);
             if ($value === false || $value < $range[0] || $value > $range[1]) {
-                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Value outside the safe range: %s', 'actnow-countdown-timers'), $key));
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Value outside the safe range: %s', 'tickloom-countdown-timers'), $key));
             }
             $c[$key] = $value;
         }
@@ -35,31 +51,31 @@ final class Email_Countdown_Timer_Config {
         foreach (['bg','dc','lc'] as $key) {
             $c[$key] = sanitize_hex_color($c[$key]);
             if (!$c[$key]) {
-                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid color: %s', 'actnow-countdown-timers'), $key));
+                self::invalid(sprintf( /* translators: %s: internal field name. */ __('Invalid color: %s', 'tickloom-countdown-timers'), $key));
             }
         }
         foreach (['label_d','label_h','label_m','label_s'] as $key) {
-            if (strlen($c[$key]) > 256) self::invalid(__('Label is too long (maximum 256 bytes).', 'actnow-countdown-timers'));
+            if (strlen($c[$key]) > 256) self::invalid(__('Label is too long (maximum 256 bytes).', 'tickloom-countdown-timers'));
         }
         if ($c['tz'] === '') $c['tz'] = 'Europe/Warsaw';
         self::deadline($c);
         // Reject traversal, including a symlink escaping the font directory. Missing fonts retain the legacy fallback.
         if ($c['font'] !== '' && !Email_Countdown_Timer_Fonts::is_bundled($c['font']) && (basename($c['font']) !== $c['font'] || strpos($c['font'], '\\') !== false ||
             !preg_match('/\.(ttf|otf)$/i', $c['font']))) {
-            self::invalid(__('Invalid font filename.', 'actnow-countdown-timers'));
+            self::invalid(__('Invalid font filename.', 'tickloom-countdown-timers'));
         }
         // Alternative text is HTML metadata, never a renderer parameter. Preserve
         // absence in legacy records and distinguish it from an explicitly empty value.
         if (array_key_exists('alt', $input)) {
             if (!is_string($input['alt']) || strlen($input['alt']) > 1000) {
-                self::invalid(__('Use plain alternative text (maximum 1000 bytes).', 'actnow-countdown-timers'));
+                self::invalid(__('Use plain alternative text (maximum 1000 bytes).', 'tickloom-countdown-timers'));
             }
             $c['alt'] = sanitize_text_field($input['alt']);
         }
         // Optional attachment metadata is additive; old saved records remain unchanged.
         if (array_key_exists('expiry_image_id', $input)) {
             try { $c['expiry_image_id'] = Email_Countdown_Timer_End_Image::id($input['expiry_image_id']); }
-            catch (InvalidArgumentException $e) { self::invalid(__('Choose a valid end image attachment ID.', 'actnow-countdown-timers')); }
+            catch (InvalidArgumentException $e) { self::invalid(__('Choose a valid end image attachment ID.', 'tickloom-countdown-timers')); }
         }
         return $c;
     }
@@ -70,7 +86,7 @@ final class Email_Countdown_Timer_Config {
     public static function deadline(array $c): int {
         $text = self::text($c, 'deadline');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?$/D', $text)) {
-            self::invalid(__('Enter a specific deadline date and time.', 'actnow-countdown-timers'));
+            self::invalid(__('Enter a specific deadline date and time.', 'tickloom-countdown-timers'));
         }
         try {
             $tz = new DateTimeZone(self::text($c, 'tz', 'Europe/Warsaw'));
@@ -78,11 +94,11 @@ final class Email_Countdown_Timer_Config {
             $dt = DateTimeImmutable::createFromFormat($format, str_replace('T', ' ', $text), $tz);
             $errors = DateTimeImmutable::getLastErrors();
             if ($dt === false || ($errors !== false && ($errors['warning_count'] || $errors['error_count']))) {
-                self::invalid(__('Invalid date.', 'actnow-countdown-timers'));
+                self::invalid(__('Invalid date.', 'tickloom-countdown-timers'));
             }
             return $dt->getTimestamp();
         } catch (Exception $e) {
-            self::invalid(__('Invalid date or time zone.', 'actnow-countdown-timers'));
+            self::invalid(__('Invalid date or time zone.', 'tickloom-countdown-timers'));
         }
     }
     public static function fontPath(string $font): ?string {

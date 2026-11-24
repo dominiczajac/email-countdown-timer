@@ -8,8 +8,8 @@ const check = (value, message) => { assert.ok(value, message); checks++; };
 const initial = () => ({
     timers: [{ value: 'alpha', label: 'alpha' }, { value: 'beta', label: 'beta' }], truncated: false,
     imageUrl: 'http://example.invalid/?ecd_action=render&mode=static', frameUrl: 'http://example.invalid/?ecd_action=frame',
-    manageUrl: 'http://example.invalid/wp-admin/admin.php?page=ecd-timers',
-    createUrl: 'http://example.invalid/wp-admin/admin.php?page=ecd-timers#ect-quick-create',
+    manageUrl: 'http://example.invalid/wp-admin/admin.php?page=tickloom-timers',
+    createUrl: 'http://example.invalid/wp-admin/admin.php?page=tickloom-timers#ect-quick-create',
     refresh: { url: 'http://example.invalid/wp-admin/admin-ajax.php', postId: 12, nonce: 'synthetic-editor-nonce' }
 });
 function harness(settings = initial(), fetch = () => { throw new Error('Unexpected request'); }, canvasWindow = null) {
