@@ -216,7 +216,7 @@ final class Email_Countdown_Timer_Admin {
 
     private static function posted( string $key, string $default = '' ): string {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Called only after capability, method and nonce checks.
-        return isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? sanitize_text_field( substr( wp_unslash( $_POST[ $key ] ), 0, 4096 ) ) : $default;
+        return isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? substr( sanitize_text_field( wp_unslash( $_POST[ $key ] ) ), 0, 4096 ) : $default;
     }
 
     public static function handle_post(): void {
@@ -313,7 +313,8 @@ final class Email_Countdown_Timer_Admin {
                 unset( $timers[ $id ]['archived'] );
             }
         } elseif ( 'email_countdown_timer_delete' === $action ) {
-            if ( '' === $id || ! isset( $timers[ $id ] ) || ( $_POST['confirm_delete'] ?? '' ) !== '1' ) {
+            $confirmed = isset( $_POST['confirm_delete'] ) && '1' === $_POST['confirm_delete'];
+            if ( '' === $id || ! isset( $timers[ $id ] ) || ! $confirmed ) {
                 wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'tickloom-countdown-timers' ), '', array( 'response' => 400 ) );
                 return;
             }
