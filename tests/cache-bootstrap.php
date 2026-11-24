@@ -11,10 +11,16 @@ $filters = array();
 function add_action( ...$args ) {}
 function add_shortcode( ...$args ) {}
 function add_filter( ...$args ) { $GLOBALS['filters'][] = $args; }
-if ( in_array( $case, array( 'new-slug', 'same-basename', 'old-site', 'old-network' ), true ) ) {
-    function plugin_basename( $file ) { return ( 'same-basename' === $GLOBALS['case'] ? 'easy-countdown' : 'actnow-countdown-timers' ) . '/email-countdown-timer.php'; }
+if ( in_array( $case, array( 'new-slug', 'same-basename', 'old-site', 'old-network', 'previous-candidate' ), true ) ) {
+    function plugin_basename( $file ) { return ( 'same-basename' === $GLOBALS['case'] ? 'easy-countdown' : 'tickloom-countdown-timers' ) . '/email-countdown-timer.php'; }
     function is_multisite() { return 'old-network' === $GLOBALS['case']; }
-    function get_option( $name, $default ) { return in_array( $GLOBALS['case'], array( 'old-site', 'same-basename' ), true ) ? array( 'easy-countdown/email-countdown-timer.php' ) : $default; }
+    function get_option( $name, $default ) {
+        return match ( $GLOBALS['case'] ) {
+            'old-site', 'same-basename' => array( 'easy-countdown/email-countdown-timer.php' ),
+            'previous-candidate' => array( 'actnow-countdown-timers/email-countdown-timer.php' ),
+            default => $default,
+        };
+    }
     function get_site_option( $name, $default ) { return array( 'email-countdown-timer/email-countdown-timer.php' => 1 ); }
     function register_activation_hook( $file, $callback ) { $GLOBALS['activation'] = $callback; }
     function esc_html__( $message, $domain ) { return $message; }
@@ -22,7 +28,7 @@ if ( in_array( $case, array( 'new-slug', 'same-basename', 'old-site', 'old-netwo
 }
 define( 'ABSPATH', __DIR__ . '/' );
 require __DIR__ . '/../email-countdown-timer.php';
-if ( in_array( $case, array( 'old-site', 'old-network' ), true ) ) {
+if ( in_array( $case, array( 'old-site', 'old-network', 'previous-candidate' ), true ) ) {
     if ( defined( 'EMAIL_COUNTDOWN_TIMER_VERSION' ) || ! isset( $activation ) ) exit( 1 );
     try { $activation(); exit( 1 ); }
     catch ( RuntimeException $e ) { if ( ! str_contains( $e->getMessage(), 'Deactivate the older countdown plugin' ) ) exit( 1 ); }

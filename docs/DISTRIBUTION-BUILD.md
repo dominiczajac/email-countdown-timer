@@ -3,7 +3,7 @@
 The installation artifact is different from GitHub's automatic source archive. Use the commands below from an identified, reviewed source revision. Building a ZIP does not publish a release, tag or WordPress.org submission.
 
 ```sh
-bash scripts/build-zip.sh --output dist/actnow-countdown-timers.zip --report dist/distribution.json
+bash scripts/build-zip.sh --output dist/tickloom-countdown-timers.zip --report dist/distribution.json
 python3 tests/test-build.py
 ```
 
@@ -13,12 +13,12 @@ Python 3.9+ and its standard library are required **only for development packagi
 
 `scripts/distribution-files.txt` is the explicit allowlist. The builder refuses missing required files, unlisted files under includes/assets, duplicate/unsafe paths, source symlinks and inconsistent header/constant/readme version or license metadata. It includes five reviewed static faces across four families (Lato, IBM Plex Mono, Barlow Condensed and Crimson Text), their original per-family OFL notices and README. Font and notice bytes are pinned by SHA256; Git attributes preserve original license line endings/whitespace. Other fonts, uploads, repository history, development documentation, tests and CI files are excluded. No build-time or runtime download is required. An intentional new runtime file requires a manifest update. Development files may exist outside runtime folders; they are not packed.
 
-The ZIP contains exactly one top-level `actnow-countdown-timers/` directory. No manually installed font or configuration is copied from a developer's machine. Failed input validation preserves an existing output archive; publication uses a temporary file and atomic replace. Build outputs inside the source tree are restricted to `dist/`, which is ignored by Git. This is packaging hygiene, not signing, provenance attestation or protection against a compromised build machine.
+The ZIP contains exactly one top-level `tickloom-countdown-timers/` directory. No manually installed font or configuration is copied from a developer's machine. Failed input validation preserves an existing output archive; publication uses a temporary file and atomic replace. Build outputs inside the source tree are restricted to `dist/`, which is ignored by Git. This is packaging hygiene, not signing, provenance attestation or protection against a compromised build machine.
 
 Plugin Check installs the generated ZIP, verifies its installed files against `distribution.json`, then checks that distribution. The ZIP, report, complete source snapshot and PCP output are retained in the same workflow artifact. Lifecycle, admin-browser and full HTTP tests also install the canonical ZIP rather than a separate hand-copied file list. Test-only fonts and observers are added only afterward to disposable test instances; they never enter the install ZIP.
 
 ```sh
-python3 scripts/verify-distribution.py dist/distribution.json /path/to/installed/actnow-countdown-timers
+python3 scripts/verify-distribution.py dist/distribution.json /path/to/installed/tickloom-countdown-timers
 ```
 
 Use that verification command on a clean extracted/installed package before test fixtures or site-managed fonts are added. Extra or modified files deliberately cause failure. Do not use a failed comparison as a reason to delete a real site's files automatically.

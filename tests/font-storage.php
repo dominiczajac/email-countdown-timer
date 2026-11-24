@@ -21,7 +21,7 @@ $name = 'ect-storage-' . bin2hex(random_bytes(8)) . '.ttf';
 $original = $legacy . '/' . $name;
 $owned = [];
 try {
-    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/actnow-countdown-timers'), 'font reads do not mkdir');
+    ok(Email_Countdown_Timer_Fonts::persistent_directory() === null && !is_dir($font_test_root.'/tickloom-countdown-timers'), 'font reads do not mkdir');
     foreach (['../x.ttf', "x\0.ttf", 'dir\\x.ttf', 'file.php', 'x.woff2'] as $bad) ok(!Email_Countdown_Timer_Fonts::valid_name($bad), 'reject unsafe font name');
     file_put_contents($original, "\0\1\0\0" . str_repeat('synthetic-test-not-a-font', 3));
     $owned[]=$original;
@@ -100,8 +100,24 @@ try {
     ok($migration['copied']===2 && hash_file('sha256',$dir.'/previous-plugin.ttf')===hash_file('sha256',$previous_plugin_font),'copy imports the previous plugin font ahead of a conflicting legacy uploads file');
     ok(hash_file('sha256',$dir.'/'.$stock)===hash_file('sha256',$previous_uploads.'/'.$stock),'copy keeps a stock-named customer font from legacy uploads even when the bytes match the bundled face');
     ok(is_file($previous_plugin_font) && is_file($previous_uploads.'/'.$stock),'migration preserves both previous sources');
+    $candidate_uploads = $font_test_root . '/actnow-countdown-timers/fonts';
+    mkdir($candidate_uploads, 0755, true);
+    $candidate_font = $candidate_uploads . '/previous-candidate.ttf';
+    file_put_contents($candidate_font, "\0\1\0\0" . str_repeat('previous-candidate', 3));
+    $candidate_hash = hash_file('sha256', $candidate_font);
+    $candidate_option = 'email_countdown_timer_actnow_copied_fonts';
+    $options[$candidate_option] = ['previous-candidate.ttf' => $candidate_hash];
+    ok(Email_Countdown_Timer_Config::fontPath('previous-candidate.ttf') === realpath($candidate_font), 'previous candidate font resolves before migration');
+    Email_Countdown_Timer_Fonts::copy_legacy();
+    $candidate_copy = $dir . '/previous-candidate.ttf';
+    ok(hash_file('sha256', $candidate_copy) === $candidate_hash, 'migration copies the previous candidate font into Tickloom uploads');
+    Email_Countdown_Timer_Fonts::delete_owned();
+    ok(!is_file($candidate_copy) && is_file($candidate_font) && isset($options[$candidate_option]), 'cleanup protects previous font storage and ownership while an older copy is installed');
+    unlink($previous_plugin.'/email-countdown-timer.php');
+    Email_Countdown_Timer_Fonts::delete_owned();
+    ok(!is_file($candidate_font) && !isset($options[$candidate_option]) && is_file($previous_plugin_font), 'cleanup uses the original candidate root when no older copy is installed');
     $safe_base=$font_test_root;$font_test_root.='/bad-root';mkdir($font_test_root);
-    symlink($safe_base,$font_test_root.'/actnow-countdown-timers');
+    symlink($safe_base,$font_test_root.'/tickloom-countdown-timers');
     ok(Email_Countdown_Timer_Fonts::persistent_directory(true)===null, 'reject symlink inside persistent root');
     $font_test_root=$safe_base;
     if (function_exists('imagecreatetruecolor')) {

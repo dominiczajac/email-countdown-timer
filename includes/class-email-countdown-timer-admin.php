@@ -58,7 +58,7 @@ final class Email_Countdown_Timer_Admin {
     public static function display_name( array $config, string $id = '', array $collisions = array() ): string {
         $name = self::campaign_name( $config );
         if ( '' !== $name && '' !== $id && isset( $collisions[ self::name_key( $name ) ] ) ) return $name . ' (' . $id . ')';
-        return '' !== $name ? $name : ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'actnow-countdown-timers' ), $id ) : __( 'Unnamed timer', 'actnow-countdown-timers' ) );
+        return '' !== $name ? $name : ( '' !== $id ? sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'tickloom-countdown-timers' ), $id ) : __( 'Unnamed timer', 'tickloom-countdown-timers' ) );
     }
 
     /** Compute once per view, including archived records, without changing saved data. */
@@ -92,18 +92,18 @@ final class Email_Countdown_Timer_Admin {
     /** Code-owned styles, shared by quick creation and explicit editor buttons. */
     public static function presets(): array {
         return array(
-            'classic' => array( 'label' => __( 'Classic', 'actnow-countdown-timers' ), 'bg' => '#FFFFFF', 'dc' => '#111827', 'lc' => '#475569', 'font' => Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ),
-            'midnight' => array( 'label' => __( 'Midnight', 'actnow-countdown-timers' ), 'bg' => '#111827', 'dc' => '#F9FAFB', 'lc' => '#CBD5E1', 'font' => Email_Countdown_Timer_Fonts::IBM_PLEX_MONO ),
-            'ocean' => array( 'label' => __( 'Ocean', 'actnow-countdown-timers' ), 'bg' => '#F8FAFC', 'dc' => '#1D4ED8', 'lc' => '#334155', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
-            'warm' => array( 'label' => __( 'Warm', 'actnow-countdown-timers' ), 'bg' => '#FFF7ED', 'dc' => '#9A3412', 'lc' => '#713F12', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
-            'christmas' => array( 'label' => __( 'Christmas', 'actnow-countdown-timers' ), 'bg' => '#FFF5F5', 'dc' => '#991B1B', 'lc' => '#166534', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
-            'new-year' => array( 'label' => __( 'New Year', 'actnow-countdown-timers' ), 'bg' => '#111827', 'dc' => '#FDE68A', 'lc' => '#F9FAFB', 'font' => Email_Countdown_Timer_Fonts::IBM_PLEX_MONO ),
-            'easter' => array( 'label' => __( 'Easter', 'actnow-countdown-timers' ), 'bg' => '#F5F3FF', 'dc' => '#6D28D9', 'lc' => '#166534', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
-            'valentines' => array( 'label' => __( "Valentine's Day", 'actnow-countdown-timers' ), 'bg' => '#FFF1F2', 'dc' => '#9F1239', 'lc' => '#831843', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
-            'halloween' => array( 'label' => __( 'Halloween', 'actnow-countdown-timers' ), 'bg' => '#1C1917', 'dc' => '#FDBA74', 'lc' => '#F5F5F4', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
-            'black-friday' => array( 'label' => __( 'Black Friday', 'actnow-countdown-timers' ), 'bg' => '#09090B', 'dc' => '#FAFAFA', 'lc' => '#FACC15', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED_BLACK ),
-            'birthday' => array( 'label' => __( 'Birthday', 'actnow-countdown-timers' ), 'bg' => '#FDF4FF', 'dc' => '#86198F', 'lc' => '#1D4ED8', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
-            'wedding' => array( 'label' => __( 'Wedding', 'actnow-countdown-timers' ), 'bg' => '#FFFBEB', 'dc' => '#78350F', 'lc' => '#3F6212', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
+            'classic' => array( 'label' => __( 'Classic', 'tickloom-countdown-timers' ), 'bg' => '#FFFFFF', 'dc' => '#111827', 'lc' => '#475569', 'font' => Email_Countdown_Timer_Fonts::BUNDLED_CHOICE ),
+            'midnight' => array( 'label' => __( 'Midnight', 'tickloom-countdown-timers' ), 'bg' => '#111827', 'dc' => '#F9FAFB', 'lc' => '#CBD5E1', 'font' => Email_Countdown_Timer_Fonts::IBM_PLEX_MONO ),
+            'ocean' => array( 'label' => __( 'Ocean', 'tickloom-countdown-timers' ), 'bg' => '#F8FAFC', 'dc' => '#1D4ED8', 'lc' => '#334155', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
+            'warm' => array( 'label' => __( 'Warm', 'tickloom-countdown-timers' ), 'bg' => '#FFF7ED', 'dc' => '#9A3412', 'lc' => '#713F12', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
+            'christmas' => array( 'label' => __( 'Christmas', 'tickloom-countdown-timers' ), 'bg' => '#FFF5F5', 'dc' => '#991B1B', 'lc' => '#166534', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
+            'new-year' => array( 'label' => __( 'New Year', 'tickloom-countdown-timers' ), 'bg' => '#111827', 'dc' => '#FDE68A', 'lc' => '#F9FAFB', 'font' => Email_Countdown_Timer_Fonts::IBM_PLEX_MONO ),
+            'easter' => array( 'label' => __( 'Easter', 'tickloom-countdown-timers' ), 'bg' => '#F5F3FF', 'dc' => '#6D28D9', 'lc' => '#166534', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
+            'valentines' => array( 'label' => __( "Valentine's Day", 'tickloom-countdown-timers' ), 'bg' => '#FFF1F2', 'dc' => '#9F1239', 'lc' => '#831843', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
+            'halloween' => array( 'label' => __( 'Halloween', 'tickloom-countdown-timers' ), 'bg' => '#1C1917', 'dc' => '#FDBA74', 'lc' => '#F5F5F4', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
+            'black-friday' => array( 'label' => __( 'Black Friday', 'tickloom-countdown-timers' ), 'bg' => '#09090B', 'dc' => '#FAFAFA', 'lc' => '#FACC15', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED_BLACK ),
+            'birthday' => array( 'label' => __( 'Birthday', 'tickloom-countdown-timers' ), 'bg' => '#FDF4FF', 'dc' => '#86198F', 'lc' => '#1D4ED8', 'font' => Email_Countdown_Timer_Fonts::BARLOW_CONDENSED ),
+            'wedding' => array( 'label' => __( 'Wedding', 'tickloom-countdown-timers' ), 'bg' => '#FFFBEB', 'dc' => '#78350F', 'lc' => '#3F6212', 'font' => Email_Countdown_Timer_Fonts::CRIMSON_TEXT ),
         );
     }
 
@@ -118,11 +118,11 @@ final class Email_Countdown_Timer_Admin {
     /** Output labels are saved data, independent of translations of the admin UI. */
     public static function label_presets(): array {
         return array(
-            'en' => array( 'label' => __( 'English', 'actnow-countdown-timers' ), 'labels' => array( 'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds' ) ),
-            'pl' => array( 'label' => __( 'Polish', 'actnow-countdown-timers' ), 'labels' => array( 'label_d' => 'Dni', 'label_h' => 'Godzin', 'label_m' => 'Minut', 'label_s' => 'Sekund' ) ),
-            'de' => array( 'label' => __( 'German', 'actnow-countdown-timers' ), 'labels' => array( 'label_d' => 'Tage', 'label_h' => 'Stunden', 'label_m' => 'Minuten', 'label_s' => 'Sekunden' ) ),
-            'es' => array( 'label' => __( 'Spanish', 'actnow-countdown-timers' ), 'labels' => array( 'label_d' => 'Días', 'label_h' => 'Horas', 'label_m' => 'Minutos', 'label_s' => 'Segundos' ) ),
-            'fr' => array( 'label' => __( 'French', 'actnow-countdown-timers' ), 'labels' => array( 'label_d' => 'Jours', 'label_h' => 'Heures', 'label_m' => 'Minutes', 'label_s' => 'Secondes' ) ),
+            'en' => array( 'label' => __( 'English', 'tickloom-countdown-timers' ), 'labels' => array( 'label_d' => 'Days', 'label_h' => 'Hours', 'label_m' => 'Minutes', 'label_s' => 'Seconds' ) ),
+            'pl' => array( 'label' => __( 'Polish', 'tickloom-countdown-timers' ), 'labels' => array( 'label_d' => 'Dni', 'label_h' => 'Godzin', 'label_m' => 'Minut', 'label_s' => 'Sekund' ) ),
+            'de' => array( 'label' => __( 'German', 'tickloom-countdown-timers' ), 'labels' => array( 'label_d' => 'Tage', 'label_h' => 'Stunden', 'label_m' => 'Minuten', 'label_s' => 'Sekunden' ) ),
+            'es' => array( 'label' => __( 'Spanish', 'tickloom-countdown-timers' ), 'labels' => array( 'label_d' => 'Días', 'label_h' => 'Horas', 'label_m' => 'Minutos', 'label_s' => 'Segundos' ) ),
+            'fr' => array( 'label' => __( 'French', 'tickloom-countdown-timers' ), 'labels' => array( 'label_d' => 'Jours', 'label_h' => 'Heures', 'label_m' => 'Minutes', 'label_s' => 'Secondes' ) ),
         );
     }
 
@@ -140,29 +140,29 @@ final class Email_Countdown_Timer_Admin {
             <input type="hidden" name="name_workflow" value="1">
             <?php wp_nonce_field( 'email_countdown_timer_admin' ); ?>
             <div class="ect-two-fields">
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-name"><?php echo esc_html__( 'Timer name', 'actnow-countdown-timers' ); ?></label>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-name"><?php echo esc_html__( 'Timer name', 'tickloom-countdown-timers' ); ?></label>
                     <input id="<?php echo esc_attr( $prefix ); ?>-name" name="campaign_name" class="widefat" type="text" required maxlength="200" aria-describedby="<?php echo esc_attr( $prefix ); ?>-name-help">
-                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-name-help"><?php echo esc_html__( 'For your administration only. Not used in public images, embeds or the generated ID. Up to 200 bytes.', 'actnow-countdown-timers' ); ?></p></div>
+                    <p class="description" id="<?php echo esc_attr( $prefix ); ?>-name-help"><?php echo esc_html__( 'For your administration only. Not used in public images, embeds or the generated ID. Up to 200 bytes.', 'tickloom-countdown-timers' ); ?></p></div>
                 <input id="<?php echo esc_attr( $prefix ); ?>-id" name="timer_id" type="hidden" value="">
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'actnow-countdown-timers' ); ?></label>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-deadline"><?php echo esc_html__( 'Deadline', 'tickloom-countdown-timers' ); ?></label>
                     <input id="<?php echo esc_attr( $prefix ); ?>-deadline" name="deadline" class="widefat" type="datetime-local" required step="1" value="<?php echo esc_attr( $quick['deadline'] ); ?>"></div>
                 <?php self::timezone_input( $prefix . '-tz', $quick['tz'] ); ?>
                 <input type="hidden" data-ect-auto-timezone="<?php echo esc_attr( $prefix . '-tz' ); ?>">
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Countdown preset', 'actnow-countdown-timers' ); ?></label>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-preset"><?php echo esc_html__( 'Countdown preset', 'tickloom-countdown-timers' ); ?></label>
                     <select id="<?php echo esc_attr( $prefix ); ?>-preset" name="appearance_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-preset-help">
                         <?php foreach ( Email_Countdown_Timer_Admin::presets() as $email_countdown_timer_key => $email_countdown_timer_preset ) : ?>
                             <option value="<?php echo esc_attr( $email_countdown_timer_key ); ?>"><?php echo esc_html( $email_countdown_timer_preset['label'] ); ?></option>
                         <?php endforeach; ?>
-                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Colors and an included font for each occasion. Bitmap is used if the font or FreeType is unavailable.', 'actnow-countdown-timers' ); ?></p></div>
-                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-language"><?php echo esc_html__( 'Countdown label language', 'actnow-countdown-timers' ); ?></label>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-preset-help"><?php echo esc_html__( 'Colors and an included font for each occasion. Bitmap is used if the font or FreeType is unavailable.', 'tickloom-countdown-timers' ); ?></p></div>
+                <div class="ect-field"><label for="<?php echo esc_attr( $prefix ); ?>-language"><?php echo esc_html__( 'Countdown label language', 'tickloom-countdown-timers' ); ?></label>
                     <select id="<?php echo esc_attr( $prefix ); ?>-language" name="label_preset" class="widefat" aria-describedby="<?php echo esc_attr( $prefix ); ?>-language-help">
                         <?php foreach ( self::label_presets() as $language => $labels ) : ?>
                             <option value="<?php echo esc_attr( $language ); ?>"><?php echo esc_html( $labels['label'] ); ?></option>
                         <?php endforeach; ?>
-                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-language-help"><?php echo esc_html__( 'Stored with this campaign, independently of the WordPress language. Accented labels need a font with those characters, such as included Lato with FreeType.', 'actnow-countdown-timers' ); ?></p></div>
+                    </select><p class="description" id="<?php echo esc_attr( $prefix ); ?>-language-help"><?php echo esc_html__( 'Stored with this campaign, independently of the WordPress language. Accented labels need a font with those characters, such as included Lato with FreeType.', 'tickloom-countdown-timers' ); ?></p></div>
             </div>
-            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create timer', 'actnow-countdown-timers' ); ?></button>
-                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'actnow-countdown-timers' ); ?></a></div>
+            <div class="ect-inline"><button type="submit" class="button button-primary"><?php echo esc_html__( 'Create timer', 'tickloom-countdown-timers' ); ?></button>
+                <a href="<?php echo esc_url( Email_Countdown_Timer_Admin::url( array( 'view' => 'new' ) ) ); ?>"><?php echo esc_html__( 'Open full editor', 'tickloom-countdown-timers' ); ?></a></div>
         </form>
         <?php
     }
@@ -179,7 +179,7 @@ final class Email_Countdown_Timer_Admin {
 
     public static function register_dashboard_widget(): void {
         if ( current_user_can( 'manage_options' ) ) {
-            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', '<span><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html__( 'ActNow – Countdown Timers', 'actnow-countdown-timers' ) . '</span>', array( self::class, 'render_dashboard_widget' ) );
+            wp_add_dashboard_widget( 'email_countdown_timer_quick_access', '<span><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html__( 'Tickloom Countdown Timers', 'tickloom-countdown-timers' ) . '</span>', array( self::class, 'render_dashboard_widget' ) );
         }
     }
 
@@ -194,21 +194,21 @@ final class Email_Countdown_Timer_Admin {
         uksort( $timers, 'strnatcasecmp' );
         ?>
         <div id="email-countdown-timer-dashboard">
-            <h3><?php echo esc_html__( 'Quick Create', 'actnow-countdown-timers' ); ?></h3>
-            <p><?php echo esc_html__( 'Create a timer from a color preset, then fine-tune it and copy your embeds in the full editor.', 'actnow-countdown-timers' ); ?></p>
+            <h3><?php echo esc_html__( 'Quick Create', 'tickloom-countdown-timers' ); ?></h3>
+            <p><?php echo esc_html__( 'Create a timer from a color preset, then fine-tune it and copy your embeds in the full editor.', 'tickloom-countdown-timers' ); ?></p>
             <?php self::quick_create_form( 'ect-dashboard' ); ?>
-            <h3><?php echo esc_html__( 'Edit an existing timer', 'actnow-countdown-timers' ); ?></h3>
+            <h3><?php echo esc_html__( 'Edit an existing timer', 'tickloom-countdown-timers' ); ?></h3>
             <?php if ( empty( $timers ) ) : ?>
-                <p><?php echo esc_html__( 'No timers yet. Create your first campaign above.', 'actnow-countdown-timers' ); ?></p>
+                <p><?php echo esc_html__( 'No timers yet. Create your first campaign above.', 'tickloom-countdown-timers' ); ?></p>
             <?php else : ?>
                 <ul>
                     <?php foreach ( array_slice( $timers, 0, 5, true ) as $id => $timer ) : ?>
-                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'actnow-countdown-timers' ), self::display_name( $timer, (string) $id, $collisions ) ) ); ?>"><?php echo esc_html( self::display_name( $timer, (string) $id, $collisions ) ); ?></a></li>
+                        <li><a href="<?php echo esc_url( self::url( array( 'edit' => $id ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: campaign name or timer ID. */ __( 'Edit %s', 'tickloom-countdown-timers' ), self::display_name( $timer, (string) $id, $collisions ) ) ); ?>"><?php echo esc_html( self::display_name( $timer, (string) $id, $collisions ) ); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
-                <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'actnow-countdown-timers' ); ?></p>
+                <p class="description"><?php echo esc_html__( 'Up to five timers are shown in ID order. Open All timers to search or edit any campaign.', 'tickloom-countdown-timers' ); ?></p>
             <?php endif; ?>
-            <p><a href="<?php echo esc_url( self::url() ); ?>"><?php echo esc_html__( 'All timers', 'actnow-countdown-timers' ); ?></a></p>
+            <p><a href="<?php echo esc_url( self::url() ); ?>"><?php echo esc_html__( 'All timers', 'tickloom-countdown-timers' ); ?></a></p>
         </div>
         <?php
     }
@@ -220,18 +220,18 @@ final class Email_Countdown_Timer_Admin {
 
     public static function handle_post(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You are not allowed to manage timers.', 'actnow-countdown-timers' ), '', array( 'response' => 403 ) );
+            wp_die( esc_html__( 'You are not allowed to manage timers.', 'tickloom-countdown-timers' ), '', array( 'response' => 403 ) );
             return;
         }
         if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
-            wp_die( esc_html__( 'Use the timer form to make this change.', 'actnow-countdown-timers' ), '', array( 'response' => 405 ) );
+            wp_die( esc_html__( 'Use the timer form to make this change.', 'tickloom-countdown-timers' ), '', array( 'response' => 405 ) );
             return;
         }
         check_admin_referer( 'email_countdown_timer_admin' );
         self::$pending = null;
         $timers = get_option( self::OPTION, array() );
         if ( ! is_array( $timers ) ) {
-            wp_die( esc_html__( 'Stored timer data is invalid. Restore a backup before making changes.', 'actnow-countdown-timers' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'Stored timer data is invalid. Restore a backup before making changes.', 'tickloom-countdown-timers' ), '', array( 'response' => 500 ) );
             return;
         }
         $original = Email_Countdown_Timer_Config::id( self::posted( 'original_id' ) );
@@ -249,7 +249,7 @@ final class Email_Countdown_Timer_Admin {
             $presets = self::presets();
             $preset = self::posted( 'appearance_preset' );
             if ( '' !== $original || ! isset( $presets[ $preset ] ) ) {
-                $errors['form'] = __( 'Quick Create needs a new timer and one of the listed appearance presets. Review the fields below before saving.', 'actnow-countdown-timers' );
+                $errors['form'] = __( 'Quick Create needs a new timer and one of the listed appearance presets. Review the fields below before saving.', 'tickloom-countdown-timers' );
             } else {
                 foreach ( array( 'bg', 'dc', 'lc' ) as $color ) {
                     $defaults[ $color ] = $presets[ $preset ][ $color ];
@@ -259,7 +259,7 @@ final class Email_Countdown_Timer_Admin {
                 // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Capability, POST and nonce checked above; only code-owned presets may supply labels.
                 $language = array_key_exists( 'label_preset', $_POST ) ? self::posted( 'label_preset' ) : 'en';
                 if ( ! isset( $label_presets[ $language ] ) ) {
-                    $errors['form'] = __( 'Choose one of the listed countdown label languages.', 'actnow-countdown-timers' );
+                    $errors['form'] = __( 'Choose one of the listed countdown label languages.', 'tickloom-countdown-timers' );
                 } else {
                     $defaults = array_replace( $defaults, $label_presets[ $language ]['labels'] );
                 }
@@ -272,7 +272,7 @@ final class Email_Countdown_Timer_Admin {
         foreach ( $defaults as $key => $default ) {
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above; reject malformed typed input before normalization.
             if ( isset( $_POST[ $key ] ) && ! is_string( $_POST[ $key ] ) ) {
-                $errors[ $key ] = __( 'Enter a single value for this field.', 'actnow-countdown-timers' );
+                $errors[ $key ] = __( 'Enter a single value for this field.', 'tickloom-countdown-timers' );
             }
             $data[ $key ] = self::posted( $key, 'deadline' === $key ? '' : (string) $default );
         }
@@ -301,7 +301,7 @@ final class Email_Countdown_Timer_Admin {
         $metadata_only = in_array( $action, array( 'email_countdown_timer_archive', 'email_countdown_timer_restore' ), true );
         if ( $metadata_only ) {
             if ( '' === $id || ! isset( $timers[ $id ] ) || ! is_array( $timers[ $id ] ) ) {
-                wp_die( esc_html__( 'Choose an existing timer to archive or restore.', 'actnow-countdown-timers' ), '', array( 'response' => 400 ) );
+                wp_die( esc_html__( 'Choose an existing timer to archive or restore.', 'tickloom-countdown-timers' ), '', array( 'response' => 400 ) );
                 return;
             }
             if ( 'email_countdown_timer_archive' === $action ) {
@@ -311,7 +311,7 @@ final class Email_Countdown_Timer_Admin {
             }
         } elseif ( 'email_countdown_timer_delete' === $action ) {
             if ( '' === $id || ! isset( $timers[ $id ] ) || '1' !== self::posted( 'confirm_delete' ) ) {
-                wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'actnow-countdown-timers' ), '', array( 'response' => 400 ) );
+                wp_die( esc_html__( 'Confirm deletion of an existing timer.', 'tickloom-countdown-timers' ), '', array( 'response' => 400 ) );
                 return;
             }
             unset( $timers[ $id ] );
@@ -321,7 +321,7 @@ final class Email_Countdown_Timer_Admin {
             if ( array_key_exists( 'campaign_name', $_POST ) ) {
                 // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked above; reject non-string names before reading the value.
                 if ( ! is_string( $_POST['campaign_name'] ) || strlen( self::posted( 'campaign_name' ) ) > 200 ) {
-                    $errors['campaign_name'] = __( 'Use plain text for the timer name, up to 200 bytes.', 'actnow-countdown-timers' );
+                    $errors['campaign_name'] = __( 'Use plain text for the timer name, up to 200 bytes.', 'tickloom-countdown-timers' );
                 }
                 $data['campaign_name'] = sanitize_text_field( self::posted( 'campaign_name' ) );
             } else {
@@ -330,48 +330,48 @@ final class Email_Countdown_Timer_Admin {
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Entry gate verified POST, capability and nonce; validate older forms that submit a name too.
             if ( $name_workflow || array_key_exists( 'campaign_name', $_POST ) ) {
                 if ( '' === trim( $data['campaign_name'] ) ) {
-                    $errors['campaign_name'] = __( 'Enter a unique timer name.', 'actnow-countdown-timers' );
+                    $errors['campaign_name'] = __( 'Enter a unique timer name.', 'tickloom-countdown-timers' );
                 } else {
                     $key = self::name_key( $data['campaign_name'] );
                     foreach ( $timers as $existing_id => $existing ) {
                         if ( (string) $existing_id !== $original && is_array( $existing ) && $key === self::name_key( self::campaign_name( $existing ) ) ) {
-                            $errors['campaign_name'] = __( 'This timer name is already used. Choose a different name.', 'actnow-countdown-timers' );
+                            $errors['campaign_name'] = __( 'This timer name is already used. Choose a different name.', 'tickloom-countdown-timers' );
                             break;
                         }
                     }
                 }
             }
             if ( '' === $id ) {
-                $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'actnow-countdown-timers' );
+                $errors['timer_id'] = __( 'Enter a valid timer ID (maximum 200 bytes).', 'tickloom-countdown-timers' );
             } elseif ( '' === $original && array_key_exists( $id, $timers ) ) {
-                $errors['timer_id'] = __( 'This ID already exists. Edit the existing timer or choose a different ID.', 'actnow-countdown-timers' );
+                $errors['timer_id'] = __( 'This ID already exists. Edit the existing timer or choose a different ID.', 'tickloom-countdown-timers' );
             } elseif ( '' !== $original && ( $original !== $id || ! isset( $timers[ $original ] ) ) ) {
-                $errors['timer_id'] = __( 'The original timer no longer exists or its ID was changed. Return to Timers.', 'actnow-countdown-timers' );
+                $errors['timer_id'] = __( 'The original timer no longer exists or its ID was changed. Return to Timers.', 'tickloom-countdown-timers' );
             }
             foreach ( array( 'size_digit' => array( 1, 200 ), 'size_label' => array( 1, 100 ), 'fixed_width' => array( 0, 4000 ) ) as $key => $range ) {
                 $number = filter_var( $data[ $key ], FILTER_VALIDATE_INT );
                 if ( false === $number || $number < $range[0] || $number > $range[1] ) {
                     /* translators: 1: minimum value, 2: maximum value. */
-                    $errors[ $key ] = sprintf( __( 'Enter a whole number from %1$d to %2$d.', 'actnow-countdown-timers' ), $range[0], $range[1] );
+                    $errors[ $key ] = sprintf( __( 'Enter a whole number from %1$d to %2$d.', 'tickloom-countdown-timers' ), $range[0], $range[1] );
                 }
             }
             foreach ( array( 'bg', 'dc', 'lc' ) as $key ) {
                 if ( ! sanitize_hex_color( $data[ $key ] ) ) {
-                    $errors[ $key ] = __( 'Enter a HEX color, for example #135E96.', 'actnow-countdown-timers' );
+                    $errors[ $key ] = __( 'Enter a HEX color, for example #135E96.', 'tickloom-countdown-timers' );
                 }
             }
             foreach ( array( 'label_d', 'label_h', 'label_m', 'label_s' ) as $key ) {
                 if ( strlen( $data[ $key ] ) > 256 ) {
-                    $errors[ $key ] = __( 'Use at most 256 bytes for this label.', 'actnow-countdown-timers' );
+                    $errors[ $key ] = __( 'Use at most 256 bytes for this label.', 'tickloom-countdown-timers' );
                 }
             }
             if ( isset( $data['alt'] ) && strlen( $data['alt'] ) > 1000 ) {
-                $errors['alt'] = __( 'Use at most 1000 bytes for alternative text.', 'actnow-countdown-timers' );
+                $errors['alt'] = __( 'Use at most 1000 bytes for alternative text.', 'tickloom-countdown-timers' );
             }
             try {
                 new DateTimeZone( '' === $data['tz'] ? 'Europe/Warsaw' : $data['tz'] );
             } catch ( Exception $exception ) {
-                $errors['tz'] = __( 'Enter a valid time zone, for example Europe/Warsaw.', 'actnow-countdown-timers' );
+                $errors['tz'] = __( 'Enter a valid time zone, for example Europe/Warsaw.', 'tickloom-countdown-timers' );
             }
             if ( ! isset( $errors['tz'] ) ) {
                 try {
@@ -384,10 +384,10 @@ final class Email_Countdown_Timer_Admin {
                 try {
                     $end_id = Email_Countdown_Timer_End_Image::id( $data['expiry_image_id'] );
                     if ( ! Email_Countdown_Timer_End_Image::validate_selection( $end_id ) ) {
-                        $errors['expiry_image_id'] = __( 'Choose an accessible local JPEG, PNG, GIF or WebP from the Media Library (up to 4 MiB and 4 million pixels), or use 0 for no end image.', 'actnow-countdown-timers' );
+                        $errors['expiry_image_id'] = __( 'Choose an accessible local JPEG, PNG, GIF or WebP from the Media Library (up to 4 MiB and 4 million pixels), or use 0 for no end image.', 'tickloom-countdown-timers' );
                     }
                 } catch ( InvalidArgumentException $exception ) {
-                    $errors['expiry_image_id'] = __( 'Use a whole attachment ID, or 0 for no end image.', 'actnow-countdown-timers' );
+                    $errors['expiry_image_id'] = __( 'Use a whole attachment ID, or 0 for no end image.', 'tickloom-countdown-timers' );
                 }
             }
             try {
@@ -416,7 +416,7 @@ final class Email_Countdown_Timer_Admin {
             return;
         }
         if ( ! update_option( self::OPTION, $timers, false ) && get_option( self::OPTION, array() ) !== $timers ) {
-            wp_die( esc_html__( 'The database could not save this change. No success has been recorded.', 'actnow-countdown-timers' ), '', array( 'response' => 500 ) );
+            wp_die( esc_html__( 'The database could not save this change. No success has been recorded.', 'tickloom-countdown-timers' ), '', array( 'response' => 500 ) );
             return;
         }
         if ( ! $metadata_only ) {
@@ -448,14 +448,14 @@ final class Email_Countdown_Timer_Admin {
         if ( ! $ttf ) {
             foreach ( array( 'label_d', 'label_h', 'label_m', 'label_s' ) as $field ) {
                 if ( preg_match( '/[^\x20-\x7e]/', $config[ $field ] ) ) {
-                    $errors[ $field ] = __( 'The active bitmap fallback supports printable ASCII labels only. Select an available TTF/OTF with the required characters.', 'actnow-countdown-timers' );
+                    $errors[ $field ] = __( 'The active bitmap fallback supports printable ASCII labels only. Select an available TTF/OTF with the required characters.', 'tickloom-countdown-timers' );
                 }
             }
         }
         try {
             ( new Email_Countdown_Timer_Renderer() )->measure( $config, Email_Countdown_Timer_Config::deadline( $config ), time() );
         } catch ( Throwable $error ) {
-            $errors['font'] = __( 'This font, text and size combination cannot be rendered. Check the font and reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels total.', 'actnow-countdown-timers' );
+            $errors['font'] = __( 'This font, text and size combination cannot be rendered. Check the font and reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels total.', 'tickloom-countdown-timers' );
         }
         return $errors;
     }
@@ -483,16 +483,16 @@ final class Email_Countdown_Timer_Admin {
         $data['campaign_name'] = self::campaign_name( $saved ?? $source ?? array() );
         $errors = $pending['errors'] ?? array();
         if ( '' !== $original && null === $saved ) {
-            $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'actnow-countdown-timers' );
+            $errors['timer_id'] = __( 'This timer no longer exists. Return to Timers to create a new one.', 'tickloom-countdown-timers' );
         }
         if ( '' !== $duplicate && null === $source ) {
-            $errors['form'] = __( 'The source timer no longer exists. Return to Timers and choose another campaign.', 'actnow-countdown-timers' );
+            $errors['form'] = __( 'The source timer no longer exists. Return to Timers and choose another campaign.', 'tickloom-countdown-timers' );
         }
         if ( $saved || $source ) {
             try {
                 Email_Countdown_Timer_Config::normalize( $saved ?? $source );
             } catch ( InvalidArgumentException $exception ) {
-                $errors['form'] = __( 'The saved configuration contains invalid values. Review the fields before saving.', 'actnow-countdown-timers' );
+                $errors['form'] = __( 'The saved configuration contains invalid values. Review the fields before saving.', 'tickloom-countdown-timers' );
             }
         }
         if ( $pending ) {
@@ -553,13 +553,13 @@ final class Email_Countdown_Timer_Admin {
         }
         ?>
         <div class="ect-field">
-            <label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html__( 'Time Zone', 'actnow-countdown-timers' ); ?></label>
+            <label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html__( 'Time Zone', 'tickloom-countdown-timers' ); ?></label>
             <select id="<?php echo esc_attr( $id ); ?>" name="tz" class="widefat" required aria-describedby="<?php echo esc_attr( $help_id . ' ' . $error_id ); ?>" <?php if ( '' !== $error ) : ?>aria-invalid="true"<?php endif; ?>>
                 <?php foreach ( $zones as $zone ) : ?>
-                    <option value="<?php echo esc_attr( $zone ); ?>" <?php selected( $value, $zone ); ?>><?php echo esc_html( '' === $zone ? __( 'Choose a time zone', 'actnow-countdown-timers' ) : str_replace( '_', ' ', $zone ) ); ?></option>
+                    <option value="<?php echo esc_attr( $zone ); ?>" <?php selected( $value, $zone ); ?>><?php echo esc_html( '' === $zone ? __( 'Choose a time zone', 'tickloom-countdown-timers' ) : str_replace( '_', ' ', $zone ) ); ?></option>
                 <?php endforeach; ?>
             </select>
-            <p class="description" id="<?php echo esc_attr( $help_id ); ?>"><?php echo esc_html__( 'New timers use your browser time zone when available, otherwise the WordPress site time zone. Existing timers keep their saved zone. Named zones follow daylight saving changes; fixed offsets do not.', 'actnow-countdown-timers' ); ?></p>
+            <p class="description" id="<?php echo esc_attr( $help_id ); ?>"><?php echo esc_html__( 'New timers use your browser time zone when available, otherwise the WordPress site time zone. Existing timers keep their saved zone. Named zones follow daylight saving changes; fixed offsets do not.', 'tickloom-countdown-timers' ); ?></p>
             <p class="ect-error" id="<?php echo esc_attr( $error_id ); ?>"><?php echo esc_html( $error ); ?></p>
         </div>
         <?php
@@ -573,7 +573,7 @@ final class Email_Countdown_Timer_Admin {
             return $utc->setTimezone( new DateTimeZone( $data['tz'] ?: 'Europe/Warsaw' ) )->format( 'Y-m-d H:i:s P' )
                 . ' (' . ( $data['tz'] ?: 'Europe/Warsaw' ) . ') / ' . $utc->format( 'Y-m-d H:i:s \U\T\C' );
         } catch ( Exception $exception ) {
-            return __( 'Invalid deadline or time zone', 'actnow-countdown-timers' );
+            return __( 'Invalid deadline or time zone', 'tickloom-countdown-timers' );
         }
     }
 }

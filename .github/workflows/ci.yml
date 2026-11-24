@@ -66,6 +66,7 @@ jobs:
           php tests/cache-bootstrap.php same-basename
           php tests/cache-bootstrap.php old-site
           php tests/cache-bootstrap.php old-network
+          php tests/cache-bootstrap.php previous-candidate
           python3 tests/privacy-contracts.py
           node tests/countdown.test.cjs
           node tests/admin-unit.cjs

@@ -1,10 +1,10 @@
-=== ActNow – Countdown Timers ===
+=== Tickloom Countdown Timers ===
 Contributors: ddoomm
 Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.9.0
+Stable tag: 12.9.1
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -36,7 +36,7 @@ Use a public HTTPS image URL. Email clients/proxies may block, prefetch or cache
 
 **Privacy**
 
-ActNow adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. Settings, media IDs, uninstall preference, font-copy ownership and temporary image/glyph caches stay local. It does not send email or contact Google Fonts.
+Tickloom adds no visitor analytics, individual open counters, tracking cookies, fingerprinting or developer telemetry. Settings, media IDs, uninstall preference, font-copy ownership and temporary image/glyph caches stay local. It does not send email or contact Google Fonts.
 
 Hosting, WordPress and email providers keep their own logs. Keep personal data out of public URLs. Privacy Policy Guide text needs your review.
 
@@ -44,18 +44,18 @@ Hosting, WordPress and email providers keep their own logs. Keep personal data o
 
 == Installation ==
 
-1. Install the ActNow ZIP through Plugins > Add New > Upload Plugin and activate it.
-2. Use Quick Create in ActNow or its dashboard widget: name, deadline, time zone, countdown preset and label language. Create Timer opens all settings.
+1. Install the Tickloom ZIP through Plugins > Add New > Upload Plugin and activate it.
+2. Use Quick Create in Tickloom or its dashboard widget: name, deadline, time zone, countdown preset and label language. Create Timer opens all settings.
 3. Adjust the appearance and alternative text. Optionally select a local image in After Countdown.
 4. Embed Codes provides the WordPress block/shortcode, external website iframe and Email HTML/Image URL.
 5. Check the public image while logged out and send a test using your actual mailing platform.
 
-Switching from Easy Countdown? Back up data and fonts, deactivate the old plugin, then activate ActNow. Keep the old copy deactivated until custom fonts are copied with Data Settings. Both versions share data. Avoid uninstalling the old copy with data cleanup enabled.
+Switching from an earlier version? Back up data and fonts, deactivate the old plugin, then activate Tickloom. Keep the old copy deactivated until custom fonts are copied with Data Settings. Both versions share data. Avoid uninstalling the old copy with data cleanup enabled.
 
 == Frequently Asked Questions ==
 
 = How do I use the block editor? =
-Insert ActNow – Countdown Timers and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves a reference and shows an active preview; refresh/pause controls stay in its sidebar. Website display > Live text adds local ticking and Pause/Resume with theme typography. Image remains the default. Reduced motion starts paused; no-JS shows a snapshot. Clear page caches after campaign changes.
+Insert Tickloom Countdown Timers and select a timer. Administrators can open Quick Create in another tab; select Refresh campaigns on return. The block saves a reference and shows an active preview; refresh/pause controls stay in its sidebar. Website display > Live text adds local ticking and Pause/Resume with theme typography. Image remains the default. Reduced motion starts paused; no-JS shows a snapshot. Clear page caches after campaign changes.
 
 
 = Does the timer start separately for each recipient? =
@@ -74,12 +74,12 @@ Describe countdown and expiry: alt stays fixed during GIF playback. Use empty al
 Shortcodes reserve measured, proportional image space; themes can override it. After font/geometry changes, purge page HTML and recopy manual/email embeds. This does not guarantee whole-page Core Web Vitals.
 
 = Where do I install fonts? =
-Lato, IBM Plex Mono, Barlow Condensed (Regular/Black) and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF under actnow-countdown-timers/fonts/ in WordPress uploads. ActNow still reads older local fonts.
+Lato, IBM Plex Mono, Barlow Condensed (Regular/Black) and Crimson Text are local OFL 1.1 fonts with original notices in fonts/. Appearance presets apply colors/font explicitly; labels and deadlines stay yours. Without FreeType, bitmap is used. Keep custom TTF/OTF under tickloom-countdown-timers/fonts/ in WordPress uploads. Tickloom still reads older local fonts.
 
 Font files may be publicly downloadable. Data Settings > Font File Access can add Apache deny rules without overwriting files; nginx needs host rules. Verify blocked font GET/HEAD requests and working timers. [Access rules and limits](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/FONT-HTTP-ACCESS.md).
 
 = Troubleshooting: which optimization assets should I exclude? =
-When necessary, exclude actnow-countdown-timers/assets/countdown.js from delayed JavaScript and email-countdown-timer-image from lazy loading. Bypass page/edge caching and image conversion for ecd_action=render. Keep ordinary page optimization enabled. [Optimizer guidance](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/OPTIMIZATION-COMPATIBILITY.md).
+When necessary, exclude tickloom-countdown-timers/assets/countdown.js from delayed JavaScript and email-countdown-timer-image from lazy loading. Bypass page/edge caching and image conversion for ecd_action=render. Keep ordinary page optimization enabled. [Optimizer guidance](https://github.com/dominiczajac/email-countdown-timer/blob/main/docs/OPTIMIZATION-COMPATIBILITY.md).
 
 = Troubleshooting: the image is missing or stale behind Cloudflare =
 Create a Cache Rule scoped to your hostname and the render query parameter. Replace example.com with your public image hostname:
@@ -107,9 +107,9 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
-= 12.9.0 =
-* Rename the plugin to ActNow – Countdown Timers. Keep existing timers, links and blocks.
-* Write font rules only in the ActNow uploads directory and retain access to legacy fonts.
+= 12.9.1 =
+* Rename the plugin to Tickloom Countdown Timers. Keep existing timers, links and blocks.
+* Write font rules only in the Tickloom uploads directory and retain access to legacy fonts.
 
 = 12.8.0 =
 * Add locally ticking raster previews and a sandboxed external website iframe.
@@ -140,5 +140,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.9.0 =
-Back up data and fonts, deactivate Easy Countdown without uninstalling it, then install ActNow. Existing timers, embed links and blocks carry over. Update path-based asset exclusions to the new slug and clear affected page caches.
+= 12.9.1 =
+Back up data and fonts, deactivate the old plugin without uninstalling it, then install Tickloom. Existing timers, embed links and blocks carry over. Update path-based asset exclusions to the new slug and clear affected page caches.

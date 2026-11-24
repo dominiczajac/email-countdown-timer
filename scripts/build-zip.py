@@ -17,8 +17,8 @@ import tempfile
 import zipfile
 import zlib
 
-SLUG = "actnow-countdown-timers"
-DISPLAY_NAME = "ActNow – Countdown Timers"
+SLUG = "tickloom-countdown-timers"
+DISPLAY_NAME = "Tickloom Countdown Timers"
 # Only these reviewed static faces/notices; never package site-managed files.
 FONT_HASHES = {
     "fonts/easy-countdown-barlow-condensed-black.ttf": "e74b750df582c608f35db467b711b2b60d2217618e85e60b72b42dfd00446cab",
@@ -87,7 +87,7 @@ def metadata(files: dict[str, bytes]) -> str:
     if one(r"^\s*\* Text Domain:\s*(\S+)", php) != SLUG:
         raise ValueError("Text Domain must match the WordPress.org submission slug")
     if one(r"^\s*\* Plugin Name:\s*(.+)$", php) != DISPLAY_NAME or not readme.startswith(f"=== {DISPLAY_NAME} ===\n"):
-        raise ValueError("The distribution must use the approved ActNow display name")
+        raise ValueError("The plugin header and readme must use the Tickloom display name")
     version = one(r"^\s*\* Version:\s*(\S+)", php)
     constant = one(r"define\(\s*'EMAIL_COUNTDOWN_TIMER_VERSION',\s*'([^']+)'\s*\)", php)
     stable = one(r"^Stable tag:\s*(\S+)", readme)

@@ -116,17 +116,17 @@ final class Email_Countdown_Timer_Frame {
         $data=self::cached_payload($id,$raw); $data['paused']=$paused;
         if($data['deadline']<=time() && $data['end']!=='') $data['fallback']=add_query_arg(array('ecd_action'=>'render','ecd'=>$id,'mode'=>'static'),home_url('/'));
         $fallback=$data['fallback']; unset($data['fallback']);
-        $alt=Email_Countdown_Timer_Config::alt($raw,__('Countdown','actnow-countdown-timers'));
+        $alt=Email_Countdown_Timer_Config::alt($raw,__('Countdown','tickloom-countdown-timers'));
         $nonce=base64_encode(random_bytes(18));
         header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; style-src 'nonce-$nonce'; img-src 'self' data:; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
         header_remove('X-Frame-Options');
         ob_start(); ?>
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo esc_html__('Countdown timer','actnow-countdown-timers'); ?></title>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?php echo esc_html__('Countdown timer','tickloom-countdown-timers'); ?></title>
 <style nonce="<?php echo esc_attr($nonce); ?>">html,body{margin:0;padding:0;background:transparent;font:13px system-ui,sans-serif}main{text-align:center}canvas,img{display:block;max-width:100%;height:auto;margin:auto}[hidden]{display:none!important}button{font:inherit;min-height:30px;margin:4px;cursor:pointer}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}</style></head><body><main>
 <img id="ect-frame-fallback" src="<?php echo esc_attr($fallback); ?>" alt="<?php echo esc_attr($alt); ?>">
 <canvas id="ect-frame-canvas" width="<?php echo esc_attr((string)$data['w']); ?>" height="<?php echo esc_attr((string)$data['h']); ?>" role="img" aria-label="<?php echo esc_attr($alt); ?>" hidden></canvas>
-<button id="ect-frame-pause" type="button" data-pause="<?php echo esc_attr__('Pause countdown','actnow-countdown-timers'); ?>" data-resume="<?php echo esc_attr__('Resume countdown','actnow-countdown-timers'); ?>" hidden><?php echo esc_html__('Pause countdown','actnow-countdown-timers'); ?></button>
-<p class="sr"><?php echo esc_html__('Deadline:','actnow-countdown-timers').' '.esc_html(Email_Countdown_Timer_Config::text($raw,'deadline')).' '.esc_html(Email_Countdown_Timer_Config::text($raw,'tz')); ?></p>
+<button id="ect-frame-pause" type="button" data-pause="<?php echo esc_attr__('Pause countdown','tickloom-countdown-timers'); ?>" data-resume="<?php echo esc_attr__('Resume countdown','tickloom-countdown-timers'); ?>" hidden><?php echo esc_html__('Pause countdown','tickloom-countdown-timers'); ?></button>
+<p class="sr"><?php echo esc_html__('Deadline:','tickloom-countdown-timers').' '.esc_html(Email_Countdown_Timer_Config::text($raw,'deadline')).' '.esc_html(Email_Countdown_Timer_Config::text($raw,'tz')); ?></p>
 <script type="application/json" id="ect-frame-data"><?php echo wp_json_encode($data, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON is hex escaped for this inert data element. ?></script>
 <script nonce="<?php echo esc_attr($nonce); ?>" src="<?php echo esc_url(add_query_arg('ver',EMAIL_COUNTDOWN_TIMER_VERSION,plugins_url('assets/frame.js',EMAIL_COUNTDOWN_TIMER_FILE))); ?>"></script></main></body></html>
 <?php return (string)ob_get_clean();
@@ -137,7 +137,7 @@ final class Email_Countdown_Timer_Frame {
         if($head) return;
         $nonce=base64_encode(random_bytes(18));
         header("Content-Security-Policy: default-src 'none'; script-src 'nonce-$nonce'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
-        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','actnow-countdown-timers').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
+        echo '<p role="alert">'.esc_html__('Countdown is temporarily unavailable.','tickloom-countdown-timers').'</p><script nonce="'.esc_attr($nonce).'">function reply(){window.parent.postMessage({type:"ecd-frame-status",ready:false},"*");}window.addEventListener("message",function(e){if(e.source===window.parent && e.data && e.data.type==="ecd-frame-ping")reply();});reply();</script>';
     }
 
     public static function listen(): void {

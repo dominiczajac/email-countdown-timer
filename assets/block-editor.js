@@ -104,42 +104,42 @@
         },[previewUrl,missing]);
         var blockProps = wp.blockEditor.useBlockProps();
         var controls = el(wp.blockEditor.InspectorControls, {},
-            el(wp.components.PanelBody, { title: __('Countdown', 'actnow-countdown-timers'), initialOpen: true },
+            el(wp.components.PanelBody, { title: __('Countdown', 'tickloom-countdown-timers'), initialOpen: true },
                 // Keep the searchable input outside the canvas WritingFlow,
                 // whose native arrow navigation can steal focus before React.
                 timers.length || timerId ? el(wp.components.ComboboxControl, {
-                    label: __('Timer', 'actnow-countdown-timers'), value: timerId,
+                    label: __('Timer', 'tickloom-countdown-timers'), value: timerId,
                     options: visibleTimers, onFilterValueChange: function (value) { setSearch(value || ''); }, onChange: function (value) { setSearch(''); props.setAttributes({ timerId: value || '' }); },
-                    help: __('Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns.', 'actnow-countdown-timers')
+                    help: __('Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns.', 'tickloom-countdown-timers')
                 }) : null,
                 el(wp.components.SelectControl, {
-                    label: __('Website display', 'actnow-countdown-timers'), value: displayMode,
+                    label: __('Website display', 'tickloom-countdown-timers'), value: displayMode,
                     options: [
-                        { label: __('Image (default)', 'actnow-countdown-timers'), value: 'image' },
-                        { label: __('Live text', 'actnow-countdown-timers'), value: 'live' }
+                        { label: __('Image (default)', 'tickloom-countdown-timers'), value: 'image' },
+                        { label: __('Live text', 'tickloom-countdown-timers'), value: 'live' }
                     ], onChange: function (value) { props.setAttributes({ displayMode: value === 'live' ? 'live' : 'image' }); },
-                    help: __('Live text uses the saved deadline, colors and labels with theme typography. It updates locally without image polling and includes a Pause control. Reduced-motion visitors start paused. Image fonts and dimensions apply to Image mode. End-image URLs are public before expiry.', 'actnow-countdown-timers')
+                    help: __('Live text uses the saved deadline, colors and labels with theme typography. It updates locally without image polling and includes a Pause control. Reduced-motion visitors start paused. Image fonts and dimensions apply to Image mode. End-image URLs are public before expiry.', 'tickloom-countdown-timers')
                 }),
                 el(wp.components.SelectControl, {
-                    label: __('Alignment', 'actnow-countdown-timers'), value: alignment,
+                    label: __('Alignment', 'tickloom-countdown-timers'), value: alignment,
                     options: [
-                        { label: __('Left', 'actnow-countdown-timers'), value: 'left' },
-                        { label: __('Center', 'actnow-countdown-timers'), value: 'center' },
-                        { label: __('Right', 'actnow-countdown-timers'), value: 'right' }
+                        { label: __('Left', 'tickloom-countdown-timers'), value: 'left' },
+                        { label: __('Center', 'tickloom-countdown-timers'), value: 'center' },
+                        { label: __('Right', 'tickloom-countdown-timers'), value: 'right' }
                     ], onChange: function (value) { props.setAttributes({ alignment: value }); }
                 }),
                 settings.truncated ? el(wp.element.Fragment, {},
-                    el('p', {}, __('The first 250 timer IDs are listed. Enter another existing ID below.', 'actnow-countdown-timers')),
-                    el(wp.components.TextControl, { label: __('Timer ID', 'actnow-countdown-timers'), value: draft, maxLength: 200, onChange: setDraft }),
-                    el(wp.components.Button, { variant: 'secondary', onClick: function () { props.setAttributes({ timerId: draft }); } }, __('Use timer ID', 'actnow-countdown-timers'))
+                    el('p', {}, __('The first 250 timer IDs are listed. Enter another existing ID below.', 'tickloom-countdown-timers')),
+                    el(wp.components.TextControl, { label: __('Timer ID', 'tickloom-countdown-timers'), value: draft, maxLength: 200, onChange: setDraft }),
+                    el(wp.components.Button, { variant: 'secondary', onClick: function () { props.setAttributes({ timerId: draft }); } }, __('Use timer ID', 'tickloom-countdown-timers'))
                 ) : null,
                 settings.refresh && settings.refresh.url ? el(wp.components.Button, {
                     variant: 'secondary', disabled: catalog.loading, isBusy: catalog.loading, onClick: refreshCampaigns
-                }, __('Refresh campaigns', 'actnow-countdown-timers')) : null,
-                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function(value){return value+1;}); } }, __('Refresh preview', 'actnow-countdown-timers')) : null,
-                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { pauseState[1](!paused); } }, paused ? __('Resume preview', 'actnow-countdown-timers') : __('Pause preview', 'actnow-countdown-timers')) : null,
+                }, __('Refresh campaigns', 'tickloom-countdown-timers')) : null,
+                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { setFailed(false); setRefresh(function(value){return value+1;}); } }, __('Refresh preview', 'tickloom-countdown-timers')) : null,
+                previewUrl ? el(wp.components.Button, { variant: 'secondary', onClick: function () { pauseState[1](!paused); } }, paused ? __('Resume preview', 'tickloom-countdown-timers') : __('Pause preview', 'tickloom-countdown-timers')) : null,
                 settings.manageUrl ? el('a', { href: settings.manageUrl + (timerId ? '&edit=' + encodeURIComponent(timerId) : ''), target: '_blank', rel: 'noopener noreferrer' },
-                    __('Open timer settings (new tab)', 'actnow-countdown-timers')) : null
+                    __('Open timer settings (new tab)', 'tickloom-countdown-timers')) : null
             )
         );
         return el(wp.element.Fragment, {}, controls,
@@ -147,19 +147,19 @@
                 value: alignment, onChange: function (value) { props.setAttributes({ alignment: value || 'left' }); }
             })),
             el('div', blockProps,
-                timers.length && !timerId ? el('p', {}, __('Choose a saved timer in the block settings sidebar.', 'actnow-countdown-timers')) : null,
+                timers.length && !timerId ? el('p', {}, __('Choose a saved timer in the block settings sidebar.', 'tickloom-countdown-timers')) : null,
                 !timers.length && !timerId ? el(wp.components.Placeholder, {
-                    label: __('No campaigns yet', 'actnow-countdown-timers'),
-                    instructions: settings.createUrl ? __('Create your first campaign in ActNow – Countdown Timers, then return here and refresh the campaign list.', 'actnow-countdown-timers') : __('Ask a site administrator to create a campaign, then refresh the campaign list.', 'actnow-countdown-timers')
-                }, settings.createUrl ? el('a', { href: settings.createUrl, target: '_blank', rel: 'noopener noreferrer' }, __('Create a campaign (new tab)', 'actnow-countdown-timers')) : null) : null,
-                catalog.loading ? el('p', { role: 'status' }, __('Refreshing campaigns…', 'actnow-countdown-timers')) : null,
-                catalog.updated ? el('p', { role: 'status' }, __('Campaign list updated.', 'actnow-countdown-timers')) : null,
-                catalog.error ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The campaign list could not refresh. Check your connection and editor access, then try again. Your selection has been kept. If your session expired, save your work before reopening the editor.', 'actnow-countdown-timers')) : null,
-                missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or refresh campaigns. A deleted timer displays nothing on the website.', 'actnow-countdown-timers')) : null,
-                failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The countdown preview could not load. Check the timer and image cache settings.', 'actnow-countdown-timers')) : null,
+                    label: __('No campaigns yet', 'tickloom-countdown-timers'),
+                    instructions: settings.createUrl ? __('Create your first campaign in Tickloom Countdown Timers, then return here and refresh the campaign list.', 'tickloom-countdown-timers') : __('Ask a site administrator to create a campaign, then refresh the campaign list.', 'tickloom-countdown-timers')
+                }, settings.createUrl ? el('a', { href: settings.createUrl, target: '_blank', rel: 'noopener noreferrer' }, __('Create a campaign (new tab)', 'tickloom-countdown-timers')) : null) : null,
+                catalog.loading ? el('p', { role: 'status' }, __('Refreshing campaigns…', 'tickloom-countdown-timers')) : null,
+                catalog.updated ? el('p', { role: 'status' }, __('Campaign list updated.', 'tickloom-countdown-timers')) : null,
+                catalog.error ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The campaign list could not refresh. Check your connection and editor access, then try again. Your selection has been kept. If your session expired, save your work before reopening the editor.', 'tickloom-countdown-timers')) : null,
+                missing ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('This timer is no longer in the saved list. Choose another timer or refresh campaigns. A deleted timer displays nothing on the website.', 'tickloom-countdown-timers')) : null,
+                failed ? el(wp.components.Notice, { status: 'warning', isDismissible: false }, __('The countdown preview could not load. Check the timer and image cache settings.', 'tickloom-countdown-timers')) : null,
                 previewUrl && !missing ? el('div', { style: { display: 'flex', justifyContent: positions[alignment] } },
                     el('iframe', {
-                        ref: previewRef, key: previewUrl, src: previewUrl, title: __('Active countdown preview', 'actnow-countdown-timers'),
+                        ref: previewRef, key: previewUrl, src: previewUrl, title: __('Active countdown preview', 'tickloom-countdown-timers'),
                         sandbox: 'allow-scripts', referrerPolicy: 'no-referrer', tabIndex: -1,
                         width: (settings.frameSizes && settings.frameSizes[timerId] || {}).width || 600,
                         height: (settings.frameSizes && settings.frameSizes[timerId] || {}).height || 180,

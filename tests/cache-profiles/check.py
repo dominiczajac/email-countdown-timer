@@ -367,7 +367,7 @@ def main():
                     report['states'].append(current)
                     try:
                         phase = 'plugin-state'
-                        wp('plugin', 'activate' if current['active'] else 'deactivate', 'actnow-countdown-timers')
+                        wp('plugin', 'activate' if current['active'] else 'deactivate', 'tickloom-countdown-timers')
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'purge')
                         (evidence / 'environment.json').unlink()
                         wp('eval-file', str(ROOT / 'tests/cache-profiles/fixture.php'), 'inventory')
@@ -430,7 +430,7 @@ def main():
                                 current['optimized_assets'].append({'path': urlsplit(asset).path, 'status': response.status, 'bytes': len(response.body()),
                                     'contains_live_script': b'emailCountdownTimerLiveInstalled' in response.body()})
                             if profile == 'autoptimize' and current['active']:
-                                standalone_live = [x for x in parsed.assets if '/actnow-countdown-timers/assets/live-countdown.js' in x]
+                                standalone_live = [x for x in parsed.assets if '/tickloom-countdown-timers/assets/live-countdown.js' in x]
                                 check(not standalone_live and any(x['contains_live_script'] for x in current['optimized_assets']), 'optimized-asset')
                             phase = 'renderer'
                             if current['active']:

@@ -53,10 +53,10 @@ for site in http://localhost:8097/ http://localhost:8097/blue/ http://localhost:
   "${wp[@]}" --url="$site" rewrite structure '/%postname%/'
 done
 phase=candidate-install
-bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/actnow-countdown-timers-network.zip" --report "$ECD_NETWORK_EVIDENCE/distribution.json"
-"${wp[@]}" plugin install "$RUNNER_TEMP/actnow-countdown-timers-network.zip"
-python3 "$root/scripts/verify-distribution.py" "$ECD_NETWORK_EVIDENCE/distribution.json" "$ECD_NETWORK_WP/wp-content/plugins/actnow-countdown-timers"
-"${wp[@]}" plugin activate actnow-countdown-timers --network
+bash "$root/scripts/build-zip.sh" --output "$RUNNER_TEMP/tickloom-countdown-timers-network.zip" --report "$ECD_NETWORK_EVIDENCE/distribution.json"
+"${wp[@]}" plugin install "$RUNNER_TEMP/tickloom-countdown-timers-network.zip"
+python3 "$root/scripts/verify-distribution.py" "$ECD_NETWORK_EVIDENCE/distribution.json" "$ECD_NETWORK_WP/wp-content/plugins/tickloom-countdown-timers"
+"${wp[@]}" plugin activate tickloom-countdown-timers --network
 if [[ "${ECD_NETWORK_PROFILE:-baseline}" == wp-super-cache ]]; then
   phase=vendor-install
   vendor_archive="$(mktemp "$RUNNER_TEMP/ect-network-vendor.XXXXXX.zip")"

@@ -34,10 +34,10 @@ try {
     try{Email_Countdown_Timer_Font_Access::handle();}catch(Font_Access_Stop $e){check($e->getMessage()==='die:405','method required');}
     $_SERVER['REQUEST_METHOD']=['POST'];
     try{Email_Countdown_Timer_Font_Access::handle();}catch(Font_Access_Stop $e){check($e->getMessage()==='die:405','malformed request method rejected');}
-    check(!is_dir($root.'/uploads/actnow-countdown-timers'),'rejected actions do not mkdir');
+    check(!is_dir($root.'/uploads/tickloom-countdown-timers'),'rejected actions do not mkdir');
     $r=Email_Countdown_Timer_Font_Access::install();$dir=Email_Countdown_Timer_Fonts::persistent_directory();
     check($r===['created'=>2,'existing'=>0,'failed'=>0],'exactly two rules in the persistent uploads font root');
-    check($dir===$root.'/uploads/actnow-countdown-timers/fonts','fresh storage uses the new slug');
+    check($dir===$root.'/uploads/tickloom-countdown-timers/fonts','fresh storage uses the new slug');
     foreach(Email_Countdown_Timer_Font_Access::templates() as $name=>$content){
         check(file_get_contents($dir.'/'.$name)===$content,'exact code-owned content written');
         check(!file_exists($root.'/code/fonts/'.$name),'single-site installation does not create a rule in the plugin');
@@ -65,7 +65,7 @@ try {
     catch(RuntimeException $e){check($e->getMessage()==='Local font directories are unavailable or not writable.','copy also rejects an uploads base inside plugin code');}
     check(scandir(WP_PLUGIN_DIR)===['.','..'] && scandir(WPMU_PLUGIN_DIR)===['.','..'],'no directory changes in other plugin roots');
     $multisite=false;
-    $code_fixture=WP_PLUGIN_DIR.'/actnow-countdown-timers/fonts';
+    $code_fixture=WP_PLUGIN_DIR.'/tickloom-countdown-timers/fonts';
     mkdir($code_fixture,0755,true);
     $code_font=$code_fixture.'/owned-copy.ttf';
     file_put_contents($code_font,'synthetic-code-font');

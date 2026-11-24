@@ -1,6 +1,11 @@
 # Changelog
 
-## 12.9.0 (review candidate)
+## 12.9.1 (review candidate)
+
+- Use Tickloom Countdown Timers and `tickloom-countdown-timers` for the updated directory submission.
+- Preserve saved timers, embeds and access to custom fonts from earlier installations. Write new font access rules only to the Tickloom uploads directory.
+
+## 12.9.0 (prior review candidate)
 
 - Rename the display name, package directory and translation domain to ActNow – Countdown Timers. Continue using the persisted block name, saved timer settings and public URLs.
 - Store new fonts and rules under the ActNow uploads directory. Read legacy fonts and restrict opt-in cleanup to each original ownership directory.

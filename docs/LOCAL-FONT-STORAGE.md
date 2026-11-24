@@ -1,18 +1,18 @@
 # Persistent local fonts
 
-## Switching to ActNow
+## Switching to Tickloom
 
-Back up custom fonts and their license notices before replacing a plugin directory. Deactivate the old plugin and install ActNow without uninstalling the old copy. Both versions share timer settings.
+Back up custom fonts and their license notices before replacing a plugin directory. Deactivate the old plugin and install Tickloom without uninstalling the old copy. Both versions share timer settings.
 
-Use the WordPress uploads base followed by `actnow-countdown-timers/fonts/` for new custom fonts. On multisite, append `site-ID/`, even with shared uploads. **Data Settings** shows the resolved directory. The previous `email-countdown-timer/fonts/` directory in uploads remains a read source. The current plugin's local font directory and installed older copies under `easy-countdown/` and `email-countdown-timer/` are also read sources. Existing filename selections keep working while the files remain available. The plugin prefers plugin-local files over uploads, and ActNow uploads over the older uploads directory for matching names. An explicit built-in selection always uses its included face.
+Use the WordPress uploads base followed by `tickloom-countdown-timers/fonts/` for new custom fonts. On multisite, append `site-ID/`, even with shared uploads. **Data Settings** shows the resolved directory. Existing filename selections can read fonts from the current plugin directory and earlier installed copies. Uploads are searched in order under `tickloom-countdown-timers/fonts/`, `actnow-countdown-timers/fonts/`, and `email-countdown-timer/fonts/` after the plugin-local directories. An explicit built-in selection always uses its included face.
 
 ## Copy tool in Data Settings
 
-**Copy Legacy Fonts to Persistent Storage** copies recognized fonts from the previous directories to ActNow uploads without moving or overwriting them. It requires administrator permission, POST and a nonce. A database session lock serializes changes, file size is limited to 5 MiB and a request copies at most 50 fonts. The tool verifies source and destination hashes, rejects symlinks and uses exclusive publication within uploads. If the host lacks filesystem or database lock support, copy the files manually without replacing existing fonts.
+**Copy Legacy Fonts to Persistent Storage** copies recognized fonts from the previous directories to Tickloom uploads without moving or overwriting them. It requires administrator permission, POST and a nonce. A database session lock serializes changes, file size is limited to 5 MiB and a request copies at most 50 fonts. The tool verifies source and destination hashes, rejects symlinks and uses exclusive publication within uploads. If the host lacks filesystem or database lock support, copy the files manually without replacing existing fonts.
 
 Checking the signature does not validate an entire native font binary. Install trusted static TTF/OTF fonts and keep FreeType/GD patched. Copy license notices manually; this tool cannot infer the license of an arbitrary font. Fonts are read by PHP to rasterize images, not fetched by visitors as web fonts.
 
-Read/render paths never create directories. Each uploads namespace has a per-site ownership map. `email_countdown_timer_copied_fonts` applies only to the old uploads directory and `email_countdown_timer_actnow_copied_fonts` applies only to ActNow uploads. Both record copied filenames and content hashes. Identical pre-existing manual copies are not adopted as plugin-owned files. Files skipped because of conflicting content, type/size or a per-call limit are counted; no successful-copy claim is made for them.
+Each uploads namespace has its own per-site ownership map of copied filenames and hashes. The Tickloom copy action records its copies in `email_countdown_timer_tickloom_copied_fonts`. Read and render operations leave the filesystem untouched. Files skipped because of conflicting content, type, size or the per-call limit are reported in the skipped count.
 
 ## Retention
 

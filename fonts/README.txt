@@ -1,4 +1,4 @@
-ActNow – Countdown Timers: five reviewed static faces across four font families
+Tickloom Countdown Timers: five reviewed static faces across four font families
 
 Select an included face under Create/Edit Timer > Appearance > Typography
 and Size > Font, then save. Lato remains the new full editor's default when
@@ -25,7 +25,7 @@ They are read locally when drawing an image, not sent as web fonts to recipients
 Website live text continues to use theme typography.
 This directory belongs to the plugin and is replaced during updates. Store YOUR
 additional fonts in the persistent directory displayed in Data Settings,
-normally wp-content/uploads/actnow-countdown-timers/fonts/ (per-site on multisite).
+normally wp-content/uploads/tickloom-countdown-timers/fonts/ (per-site on multisite).
 Do not replace the included file or its license. Unchanged bundled files do not
 need the legacy-copy tool. Existing manually supplied filenames keep resolving
 as before; adding this example does not migrate or overwrite those files.

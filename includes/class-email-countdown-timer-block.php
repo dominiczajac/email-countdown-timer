@@ -18,7 +18,7 @@ final class Email_Countdown_Timer_Block {
             EMAIL_COUNTDOWN_TIMER_VERSION,
             true
         );
-        wp_set_script_translations( 'easy-countdown-block-editor', 'actnow-countdown-timers' );
+        wp_set_script_translations( 'easy-countdown-block-editor', 'tickloom-countdown-timers' );
         register_block_type(
             EMAIL_COUNTDOWN_TIMER_DIR . 'blocks/timer',
             array( 'render_callback' => static function ( $attributes ) use ( $plugin ): string {
@@ -126,7 +126,7 @@ final class Email_Countdown_Timer_Block {
                 $name = current_user_can( 'manage_options' ) ? Email_Countdown_Timer_Config::text( $config, 'campaign_name' ) : '';
                 $label = '' !== trim( $name ) && strlen( $name ) <= 200 ? $name : $id;
                 if ( current_user_can( 'manage_options' ) && '' === trim( $name ) ) {
-                    $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'actnow-countdown-timers' ), $id );
+                    $label = sprintf( /* translators: %s: existing unnamed timer identifier. */ __( 'Unnamed timer (%s)', 'tickloom-countdown-timers' ), $id );
                 }
                 $choices[] = array( 'value' => $id, 'label' => $label );
                 $frame_sizes[$id] = Email_Countdown_Timer_Frame::dimensions($config);
