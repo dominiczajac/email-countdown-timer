@@ -4,7 +4,7 @@ Tags: countdown, email, timer, gif
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 12.9.1
+Stable tag: 12.9.2
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -107,9 +107,9 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Changelog ==
 
-= 12.9.1 =
-* Rename the plugin to Tickloom Countdown Timers. Keep existing timers, links and blocks.
-* Write font rules only in the Tickloom uploads directory and retain access to legacy fonts.
+= 12.9.2 =
+* Validate HTTP request fields at entry and use Tickloom-prefixed names for new shortcodes and timer administration links.
+* Keep the legacy shortcode and existing timer, image, and block references compatible.
 
 = 12.8.0 =
 * Add locally ticking raster previews and a sandboxed external website iframe.
@@ -140,5 +140,5 @@ Deactivation retains data. Opt-in, per-site uninstall cleanup removes owned opti
 
 == Upgrade Notice ==
 
-= 12.9.1 =
+= 12.9.2 =
 Back up data and fonts, deactivate the old plugin without uninstalling it, then install Tickloom. Existing timers, embed links and blocks carry over. Update path-based asset exclusions to the new slug and clear affected page caches.

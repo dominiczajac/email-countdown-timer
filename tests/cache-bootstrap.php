@@ -10,6 +10,9 @@ $_GET = match ( $case ) {
 $filters = array();
 function add_action( ...$args ) {}
 function add_shortcode( ...$args ) {}
+function shortcode_exists( $tag ) { return false; }
+function wp_unslash( $value ) { return stripslashes( $value ); }
+function sanitize_text_field( $value ) { return trim( strip_tags( $value ) ); }
 function add_filter( ...$args ) { $GLOBALS['filters'][] = $args; }
 if ( in_array( $case, array( 'new-slug', 'same-basename', 'old-site', 'old-network', 'previous-candidate' ), true ) ) {
     function plugin_basename( $file ) { return ( 'same-basename' === $GLOBALS['case'] ? 'easy-countdown' : 'tickloom-countdown-timers' ) . '/email-countdown-timer.php'; }

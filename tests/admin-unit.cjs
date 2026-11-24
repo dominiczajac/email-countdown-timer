@@ -7,7 +7,7 @@ let checks = 0;
 function check(value, message) { assert.ok(value, message); checks++; }
 function editor({ clipboard = true, secure = true, reject = false } = {}) {
     const fields = new Map(), buttons = [], writes = [], announcements = [];
-    for (const [id, value] of [['ect-manual-shortcode', '[ecd_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email'], ['ect-manual-iframe', '<iframe src="https://example.invalid/?ecd_action=frame"></iframe>']]) {
+    for (const [id, value] of [['ect-manual-shortcode', '[tickloom_timer id="summer"]'], ['ect-manual-html', '<img alt="Offer" src="https://example.invalid/?mode=email">'], ['ect-embed-code', 'https://example.invalid/?mode=email'], ['ect-manual-iframe', '<iframe src="https://example.invalid/?ecd_action=frame"></iframe>']]) {
         const code = { value, focused: false, selected: false, focus() { this.focused = true; }, select() { this.selected = true; } };
         fields.set(id, code); fields.set(id + '-result', { textContent: '' });
         buttons.push({ hidden: true, dataset: { ectCopy: id, success: 'Copied.', fallback: 'Select and copy manually.' }, addEventListener(name, action) { this[name] = action; } });
@@ -27,7 +27,7 @@ async function main() {
         check(e.writes.at(-1) === e.fields.get(button.dataset.ectCopy).value, 'each action copies its own exact embed, including escaped HTML/newlines');
         check(e.fields.get(button.dataset.ectCopy + '-result').textContent === 'Copied.' && e.announcements.at(-1) === 'Copied.', 'successful copy has local feedback and an announcement');
     }
-    check(e.writes[0].startsWith('[ecd_timer') && e.writes[1].startsWith('<img') && e.writes[2].startsWith('https:'), 'website, email HTML and image URL are never interchanged');
+    check(e.writes[0].startsWith('[tickloom_timer') && e.writes[1].startsWith('<img') && e.writes[2].startsWith('https:'), 'website, email HTML and image URL are never interchanged');
     for (const options of [{ clipboard: false }, { reject: true }, { secure: false }]) {
         const fallback = editor(options), button = fallback.buttons[1];
         await button.click();

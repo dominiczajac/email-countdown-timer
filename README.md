@@ -1,8 +1,8 @@
 # Tickloom Countdown Timers
 
-Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[ecd_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
+Locally generated countdown images for email campaigns and WordPress pages. Set a fixed deadline, choose colors, labels and a local font, then copy email HTML, an image URL or `[tickloom_timer id="promotion"]`. The plugin does not send email, require a countdown SaaS account or track individual opens.
 
-**Source version:** 12.9.1 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Tickloom Countdown Timers
+**Source version:** 12.9.2 (review candidate) · **License:** GPL-3.0-only · **Admin menu:** Tickloom Countdown Timers
 
 ## Requirements
 
@@ -20,7 +20,7 @@ There are no bundled runtime Composer/npm dependencies. Five static faces across
 
 ## Existing WordPress.org submission
 
-The display name is **Tickloom Countdown Timers**. The proposed WordPress.org slug, ZIP root and translation domain are `tickloom-countdown-timers`. Upload the revised ZIP to the existing Easy Countdown submission and request the new slug in the existing review thread. The contributor remains `ddoomm`. See the [12.9.1 handoff](docs/REVIEW-HANDOFF-12.9.1.md).
+The display name is **Tickloom Countdown Timers**. The proposed WordPress.org slug, ZIP root and translation domain are `tickloom-countdown-timers`. Upload the revised ZIP to the existing Easy Countdown submission and request the new slug in the existing review thread. The contributor remains `ddoomm`. See the [12.9.2 handoff](docs/REVIEW-HANDOFF-12.9.2.md).
 
 ## Image after the countdown
 
@@ -67,7 +67,7 @@ after campaign changes; live text trusts the visitor clock. [Behavior and limits
 In the WordPress block editor, insert **Tickloom Countdown Timers**, choose an existing timer and set alignment in the sidebar. The block uses the saved campaign and offers an active preview with sidebar controls. See the [block guide](docs/GUTENBERG-BLOCK.md). Classic-editor and shortcode use remain supported.
 
 ```text
-[ecd_timer id="promotion"]
+[tickloom_timer id="promotion"]
 ```
 
 **Embed Codes > Website** explains the native Tickloom block and provides the shortcode. Choose **Timer** in the block settings sidebar, where arrow-key navigation stays within the picker. In Gutenberg, administrators can create the first campaign in a new tab from the empty state. Select **Refresh campaigns** on return to update all timer blocks without reloading the editor or changing their selected IDs. Other post editors can refresh/select campaigns but do not gain campaign-management permission. The list contains at most 250 IDs; the sidebar accepts another known ID when truncated.

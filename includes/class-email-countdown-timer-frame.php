@@ -141,20 +141,21 @@ final class Email_Countdown_Timer_Frame {
     }
 
     public static function listen(): void {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only presentation of an existing public timer; no writes, sessions or arbitrary settings.
-        if(Email_Countdown_Timer_Config::text($_GET,'ecd_action')!=='frame') return;
+        if(Email_Countdown_Timer_Config::public_action()!=='frame') return;
         while(ob_get_level()>0) { $buffer=ob_get_status(); if(!(($buffer['flags']??0)&PHP_OUTPUT_HANDLER_REMOVABLE)) break; ob_end_clean(); }
         header('Content-Type: text/html; charset=UTF-8'); header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, no-transform'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: no-referrer');
         header_remove('X-Frame-Options'); header("Content-Security-Policy: default-src 'none'; frame-ancestors *; base-uri 'none'; form-action 'none'; sandbox allow-scripts");
-        $method=Email_Countdown_Timer_Config::text($_SERVER,'REQUEST_METHOD','GET');
+        $method=Email_Countdown_Timer_Config::request_method('GET');
         if(!in_array($method,array('GET','HEAD'),true)) { header('Allow: GET, HEAD'); status_header(405); exit; }
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Validated canonical public identifier; does not authorize a mutation.
-        $id=Email_Countdown_Timer_Config::text($_GET,'ecd'); $timers=get_option('easy_countdown_timers',array());
-        if($id==='' || strlen($id)>200 || Email_Countdown_Timer_Config::id($id)!==$id || !is_array($timers) || !isset($timers[$id]) || !is_array($timers[$id])) { self::failure(404,$method==='HEAD'); exit; }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput -- request_id unslashes, sanitizes and requires a canonical timer ID.
+        $id=Email_Countdown_Timer_Config::request_id($_GET['ecd'] ?? null, true);
+        $timers=get_option('easy_countdown_timers',array());
+        if($id==='' || !is_array($timers) || !isset($timers[$id]) || !is_array($timers[$id])) { self::failure(404,$method==='HEAD'); exit; }
         try {
             if($method==='HEAD') { Email_Countdown_Timer_Config::normalize($timers[$id]); if(!function_exists('imagecreatetruecolor')) throw new RuntimeException('GD unavailable.'); exit; }
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only initial playback preference, not saved configuration.
-            $html=self::document($id,$timers[$id],Email_Countdown_Timer_Config::text($_GET,'paused')==='1');
+            $paused=isset($_GET['paused']) && $_GET['paused']==='1';
+            $html=self::document($id,$timers[$id],$paused);
             if($method!=='HEAD') echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Complete document escapes text/attributes and uses hex-encoded JSON above.
         } catch(Throwable $error) { self::failure(503,$method==='HEAD'); }
         exit;

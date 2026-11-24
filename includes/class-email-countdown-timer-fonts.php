@@ -331,7 +331,7 @@ final class Email_Countdown_Timer_Fonts {
             wp_die( esc_html__( 'You are not allowed to manage fonts.', 'tickloom-countdown-timers' ), '', array( 'response' => 403 ) );
             return;
         }
-        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
+        if ( 'POST' !== Email_Countdown_Timer_Config::request_method() ) {
             wp_die( esc_html__( 'Use the font copy form.', 'tickloom-countdown-timers' ), '', array( 'response' => 405 ) );
             return;
         }

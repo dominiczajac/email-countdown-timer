@@ -5,8 +5,10 @@
 In **Embed Codes > Website**, choose the native Easy Countdown block in Gutenberg or copy **Website Shortcode** for other editors. Create campaigns with Quick Create in the plugin panel or the Easy Countdown dashboard widget; the widget also links to existing timers and is limited to users who already have `manage_options`. If you create a campaign in another tab while using Gutenberg, select **Refresh campaigns** to update the list without reloading your post.
 
 ```text
-[ecd_timer id="promotion"]
+[tickloom_timer id="promotion"]
 ```
+
+Published `[ecd_timer]` shortcodes keep working as a compatibility alias.
 
 The shortcode creates a responsive `img` element and loads one shared script. When document visibility changes to `visible`, the images are fetched again with the `_t` parameter. There is no continuous server polling or new request for each frame.
 

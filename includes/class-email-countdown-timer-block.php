@@ -82,12 +82,12 @@ final class Email_Countdown_Timer_Block {
 
     /** Refresh IDs after creation in another tab, rechecking the original editing context. */
     public static function refresh_campaigns(): void {
-        if ( 'POST' !== sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) ) ) {
+        if ( 'POST' !== Email_Countdown_Timer_Config::request_method() ) {
             wp_send_json_error( null, 405 );
             return;
         }
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read only to choose the context-bound nonce; capability and nonce are checked before reading campaign data.
-        $post_id = filter_var( Email_Countdown_Timer_Config::text( $_POST, 'post_id' ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Strict integer validation selects the nonce; capability and nonce are checked before reading any campaign data.
+        $post_id = isset( $_POST['post_id'] ) && is_string( $_POST['post_id'] ) ? filter_var( wp_unslash( $_POST['post_id'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) ) : false;
         if ( false === $post_id ) {
             wp_send_json_error( null, 400 );
             return;
@@ -151,8 +151,8 @@ final class Email_Countdown_Timer_Block {
             'frameUrl' => add_query_arg(array('ecd_action'=>'frame'),home_url('/')),
             'frameSizes' => $frame_sizes,
             'imageUrl' => add_query_arg( array( 'ecd_action' => 'render', 'mode' => 'static' ), home_url( '/' ) ),
-            'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) : '',
-            'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', 'ecd-timers', admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',
+            'manageUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', Email_Countdown_Timer_Plugin::MENU_PAGE, admin_url( 'admin.php' ) ) : '',
+            'createUrl' => current_user_can( 'manage_options' ) ? add_query_arg( 'page', Email_Countdown_Timer_Plugin::MENU_PAGE, admin_url( 'admin.php' ) ) . '#ect-quick-create' : '',
         );
     }
 

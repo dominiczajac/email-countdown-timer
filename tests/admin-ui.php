@@ -145,11 +145,11 @@ ok( 11 === count( Email_Countdown_Timer_Admin::state()['timers'] ), 'last page d
 $_GET = array( 'edit' => 'campaign-0' );
 ob_start(); $plugin->renderAdminPage(); $markup = ob_get_clean();
 ok( str_contains( $markup, 'ecd_action=frame' ) && str_contains($markup, 'sandbox="allow-scripts"') && !str_contains($markup, 'ect-save-state'), 'editor has an isolated active frame and no save-status badge' );
-ok( str_contains( $markup, 'id="ect-website-title"' ) && str_contains( $markup, 'id="ect-email-title"' ) && str_contains( $markup, '[ecd_timer id=' ), 'website and email embedding have separate sections without JavaScript' );
+ok( str_contains( $markup, 'id="ect-website-title"' ) && str_contains( $markup, 'id="ect-email-title"' ) && str_contains( $markup, '[tickloom_timer id=' ), 'website and email embedding have separate sections without JavaScript' );
 ok( str_contains( $markup, 'data-ect-copy="ect-manual-shortcode"' ) && str_contains( $markup, 'data-ect-copy="ect-manual-html"' ) && str_contains( $markup, 'data-ect-copy="ect-embed-code"' ), 'each embed has its own copy action' );
 ok( str_contains( $markup, '2030-12-31' ) && str_contains( $markup, 'Europe/Warsaw' ), 'absolute deadline and zone accompany image' );
 $styles = $scripts = array();
-Email_Countdown_Timer_Admin::add_screen( 'toplevel_page_ecd-timers' );
+Email_Countdown_Timer_Admin::add_screen( 'toplevel_page_tickloom-timers' );
 $styles = $scripts = array();
 $admin=false; Email_Countdown_Timer_Admin::enqueue('index.php');
 ok(empty($styles) && empty($scripts), 'dashboard script excluded for non-administrators');
@@ -158,7 +158,7 @@ ok(empty($styles) && isset($scripts['email-countdown-timer-admin']) && count($sc
 $styles = $scripts = array();
 Email_Countdown_Timer_Admin::enqueue( 'dashboard' );
 ok( empty( $styles ) && empty( $scripts ), 'admin assets not enqueued on unrelated screens' );
-Email_Countdown_Timer_Admin::enqueue( 'toplevel_page_ecd-timers' );
+Email_Countdown_Timer_Admin::enqueue( 'toplevel_page_tickloom-timers' );
 ok( count( $styles ) === 1 && count( $scripts ) === 1, 'only one custom stylesheet and script' );
 $styles = $scripts = array();
 unset( $dashboard_widget );

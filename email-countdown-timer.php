@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Tickloom Countdown Timers
  * Description: Create one countdown in WordPress and use it in emails and on websites. No external account required.
- * Version: 12.9.1
+ * Version: 12.9.2
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author: Dominic Zajac
@@ -28,19 +28,18 @@ if (function_exists('plugin_basename')) {
     unset($email_countdown_timer_active, $email_countdown_timer_previous);
 }
 if (defined('EMAIL_COUNTDOWN_TIMER_VERSION')) return;
+require_once __DIR__.'/includes/class-ecd-config.php';
 // Best effort for optimizers running after normal plugins. Cache drop-ins and
 // reverse proxies can run earlier; the render query still needs their bypass rules.
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only disables page caching for the public read-only image route; does not authorize a write.
-if (isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) && in_array($_GET['ecd_action'], ['render','frame'], true) && !defined('DONOTCACHEPAGE')) {
+if (Email_Countdown_Timer_Config::public_action() !== '' && !defined('DONOTCACHEPAGE')) {
     // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard cache-plugin interoperability flag, not a plugin-owned global.
     define('DONOTCACHEPAGE', true);
 }
-define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.9.1');
+define('EMAIL_COUNTDOWN_TIMER_VERSION', '12.9.2');
 define('EMAIL_COUNTDOWN_TIMER_FILE', __FILE__);
 define('EMAIL_COUNTDOWN_TIMER_DIR', __DIR__.'/');
 require_once __DIR__.'/includes/class-email-countdown-timer-fonts.php';
 Email_Countdown_Timer_Fonts::register();
-require_once __DIR__.'/includes/class-ecd-config.php';
 require_once __DIR__.'/includes/class-email-countdown-timer-end-image.php';
 require_once __DIR__.'/includes/class-ecd-renderer.php';
 require_once __DIR__.'/includes/class-email-countdown-timer-embed.php';

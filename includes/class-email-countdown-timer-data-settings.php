@@ -17,7 +17,7 @@ final class Email_Countdown_Timer_Data_Settings {
     public static function add_menu(): void {
         require_once __DIR__ . '/class-email-countdown-timer-admin.php';
         $hook = add_submenu_page(
-            'ecd-timers',
+            Email_Countdown_Timer_Plugin::MENU_PAGE,
             __( 'Data Settings', 'tickloom-countdown-timers' ),
             __( 'Data Settings', 'tickloom-countdown-timers' ),
             'manage_options',
@@ -36,7 +36,7 @@ final class Email_Countdown_Timer_Data_Settings {
             wp_die( esc_html__( 'You are not allowed to change these settings.', 'tickloom-countdown-timers' ), '', array( 'response' => 403 ) );
             return;
         }
-        if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+        if ( 'POST' !== Email_Countdown_Timer_Config::request_method() ) {
             wp_die( esc_html__( 'Use the settings form to make this change.', 'tickloom-countdown-timers' ), '', array( 'response' => 405 ) );
             return;
         }
@@ -114,7 +114,7 @@ final class Email_Countdown_Timer_Data_Settings {
                 <p><?php echo esc_html__( 'Rules are retained on uninstall because manually managed fonts may remain. Blocking downloads does not grant a font license; verify permission for server-side rendering.', 'tickloom-countdown-timers' ); ?></p>
                 <?php
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status label; no data or file mutation. Action is POST/capability/nonce protected.
-                $email_countdown_timer_rules_status = sanitize_text_field( wp_unslash( Email_Countdown_Timer_Config::text( $_GET, 'font_rules' ) ) );
+                $email_countdown_timer_rules_status = isset( $_GET['font_rules'] ) && is_string( $_GET['font_rules'] ) ? sanitize_text_field( wp_unslash( $_GET['font_rules'] ) ) : '';
                 if ( in_array( $email_countdown_timer_rules_status, array( 'written', 'incomplete' ), true ) ) : ?>
                     <p role="status"><?php echo esc_html__( 'Rule installation was attempted without overwriting existing files. Check directory permissions and existing rules with your host; HTTP protection is not verified.', 'tickloom-countdown-timers' ); ?></p>
                 <?php endif; ?>
@@ -135,9 +135,11 @@ final class Email_Countdown_Timer_Data_Settings {
                 <p><?php echo esc_html__( 'With uninstall cleanup enabled, only unchanged files created by this copy tool are removed. Manually uploaded or subsequently replaced files remain; shared directories are never recursively deleted.', 'tickloom-countdown-timers' ); ?></p>
                 <?php
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only counts; numeric bounds and output escaping below. The copying action itself requires POST, capability and nonce.
-                $email_countdown_timer_copy_query = array_intersect_key( $_GET, array_flip( array( 'fonts_copied', 'fonts_skipped' ) ) );
-                if ( isset( $email_countdown_timer_copy_query['fonts_copied'] ) ) : ?>
-                    <p role="status"><?php echo esc_html( sprintf( /* translators: 1: copied files, 2: skipped files. */ __( 'Copied: %1$d. Skipped or conflicting: %2$d. Original files are unchanged.', 'tickloom-countdown-timers' ), max( 0, min( 50, (int) Email_Countdown_Timer_Config::text( $email_countdown_timer_copy_query, 'fonts_copied' ) ) ), max( 0, (int) Email_Countdown_Timer_Config::text( $email_countdown_timer_copy_query, 'fonts_skipped' ) ) ) ); ?></p>
+                $email_countdown_timer_copied = isset( $_GET['fonts_copied'] ) && is_string( $_GET['fonts_copied'] ) ? filter_var( wp_unslash( $_GET['fonts_copied'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0, 'max_range' => 50 ) ) ) : false;
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Numeric read-only count; the copy action has its own authorization.
+                $email_countdown_timer_skipped = isset( $_GET['fonts_skipped'] ) && is_string( $_GET['fonts_skipped'] ) ? filter_var( wp_unslash( $_GET['fonts_skipped'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 0 ) ) ) : false;
+                if ( false !== $email_countdown_timer_copied ) : ?>
+                    <p role="status"><?php echo esc_html( sprintf( /* translators: 1: copied files, 2: skipped files. */ __( 'Copied: %1$d. Skipped or conflicting: %2$d. Original files are unchanged.', 'tickloom-countdown-timers' ), $email_countdown_timer_copied, $email_countdown_timer_skipped ?: 0 ) ); ?></p>
                 <?php endif; ?>
                 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                     <input type="hidden" name="action" value="email_countdown_timer_copy_fonts">

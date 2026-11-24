@@ -40,7 +40,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
             </nav>
             <p class="description"><?php echo esc_html__( 'Archiving hides a campaign from this list and the dashboard. Existing links and Gutenberg selections still work. Restore it from Archived; deletion remains a separate action.', 'tickloom-countdown-timers' ); ?></p>
             <form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="ect-search">
-                <input type="hidden" name="page" value="ecd-timers">
+                <input type="hidden" name="page" value="<?php echo esc_attr( Email_Countdown_Timer_Plugin::MENU_PAGE ); ?>">
                 <input type="hidden" name="filter" value="<?php echo esc_attr( $email_countdown_timer_ui['filter'] ); ?>">
                 <label for="ect-search"><?php echo esc_html__( 'Search names or timer IDs', 'tickloom-countdown-timers' ); ?></label>
                 <div class="ect-inline"><input id="ect-search" name="s" type="search" value="<?php echo esc_attr( $email_countdown_timer_ui['search'] ); ?>"><button class="button" type="submit"><?php echo esc_html__( 'Search', 'tickloom-countdown-timers' ); ?></button></div>
@@ -208,7 +208,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
                         $email_countdown_timer_deadline = Email_Countdown_Timer_Admin::deadline_text( $email_countdown_timer_ui['saved'] );
                         $email_countdown_timer_email_html = '<img class="email-countdown-timer-image" loading="eager" data-no-lazy="1" referrerpolicy="no-referrer" src="' . esc_url( $email_countdown_timer_image_url ) . '" alt="' . esc_attr( Email_Countdown_Timer_Config::alt( $email_countdown_timer_ui['saved'], sprintf( /* translators: %s: absolute deadline and time zone. */ __( 'Countdown ends %s', 'tickloom-countdown-timers' ), $email_countdown_timer_deadline ) ) ) . '" style="display:block;max-width:100%;height:auto;border:0;">';
                         $email_countdown_timer_email_html = Email_Countdown_Timer_Embed::reserve( $email_countdown_timer_email_html, $email_countdown_timer_ui['saved'], true );
-                        $email_countdown_timer_shortcode = '[ecd_timer id="' . esc_attr( $email_countdown_timer_ui['original'] ) . '"]';
+                        $email_countdown_timer_shortcode = '[' . Email_Countdown_Timer_Plugin::SHORTCODE . ' id="' . esc_attr( $email_countdown_timer_ui['original'] ) . '"]';
                         ?>
                         <section class="ect-disclosure" aria-labelledby="ect-website-title">
                             <h4 id="ect-website-title"><?php echo esc_html__( 'Website', 'tickloom-countdown-timers' ); ?></h4>

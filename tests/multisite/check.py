@@ -219,7 +219,7 @@ def main():
             phase = 'media-library'; visit(page, '/wp-admin/upload.php')
             expect(page.locator('#wp-media-grid .media-frame-content')).to_be_visible(); row['checks'].append('media-library')
             if active:
-                phase = 'timer-editor'; visit(page, '/wp-admin/admin.php?page=ecd-timers&edit=shared-timer')
+                phase = 'timer-editor'; visit(page, '/wp-admin/admin.php?page=tickloom-timers&edit=shared-timer')
                 expect(page.locator('[name=campaign_name]')).to_have_value('PRIVATE-NETWORK-' + role)
                 expect(page.locator('[name=fixed_width]')).to_have_value(str(WIDTHS[role]))
                 live_preview=page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')

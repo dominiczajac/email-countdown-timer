@@ -24,7 +24,7 @@ rm -f "$archive"
 export ECD_BROWSER_END_ID="$("${wp[@]}" eval-file "$root/tests/browser/end-image-fixture.php")"
 policy_id="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Privacy fixture' --post_content='ECT privacy sentinel' --porcelain)"
 "${wp[@]}" option update wp_page_for_privacy_policy "$policy_id"
-export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[ecd_timer id="alt-browser-test"]' --porcelain)"
+export ECD_BROWSER_PAGE_ID="$("${wp[@]}" post create --post_type=page --post_status=publish --post_title='Disposable Timer Page' --post_content='[tickloom_timer id="alt-browser-test"]' --porcelain)"
 php -S 127.0.0.1:8081 -t "$wpdir" > "$RUNNER_TEMP/admin-evidence/http.log" 2>&1 &
 server=$!
 trap 'kill "$server" 2>/dev/null || true; unset ECD_BROWSER_PASSWORD' EXIT

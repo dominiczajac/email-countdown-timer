@@ -12,6 +12,22 @@ final class Email_Countdown_Timer_Config {
     public static function id(string $id): string {
         return strlen($id) <= 200 ? sanitize_title($id) : '';
     }
+    /** Sanitize an unslashed request ID with the same slug rules as stored timers. */
+    public static function request_id(mixed $value, bool $canonical = false): string {
+        if (!is_string($value)) return '';
+        $value = wp_unslash($value);
+        $id = self::id($value);
+        return !$canonical || $value === $id ? $id : '';
+    }
+    public static function request_method(string $default = ''): string {
+        return isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])
+            ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : $default;
+    }
+    public static function public_action(): string {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only routing only.
+        $action = isset($_GET['ecd_action']) && is_string($_GET['ecd_action']) ? sanitize_text_field(wp_unslash($_GET['ecd_action'])) : '';
+        return in_array($action, ['render', 'frame'], true) ? $action : '';
+    }
     public static function normalize(array $input): array {
         $defaults = ['deadline'=>'', 'tz'=>'Europe/Warsaw', 'bg'=>'#FFFFFF', 'dc'=>'#000000', 'lc'=>'#666666',
             'font'=>'', 'size_digit'=>40, 'size_label'=>12, 'hide_days'=>0, 'label_d'=>'Days', 'label_h'=>'Hours',

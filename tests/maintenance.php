@@ -3,6 +3,28 @@
 if (PHP_SAPI !== 'cli') exit(1);
 ob_start();require __DIR__.'/run.php';$start=$checks;
 $admin=true;$nonce=true;$_SERVER['REQUEST_METHOD']='POST';
+$legacy_handler = $shortcodes['ecd_timer'];
+ok($shortcodes['tickloom_timer'][1] === 'renderShortcode' && $legacy_handler[1] === 'renderShortcode', 'new and legacy shortcodes share the renderer');
+$shortcodes['ecd_timer'] = static fn() => 'other plugin';
+$controller = new Email_Countdown_Timer_Plugin();
+ok($shortcodes['ecd_timer']() === 'other plugin' && $shortcodes['tickloom_timer'][0] === $controller, 'legacy shortcode does not replace an existing handler');
+$shortcodes['ecd_timer'] = $legacy_handler;
+$pagenow = 'admin.php';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['page'=>'ecd-timers', 'edit'=>'sale', 's'=>"D\\'ni&page=other", 'invalid'=>'discard'];
+try {
+    $controller->redirectLegacyAdmin();
+    throw new RuntimeException('missing legacy admin redirect');
+} catch ( ECD_Test_Stop $e ) {
+    parse_str(parse_url(substr($e->getMessage(), strlen('redirect:')), PHP_URL_QUERY), $query);
+    ok($query === ['page'=>'tickloom-timers','edit'=>'sale','s'=>"D'ni&page=other"], 'legacy admin redirect encodes values and forwards only authorized screen arguments');
+}
+$admin = false;
+$controller->redirectLegacyAdmin();
+$admin = true;
+unset($pagenow);
+$_GET = [];
+$_SERVER['REQUEST_METHOD'] = 'POST';
 $before=$options;
 foreach ([[],['delete_timer'=>'1'],['alt'=>'replace']] as $extra) {
     $_POST=$extra+['ecd_action'=>'save_timer','timer_id'=>'existing','deadline'=>'2030-01-01T00:00:00'];

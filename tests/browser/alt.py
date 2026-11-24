@@ -35,7 +35,7 @@ with sync_playwright() as p:
     page = context.new_page()
     page.on('dialog', lambda d: d.accept() if d.type == 'beforeunload' else d.dismiss())
     log_in(page, base, 'ci-admin', os.environ['ECD_BROWSER_PASSWORD'])
-    page.goto(base + '/wp-admin/admin.php?page=ecd-timers&view=new')
+    page.goto(base + '/wp-admin/admin.php?page=tickloom-timers&view=new')
     custom_alt = 'Offer "summer" & deadline — 2030'
     page.get_by_label('Image alternative text (alt)', exact=True).fill(custom_alt)
     page.locator('#ect-campaign_name').fill('Alternative text test')
@@ -43,7 +43,7 @@ with sync_playwright() as p:
     page.locator('#ect-editor button[type=submit]').click()
     page.wait_for_url('**edit=**')
     timer_id=page.locator('#ect-timer_id').input_value()
-    __import__('subprocess').run(['wp','--path='+os.environ['ECD_BROWSER_WP'],'--no-color','post','update',os.environ['ECD_BROWSER_PAGE_ID'],'--post_content=[ecd_timer id="'+timer_id+'"]'],check=True,capture_output=True)
+    __import__('subprocess').run(['wp','--path='+os.environ['ECD_BROWSER_WP'],'--no-color','post','update',os.environ['ECD_BROWSER_PAGE_ID'],'--post_content=[tickloom_timer id="'+timer_id+'"]'],check=True,capture_output=True)
     expect(page.get_by_text('Timer saved.', exact=True)).to_be_visible()
     check(page.locator('#ect-alt').input_value() == custom_alt, 'alt roundtrips through real WordPress database')
     expect(page.locator('#ect-preview').content_frame.locator('#ect-frame-canvas')).to_have_attribute('aria-label', custom_alt)
@@ -75,7 +75,7 @@ with sync_playwright() as p:
     # A separate no-JS browser proves the field is not injected by JavaScript.
     nojs = browser.new_context(storage_state=context.storage_state(), java_script_enabled=False)
     plain = nojs.new_page()
-    plain.goto(base + '/wp-admin/admin.php?page=ecd-timers&edit='+timer_id)
+    plain.goto(base + '/wp-admin/admin.php?page=tickloom-timers&edit='+timer_id)
     plain.get_by_label('Image alternative text (alt)', exact=True).fill('')
     plain.locator('#ect-editor button[type=submit]').click()
     expect(plain.get_by_text('Timer saved.', exact=True)).to_be_visible()

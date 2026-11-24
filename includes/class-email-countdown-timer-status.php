@@ -11,7 +11,7 @@ final class Email_Countdown_Timer_Status {
     }
 
     public static function add_menu(): void {
-        self::$screen = (string) add_submenu_page( 'ecd-timers', __( 'Status & Troubleshooting', 'tickloom-countdown-timers' ), __( 'Status & Troubleshooting', 'tickloom-countdown-timers' ), 'manage_options', 'email-countdown-timer-status', array( self::class, 'render' ) );
+        self::$screen = (string) add_submenu_page( Email_Countdown_Timer_Plugin::MENU_PAGE, __( 'Status & Troubleshooting', 'tickloom-countdown-timers' ), __( 'Status & Troubleshooting', 'tickloom-countdown-timers' ), 'manage_options', 'email-countdown-timer-status', array( self::class, 'render' ) );
     }
 
     public static function enqueue( string $hook ): void {
@@ -83,11 +83,13 @@ final class Email_Countdown_Timer_Status {
         $timers = is_array( $timers ) ? $timers : array();
         $id = '';
         $result = null;
-        if ( 'POST' === Email_Countdown_Timer_Config::text( $_SERVER, 'REQUEST_METHOD' ) ) {
+        if ( 'POST' === Email_Countdown_Timer_Config::request_method() ) {
             check_admin_referer( 'email_countdown_timer_status' );
-            $id = wp_unslash( Email_Countdown_Timer_Config::text( $_POST, 'campaign_id' ) );
-            $valid = '' !== $id && strlen( $id ) <= 200 && Email_Countdown_Timer_Config::id( $id ) === $id && isset( $timers[ $id ] ) && is_array( $timers[ $id ] );
-            $result = self::collect( $valid ? $timers[ $id ] : null, '' !== $id && ! $valid );
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- request_id unslashes, sanitizes and validates the canonical ID before lookup or output.
+            $id = Email_Countdown_Timer_Config::request_id( $_POST['campaign_id'] ?? null, true );
+            $valid = '' !== $id && isset( $timers[ $id ] ) && is_array( $timers[ $id ] );
+            $provided = isset( $_POST['campaign_id'] ) && '' !== $_POST['campaign_id'];
+            $result = self::collect( $valid ? $timers[ $id ] : null, $provided && ! $valid );
         }
         $levels = array( 'pass' => __( 'Passed', 'tickloom-countdown-timers' ), 'warning' => __( 'Warning', 'tickloom-countdown-timers' ), 'error' => __( 'Needs attention', 'tickloom-countdown-timers' ), 'info' => __( 'Information', 'tickloom-countdown-timers' ) );
         ?>
