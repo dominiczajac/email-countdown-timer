@@ -1,0 +1,280 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tickloom Countdown Timers 12.9.2\n"
+"Language: pl_PL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#: includes/admin-view.php:178
+msgid "Accessibility"
+msgstr "Dostępność"
+
+#: assets/block-editor.js:162
+msgid "Active countdown preview"
+msgstr "Podgląd odliczania na żywo"
+
+#: includes/admin-view.php:169
+msgid "After Countdown"
+msgstr "Po zakończeniu odliczania"
+
+#: assets/block-editor.js:124
+msgid "Alignment"
+msgstr "Wyrównanie"
+
+#: includes/class-email-countdown-timer-admin.php:212
+msgid "All timers"
+msgstr "Wszystkie liczniki"
+
+#: includes/admin-view.php:120
+msgid "Appearance"
+msgstr "Wygląd"
+
+#: includes/admin-view.php:181
+msgid "Back to Timers"
+msgstr "Wróć do liczników"
+
+#: includes/admin-view.php:131
+msgid "Background"
+msgstr "Tło"
+
+#: assets/block-editor.js:156
+msgid "Campaign list updated."
+msgstr "Lista kampanii została zaktualizowana."
+
+#: assets/block-editor.js:127
+msgid "Center"
+msgstr "Do środka"
+
+#: assets/block-editor.js:150
+msgid "Choose a saved timer in the block settings sidebar."
+msgstr "Wybierz zapisany licznik w panelu bocznym ustawień bloku."
+
+#: assets/block-editor.js:113
+msgid "Choose a saved timer. After creating a campaign in another tab, select Refresh campaigns."
+msgstr "Wybierz zapisany licznik. Po utworzeniu kampanii w innej karcie wybierz „Odśwież listę kampanii”."
+
+#: includes/admin-view.php:130
+msgid "Colors"
+msgstr "Kolory"
+
+#: includes/admin-view.php:230
+msgid "Copy Email HTML"
+msgstr "Skopiuj kod HTML do e-maila"
+
+#: includes/admin-view.php:224
+msgid "Copy iframe HTML"
+msgstr "Skopiuj kod iframe"
+
+#: includes/admin-view.php:232
+msgid "Copy image URL"
+msgstr "Skopiuj adres URL obrazu"
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Copy report"
+msgstr "Skopiuj raport"
+
+#: includes/admin-view.php:217
+msgid "Copy shortcode"
+msgstr "Skopiuj shortcode"
+
+#: includes/class-ecd-plugin.php:75 includes/class-email-countdown-timer-live.php:23 includes/class-email-countdown-timer-frame.php:119 assets/block-editor.js:107
+msgid "Countdown"
+msgstr "Odliczanie"
+
+#: includes/admin-view.php:222 includes/class-email-countdown-timer-frame.php:124
+msgid "Countdown timer"
+msgstr "Licznik odliczający czas"
+
+#: includes/admin-view.php:36 includes/admin-view.php:181
+msgid "Create Timer"
+msgstr "Utwórz licznik"
+
+#: assets/block-editor.js:154
+msgid "Create a campaign (new tab)"
+msgstr "Utwórz kampanię w nowej karcie"
+
+#: includes/admin-view.php:150
+msgid "Custom Labels"
+msgstr "Własne etykiety"
+
+#: includes/admin-view.php:16 includes/class-email-countdown-timer-data-settings.php:21 includes/class-email-countdown-timer-data-settings.php:22
+msgid "Data Settings"
+msgstr "Ustawienia danych"
+
+#: includes/admin-view.php:114 includes/class-email-countdown-timer-admin.php:148
+msgid "Deadline"
+msgstr "Termin zakończenia"
+
+#: includes/admin-view.php:184
+msgid "Delete Timer"
+msgstr "Usuń licznik"
+
+#: includes/admin-view.php:145
+msgid "Digit Size (px)"
+msgstr "Rozmiar cyfr (px)"
+
+#: includes/admin-view.php:131
+msgid "Digits"
+msgstr "Cyfry"
+
+#: includes/admin-view.php:227
+msgid "Email"
+msgstr "E-mail"
+
+#: includes/admin-view.php:229
+msgid "Email HTML"
+msgstr "Kod HTML do e-maila"
+
+#: includes/admin-view.php:205
+msgid "Embed Codes"
+msgstr "Kody osadzania"
+
+#: includes/admin-view.php:220
+msgid "External website (iframe)"
+msgstr "Zewnętrzna witryna (iframe)"
+
+#: includes/admin-view.php:138
+msgid "Font"
+msgstr "Krój pisma"
+
+#: assets/block-editor.js:118
+msgid "Image (default)"
+msgstr "Obraz (domyślnie)"
+
+#: includes/admin-view.php:231
+msgid "Image URL"
+msgstr "Adres URL obrazu"
+
+#: includes/admin-view.php:146
+msgid "Label Size (px)"
+msgstr "Rozmiar etykiet (px)"
+
+#: includes/admin-view.php:131
+msgid "Labels"
+msgstr "Etykiety"
+
+#: assets/block-editor.js:126
+msgid "Left"
+msgstr "Do lewej"
+
+#: assets/block-editor.js:119
+msgid "Live text"
+msgstr "Tekst odliczany na żywo"
+
+#: includes/class-email-countdown-timer-status.php:118
+msgid "Local checks"
+msgstr "Lokalne testy"
+
+#: assets/block-editor.js:152
+msgid "No campaigns yet"
+msgstr "Brak kampanii"
+
+#: includes/class-email-countdown-timer-admin.php:166
+msgid "Open full editor"
+msgstr "Otwórz pełny edytor"
+
+#: assets/block-editor.js:142
+msgid "Open timer settings (new tab)"
+msgstr "Otwórz ustawienia licznika w nowej karcie"
+
+#: includes/class-email-countdown-timer-live.php:39 includes/class-email-countdown-timer-live.php:39 includes/class-email-countdown-timer-frame.php:128 includes/class-email-countdown-timer-frame.php:128
+msgid "Pause countdown"
+msgstr "Wstrzymaj odliczanie"
+
+#: assets/block-editor.js:140
+msgid "Pause preview"
+msgstr "Wstrzymaj podgląd"
+
+#: includes/admin-view.php:30 includes/class-email-countdown-timer-admin.php:198
+msgid "Quick Create"
+msgstr "Szybkie tworzenie"
+
+#: assets/block-editor.js:138
+msgid "Refresh campaigns"
+msgstr "Odśwież listę kampanii"
+
+#: assets/block-editor.js:139
+msgid "Refresh preview"
+msgstr "Odśwież podgląd"
+
+#: assets/block-editor.js:155
+msgid "Refreshing campaigns…"
+msgstr "Odświeżanie listy kampanii…"
+
+#: includes/class-email-countdown-timer-live.php:39 includes/class-email-countdown-timer-frame.php:128
+msgid "Resume countdown"
+msgstr "Wznów odliczanie"
+
+#: assets/block-editor.js:140
+msgid "Resume preview"
+msgstr "Wznów podgląd"
+
+#: assets/block-editor.js:128
+msgid "Right"
+msgstr "Do prawej"
+
+#: includes/class-email-countdown-timer-status.php:114
+msgid "Run local checks"
+msgstr "Uruchom lokalne testy"
+
+#: includes/admin-view.php:181
+msgid "Save Changes"
+msgstr "Zapisz zmiany"
+
+#: includes/admin-view.php:195
+msgid "Saved Preview"
+msgstr "Podgląd zapisanych ustawień"
+
+#: includes/admin-view.php:110
+msgid "Schedule"
+msgstr "Harmonogram"
+
+#: includes/class-email-countdown-timer-status.php:14 includes/class-email-countdown-timer-status.php:14
+msgid "Status & Troubleshooting"
+msgstr "Stan i rozwiązywanie problemów"
+
+#: includes/admin-view.php:12 includes/class-ecd-plugin.php:27 includes/class-ecd-plugin.php:27 includes/class-email-countdown-timer-admin.php:183
+msgid "Tickloom Countdown Timers"
+msgstr "Tickloom Countdown Timers"
+
+#: includes/class-email-countdown-timer-admin.php:573
+msgid "Time Zone"
+msgstr "Strefa czasowa"
+
+#: assets/block-editor.js:111
+msgid "Timer"
+msgstr "Licznik"
+
+#: assets/block-editor.js:133
+msgid "Timer ID"
+msgstr "Identyfikator licznika"
+
+#: includes/admin-view.php:53 includes/admin-view.php:111 includes/class-email-countdown-timer-admin.php:144
+msgid "Timer name"
+msgstr "Nazwa licznika"
+
+#: includes/admin-view.php:15
+msgid "Timers"
+msgstr "Liczniki"
+
+#: includes/admin-view.php:137
+msgid "Typography and Size"
+msgstr "Typografia i rozmiar"
+
+#: assets/block-editor.js:134
+msgid "Use timer ID"
+msgstr "Użyj identyfikatora licznika"
+
+#: includes/admin-view.php:214
+msgid "Website"
+msgstr "Witryna"
+
+#: includes/admin-view.php:216
+msgid "Website Shortcode"
+msgstr "Shortcode do witryny"
+
+#: assets/block-editor.js:116
+msgid "Website display"
+msgstr "Wyświetlanie w witrynie"

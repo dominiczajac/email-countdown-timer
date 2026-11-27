@@ -1,0 +1,1993 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Tickloom Countdown Timers 12.9.2\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=(0);\n"
+
+#: includes/admin-view.php:148
+msgid ""
+"0 means automatic. This sets a minimum width, not image scaling. Height "
+"follows content with padding."
+msgstr ""
+"0 có nghĩa là tự động. Điều này đặt chiều rộng tối thiểu, không chia tỷ lệ "
+"hình ảnh. Chiều cao theo sau nội dung có phần đệm."
+
+#: includes/class-email-countdown-timer-status.php:47
+msgid ""
+"A zero-wait database advisory lock was acquired; its cleanup was requested "
+"immediately."
+msgstr ""
+"Đã có được khóa tư vấn cơ sở dữ liệu không chờ đợi; việc dọn dẹp nó đã được "
+"yêu cầu ngay lập tức."
+
+#: includes/admin-view.php:178
+msgid "Accessibility"
+msgstr "Khả năng tiếp cận"
+
+#: includes/admin-view.php:53
+msgid "Actions"
+msgstr "hành động"
+
+#: includes/admin-view.php:58
+msgid "Active"
+msgstr "Đang hoạt động"
+
+#: assets/block-editor.js:162
+msgid "Active countdown preview"
+msgstr "Xem trước đếm ngược đang hoạt động"
+
+#: includes/admin-view.php:169
+msgid "After Countdown"
+msgstr "Sau khi đếm ngược"
+
+#: assets/block-editor.js:124
+msgid "Alignment"
+msgstr "Căn chỉnh"
+
+#: includes/class-email-countdown-timer-admin.php:212
+msgid "All timers"
+msgstr "Tất cả bộ hẹn giờ"
+
+#: includes/admin-view.php:164
+msgid "An empty label is allowed. Maximum 256 bytes."
+msgstr "Cho phép nhãn trống. Tối đa 256 byte."
+
+#: includes/class-email-countdown-timer-data-settings.php:113
+msgid ""
+"Apache must allow the Require directive in .htaccess. nginx ignores "
+".htaccess and needs a host-managed location rule. Writing these files does "
+"not verify protection: ask your host to check that direct GET and HEAD font "
+"requests are denied while timer images still work. No remote probe is "
+"performed."
+msgstr ""
+"Apache phải cho phép lệnh Yêu cầu trong .htaccess. nginx bỏ qua .htaccess và"
+" cần quy tắc vị trí do máy chủ quản lý. Việc ghi các tệp này không xác minh "
+"khả năng bảo vệ: hãy yêu cầu máy chủ của bạn kiểm tra xem các yêu cầu phông "
+"chữ GET và HEAD trực tiếp có bị từ chối trong khi hình ảnh hẹn giờ vẫn hoạt "
+"động hay không. Không có thăm dò từ xa được thực hiện."
+
+#: includes/admin-view.php:120
+msgid "Appearance"
+msgstr "Ngoại hình"
+
+#: includes/admin-view.php:123
+msgid "Appearance presets"
+msgstr "Cài đặt trước giao diện"
+
+#: includes/admin-view.php:145 includes/admin-view.php:146
+msgid "Applies to a local TTF/OTF font."
+msgstr "Áp dụng cho phông chữ TTF/OTF cục bộ."
+
+#: includes/admin-view.php:158
+msgid "Apply label preset"
+msgstr "Áp dụng giá trị đặt trước nhãn"
+
+#: includes/admin-view.php:159
+msgid ""
+"Apply replaces only the four label fields. Review and save to keep the "
+"changes. Existing labels never follow the admin language. Accents require an"
+" appropriate local font; bitmap supports printable ASCII only."
+msgstr ""
+"Áp dụng chỉ thay thế bốn trường nhãn. Xem lại và lưu để giữ những thay đổi. "
+"Các nhãn hiện tại không bao giờ tuân theo ngôn ngữ quản trị viên. Điểm nhấn "
+"yêu cầu phông chữ cục bộ thích hợp; bitmap chỉ hỗ trợ ASCII có thể in được."
+
+#: includes/admin-view.php:77
+msgid "Archive"
+msgstr "Lưu trữ"
+
+#: includes/admin-view.php:77
+msgid "Archive %s"
+msgstr "Lưu trữ %s"
+
+#: includes/admin-view.php:63
+msgid "Archived"
+msgstr "Đã lưu trữ"
+
+#: includes/admin-view.php:39
+msgid "Archived (%d)"
+msgstr "(%d)"
+
+#: includes/admin-view.php:41
+msgid ""
+"Archiving hides a campaign from this list and the dashboard. Existing links "
+"and Gutenberg selections still work. Restore it from Archived; deletion "
+"remains a separate action."
+msgstr ""
+"Archiveing ẩn chiến dịch khỏi danh sách này và trang tổng quan. Các liên kết"
+" hiện có và lựa chọn Gutenberg vẫn hoạt động. Khôi phục nó từ Đã lưu trữ; "
+"xóa vẫn là một hành động riêng biệt."
+
+#: assets/block-editor.js:153
+msgid ""
+"Ask a site administrator to create a campaign, then refresh the campaign "
+"list."
+msgstr ""
+"Yêu cầu quản trị viên trang tạo chiến dịch, sau đó làm mới danh sách chiến "
+"dịch."
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Ask your host to enable GD with PNG/GIF support, then test a public image "
+"below."
+msgstr ""
+"Yêu cầu máy chủ của bạn bật GD có hỗ trợ PNG/GIF, sau đó kiểm tra hình ảnh "
+"công khai bên dưới."
+
+#: includes/admin-view.php:181
+msgid "Back to Timers"
+msgstr "Quay lại bộ hẹn giờ"
+
+#: includes/admin-view.php:131
+msgid "Background"
+msgstr "Lý lịch"
+
+#: includes/class-email-countdown-timer-fonts.php:44
+msgid "Barlow Condensed Black (included)"
+msgstr "Barlow Đen Đặc (bao gồm)"
+
+#: includes/class-email-countdown-timer-fonts.php:47
+msgid "Barlow Condensed Regular (included)"
+msgstr "Barlow cô đặc thường xuyên (bao gồm)"
+
+#: includes/class-email-countdown-timer-data-settings.php:134
+msgid ""
+"Before the first upgrade from an older version, back up or copy plugin-local"
+" fonts manually: this version cannot recover files already deleted by an "
+"earlier updater. On multisite, prepare each site before a network update."
+msgstr ""
+"Trước lần nâng cấp đầu tiên từ phiên bản cũ hơn, hãy sao lưu hoặc sao chép "
+"phông chữ cục bộ của plugin theo cách thủ công: phiên bản này không thể khôi"
+" phục các tệp đã bị xóa bởi trình cập nhật trước đó. Trên nhiều trang, hãy "
+"chuẩn bị từng trang trước khi cập nhật mạng."
+
+#: includes/class-email-countdown-timer-admin.php:106
+msgid "Birthday"
+msgstr "Sinh nhật"
+
+#: includes/class-email-countdown-timer-admin.php:105
+msgid "Black Friday"
+msgstr "Thứ sáu đen"
+
+#: includes/class-email-countdown-timer-status.php:101
+msgid "Campaign ID (optional)"
+msgstr "ID chiến dịch (tùy chọn)"
+
+#: includes/class-email-countdown-timer-status.php:54
+#: includes/class-email-countdown-timer-status.php:57
+#: includes/class-email-countdown-timer-status.php:68
+#: includes/class-email-countdown-timer-status.php:70
+msgid "Campaign font"
+msgstr "Phông chữ chiến dịch"
+
+#: assets/block-editor.js:156
+msgid "Campaign list updated."
+msgstr "Danh sách chiến dịch được cập nhật."
+
+#: includes/admin-view.php:37
+msgid "Campaign lists"
+msgstr "Danh sách chiến dịch"
+
+#: includes/admin-view.php:239
+msgid "Cancel"
+msgstr "Hủy bỏ"
+
+#: assets/block-editor.js:127
+msgid "Center"
+msgstr "Trung tâm"
+
+#: includes/class-email-countdown-timer-status.php:98
+msgid ""
+"Checks run only when requested. They do not change campaigns or settings, "
+"send a report, or run background image requests."
+msgstr ""
+"Kiểm tra chỉ chạy khi được yêu cầu. Họ không thay đổi chiến dịch hoặc cài "
+"đặt, gửi báo cáo hoặc chạy yêu cầu hình nền."
+
+#: includes/admin-view.php:133
+msgid "Choose %s color"
+msgstr "Chọn màu %s"
+
+#: includes/admin-view.php:172
+msgid "Choose Image"
+msgstr "Chọn hình ảnh"
+
+#: includes/admin-view.php:154
+msgid "Choose a label preset"
+msgstr "Chọn giá trị đặt trước nhãn"
+
+#: includes/admin-view.php:176
+msgid ""
+"Choose a public image: Media Library and end-only timer URLs can expose it "
+"before the deadline. Standard image/email output switches at expiry. It is "
+"fitted to the timer canvas without stretching; use a similar aspect ratio "
+"for a readable result. New expired requests and GIF frames crossing the "
+"deadline show it. Email caches can retain an earlier image; a GIF already "
+"frozen after its 60 seconds cannot refresh itself. Keep the deadline in text"
+" and choose alt text suitable for both states."
+msgstr ""
+"Chọn hình ảnh công khai: Thư viện phương tiện và các URL hẹn giờ chỉ kết "
+"thúc có thể hiển thị hình ảnh đó trước thời hạn. Chuyển đổi đầu ra hình "
+"ảnh/email tiêu chuẩn khi hết hạn. Nó được lắp vào khung hẹn giờ mà không bị "
+"giãn; sử dụng tỷ lệ khung hình tương tự để có kết quả dễ đọc. Các yêu cầu "
+"mới đã hết hạn và khung GIF vượt quá thời hạn sẽ hiển thị điều đó. Bộ nhớ "
+"đệm email có thể giữ lại hình ảnh trước đó; GIF đã bị đóng băng sau 60 giây "
+"không thể tự làm mới. Giữ thời hạn trong văn bản và chọn văn bản thay thế "
+"phù hợp cho cả hai trạng thái."
+
+#: assets/block-editor.js:150
+msgid "Choose a saved timer in the block settings sidebar."
+msgstr "Chọn bộ hẹn giờ đã lưu trong thanh bên cài đặt khối."
+
+#: assets/block-editor.js:113
+msgid ""
+"Choose a saved timer. After creating a campaign in another tab, select "
+"Refresh campaigns."
+msgstr ""
+"Chọn bộ hẹn giờ đã lưu. Sau khi tạo chiến dịch trong tab khác, hãy chọn Làm "
+"mới chiến dịch."
+
+#: includes/class-email-countdown-timer-admin.php:576
+msgid "Choose a time zone"
+msgstr "Chọn múi giờ"
+
+#: includes/admin-view.php:31
+msgid ""
+"Choose a unique timer name, deadline and preset. Create the timer to get "
+"website and email embeds; you can fine-tune every setting afterwards."
+msgstr ""
+"Chọn tên hẹn giờ, thời hạn và giá trị đặt trước duy nhất. Tạo bộ đếm thời "
+"gian để nhúng trang web và email; bạn có thể tinh chỉnh mọi cài đặt sau đó."
+
+#: includes/class-ecd-config.php:78
+msgid "Choose a valid end image attachment ID."
+msgstr "Chọn ID đính kèm hình ảnh cuối hợp lệ."
+
+#: includes/admin-view.php:172
+msgid "Choose an End Image"
+msgstr "Chọn hình ảnh kết thúc"
+
+#: includes/class-email-countdown-timer-admin.php:391
+msgid ""
+"Choose an accessible local JPEG, PNG, GIF or WebP from the Media Library (up"
+" to 4 MiB and 4 million pixels), or use 0 for no end image."
+msgstr ""
+"Chọn JPEG, PNG, GIF hoặc WebP cục bộ có thể truy cập từ Thư viện phương tiện"
+" (tối đa 4 MiB và 4 triệu pixel) hoặc sử dụng 0 cho không có hình ảnh cuối."
+
+#: includes/class-email-countdown-timer-status.php:57
+msgid "Choose an existing campaign and try again."
+msgstr "Chọn chiến dịch hiện có và thử lại."
+
+#: includes/class-email-countdown-timer-admin.php:307
+msgid "Choose an existing timer to archive or restore."
+msgstr "Chọn bộ hẹn giờ hiện có để lưu trữ hoặc khôi phục."
+
+#: includes/class-email-countdown-timer-admin.php:265
+msgid "Choose one of the listed countdown label languages."
+msgstr "Chọn một trong các ngôn ngữ nhãn đếm ngược được liệt kê."
+
+#: includes/class-email-countdown-timer-admin.php:100
+msgid "Christmas"
+msgstr "Giáng sinh"
+
+#: includes/class-email-countdown-timer-admin.php:96
+msgid "Classic"
+msgstr "Cổ điển"
+
+#: includes/admin-view.php:130
+msgid "Colors"
+msgstr "Màu sắc"
+
+#: includes/class-email-countdown-timer-admin.php:157
+msgid ""
+"Colors and an included font for each occasion. Bitmap is used if the font or"
+" FreeType is unavailable."
+msgstr ""
+"Màu sắc và phông chữ đi kèm cho từng trường hợp. Bitmap được sử dụng nếu "
+"phông chữ hoặc FreeType không có sẵn."
+
+#: includes/class-email-countdown-timer-admin.php:318
+msgid "Confirm deletion of an existing timer."
+msgstr "Xác nhận xóa bộ hẹn giờ hiện có."
+
+#: includes/admin-view.php:136
+msgid ""
+"Contrast on background: digits {digits}:1; labels {labels}:1. Aim for at "
+"least 4.5:1. Colors are not changed automatically."
+msgstr ""
+"Độ tương phản trên nền: chữ số {chữ số}:1; nhãn {nhãn}:1. Hãy nhắm đến tỷ lệ"
+" ít nhất là 4,5:1. Màu sắc không được thay đổi tự động."
+
+#: includes/admin-view.php:217 includes/admin-view.php:224
+#: includes/admin-view.php:230 includes/admin-view.php:232
+msgid "Copied to clipboard."
+msgstr "Đã sao chép vào bảng nhớ tạm."
+
+#: includes/class-email-countdown-timer-data-settings.php:142
+msgid ""
+"Copied: %1$d. Skipped or conflicting: %2$d. Original files are unchanged."
+msgstr ""
+"Sao chép: %1$d. Bị bỏ qua hoặc xung đột: %2$d. File gốc không thay đổi."
+
+#: includes/admin-view.php:230
+msgid "Copy Email HTML"
+msgstr "Sao chép HTML email"
+
+#: includes/class-email-countdown-timer-data-settings.php:147
+msgid "Copy Legacy Fonts to Persistent Storage"
+msgstr "Sao chép phông chữ cũ vào bộ lưu trữ liên tục"
+
+#: includes/admin-view.php:224
+msgid "Copy iframe HTML"
+msgstr "Sao chép HTML iframe"
+
+#: includes/admin-view.php:232
+msgid "Copy image URL"
+msgstr "Sao chép URL hình ảnh"
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Copy report"
+msgstr "Sao chép báo cáo"
+
+#: includes/admin-view.php:217
+msgid "Copy shortcode"
+msgstr "Sao chép mã ngắn"
+
+#: includes/admin-view.php:217 includes/admin-view.php:230
+#: includes/admin-view.php:232
+msgid ""
+"Copy was unavailable. The code is selected; use your keyboard or device copy"
+" command."
+msgstr ""
+"Bản sao không có sẵn. Mã được chọn; sử dụng lệnh sao chép bàn phím hoặc "
+"thiết bị của bạn."
+
+#: includes/admin-view.php:93
+msgid ""
+"Copying %s into a new, unsaved campaign. Review the new ID and deadline, "
+"then create it. The original campaign is unchanged."
+msgstr ""
+"Đang sao chép %s vào chiến dịch mới, chưa được lưu. Xem lại ID mới và thời "
+"hạn, sau đó tạo nó. Chiến dịch ban đầu không thay đổi."
+
+#: includes/class-email-countdown-timer-data-settings.php:133
+msgid ""
+"Copying preserves original files and timer names, never overwrites a "
+"different file, and processes at most 50 new files per request (5 MiB each)."
+" A same-name plugin-local file takes precedence while the old copy remains "
+"installed. Fonts in the previous uploads directory remain available. Copy "
+"font license notices manually."
+msgstr ""
+"Việc sao chép sẽ giữ nguyên các tệp gốc và tên bộ hẹn giờ, không bao giờ ghi"
+" đè lên một tệp khác và xử lý tối đa 50 tệp mới cho mỗi yêu cầu (mỗi tệp 5 "
+"MiB). Tệp cục bộ plugin có cùng tên được ưu tiên trong khi bản sao cũ vẫn "
+"được cài đặt. Các phông chữ trong thư mục tải lên trước đó vẫn có sẵn. Sao "
+"chép thông báo giấy phép phông chữ theo cách thủ công."
+
+#: assets/block-editor.js:107 includes/class-ecd-plugin.php:75
+#: includes/class-email-countdown-timer-frame.php:119
+#: includes/class-email-countdown-timer-live.php:23
+msgid "Countdown"
+msgstr "Đếm ngược"
+
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Countdown ended"
+msgstr "Đếm ngược đã kết thúc"
+
+#: includes/admin-view.php:209
+msgid "Countdown ends %s"
+msgstr "Đếm ngược kết thúc %s"
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Countdown image generation is unavailable. Live text blocks can still work."
+msgstr ""
+"Việc tạo hình ảnh đếm ngược không khả dụng. Khối văn bản trực tiếp vẫn có "
+"thể hoạt động."
+
+#: includes/class-email-countdown-timer-frame.php:140
+msgid "Countdown is temporarily unavailable."
+msgstr "Đếm ngược tạm thời không khả dụng."
+
+#: includes/admin-view.php:152
+#: includes/class-email-countdown-timer-admin.php:158
+msgid "Countdown label language"
+msgstr "Ngôn ngữ nhãn đếm ngược"
+
+#: includes/admin-view.php:14
+msgid "Countdown navigation"
+msgstr "Cài đặt sẵn đếm ngược"
+
+#: includes/class-email-countdown-timer-admin.php:152
+msgid "Countdown preset"
+msgstr "cài sẵn đếm ngược"
+
+#: includes/admin-view.php:201
+msgid ""
+"Countdown preview is unavailable. Reload or check rendering diagnostics."
+msgstr ""
+"Xem trước đếm ngược không có sẵn. Tải lại hoặc kiểm tra chẩn đoán kết xuất."
+
+#: includes/admin-view.php:222
+#: includes/class-email-countdown-timer-frame.php:124
+msgid "Countdown timer"
+msgstr "Đồng hồ đếm ngược"
+
+#: includes/admin-view.php:36 includes/admin-view.php:181
+msgid "Create Timer"
+msgstr "Tạo bộ đếm thời gian"
+
+#: assets/block-editor.js:154
+msgid "Create a campaign (new tab)"
+msgstr "Tạo chiến dịch (tab mới)"
+
+#: includes/class-email-countdown-timer-admin.php:199
+msgid ""
+"Create a timer from a color preset, then fine-tune it and copy your embeds "
+"in the full editor."
+msgstr ""
+"Tạo bộ hẹn giờ từ cài đặt sẵn màu, sau đó tinh chỉnh nó và sao chép phần "
+"nhúng của bạn vào trình chỉnh sửa đầy đủ."
+
+#: includes/admin-view.php:13
+msgid "Create countdown images for your website and email campaigns."
+msgstr "Tạo hình ảnh đếm ngược cho website và chiến dịch email của bạn."
+
+#: includes/admin-view.php:203
+msgid "Create this timer to see its image and embed codes."
+msgstr "Tạo bộ hẹn giờ này để xem hình ảnh và mã nhúng của nó."
+
+#: includes/class-email-countdown-timer-admin.php:165
+msgid "Create timer"
+msgstr "Tạo bộ hẹn giờ"
+
+#: assets/block-editor.js:153
+msgid ""
+"Create your first campaign in Tickloom Countdown Timers, then return here "
+"and refresh the campaign list."
+msgstr ""
+"Tạo chiến dịch đầu tiên của bạn trong Đồng hồ đếm ngược Tickloom, sau đó "
+"quay lại đây và làm mới danh sách chiến dịch."
+
+#: includes/class-email-countdown-timer-fonts.php:48
+msgid "Crimson Text Regular (included)"
+msgstr "Văn bản màu đỏ thẫm thường xuyên (bao gồm)"
+
+#: includes/admin-view.php:150
+msgid "Custom Labels"
+msgstr "Nhãn tùy chỉnh"
+
+#: includes/admin-view.php:16
+#: includes/class-email-countdown-timer-data-settings.php:21
+#: includes/class-email-countdown-timer-data-settings.php:22
+msgid "Data Settings"
+msgstr "Cài đặt dữ liệu"
+
+#: includes/class-email-countdown-timer-data-settings.php:65
+msgid "Data settings saved. No timer data has been deleted."
+msgstr "Đã lưu cài đặt dữ liệu. Không có dữ liệu hẹn giờ đã bị xóa."
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid "Database locking"
+msgstr "Khóa cơ sở dữ liệu"
+
+#: includes/class-email-countdown-timer-data-settings.php:96
+msgid "Database locking is available."
+msgstr "có sẵn."
+
+#: includes/admin-view.php:114
+msgid "Date and time in the time zone below, including seconds."
+msgstr "Ngày và giờ ở múi giờ bên dưới, bao gồm cả giây."
+
+#: includes/admin-view.php:163
+msgid "Days"
+msgstr "Ngày"
+
+#: email-countdown-timer.php:24
+msgid ""
+"Deactivate the older countdown plugin before activating Tickloom. Keep the "
+"old copy if you still need its data or fonts."
+msgstr ""
+"Vô hiệu hóa plugin đếm ngược cũ hơn trước khi kích hoạt Tickloom. Giữ bản "
+"sao cũ nếu bạn vẫn cần dữ liệu hoặc phông chữ của nó."
+
+#: includes/admin-view.php:114
+#: includes/class-email-countdown-timer-admin.php:148
+msgid "Deadline"
+msgstr "Thời hạn"
+
+#: includes/admin-view.php:53
+msgid "Deadline / Time Zone"
+msgstr "Hạn chót/Múi giờ"
+
+#: includes/class-email-countdown-timer-frame.php:129
+#: includes/class-email-countdown-timer-live.php:38
+msgid "Deadline:"
+msgstr "Thời hạn:"
+
+#: includes/admin-view.php:140
+msgid "Default bitmap font"
+msgstr "Phông chữ bitmap mặc định"
+
+#: includes/admin-view.php:184
+msgid "Delete Timer"
+msgstr "Xóa bộ đếm thời gian"
+
+#: includes/admin-view.php:239
+msgid "Delete Timer?"
+msgstr "Xóa bộ hẹn giờ?"
+
+#: includes/class-email-countdown-timer-data-settings.php:74
+msgid "Delete all plugin data when uninstalling"
+msgstr "Xóa tất cả dữ liệu plugin khi gỡ cài đặt"
+
+#: includes/admin-view.php:189 includes/admin-view.php:239
+msgid "Delete permanently"
+msgstr "Xóa vĩnh viễn"
+
+#: includes/class-email-countdown-timer-privacy.php:14
+msgid ""
+"Delivering an image requires an HTTP request. Our hosting, email-image "
+"proxies and other services may process connection data under their own "
+"logging and retention policies. Local fonts are read on the server; this "
+"plugin does not contact Google Fonts."
+msgstr ""
+"Việc phân phối hình ảnh yêu cầu yêu cầu HTTP. Dịch vụ lưu trữ, proxy hình "
+"ảnh email và các dịch vụ khác của chúng tôi có thể xử lý dữ liệu kết nối "
+"theo chính sách ghi nhật ký và lưu giữ của riêng họ. Phông chữ cục bộ được "
+"đọc trên máy chủ; plugin này không liên hệ với Google Fonts."
+
+#: includes/admin-view.php:179
+msgid ""
+"Describe the timer purpose, not its changing seconds. Used by the website "
+"shortcode and new Email HTML. Leave empty only when nearby text provides the"
+" same information. Save, then copy updated HTML; already sent emails cannot "
+"be changed. Maximum 1000 bytes."
+msgstr ""
+"Mô tả mục đích của bộ đếm thời gian chứ không phải số giây thay đổi của nó. "
+"Được sử dụng bởi shortcode trang web và HTML Email mới. Chỉ để trống khi văn"
+" bản gần đó cung cấp thông tin tương tự. Lưu, sau đó sao chép HTML đã cập "
+"nhật; email đã gửi không thể thay đổi được. Tối đa 1000 byte."
+
+#: includes/admin-view.php:145
+msgid "Digit Size (px)"
+msgstr "Kích thước chữ số (px)"
+
+#: includes/admin-view.php:131
+msgid "Digits"
+msgstr "chữ số"
+
+#: blocks/timer/block.json
+msgid "Display an existing countdown with its saved appearance and deadline."
+msgstr "Hiển thị đồng hồ đếm ngược hiện có với giao diện và thời hạn đã lưu."
+
+#: includes/admin-view.php:72
+msgid "Duplicate"
+msgstr "trùng lặp"
+
+#: includes/admin-view.php:72
+msgid "Duplicate %s"
+msgstr "Sao chép %s"
+
+#: includes/class-email-countdown-timer-admin.php:102
+msgid "Easter"
+msgstr "Lễ Phục Sinh"
+
+#: includes/admin-view.php:70
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+#: includes/admin-view.php:70
+#: includes/class-email-countdown-timer-admin.php:207
+msgid "Edit %s"
+msgstr "Chỉnh sửa %s"
+
+#: includes/class-email-countdown-timer-admin.php:201
+msgid "Edit an existing timer"
+msgstr "Chỉnh sửa bộ hẹn giờ hiện có"
+
+#: includes/admin-view.php:97
+msgid "Edit timer: %s"
+msgstr "Chỉnh sửa bộ hẹn giờ: %s"
+
+#: includes/admin-view.php:227
+msgid "Email"
+msgstr "E-mail"
+
+#: includes/admin-view.php:233
+msgid ""
+"Email GIFs play for 60 seconds; an already downloaded image cannot refresh "
+"itself. Clients may cache, prefetch or block images. Always include the "
+"absolute deadline as visible text, and send a test email."
+msgstr ""
+"Ảnh GIF qua email phát trong 60 giây; hình ảnh đã tải xuống không thể tự làm"
+" mới được. Khách hàng có thể lưu vào bộ nhớ đệm, tìm nạp trước hoặc chặn "
+"hình ảnh. Luôn bao gồm thời hạn tuyệt đối dưới dạng văn bản hiển thị và gửi "
+"email kiểm tra."
+
+#: includes/admin-view.php:229
+msgid "Email HTML"
+msgstr "Email HTML"
+
+#: includes/admin-view.php:205
+msgid "Embed Codes"
+msgstr "Mã nhúng"
+
+#: includes/admin-view.php:235
+msgid "Embed codes are available after the first successful save."
+msgstr "có sẵn sau lần lưu thành công đầu tiên."
+
+#: includes/admin-view.php:170
+msgid "End image attachment ID"
+msgstr "ID đính kèm hình ảnh cuối"
+
+#: includes/admin-view.php:175
+msgid "End image removed. Save the timer to apply this change."
+msgstr "Đã xóa hình ảnh cuối. Lưu bộ đếm thời gian để áp dụng thay đổi này."
+
+#: includes/admin-view.php:202
+msgid "Ends:"
+msgstr "Kết thúc:"
+
+#: includes/class-email-countdown-timer-admin.php:122
+msgid "English"
+msgstr "Tiếng Anh"
+
+#: includes/class-email-countdown-timer-admin.php:364
+msgid "Enter a HEX color, for example #135E96."
+msgstr "Nhập màu HEX, ví dụ #135E96."
+
+#: includes/class-email-countdown-timer-status.php:113
+msgid ""
+"Enter a saved ID to check its font and enable the separate image test. The "
+"first 250 IDs are suggested; other saved IDs may be typed."
+msgstr ""
+"Nhập ID đã lưu để kiểm tra phông chữ của nó và bật kiểm tra hình ảnh riêng. "
+"250 ID đầu tiên được đề xuất; ID đã lưu khác có thể được gõ."
+
+#: includes/class-email-countdown-timer-status.php:54
+msgid ""
+"Enter a saved campaign ID and run local checks to verify its font "
+"resolution."
+msgstr ""
+"Nhập ID chiến dịch đã lưu và chạy kiểm tra cục bộ để xác minh độ phân giải "
+"phông chữ của chiến dịch."
+
+#: includes/class-email-countdown-timer-admin.php:278
+msgid "Enter a single value for this field."
+msgstr "Nhập một giá trị duy nhất cho trường này."
+
+#: includes/class-ecd-config.php:89
+msgid "Enter a specific deadline date and time."
+msgstr "Nhập ngày và giờ hạn chót cụ thể."
+
+#: includes/class-email-countdown-timer-admin.php:337
+msgid "Enter a unique timer name."
+msgstr "Nhập tên bộ hẹn giờ duy nhất."
+
+#: includes/class-email-countdown-timer-admin.php:378
+msgid "Enter a valid time zone, for example Europe/Warsaw."
+msgstr "Nhập múi giờ hợp lệ, ví dụ Châu Âu/Warsaw."
+
+#: includes/class-email-countdown-timer-admin.php:349
+msgid "Enter a valid timer ID (maximum 200 bytes)."
+msgstr "Nhập ID hẹn giờ hợp lệ (tối đa 200 byte)."
+
+#: includes/class-email-countdown-timer-admin.php:359
+msgid "Enter a whole number from %1$d to %2$d."
+msgstr "Nhập một số nguyên từ %1$d đến %2$d."
+
+#: includes/class-email-countdown-timer-data-settings.php:77
+msgid ""
+"Existing emails and pages will no longer receive countdown images after the "
+"plugin is removed. Manually deleting files does not run this cleanup."
+msgstr ""
+"Các email và trang hiện có sẽ không còn nhận được hình ảnh đếm ngược sau khi"
+" gỡ bỏ plugin. Xóa thủ công các tập tin không chạy quá trình dọn dẹp này."
+
+#: includes/admin-view.php:58
+msgid "Expired"
+msgstr "đã hết hạn"
+
+#: includes/admin-view.php:220
+msgid "External website (iframe)"
+msgstr "Trang web bên ngoài (iframe)"
+
+#: includes/admin-view.php:143
+msgid ""
+"Five faces are included locally: Lato Regular, IBM Plex Mono Regular, Barlow"
+" Condensed Regular and Black (900), and Crimson Text Regular. Select a face "
+"and save to use scalable text. FreeType is required. Keep your own licensed "
+"TTF/OTF files in the persistent directory shown in Data Settings. Bitmap "
+"fallback has fixed sizes and printable ASCII labels only."
+msgstr ""
+"Năm khuôn mặt được bao gồm cục bộ: Lato Regular, IBM Plex Mono Regular, "
+"Barlow Condensed Regular và Black (900) và Crimson Text Regular. Chọn một "
+"khuôn mặt và lưu để sử dụng văn bản có thể mở rộng. FreeType là bắt buộc. "
+"Giữ các tệp TTF/OTF được cấp phép của riêng bạn trong thư mục liên tục được "
+"hiển thị trong Cài đặt dữ liệu. Dự phòng bitmap có kích thước cố định và chỉ"
+" có thể in nhãn ASCII."
+
+#: includes/admin-view.php:138
+msgid "Font"
+msgstr "Phông chữ"
+
+#: includes/class-email-countdown-timer-data-settings.php:111
+msgid "Font File Access"
+msgstr "Không thể tạo quy tắc truy cập phông chữ"
+
+#: includes/class-email-countdown-timer-font-access.php:75
+msgid ""
+"Font access rules could not be created. Configure the font directories "
+"through your host. No existing rules were overwritten."
+msgstr ""
+". Định cấu hình các thư mục phông chữ thông qua máy chủ của bạn. Không có "
+"quy tắc hiện có nào bị ghi đè."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid ""
+"For animated email GIFs, ask your host to enable Imagick with GIF support."
+msgstr ""
+"Đối với ảnh GIF động qua email, hãy yêu cầu máy chủ của bạn bật Imagick có "
+"hỗ trợ GIF."
+
+#: includes/admin-view.php:111
+#: includes/class-email-countdown-timer-admin.php:146
+msgid ""
+"For your administration only. Not used in public images, embeds or the "
+"generated ID. Up to 200 bytes."
+msgstr ""
+"Chỉ dành cho quản trị của bạn. Không được sử dụng trong hình ảnh công khai, "
+"nội dung nhúng hoặc ID được tạo. Lên đến 200 byte."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid "FreeType text functions are available."
+msgstr "Chức năng văn bản FreeType có sẵn."
+
+#: includes/class-email-countdown-timer-admin.php:126
+msgid "French"
+msgstr "người Pháp"
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid "GD image functions are available."
+msgstr "Chức năng hình ảnh GD có sẵn."
+
+#: includes/admin-view.php:24
+msgid ""
+"GD is unavailable. Settings can be saved, but image generation and geometry "
+"validation are unavailable until GD is enabled."
+msgstr ""
+"GD không có sẵn. Có thể lưu cài đặt nhưng việc tạo hình ảnh và xác thực hình"
+" học không khả dụng cho đến khi GD được bật."
+
+#: includes/class-email-countdown-timer-admin.php:124
+msgid "German"
+msgstr "tiếng Đức"
+
+#: includes/admin-view.php:71
+msgid "Get Embed Code"
+msgstr "Nhận mã nhúng"
+
+#: includes/admin-view.php:71
+msgid "Get embed code for %s"
+msgstr "Nhận mã nhúng cho %s"
+
+#: includes/admin-view.php:132
+msgid "HEX color"
+msgstr "màu lục giác"
+
+#: includes/class-email-countdown-timer-admin.php:104
+msgid "Halloween"
+msgstr "Halloween"
+
+#: includes/admin-view.php:117
+msgid "Hide days when fewer than 24 hours remain"
+msgstr "Ẩn những ngày còn ít hơn 24 giờ"
+
+#: includes/admin-view.php:163
+msgid "Hours"
+msgstr "Giờ"
+
+#: includes/admin-view.php:188
+msgid "I understand this cannot be undone."
+msgstr "Tôi hiểu rằng thao tác này không thể hoàn tác được."
+
+#: includes/class-email-countdown-timer-fonts.php:46
+msgid "IBM Plex Mono Regular (included)"
+msgstr "IBM Plex Mono thường xuyên (bao gồm)"
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid ""
+"If GIFs stay static, check advisory locks, GIF codec policy and hosting "
+"memory. Test the actual image."
+msgstr ""
+"Nếu ảnh GIF ở trạng thái tĩnh, hãy kiểm tra các khóa tư vấn, chính sách "
+"codec GIF và bộ nhớ lưu trữ. Kiểm tra hình ảnh thực tế."
+
+#: includes/admin-view.php:223
+msgid "Iframe HTML"
+msgstr "HTML khung nội tuyến"
+
+#: assets/block-editor.js:118
+msgid "Image (default)"
+msgstr "Hình ảnh (mặc định)"
+
+#: includes/admin-view.php:231
+msgid "Image URL"
+msgstr "URL hình ảnh"
+
+#: includes/admin-view.php:179
+msgid "Image alternative text (alt)"
+msgstr "Văn bản thay thế hình ảnh (alt)"
+
+#: includes/admin-view.php:175
+msgid "Image selected. Save the timer to apply it."
+msgstr "Hình ảnh được chọn. Lưu bộ đếm thời gian để áp dụng nó."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid ""
+"Images use bitmap text without FreeType; accented labels may not render."
+msgstr ""
+"Hình ảnh sử dụng văn bản bitmap không có FreeType; nhãn có dấu có thể không "
+"hiển thị."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid "Imagick is available for GIF animation."
+msgstr "Imagick có sẵn cho hoạt hình GIF."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid "Imagick is unavailable; image requests use a static frame."
+msgstr "Imagick không có sẵn; yêu cầu hình ảnh sử dụng khung tĩnh."
+
+#: includes/admin-view.php:215
+msgid ""
+"In the block editor, add the Tickloom Countdown Timers block and select this"
+" timer. In other editors, paste the shortcode below. Website embeds refresh "
+"when the page becomes visible again."
+msgstr ""
+"Trong trình chỉnh sửa khối, thêm khối Đồng hồ đếm ngược Tickloom và chọn bộ "
+"hẹn giờ này. Trong các trình soạn thảo khác, dán mã ngắn bên dưới. Làm mới "
+"trang web nhúng khi trang hiển thị lại."
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Information"
+msgstr "Thông tin"
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"Inspect the actual image: file availability does not certify glyph coverage "
+"or layout."
+msgstr ""
+"Kiểm tra hình ảnh thực tế: tính khả dụng của tệp không chứng nhận mức độ bao"
+" phủ hoặc bố cục của hình tượng."
+
+#: includes/class-email-countdown-timer-data-settings.php:124
+msgid "Install Font Access Rules (Apache)"
+msgstr "Cài đặt quy tắc truy cập phông chữ (Apache)"
+
+#: includes/class-ecd-config.php:54
+msgid "Invalid color: %s"
+msgstr "Màu không hợp lệ: %s"
+
+#: includes/class-email-countdown-timer-data-settings.php:48
+msgid "Invalid data retention setting."
+msgstr "Cài đặt lưu giữ dữ liệu không hợp lệ."
+
+#: includes/class-ecd-config.php:101
+msgid "Invalid date or time zone."
+msgstr "Ngày hoặc múi giờ không hợp lệ."
+
+#: includes/class-ecd-config.php:97
+msgid "Invalid date."
+msgstr "Ngày không hợp lệ."
+
+#: includes/class-email-countdown-timer-admin.php:593
+msgid "Invalid deadline or time zone"
+msgstr "Thời hạn hoặc múi giờ không hợp lệ"
+
+#: includes/class-ecd-config.php:39
+msgid "Invalid field type: %s"
+msgstr "Loại trường không hợp lệ: %s"
+
+#: includes/class-ecd-config.php:65
+msgid "Invalid font filename."
+msgstr "Tên tệp phông chữ không hợp lệ."
+
+#: includes/admin-view.php:146
+msgid "Label Size (px)"
+msgstr "Kích thước nhãn (px)"
+
+#: includes/class-ecd-config.php:58
+msgid "Label is too long (maximum 256 bytes)."
+msgstr "Nhãn quá dài (tối đa 256 byte)."
+
+#: includes/admin-view.php:131
+msgid "Labels"
+msgstr "Nhãn"
+
+#: includes/admin-view.php:160
+msgid "Labels applied. Review the text and save to keep these changes."
+msgstr "được áp dụng. Xem lại văn bản và lưu để giữ những thay đổi này."
+
+#: includes/class-email-countdown-timer-fonts.php:45
+msgid "Lato Regular (included)"
+msgstr "Lato Thường (đã bao gồm)"
+
+#: assets/block-editor.js:126
+msgid "Left"
+msgstr "còn lại"
+
+#: assets/block-editor.js:119
+msgid "Live text"
+msgstr "Văn bản trực tiếp"
+
+#: assets/block-editor.js:121
+msgid ""
+"Live text uses the saved deadline, colors and labels with theme typography. "
+"It updates locally without image polling and includes a Pause control. "
+"Reduced-motion visitors start paused. Image fonts and dimensions apply to "
+"Image mode. End-image URLs are public before expiry."
+msgstr ""
+"Văn bản trực tiếp sử dụng thời hạn, màu sắc và nhãn đã lưu với kiểu chữ theo"
+" chủ đề. Nó cập nhật cục bộ mà không cần thăm dò hình ảnh và bao gồm điều "
+"khiển Tạm dừng. Khách truy cập giảm chuyển động bắt đầu tạm dừng. Phông chữ "
+"và kích thước hình ảnh áp dụng cho chế độ Hình ảnh. URL hình ảnh cuối được "
+"công khai trước khi hết hạn."
+
+#: includes/class-email-countdown-timer-data-settings.php:128
+msgid "Local Fonts"
+msgstr "Phông chữ cục bộ"
+
+#: includes/class-email-countdown-timer-status.php:118
+msgid "Local checks"
+msgstr "Kiểm tra cục bộ"
+
+#: includes/class-email-countdown-timer-fonts.php:342
+msgid ""
+"Local font copying failed. Check directory permissions and database locks, "
+"or use SFTP. Original files were not removed."
+msgstr ""
+"Sao chép phông chữ cục bộ không thành công. Kiểm tra quyền thư mục và khóa "
+"cơ sở dữ liệu hoặc sử dụng SFTP. Các tập tin gốc không bị xóa."
+
+#: includes/class-email-countdown-timer-data-settings.php:112
+msgid ""
+"Local fonts may be publicly downloadable unless your host blocks HTTP "
+"access. This tool creates an Apache 2.4 deny rule and a blank index in this "
+"site's persistent font directory under uploads. Existing rules and symlinks "
+"are never replaced. For fonts still in the legacy plugin directory, use the "
+"copy tool and ask your host to protect any originals that remain."
+msgstr ""
+"Phông chữ cục bộ có thể được tải xuống công khai trừ khi máy chủ của bạn "
+"chặn quyền truy cập HTTP. Công cụ này tạo quy tắc từ chối Apache 2.4 và một "
+"chỉ mục trống trong thư mục phông chữ liên tục của trang web này trong phần "
+"tải lên. Các quy tắc và liên kết tượng trưng hiện tại không bao giờ được "
+"thay thế. Đối với các phông chữ vẫn còn trong thư mục plugin cũ, hãy sử dụng"
+" công cụ sao chép và yêu cầu máy chủ của bạn bảo vệ mọi phông chữ gốc còn "
+"sót lại."
+
+#: includes/class-email-countdown-timer-admin.php:97
+msgid "Midnight"
+msgstr "Nửa đêm"
+
+#: includes/admin-view.php:148
+msgid "Minimum Image Width (px)"
+msgstr "Chiều rộng hình ảnh tối thiểu (px)"
+
+#: includes/admin-view.php:163
+msgid "Minutes"
+msgstr "Phút"
+
+#: includes/class-email-countdown-timer-data-settings.php:79
+msgid ""
+"Multisite: this choice applies only to this site. Network uninstall removes "
+"data only on sites that have enabled this option."
+msgstr ""
+"Multisite: lựa chọn này chỉ áp dụng cho trang này. Gỡ cài đặt mạng chỉ xóa "
+"dữ liệu trên các trang web đã bật tùy chọn này."
+
+#: includes/admin-view.php:60
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Needs attention"
+msgstr "Cần được chú ý"
+
+#: includes/admin-view.php:97
+msgid "New Timer"
+msgstr "Bộ hẹn giờ mới"
+
+#: includes/class-email-countdown-timer-admin.php:101
+msgid "New Year"
+msgstr "Năm Mới"
+
+#: includes/class-email-countdown-timer-admin.php:579
+msgid ""
+"New timers use your browser time zone when available, otherwise the "
+"WordPress site time zone. Existing timers keep their saved zone. Named zones"
+" follow daylight saving changes; fixed offsets do not."
+msgstr ""
+"Bộ hẹn giờ mới sử dụng múi giờ trình duyệt của bạn khi khả dụng, nếu không "
+"thì múi giờ của trang web WordPress. Bộ hẹn giờ hiện tại giữ vùng đã lưu của"
+" họ. Các vùng được đặt tên tuân theo các thay đổi về tiết kiệm ánh sáng ban "
+"ngày; sự bù đắp cố định thì không."
+
+#: includes/admin-view.php:87
+msgid "Next"
+msgstr "Tiếp theo"
+
+#: includes/admin-view.php:49
+msgid "No archived timers."
+msgstr "Không có bộ hẹn giờ được lưu trữ."
+
+#: includes/class-email-countdown-timer-status.php:54
+msgid "No campaign was selected."
+msgstr "Không có chiến dịch nào được chọn."
+
+#: assets/block-editor.js:152
+msgid "No campaigns yet"
+msgstr "Chưa có chiến dịch nào"
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid ""
+"No lock configuration change is indicated. This probe does not certify "
+"database proxies or multiple primaries."
+msgstr ""
+"Không có thay đổi cấu hình khóa nào được chỉ định. Cuộc thăm dò này không "
+"chứng nhận proxy cơ sở dữ liệu hoặc nhiều cuộc bầu cử sơ bộ."
+
+#: includes/admin-view.php:49
+msgid "No timers match this search."
+msgstr "Không có bộ tính giờ nào phù hợp với tìm kiếm này."
+
+#: includes/class-email-countdown-timer-admin.php:203
+msgid "No timers yet. Create your first campaign above."
+msgstr "Chưa có đồng hồ hẹn giờ. Tạo chiến dịch đầu tiên của bạn ở trên."
+
+#: includes/admin-view.php:49
+msgid ""
+"No timers yet. Use Quick Create above, or open the full editor with Create "
+"Timer."
+msgstr ""
+"Chưa có đồng hồ hẹn giờ. Sử dụng Tạo nhanh ở trên hoặc mở trình chỉnh sửa "
+"đầy đủ bằng Tạo bộ hẹn giờ."
+
+#: includes/class-email-countdown-timer-admin.php:98
+msgid "Ocean"
+msgstr "Đại dương"
+
+#: includes/class-email-countdown-timer-data-settings.php:76
+msgid ""
+"Off by default. When enabled, deleting the plugin through WordPress "
+"permanently removes this site's timers, plugin options, and database image "
+"cache. Deactivation and saving this setting never delete timer data. Back up"
+" your configuration first."
+msgstr ""
+"Tắt theo mặc định. Khi được bật, việc xóa plugin thông qua WordPress sẽ xóa "
+"vĩnh viễn bộ hẹn giờ, tùy chọn plugin và bộ đệm hình ảnh cơ sở dữ liệu của "
+"trang web này. Việc tắt và lưu cài đặt này sẽ không bao giờ xóa dữ liệu hẹn "
+"giờ. Sao lưu cấu hình của bạn trước."
+
+#: includes/class-email-countdown-timer-data-settings.php:108
+msgid ""
+"On a cache miss, image requests wait at most one second for a generation "
+"lock. If it is busy or unavailable, a current single-frame image is "
+"generated without replacing the animation cache. This avoids stale "
+"countdowns, but does not replace hosting rate limits. This probe is not a "
+"full database-proxy compatibility test."
+msgstr ""
+"Khi thiếu bộ nhớ đệm, các yêu cầu hình ảnh sẽ đợi tối đa một giây để khóa "
+"thế hệ. Nếu nó bận hoặc không khả dụng, hình ảnh một khung hình hiện tại sẽ "
+"được tạo mà không thay thế bộ đệm hoạt ảnh. Điều này tránh việc đếm ngược cũ"
+" nhưng không thay thế giới hạn tốc độ lưu trữ. Cuộc thăm dò này không phải "
+"là cuộc kiểm tra khả năng tương thích proxy cơ sở dữ liệu đầy đủ."
+
+#: includes/class-email-countdown-timer-status.php:148
+msgid ""
+"Only versions and diagnostic results are included. Site URLs, campaign "
+"IDs/names/settings, font filenames/paths, media IDs, usernames, credentials,"
+" nonces and raw errors are excluded. Review the text before sharing; copying"
+" never sends it."
+msgstr ""
+"Chỉ bao gồm các phiên bản và kết quả chẩn đoán. URL trang web, ID/tên/cài "
+"đặt chiến dịch, tên tệp/đường dẫn phông chữ, ID phương tiện, tên người dùng,"
+" thông tin xác thực, nonces và lỗi thô đều bị loại trừ. Xem lại văn bản "
+"trước khi chia sẻ; sao chép không bao giờ gửi nó."
+
+#: includes/class-email-countdown-timer-admin.php:166
+msgid "Open full editor"
+msgstr "Mở trình chỉnh sửa đầy đủ"
+
+#: includes/class-email-countdown-timer-status.php:141
+msgid "Open image manually (new tab)"
+msgstr "Mở hình ảnh thủ công (tab mới)"
+
+#: includes/class-email-countdown-timer-status.php:70
+msgid ""
+"Open the campaign editor, check its settings and restore or reselect its "
+"font before testing the image."
+msgstr ""
+"Mở trình chỉnh sửa chiến dịch, kiểm tra cài đặt của nó và khôi phục hoặc "
+"chọn lại phông chữ của nó trước khi kiểm tra hình ảnh."
+
+#: assets/block-editor.js:142
+msgid "Open timer settings (new tab)"
+msgstr "Mở cài đặt hẹn giờ (tab mới)"
+
+#: includes/admin-view.php:170
+msgid ""
+"Optional. Choose an image from this site’s Media Library, or enter its "
+"attachment ID. Use 0 to keep the zero countdown. Local JPEG, PNG, GIF or "
+"WebP only, up to 4 MiB / 4 million pixels. Animated source files use their "
+"first frame."
+msgstr ""
+"Tùy chọn. Chọn một hình ảnh từ Thư viện phương tiện của trang web này hoặc "
+"nhập ID đính kèm của nó. Sử dụng 0 để giữ đếm ngược số 0. Chỉ JPEG, PNG, GIF"
+" hoặc WebP cục bộ, tối đa 4 MiB / 4 triệu pixel. Các tệp nguồn hoạt hình sử "
+"dụng khung đầu tiên của chúng."
+
+#: includes/admin-view.php:85
+msgid "Page %1$d of %2$d"
+msgstr "Trang %1$d của %2$d"
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Passed"
+msgstr "đã qua"
+
+#: includes/admin-view.php:228
+msgid ""
+"Paste Email HTML into your mailing platform’s HTML editor, or use the Image "
+"URL in an image block. WordPress shortcodes do not work in email."
+msgstr ""
+"Dán HTML email vào trình soạn thảo HTML của nền tảng gửi thư của bạn hoặc sử"
+" dụng URL hình ảnh trong khối hình ảnh. Mã ngắn WordPress không hoạt động "
+"trong email."
+
+#: includes/admin-view.php:221
+msgid ""
+"Paste this HTML on another website. The countdown runs locally in the frame "
+"with the saved fonts, colors and labels. Iframes are for websites, not "
+"email. Your hosting must allow this frame to load on other sites."
+msgstr ""
+"Dán HTML này vào một trang web khác. Quá trình đếm ngược chạy cục bộ trong "
+"khung với phông chữ, màu sắc và nhãn đã lưu. Iframe dành cho trang web, "
+"không phải email. Lưu trữ của bạn phải cho phép khung này tải trên các trang"
+" web khác."
+
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-live.php:39
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Pause countdown"
+msgstr "Tạm dừng đếm ngược"
+
+#: assets/block-editor.js:140
+msgid "Pause preview"
+msgstr "Tạm dừng xem trước"
+
+#: includes/admin-view.php:187
+msgid ""
+"Permanently delete %s? Existing emails and pages using this timer will stop "
+"receiving countdown images."
+msgstr ""
+"Xóa vĩnh viễn %s? Các email và trang hiện có sử dụng bộ đếm thời gian này sẽ"
+" ngừng nhận hình ảnh đếm ngược."
+
+#: includes/admin-view.php:239
+msgid ""
+"Permanently delete %s? This cannot be undone and will break existing embeds."
+msgstr ""
+"Xóa vĩnh viễn %s? Việc này không thể hoàn tác được và sẽ phá vỡ các nội dung"
+" nhúng hiện có."
+
+#: includes/class-email-countdown-timer-data-settings.php:130
+msgid ""
+"Persistent location: the uploads base directory, then tickloom-countdown-"
+"timers/fonts/. Multisite adds site-ID/ inside fonts/. The directory is "
+"created only when copying fonts, installing access rules, or manually "
+"through your hosting tools."
+msgstr ""
+"Vị trí cố định: thư mục cơ sở tải lên, sau đó là tickloom-countdown-"
+"timers/fonts/. Multisite thêm site-ID/ bên trong phông chữ/. Thư mục chỉ "
+"được tạo khi sao chép phông chữ, cài đặt quy tắc truy cập hoặc thủ công "
+"thông qua các công cụ lưu trữ của bạn."
+
+#: includes/class-email-countdown-timer-admin.php:123
+msgid "Polish"
+msgstr "Đánh bóng"
+
+#: includes/admin-view.php:128
+msgid "Preset applied. Review the fields and save explicitly."
+msgstr ""
+"Đã áp dụng giá trị đặt trước. Xem lại các trường và lưu một cách rõ ràng."
+
+#: includes/admin-view.php:122
+msgid ""
+"Presets apply colors and an available included font. Review the fields and "
+"save explicitly. If the preset font or FreeType is unavailable, your "
+"selected font is kept."
+msgstr ""
+"Các cài đặt trước áp dụng màu sắc và phông chữ đi kèm có sẵn. Xem lại các "
+"trường và lưu một cách rõ ràng. Nếu phông chữ cài sẵn hoặc FreeType không có"
+" sẵn thì phông chữ bạn đã chọn sẽ được giữ lại."
+
+#: includes/admin-view.php:194
+msgid "Preview and embedding"
+msgstr "Xem trước và nhúng"
+
+#: includes/admin-view.php:86
+msgid "Previous"
+msgstr "trước đó"
+
+#: includes/class-email-countdown-timer-status.php:127
+msgid "Public image test"
+msgstr "Kiểm tra hình ảnh công khai"
+
+#: includes/admin-view.php:30
+#: includes/class-email-countdown-timer-admin.php:198
+msgid "Quick Create"
+msgstr "Tạo nhanh"
+
+#: includes/class-email-countdown-timer-admin.php:255
+msgid ""
+"Quick Create needs a new timer and one of the listed appearance presets. "
+"Review the fields below before saving."
+msgstr ""
+"Tạo nhanh cần có bộ hẹn giờ mới và một trong các cài đặt trước về giao diện "
+"được liệt kê. Xem lại các trường bên dưới trước khi lưu."
+
+#: includes/class-email-countdown-timer-status.php:147
+msgid "Redacted troubleshooting report"
+msgstr "Báo cáo khắc phục sự cố được làm lại"
+
+#: assets/block-editor.js:138
+msgid "Refresh campaigns"
+msgstr "Làm mới chiến dịch"
+
+#: assets/block-editor.js:139
+msgid "Refresh preview"
+msgstr "Xem trước làm mới"
+
+#: assets/block-editor.js:155
+msgid "Refreshing campaigns…"
+msgstr "Đang làm mới chiến dịch…"
+
+#: includes/admin-view.php:173
+msgid "Remove End Image"
+msgstr "Xóa hình ảnh cuối"
+
+#: includes/class-email-countdown-timer-data-settings.php:85
+msgid "Rendering Diagnostics"
+msgstr "Kết xuất chẩn đoán"
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Report copied."
+msgstr "Đã sao chép báo cáo."
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Report selected. Copy it manually."
+msgstr "Đã chọn báo cáo. Sao chép nó bằng tay."
+
+#: includes/admin-view.php:77
+msgid "Restore"
+msgstr "Khôi phục"
+
+#: includes/admin-view.php:77
+msgid "Restore %s"
+msgstr "Khôi phục %s"
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"Restore the selected local font or choose an available font in the campaign "
+"editor, then inspect the image."
+msgstr ""
+"Khôi phục phông chữ cục bộ đã chọn hoặc chọn phông chữ có sẵn trong trình "
+"chỉnh sửa chiến dịch, sau đó kiểm tra hình ảnh."
+
+#: includes/class-email-countdown-timer-status.php:143
+msgid "Result of the requested public image test."
+msgstr "Kết quả kiểm tra hình ảnh công khai được yêu cầu."
+
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Resume countdown"
+msgstr "Tiếp tục đếm ngược"
+
+#: assets/block-editor.js:140
+msgid "Resume preview"
+msgstr "Tiếp tục xem trước"
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid ""
+"Retry a busy check. Otherwise ask your host about advisory locks and "
+"connection affinity."
+msgstr ""
+"Thử lại kiểm tra bận. Nếu không, hãy hỏi máy chủ của bạn về các khóa tư vấn "
+"và mối quan hệ kết nối."
+
+#: includes/admin-view.php:100
+msgid "Review the following fields. Your changes have not been saved."
+msgstr "Xem lại các trường sau. Những thay đổi của bạn chưa được lưu."
+
+#: includes/class-email-countdown-timer-privacy.php:12
+msgid ""
+"Review this suggestion against your hosting, email and optimization "
+"services. Add their actual logging, retention and processor details. Do not "
+"put personal data or recipient identifiers in public timer fields or image "
+"URLs."
+msgstr ""
+"Xem lại đề xuất này dựa trên các dịch vụ lưu trữ, email và tối ưu hóa của "
+"bạn. Thêm chi tiết ghi nhật ký, lưu giữ và xử lý thực tế của họ. Không đặt "
+"dữ liệu cá nhân hoặc mã nhận dạng người nhận vào các trường hẹn giờ công "
+"khai hoặc URL hình ảnh."
+
+#: assets/block-editor.js:128
+msgid "Right"
+msgstr "Phải"
+
+#: includes/class-email-countdown-timer-data-settings.php:119
+msgid ""
+"Rule installation was attempted without overwriting existing files. Check "
+"directory permissions and existing rules with your host; HTTP protection is "
+"not verified."
+msgstr ""
+"Đã thử cài đặt quy tắc mà không ghi đè lên các tệp hiện có. Kiểm tra quyền "
+"truy cập thư mục và các quy tắc hiện có với máy chủ của bạn; Bảo vệ HTTP "
+"chưa được xác minh."
+
+#: includes/class-email-countdown-timer-data-settings.php:114
+msgid ""
+"Rules are retained on uninstall because manually managed fonts may remain. "
+"Blocking downloads does not grant a font license; verify permission for "
+"server-side rendering."
+msgstr ""
+"Các quy tắc được giữ lại khi gỡ cài đặt vì các phông chữ được quản lý thủ "
+"công có thể vẫn còn. Chặn tải xuống không cấp giấy phép phông chữ; xác minh "
+"quyền hiển thị phía máy chủ."
+
+#: includes/class-email-countdown-timer-status.php:114
+msgid "Run local checks"
+msgstr "Chạy kiểm tra cục bộ"
+
+#: includes/admin-view.php:181
+msgid "Save Changes"
+msgstr "Lưu thay đổi"
+
+#: includes/class-email-countdown-timer-data-settings.php:82
+msgid "Save Data Settings"
+msgstr "Lưu cài đặt dữ liệu"
+
+#: includes/admin-view.php:195
+msgid "Saved Preview"
+msgstr "Bản xem trước đã lưu"
+
+#: includes/admin-view.php:200
+msgid "Saved countdown preview"
+msgstr "Đã lưu bản xem trước đếm ngược"
+
+#: includes/admin-view.php:52
+msgid "Saved timers, deadlines and actions"
+msgstr "Bộ hẹn giờ, thời hạn và hành động đã lưu"
+
+#: includes/admin-view.php:110
+msgid "Schedule"
+msgstr "Lịch trình"
+
+#: includes/admin-view.php:46
+msgid "Search"
+msgstr "Tìm kiếm"
+
+#: includes/admin-view.php:45
+msgid "Search names or timer IDs"
+msgstr "Tìm kiếm tên hoặc ID hẹn giờ"
+
+#: includes/admin-view.php:163
+msgid "Seconds"
+msgstr "Giây"
+
+#: includes/admin-view.php:224
+msgid "Select and copy manually."
+msgstr "Chọn và sao chép thủ công."
+
+#: includes/admin-view.php:196
+msgid "Shows the saved configuration, not unsaved changes. Save to update."
+msgstr ""
+"Hiển thị cấu hình đã lưu, không hiển thị các thay đổi chưa được lưu. Lưu để "
+"cập nhật."
+
+#: includes/class-email-countdown-timer-admin.php:125
+msgid "Spanish"
+msgstr "tiếng Tây Ban Nha"
+
+#: includes/admin-view.php:53
+msgid "Status"
+msgstr "Trạng thái"
+
+#: includes/class-email-countdown-timer-status.php:14
+#: includes/class-email-countdown-timer-status.php:14
+msgid "Status & Troubleshooting"
+msgstr "Trạng thái & Khắc phục sự cố"
+
+#: includes/class-email-countdown-timer-admin.php:235
+msgid "Stored timer data is invalid. Restore a backup before making changes."
+msgstr ""
+"Dữ liệu hẹn giờ được lưu trữ không hợp lệ. Khôi phục bản sao lưu trước khi "
+"thực hiện thay đổi."
+
+#: includes/class-email-countdown-timer-admin.php:163
+msgid ""
+"Stored with this campaign, independently of the WordPress language. Accented"
+" labels need a font with those characters, such as included Lato with "
+"FreeType."
+msgstr ""
+"Được lưu trữ cùng với chiến dịch này, độc lập với ngôn ngữ WordPress. Nhãn "
+"có dấu cần có phông chữ với các ký tự đó, chẳng hạn như Lato đi kèm với "
+"FreeType."
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Test a public image below; function availability alone does not verify "
+"codecs or hosting capacity."
+msgstr ""
+"Kiểm tra hình ảnh công khai bên dưới; Chỉ tính khả dụng của chức năng không "
+"xác minh được codec hoặc dung lượng lưu trữ."
+
+#: includes/class-email-countdown-timer-status.php:140
+msgid "Test public image"
+msgstr "Thử nghiệm hình ảnh công khai"
+
+#: includes/class-email-countdown-timer-status.php:131
+msgid "Testing public image…"
+msgstr "Đang thử nghiệm hình ảnh công khai…"
+
+#: includes/class-email-countdown-timer-status.php:134
+msgid "The 15-second limit was reached. Check host responsiveness and retry."
+msgstr ""
+"Đã đạt đến giới hạn 15 giây. Kiểm tra khả năng phản hồi của máy chủ và thử "
+"lại."
+
+#: includes/class-email-countdown-timer-admin.php:455
+msgid ""
+"The active bitmap fallback supports printable ASCII labels only. Select an "
+"available TTF/OTF with the required characters."
+msgstr ""
+"Dự phòng bitmap hoạt động chỉ hỗ trợ các nhãn ASCII có thể in được. Chọn một"
+" TTF/OTF có sẵn với các ký tự được yêu cầu."
+
+#: includes/admin-view.php:26
+msgid ""
+"The active renderer uses the bitmap fallback: fixed text sizes and printable"
+" ASCII labels. Select an available local TTF/OTF for scalable or "
+"multilingual text."
+msgstr ""
+"Trình kết xuất đang hoạt động sử dụng dự phòng bitmap: kích thước văn bản cố"
+" định và nhãn ASCII có thể in được. Chọn một TTF/OTF cục bộ có sẵn cho văn "
+"bản có thể mở rộng hoặc đa ngôn ngữ."
+
+#: includes/class-email-countdown-timer-status.php:50
+msgid "The advisory-lock check failed. Uncached images use static output."
+msgstr ""
+"Kiểm tra khóa tư vấn không thành công. Hình ảnh không được lưu trong bộ nhớ "
+"đệm sử dụng đầu ra tĩnh."
+
+#: includes/class-email-countdown-timer-status.php:132
+msgid ""
+"The anonymous image request loaded successfully. Test your real sender and "
+"recipients separately."
+msgstr ""
+"Yêu cầu hình ảnh ẩn danh được tải thành công. Kiểm tra người gửi và người "
+"nhận thực sự của bạn một cách riêng biệt."
+
+#: includes/class-email-countdown-timer-status.php:133
+msgid "The anonymous image test failed."
+msgstr "Thử nghiệm hình ảnh ẩn danh không thành công."
+
+#: includes/class-email-countdown-timer-status.php:138
+msgid ""
+"The browser could not decode the image. Check GD, image conversion and proxy"
+" caching."
+msgstr ""
+"Trình duyệt không thể giải mã hình ảnh. Kiểm tra GD, chuyển đổi hình ảnh và "
+"bộ nhớ đệm proxy."
+
+#: includes/class-email-countdown-timer-status.php:135
+msgid ""
+"The browser could not reach or read the response. Check the network, "
+"firewall and cross-host CORS access; this alone does not indicate a GD "
+"failure."
+msgstr ""
+"Trình duyệt không thể truy cập hoặc đọc phản hồi. Kiểm tra mạng, tường lửa "
+"và quyền truy cập CORS trên nhiều máy chủ; riêng điều này không cho thấy GD "
+"bị lỗi."
+
+#: includes/class-email-countdown-timer-status.php:128
+msgid ""
+"The button makes one anonymous request from this browser, without WordPress "
+"cookies. It does not test a remote network, email provider or recipient "
+"client. A different image hostname must allow browser CORS access for this "
+"test."
+msgstr ""
+"Nút thực hiện một yêu cầu ẩn danh từ trình duyệt này mà không có cookie "
+"WordPress. Nó không kiểm tra mạng từ xa, nhà cung cấp email hoặc ứng dụng "
+"khách người nhận. Tên máy chủ hình ảnh khác phải cho phép trình duyệt truy "
+"cập CORS cho thử nghiệm này."
+
+#: includes/class-email-countdown-timer-status.php:57
+msgid "The campaign ID is invalid or no longer saved."
+msgstr "ID chiến dịch không hợp lệ hoặc không còn được lưu."
+
+#: assets/block-editor.js:157
+msgid ""
+"The campaign list could not refresh. Check your connection and editor "
+"access, then try again. Your selection has been kept. If your session "
+"expired, save your work before reopening the editor."
+msgstr ""
+"Danh sách chiến dịch không thể làm mới. Hãy kiểm tra kết nối và quyền truy "
+"cập trình chỉnh sửa của bạn, sau đó thử lại. Lựa chọn của bạn đã được giữ. "
+"Nếu phiên của bạn hết hạn, hãy lưu tác phẩm của bạn trước khi mở lại trình "
+"chỉnh sửa."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid "The campaign selects built-in bitmap text."
+msgstr "Chiến dịch chọn văn bản bitmap tích hợp."
+
+#: assets/block-editor.js:159
+msgid ""
+"The countdown preview could not load. Check the timer and image cache "
+"settings."
+msgstr ""
+"Không thể tải bản xem trước đếm ngược. Kiểm tra cài đặt bộ hẹn giờ và bộ đệm"
+" hình ảnh."
+
+#: includes/class-email-countdown-timer-admin.php:423
+msgid "The database could not save this change. No success has been recorded."
+msgstr ""
+"Cơ sở dữ liệu không thể lưu thay đổi này. Không có thành công nào được ghi "
+"nhận."
+
+#: includes/class-email-countdown-timer-data-settings.php:105
+msgid ""
+"The database lock check failed. Ask your host to check advisory-lock support"
+" and connectivity. Uncached images use static output."
+msgstr ""
+"Kiểm tra khóa cơ sở dữ liệu không thành công. Yêu cầu máy chủ của bạn kiểm "
+"tra khả năng hỗ trợ và kết nối khóa tư vấn. Hình ảnh không được lưu trong bộ"
+" nhớ đệm sử dụng đầu ra tĩnh."
+
+#: includes/class-email-countdown-timer-status.php:48
+msgid "The diagnostic lock is busy."
+msgstr "Khóa chẩn đoán đang bận."
+
+#: includes/class-email-countdown-timer-data-settings.php:99
+msgid ""
+"The diagnostic lock is currently busy. Refresh this screen to check again."
+msgstr ""
+"Khóa chẩn đoán hiện đang bận. Hãy làm mới màn hình này để kiểm tra lại."
+
+#: includes/class-email-countdown-timer-status.php:139
+msgid ""
+"The endpoint returned an error pixel. Check the campaign configuration, GD "
+"and host capacity."
+msgstr ""
+"Điểm cuối trả về pixel lỗi. Kiểm tra cấu hình chiến dịch, GD và dung lượng "
+"máy chủ."
+
+#: assets/block-editor.js:132
+msgid "The first 250 timer IDs are listed. Enter another existing ID below."
+msgstr ""
+"250 ID hẹn giờ đầu tiên được liệt kê. Nhập một ID hiện có khác bên dưới."
+
+#: includes/class-email-countdown-timer-status.php:140
+msgid ""
+"The image target is invalid. Reload this screen and check the site home URL."
+msgstr ""
+"Mục tiêu hình ảnh không hợp lệ. Tải lại màn hình này và kiểm tra URL trang "
+"chủ của trang web."
+
+#: includes/class-email-countdown-timer-admin.php:353
+msgid ""
+"The original timer no longer exists or its ID was changed. Return to Timers."
+msgstr ""
+"Bộ hẹn giờ ban đầu không còn tồn tại hoặc ID của nó đã bị thay đổi. Trở lại "
+"Bộ đếm thời gian."
+
+#: includes/class-email-countdown-timer-status.php:136
+msgid ""
+"The public server rejected the request. Check the HTTP status in the report,"
+" public URL and firewall rules."
+msgstr ""
+"Máy chủ công cộng từ chối yêu cầu. Kiểm tra trạng thái HTTP trong báo cáo, "
+"URL công khai và quy tắc tường lửa."
+
+#: includes/class-email-countdown-timer-status.php:137
+msgid ""
+"The response is not a supported image. Check redirects, caching and firewall"
+" challenge pages."
+msgstr ""
+"Phản hồi không phải là hình ảnh được hỗ trợ. Kiểm tra các trang chuyển "
+"hướng, bộ nhớ đệm và tường lửa."
+
+#: includes/class-email-countdown-timer-status.php:70
+msgid "The saved campaign could not be validated."
+msgstr "Không thể xác thực chiến dịch đã lưu."
+
+#: includes/class-email-countdown-timer-admin.php:512
+msgid ""
+"The saved configuration contains invalid values. Review the fields before "
+"saving."
+msgstr ""
+"Cấu hình đã lưu chứa các giá trị không hợp lệ. Xem lại các trường trước khi "
+"lưu."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"The selected font is missing or FreeType is unavailable. Images fall back to"
+" bitmap text."
+msgstr ""
+"Phông chữ đã chọn bị thiếu hoặc FreeType không khả dụng. Hình ảnh quay trở "
+"lại văn bản bitmap."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"The selected local font resolves to a readable file with FreeType support."
+msgstr ""
+"Phông chữ cục bộ đã chọn sẽ phân giải thành tệp có thể đọc được với sự hỗ "
+"trợ FreeType."
+
+#: includes/class-email-countdown-timer-admin.php:506
+msgid ""
+"The source timer no longer exists. Return to Timers and choose another "
+"campaign."
+msgstr ""
+"Bộ hẹn giờ nguồn không còn tồn tại. Quay lại Bộ tính giờ và chọn một chiến "
+"dịch khác."
+
+#: includes/class-email-countdown-timer-admin.php:351
+msgid ""
+"This ID already exists. Edit the existing timer or choose a different ID."
+msgstr ""
+"ID này đã tồn tại. Chỉnh sửa bộ hẹn giờ hiện có hoặc chọn một ID khác."
+
+#: includes/admin-view.php:95
+msgid ""
+"This campaign is archived. Existing links still work. Saving changes keeps "
+"it archived; restore it from the Archived list."
+msgstr ""
+"Chiến dịch này đã được lưu trữ. Các liên kết hiện có vẫn hoạt động. Việc lưu"
+" các thay đổi sẽ giúp nó được lưu trữ; khôi phục nó từ danh sách lưu trữ."
+
+#: includes/class-email-countdown-timer-data-settings.php:102
+msgid ""
+"This database interface does not support the configured session-lock "
+"mechanism. Uncached images use static output."
+msgstr ""
+"Giao diện cơ sở dữ liệu này không hỗ trợ cơ chế khóa phiên đã định cấu hình."
+" Hình ảnh không được lưu trong bộ nhớ đệm sử dụng đầu ra tĩnh."
+
+#: includes/class-email-countdown-timer-status.php:49
+msgid ""
+"This database interface does not support the session-lock mechanism. "
+"Uncached images use static output."
+msgstr ""
+"Giao diện cơ sở dữ liệu này không hỗ trợ cơ chế khóa phiên. Hình ảnh không "
+"được lưu trong bộ nhớ đệm sử dụng đầu ra tĩnh."
+
+#: includes/class-email-countdown-timer-admin.php:462
+msgid ""
+"This font, text and size combination cannot be rendered. Check the font and "
+"reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels "
+"total."
+msgstr ""
+"Không thể hiển thị kết hợp phông chữ, văn bản và kích thước này. Kiểm tra "
+"phông chữ và giảm kích thước hoặc chiều rộng văn bản. Tối đa: 4000 x 1000 "
+"pixel và tổng cộng 400000 pixel."
+
+#: includes/class-ecd-plugin.php:54
+msgid ""
+"This form version is no longer supported. Reload Tickloom Countdown Timers "
+"and use the current editor. No timer data was changed."
+msgstr ""
+"Phiên bản biểu mẫu này không còn được hỗ trợ. Tải lại Tickloom Countdown "
+"Timers và sử dụng trình chỉnh sửa hiện tại. Không có dữ liệu hẹn giờ nào "
+"được thay đổi."
+
+#: assets/block-editor.js:158
+msgid ""
+"This timer is no longer in the saved list. Choose another timer or refresh "
+"campaigns. A deleted timer displays nothing on the website."
+msgstr ""
+"Bộ hẹn giờ này không còn trong danh sách đã lưu. Chọn một bộ đếm thời gian "
+"khác hoặc làm mới các chiến dịch. Đồng hồ hẹn giờ đã xóa không hiển thị gì "
+"trên trang web."
+
+#: includes/class-email-countdown-timer-admin.php:342
+msgid "This timer name is already used. Choose a different name."
+msgstr "Tên bộ hẹn giờ này đã được sử dụng. Chọn một tên khác."
+
+#: includes/class-email-countdown-timer-admin.php:503
+msgid "This timer no longer exists. Return to Timers to create a new one."
+msgstr ""
+"Bộ hẹn giờ này không còn tồn tại. Quay lại Bộ hẹn giờ để tạo bộ hẹn giờ mới."
+
+#: includes/admin-view.php:12 includes/class-ecd-plugin.php:27
+#: includes/class-ecd-plugin.php:27
+#: includes/class-email-countdown-timer-admin.php:183 blocks/timer/block.json
+msgid "Tickloom Countdown Timers"
+msgstr "Tickloom Countdown Timers"
+
+#: includes/class-email-countdown-timer-data-settings.php:62
+msgid "Tickloom Countdown Timers: Data Settings"
+msgstr "Tickloom Countdown Timers: Cài đặt dữ liệu"
+
+#: includes/class-email-countdown-timer-status.php:97
+msgid "Tickloom Countdown Timers: Status & Troubleshooting"
+msgstr "Đồng hồ đếm ngược Tickloom: Trạng thái & Khắc phục sự cố"
+
+#: email-countdown-timer.php:21
+msgid ""
+"Tickloom cannot start while an older copy of this countdown plugin is "
+"active. Back up your fonts and deactivate the old copy before activating "
+"Tickloom."
+msgstr ""
+"Tickloom không thể bắt đầu khi bản sao cũ hơn của plugin đếm ngược này đang "
+"hoạt động. Sao lưu phông chữ của bạn và hủy kích hoạt bản sao cũ trước khi "
+"kích hoạt Tickloom."
+
+#: includes/class-email-countdown-timer-admin.php:573
+msgid "Time Zone"
+msgstr "Múi giờ"
+
+#: assets/block-editor.js:111
+msgid "Timer"
+msgstr "ID bộ hẹn giờ"
+
+#: assets/block-editor.js:133
+msgid "Timer ID"
+msgstr "ID hẹn giờ"
+
+#: includes/admin-view.php:19
+msgid "Timer archived. Existing website and email links still work."
+msgstr ""
+"Đã lưu trữ bộ hẹn giờ. Các liên kết trang web và email hiện tại vẫn hoạt "
+"động."
+
+#: includes/admin-view.php:19
+msgid "Timer deleted."
+msgstr "Đã xóa bộ hẹn giờ."
+
+#: includes/admin-view.php:53 includes/admin-view.php:111
+#: includes/class-email-countdown-timer-admin.php:144
+msgid "Timer name"
+msgstr "Tên hẹn giờ"
+
+#: includes/admin-view.php:84
+msgid "Timer pages"
+msgstr "Trang hẹn giờ"
+
+#: includes/admin-view.php:19
+msgid "Timer restored to the main list."
+msgstr "Hẹn giờ được khôi phục vào danh sách chính."
+
+#: includes/admin-view.php:19
+msgid "Timer saved."
+msgstr "Đã lưu bộ hẹn giờ."
+
+#: includes/admin-view.php:15
+msgid "Timers"
+msgstr "Bộ hẹn giờ"
+
+#: includes/admin-view.php:38
+msgid "Timers (%d)"
+msgstr "Bộ hẹn giờ (%d)"
+
+#: includes/class-email-countdown-timer-status.php:149
+msgid "Troubleshooting report"
+msgstr "Báo cáo khắc phục sự cố"
+
+#: includes/admin-view.php:137
+msgid "Typography and Size"
+msgstr "Kiểu chữ và kích thước"
+
+#: includes/admin-view.php:141
+msgid "Unavailable: %s (keep saved value)"
+msgstr "Không có sẵn: %s (giữ giá trị đã lưu)"
+
+#: includes/class-email-countdown-timer-data-settings.php:71
+msgid "Uninstall policy"
+msgstr "Chính sách gỡ cài đặt"
+
+#: includes/class-email-countdown-timer-admin.php:62
+msgid "Unnamed timer"
+msgstr "Bộ hẹn giờ không tên"
+
+#: includes/class-email-countdown-timer-admin.php:62
+#: includes/class-email-countdown-timer-block.php:129
+msgid "Unnamed timer (%s)"
+msgstr "Bộ hẹn giờ không tên (%s)"
+
+#: includes/class-email-countdown-timer-admin.php:210
+msgid ""
+"Up to five timers are shown in ID order. Open All timers to search or edit "
+"any campaign."
+msgstr ""
+"Tối đa năm bộ hẹn giờ được hiển thị theo thứ tự ID. Mở Tất cả bộ tính giờ để"
+" tìm kiếm hoặc chỉnh sửa bất kỳ chiến dịch nào."
+
+#: includes/admin-view.php:172
+msgid "Use This Image"
+msgstr "Sử dụng hình ảnh này"
+
+#: includes/class-email-countdown-timer-data-settings.php:129
+msgid ""
+"Use a persistent uploads directory for trusted static TTF/OTF files. No "
+"Google connection or browser upload is provided."
+msgstr ""
+"Sử dụng thư mục tải lên liên tục cho các tệp TTF/OTF tĩnh đáng tin cậy. "
+"Không có kết nối Google hoặc tải lên trình duyệt nào được cung cấp."
+
+#: includes/class-email-countdown-timer-admin.php:394
+msgid "Use a whole attachment ID, or 0 for no end image."
+msgstr "Sử dụng toàn bộ ID tệp đính kèm hoặc 0 nếu không có hình ảnh cuối."
+
+#: includes/class-email-countdown-timer-admin.php:373
+msgid "Use at most 1000 bytes for alternative text."
+msgstr "Sử dụng tối đa 1000 byte cho văn bản thay thế."
+
+#: includes/class-email-countdown-timer-admin.php:369
+msgid "Use at most 256 bytes for this label."
+msgstr "Sử dụng tối đa 256 byte cho nhãn này."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid ""
+"Use available local fonts with FreeType, or printable ASCII bitmap labels. "
+"Check the actual image for glyph coverage."
+msgstr ""
+"Sử dụng phông chữ cục bộ có sẵn với FreeType hoặc nhãn bitmap ASCII có thể "
+"in được. Kiểm tra hình ảnh thực tế để biết mức độ bao phủ của glyph."
+
+#: includes/class-ecd-config.php:71
+msgid "Use plain alternative text (maximum 1000 bytes)."
+msgstr "Sử dụng văn bản thay thế thuần túy (tối đa 1000 byte)."
+
+#: includes/class-email-countdown-timer-admin.php:328
+msgid "Use plain text for the timer name, up to 200 bytes."
+msgstr "Sử dụng văn bản thuần túy cho tên bộ hẹn giờ, tối đa 200 byte."
+
+#: includes/class-email-countdown-timer-font-access.php:68
+msgid "Use the font access form."
+msgstr "Sử dụng biểu mẫu truy cập phông chữ."
+
+#: includes/class-email-countdown-timer-fonts.php:335
+msgid "Use the font copy form."
+msgstr "Sử dụng mẫu sao chép phông chữ."
+
+#: includes/class-email-countdown-timer-data-settings.php:40
+msgid "Use the settings form to make this change."
+msgstr "Sử dụng biểu mẫu cài đặt để thực hiện thay đổi này."
+
+#: includes/class-email-countdown-timer-admin.php:228
+msgid "Use the timer form to make this change."
+msgstr "Sử dụng biểu mẫu hẹn giờ để thực hiện thay đổi này."
+
+#: assets/block-editor.js:134
+msgid "Use timer ID"
+msgstr "Sử dụng ID hẹn giờ"
+
+#: includes/class-email-countdown-timer-admin.php:103
+msgid "Valentine's Day"
+msgstr "Ngày lễ tình nhân"
+
+#: includes/class-ecd-config.php:46
+msgid "Value outside the safe range: %s"
+msgstr "Giá trị ngoài phạm vi an toàn: %s"
+
+#: includes/class-email-countdown-timer-admin.php:99
+msgid "Warm"
+msgstr "Ấm"
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Warning"
+msgstr "Cảnh báo"
+
+#: includes/class-email-countdown-timer-privacy.php:13
+msgid ""
+"We serve countdown images from our WordPress server. The countdown plugin "
+"does not set tracking cookies, count individual views or email opens, "
+"profile visitors, or send telemetry to its developer. It stores "
+"administrator-entered timer settings and temporary shared image caches "
+"locally."
+msgstr ""
+"Chúng tôi phục vụ hình ảnh đếm ngược từ máy chủ WordPress của chúng tôi. "
+"Plugin đếm ngược không đặt cookie theo dõi, đếm số lượt xem riêng lẻ hoặc số"
+" lần mở email, khách truy cập hồ sơ hoặc gửi dữ liệu đo từ xa cho nhà phát "
+"triển của nó. Nó lưu trữ cục bộ cài đặt hẹn giờ do quản trị viên nhập và bộ "
+"đệm hình ảnh được chia sẻ tạm thời."
+
+#: includes/admin-view.php:214
+msgid "Website"
+msgstr "Trang web"
+
+#: includes/admin-view.php:216
+msgid "Website Shortcode"
+msgstr "Mã ngắn trang web"
+
+#: assets/block-editor.js:116
+msgid "Website display"
+msgstr "Hiển thị trang web"
+
+#: includes/class-email-countdown-timer-admin.php:107
+msgid "Wedding"
+msgstr "Lễ cưới"
+
+#: includes/class-email-countdown-timer-data-settings.php:135
+msgid ""
+"With uninstall cleanup enabled, only unchanged files created by this copy "
+"tool are removed. Manually uploaded or subsequently replaced files remain; "
+"shared directories are never recursively deleted."
+msgstr ""
+"Khi bật tính năng dọn dẹp gỡ cài đặt, chỉ các tệp không thay đổi được tạo "
+"bởi công cụ sao chép này mới bị xóa. Các tập tin được tải lên thủ công hoặc "
+"được thay thế sau đó vẫn còn; thư mục chia sẻ không bao giờ bị xóa đệ quy."
+
+#: includes/class-email-countdown-timer-live.php:40
+msgid ""
+"Without JavaScript, these digits are a snapshot. Use the deadline above for "
+"the exact end time."
+msgstr ""
+"Không có JavaScript, các chữ số này chỉ là ảnh chụp nhanh. Sử dụng thời hạn "
+"trên để biết thời gian kết thúc chính xác."
+
+#: includes/class-email-countdown-timer-data-settings.php:36
+msgid "You are not allowed to change these settings."
+msgstr "Bạn không được phép thay đổi các cài đặt này."
+
+#: includes/class-email-countdown-timer-font-access.php:62
+msgid "You are not allowed to manage font access."
+msgstr "Bạn không được phép quản lý quyền truy cập phông chữ."
+
+#: includes/class-email-countdown-timer-fonts.php:331
+msgid "You are not allowed to manage fonts."
+msgstr "Bạn không được phép quản lý phông chữ."
+
+#: includes/class-email-countdown-timer-admin.php:224
+msgid "You are not allowed to manage timers."
+msgstr "Bạn không được phép quản lý bộ hẹn giờ."
+
+#: includes/admin-view.php:35
+msgid "Your Timers"
+msgstr "Bộ hẹn giờ của bạn"
+
+#: blocks/timer/block.json
+msgid "campaign"
+msgstr "chiến dịch"
+
+#: blocks/timer/block.json
+msgid "countdown"
+msgstr "đếm ngược"
+
+#: blocks/timer/block.json
+msgid "timer"
+msgstr "bộ hẹn giờ"
