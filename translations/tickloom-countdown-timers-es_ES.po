@@ -1,0 +1,2044 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Tickloom Countdown Timers 12.9.2\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: includes/admin-view.php:148
+msgid ""
+"0 means automatic. This sets a minimum width, not image scaling. Height "
+"follows content with padding."
+msgstr ""
+"0 significa automático. Esto establece un ancho mínimo, no una escala de "
+"imagen. La altura sigue al contenido con relleno."
+
+#: includes/class-email-countdown-timer-status.php:47
+msgid ""
+"A zero-wait database advisory lock was acquired; its cleanup was requested "
+"immediately."
+msgstr ""
+"Se adquirió un bloqueo de aviso de base de datos de espera cero; Se solicitó"
+" su limpieza de inmediato."
+
+#: includes/admin-view.php:178
+msgid "Accessibility"
+msgstr "Accesibilidad"
+
+#: includes/admin-view.php:53
+msgid "Actions"
+msgstr "Comportamiento"
+
+#: includes/admin-view.php:58
+msgid "Active"
+msgstr "Activo"
+
+#: assets/block-editor.js:162
+msgid "Active countdown preview"
+msgstr "Vista previa de cuenta regresiva activa"
+
+#: includes/admin-view.php:169
+msgid "After Countdown"
+msgstr "Después de la cuenta regresiva"
+
+#: assets/block-editor.js:124
+msgid "Alignment"
+msgstr "Alineación"
+
+#: includes/class-email-countdown-timer-admin.php:212
+msgid "All timers"
+msgstr "Todos los temporizadores"
+
+#: includes/admin-view.php:164
+msgid "An empty label is allowed. Maximum 256 bytes."
+msgstr "Se permite una etiqueta vacía. Máximo 256 bytes."
+
+#: includes/class-email-countdown-timer-data-settings.php:113
+msgid ""
+"Apache must allow the Require directive in .htaccess. nginx ignores "
+".htaccess and needs a host-managed location rule. Writing these files does "
+"not verify protection: ask your host to check that direct GET and HEAD font "
+"requests are denied while timer images still work. No remote probe is "
+"performed."
+msgstr ""
+"Apache debe permitir la directiva Require en .htaccess. nginx ignora "
+".htaccess y necesita una regla de ubicación administrada por el host. "
+"Escribir estos archivos no verifica la protección: solicite a su host que "
+"verifique que las solicitudes directas de fuentes GET y HEAD sean rechazadas"
+" mientras las imágenes del temporizador aún funcionen. No se realiza ninguna"
+" sonda remota."
+
+#: includes/admin-view.php:120
+msgid "Appearance"
+msgstr "Apariencia"
+
+#: includes/admin-view.php:123
+msgid "Appearance presets"
+msgstr "Ajustes preestablecidos de apariencia"
+
+#: includes/admin-view.php:145 includes/admin-view.php:146
+msgid "Applies to a local TTF/OTF font."
+msgstr "Se aplica a una fuente local TTF/OTF."
+
+#: includes/admin-view.php:158
+msgid "Apply label preset"
+msgstr "Aplicar etiqueta preestablecida"
+
+#: includes/admin-view.php:159
+msgid ""
+"Apply replaces only the four label fields. Review and save to keep the "
+"changes. Existing labels never follow the admin language. Accents require an"
+" appropriate local font; bitmap supports printable ASCII only."
+msgstr ""
+"Aplicar reemplaza solo los cuatro campos de etiqueta. Revise y guarde para "
+"conservar los cambios. Las etiquetas existentes nunca siguen el idioma del "
+"administrador. Los acentos requieren una fuente local apropiada; El mapa de "
+"bits solo admite ASCII imprimible."
+
+#: includes/admin-view.php:77
+msgid "Archive"
+msgstr "Archivo"
+
+#: includes/admin-view.php:77
+msgid "Archive %s"
+msgstr "Archivo %s"
+
+#: includes/admin-view.php:63
+msgid "Archived"
+msgstr "Archivado"
+
+#: includes/admin-view.php:39
+msgid "Archived (%d)"
+msgstr "Archivado (%d)"
+
+#: includes/admin-view.php:41
+msgid ""
+"Archiving hides a campaign from this list and the dashboard. Existing links "
+"and Gutenberg selections still work. Restore it from Archived; deletion "
+"remains a separate action."
+msgstr ""
+"Archiving oculta una campaña de esta lista y del panel. Los enlaces "
+"existentes y las selecciones Gutenberg aún funcionan. Restaurarlo desde "
+"Archivado; la eliminación sigue siendo una acción separada."
+
+#: assets/block-editor.js:153
+msgid ""
+"Ask a site administrator to create a campaign, then refresh the campaign "
+"list."
+msgstr ""
+"Solicite a un administrador del sitio que cree una campaña y luego actualice"
+" la lista de campañas."
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Ask your host to enable GD with PNG/GIF support, then test a public image "
+"below."
+msgstr ""
+"Pídale a su anfitrión que habilite GD con soporte PNG/GIF, luego pruebe una "
+"imagen pública a continuación."
+
+#: includes/admin-view.php:181
+msgid "Back to Timers"
+msgstr "Volver a Temporizadores"
+
+#: includes/admin-view.php:131
+msgid "Background"
+msgstr "Fondo"
+
+#: includes/class-email-countdown-timer-fonts.php:44
+msgid "Barlow Condensed Black (included)"
+msgstr "Barlow Condensado Negro (incluido)"
+
+#: includes/class-email-countdown-timer-fonts.php:47
+msgid "Barlow Condensed Regular (included)"
+msgstr "Barlow Condensado Regular (incluido)"
+
+#: includes/class-email-countdown-timer-data-settings.php:134
+msgid ""
+"Before the first upgrade from an older version, back up or copy plugin-local"
+" fonts manually: this version cannot recover files already deleted by an "
+"earlier updater. On multisite, prepare each site before a network update."
+msgstr ""
+"Antes de la primera actualización desde una versión anterior, haga una copia"
+" de seguridad o copie las fuentes locales del complemento manualmente: esta "
+"versión no puede recuperar archivos ya eliminados por un actualizador "
+"anterior. En sitios múltiples, prepare cada sitio antes de una actualización"
+" de la red."
+
+#: includes/class-email-countdown-timer-admin.php:106
+msgid "Birthday"
+msgstr "Cumpleaños"
+
+#: includes/class-email-countdown-timer-admin.php:105
+msgid "Black Friday"
+msgstr "viernes negro"
+
+#: includes/class-email-countdown-timer-status.php:101
+msgid "Campaign ID (optional)"
+msgstr "ID de campaña (opcional)"
+
+#: includes/class-email-countdown-timer-status.php:54
+#: includes/class-email-countdown-timer-status.php:57
+#: includes/class-email-countdown-timer-status.php:68
+#: includes/class-email-countdown-timer-status.php:70
+msgid "Campaign font"
+msgstr "Fuente de campaña"
+
+#: assets/block-editor.js:156
+msgid "Campaign list updated."
+msgstr "Lista de campañas actualizada."
+
+#: includes/admin-view.php:37
+msgid "Campaign lists"
+msgstr "Listas de campaña"
+
+#: includes/admin-view.php:239
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: assets/block-editor.js:127
+msgid "Center"
+msgstr "Centro"
+
+#: includes/class-email-countdown-timer-status.php:98
+msgid ""
+"Checks run only when requested. They do not change campaigns or settings, "
+"send a report, or run background image requests."
+msgstr ""
+"Las comprobaciones se ejecutan solo cuando se solicitan. No cambian campañas"
+" ni configuraciones, no envían informes ni ejecutan solicitudes de imágenes "
+"de fondo."
+
+#: includes/admin-view.php:133
+msgid "Choose %s color"
+msgstr "Elige el color %s"
+
+#: includes/admin-view.php:172
+msgid "Choose Image"
+msgstr "Elegir imagen"
+
+#: includes/admin-view.php:154
+msgid "Choose a label preset"
+msgstr "Elija una etiqueta preestablecida"
+
+#: includes/admin-view.php:176
+msgid ""
+"Choose a public image: Media Library and end-only timer URLs can expose it "
+"before the deadline. Standard image/email output switches at expiry. It is "
+"fitted to the timer canvas without stretching; use a similar aspect ratio "
+"for a readable result. New expired requests and GIF frames crossing the "
+"deadline show it. Email caches can retain an earlier image; a GIF already "
+"frozen after its 60 seconds cannot refresh itself. Keep the deadline in text"
+" and choose alt text suitable for both states."
+msgstr ""
+"Elija una imagen pública: la biblioteca multimedia y las URL del "
+"temporizador de finalización pueden exponerla antes de la fecha límite. La "
+"salida de imagen/correo electrónico estándar cambia al vencimiento. Se "
+"ajusta a la lona del temporizador sin estirar; utilice una relación de "
+"aspecto similar para obtener un resultado legible. Las nuevas solicitudes "
+"caducadas y los fotogramas GIF que superan la fecha límite lo demuestran. "
+"Los cachés de correo electrónico pueden conservar una imagen anterior; un "
+"GIF que ya está congelado después de 60 segundos no puede actualizarse. "
+"Mantenga la fecha límite en texto y elija texto alternativo adecuado para "
+"ambos estados."
+
+#: assets/block-editor.js:150
+msgid "Choose a saved timer in the block settings sidebar."
+msgstr ""
+"Elija un temporizador guardado en la barra lateral de configuración del "
+"bloque."
+
+#: assets/block-editor.js:113
+msgid ""
+"Choose a saved timer. After creating a campaign in another tab, select "
+"Refresh campaigns."
+msgstr ""
+"Elija un temporizador guardado. Después de crear una campaña en otra "
+"pestaña, seleccione Actualizar campañas."
+
+#: includes/class-email-countdown-timer-admin.php:576
+msgid "Choose a time zone"
+msgstr "Elige una zona horaria"
+
+#: includes/admin-view.php:31
+msgid ""
+"Choose a unique timer name, deadline and preset. Create the timer to get "
+"website and email embeds; you can fine-tune every setting afterwards."
+msgstr ""
+"Elija un nombre de temporizador, una fecha límite y un ajuste preestablecido"
+" únicos. Cree el temporizador para insertar sitios web y correos "
+"electrónicos; puedes ajustar cada configuración después."
+
+#: includes/class-ecd-config.php:78
+msgid "Choose a valid end image attachment ID."
+msgstr "Elija una ID de archivo adjunto de imagen final válida."
+
+#: includes/admin-view.php:172
+msgid "Choose an End Image"
+msgstr "Elija una imagen final"
+
+#: includes/class-email-countdown-timer-admin.php:391
+msgid ""
+"Choose an accessible local JPEG, PNG, GIF or WebP from the Media Library (up"
+" to 4 MiB and 4 million pixels), or use 0 for no end image."
+msgstr ""
+"Elija un JPEG local accesible, PNG, GIF o WebP de la biblioteca multimedia "
+"(hasta 4 MiB y 4 millones de píxeles), o utilice 0 para no tener una imagen "
+"final."
+
+#: includes/class-email-countdown-timer-status.php:57
+msgid "Choose an existing campaign and try again."
+msgstr "Elija una campaña existente e inténtelo de nuevo."
+
+#: includes/class-email-countdown-timer-admin.php:307
+msgid "Choose an existing timer to archive or restore."
+msgstr "Elija un temporizador existente para archivarlo o restaurarlo."
+
+#: includes/class-email-countdown-timer-admin.php:265
+msgid "Choose one of the listed countdown label languages."
+msgstr "Elija uno de los idiomas de etiquetas de cuenta regresiva enumerados."
+
+#: includes/class-email-countdown-timer-admin.php:100
+msgid "Christmas"
+msgstr "Navidad"
+
+#: includes/class-email-countdown-timer-admin.php:96
+msgid "Classic"
+msgstr "Clásico"
+
+#: includes/admin-view.php:130
+msgid "Colors"
+msgstr "Bandera"
+
+#: includes/class-email-countdown-timer-admin.php:157
+msgid ""
+"Colors and an included font for each occasion. Bitmap is used if the font or"
+" FreeType is unavailable."
+msgstr ""
+"Colores y fuente incluida para cada ocasión. Se utiliza mapa de bits si la "
+"fuente o FreeType no está disponible."
+
+#: includes/class-email-countdown-timer-admin.php:318
+msgid "Confirm deletion of an existing timer."
+msgstr "Confirmar la eliminación de un temporizador existente."
+
+#: includes/admin-view.php:136
+msgid ""
+"Contrast on background: digits {digits}:1; labels {labels}:1. Aim for at "
+"least 4.5:1. Colors are not changed automatically."
+msgstr ""
+"Contraste en el fondo: dígitos {dígitos}:1; etiquetas {etiquetas}:1. Apunte "
+"a al menos 4,5:1. Los colores no se cambian automáticamente."
+
+#: includes/admin-view.php:217 includes/admin-view.php:224
+#: includes/admin-view.php:230 includes/admin-view.php:232
+msgid "Copied to clipboard."
+msgstr "Copiado al portapapeles."
+
+#: includes/class-email-countdown-timer-data-settings.php:142
+msgid ""
+"Copied: %1$d. Skipped or conflicting: %2$d. Original files are unchanged."
+msgstr ""
+"Copiado: %1$d. Omitido o en conflicto: %2$d. Los archivos originales no se "
+"modifican."
+
+#: includes/admin-view.php:230
+msgid "Copy Email HTML"
+msgstr "Copiar correo electrónico HTML"
+
+#: includes/class-email-countdown-timer-data-settings.php:147
+msgid "Copy Legacy Fonts to Persistent Storage"
+msgstr "Copie fuentes heredadas en almacenamiento persistente"
+
+#: includes/admin-view.php:224
+msgid "Copy iframe HTML"
+msgstr "Copiar marco flotante HTML"
+
+#: includes/admin-view.php:232
+msgid "Copy image URL"
+msgstr "Copiar URL de imagen"
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Copy report"
+msgstr "Copiar informe"
+
+#: includes/admin-view.php:217
+msgid "Copy shortcode"
+msgstr "Copiar código corto"
+
+#: includes/admin-view.php:217 includes/admin-view.php:230
+#: includes/admin-view.php:232
+msgid ""
+"Copy was unavailable. The code is selected; use your keyboard or device copy"
+" command."
+msgstr ""
+"La copia no estaba disponible. El código está seleccionado; use el comando "
+"de copia de su teclado o dispositivo."
+
+#: includes/admin-view.php:93
+msgid ""
+"Copying %s into a new, unsaved campaign. Review the new ID and deadline, "
+"then create it. The original campaign is unchanged."
+msgstr ""
+"Copiando %s en una campaña nueva no guardada. Revise el nuevo ID y la fecha "
+"límite, luego créelo. La campaña original no ha cambiado."
+
+#: includes/class-email-countdown-timer-data-settings.php:133
+msgid ""
+"Copying preserves original files and timer names, never overwrites a "
+"different file, and processes at most 50 new files per request (5 MiB each)."
+" A same-name plugin-local file takes precedence while the old copy remains "
+"installed. Fonts in the previous uploads directory remain available. Copy "
+"font license notices manually."
+msgstr ""
+"La copia conserva los archivos originales y los nombres de los "
+"temporizadores, nunca sobrescribe un archivo diferente y procesa como máximo"
+" 50 archivos nuevos por solicitud (5 MiB cada uno). Un archivo local de "
+"complemento con el mismo nombre tiene prioridad mientras la copia anterior "
+"permanece instalada. Las fuentes del directorio de cargas anteriores siguen "
+"estando disponibles. Copie los avisos de licencia de fuentes manualmente."
+
+#: assets/block-editor.js:107 includes/class-ecd-plugin.php:75
+#: includes/class-email-countdown-timer-frame.php:119
+#: includes/class-email-countdown-timer-live.php:23
+msgid "Countdown"
+msgstr "Cuenta atrás"
+
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Countdown ended"
+msgstr "Cuenta regresiva finalizada"
+
+#: includes/admin-view.php:209
+msgid "Countdown ends %s"
+msgstr "Finaliza la cuenta atrás %s"
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Countdown image generation is unavailable. Live text blocks can still work."
+msgstr ""
+"La generación de imágenes de cuenta regresiva no está disponible. Los "
+"bloques de texto en vivo aún pueden funcionar."
+
+#: includes/class-email-countdown-timer-frame.php:140
+msgid "Countdown is temporarily unavailable."
+msgstr "La cuenta regresiva no está disponible temporalmente."
+
+#: includes/admin-view.php:152
+#: includes/class-email-countdown-timer-admin.php:158
+msgid "Countdown label language"
+msgstr "Idioma de la etiqueta de cuenta regresiva"
+
+#: includes/admin-view.php:14
+msgid "Countdown navigation"
+msgstr "Navegación de cuenta regresiva"
+
+#: includes/class-email-countdown-timer-admin.php:152
+msgid "Countdown preset"
+msgstr "Cuenta regresiva preestablecida"
+
+#: includes/admin-view.php:201
+msgid ""
+"Countdown preview is unavailable. Reload or check rendering diagnostics."
+msgstr ""
+"La vista previa de la cuenta regresiva no está disponible. Vuelva a cargar o"
+" verifique los diagnósticos de renderizado."
+
+#: includes/admin-view.php:222
+#: includes/class-email-countdown-timer-frame.php:124
+msgid "Countdown timer"
+msgstr "Temporizador de cuenta regresiva"
+
+#: includes/admin-view.php:36 includes/admin-view.php:181
+msgid "Create Timer"
+msgstr "Crear temporizador"
+
+#: assets/block-editor.js:154
+msgid "Create a campaign (new tab)"
+msgstr "Crear una campaña (nueva pestaña)"
+
+#: includes/class-email-countdown-timer-admin.php:199
+msgid ""
+"Create a timer from a color preset, then fine-tune it and copy your embeds "
+"in the full editor."
+msgstr ""
+"Cree un temporizador a partir de un ajuste preestablecido de color, luego "
+"ajústelo y copie sus incrustaciones en el editor completo."
+
+#: includes/admin-view.php:13
+msgid "Create countdown images for your website and email campaigns."
+msgstr ""
+"Cree imágenes de cuenta regresiva para su sitio web y campañas de correo "
+"electrónico."
+
+#: includes/admin-view.php:203
+msgid "Create this timer to see its image and embed codes."
+msgstr "Cree este temporizador para ver su imagen y códigos de inserción."
+
+#: includes/class-email-countdown-timer-admin.php:165
+msgid "Create timer"
+msgstr "Crear temporizador"
+
+#: assets/block-editor.js:153
+msgid ""
+"Create your first campaign in Tickloom Countdown Timers, then return here "
+"and refresh the campaign list."
+msgstr ""
+"Cree su primera campaña en Tickloom Countdown Timers, luego regrese aquí y "
+"actualice la lista de campañas."
+
+#: includes/class-email-countdown-timer-fonts.php:48
+msgid "Crimson Text Regular (included)"
+msgstr "Texto carmesí regular (incluido)"
+
+#: includes/admin-view.php:150
+msgid "Custom Labels"
+msgstr "Etiquetas personalizadas"
+
+#: includes/admin-view.php:16
+#: includes/class-email-countdown-timer-data-settings.php:21
+#: includes/class-email-countdown-timer-data-settings.php:22
+msgid "Data Settings"
+msgstr "Configuración de datos"
+
+#: includes/class-email-countdown-timer-data-settings.php:65
+msgid "Data settings saved. No timer data has been deleted."
+msgstr ""
+"Configuración de datos guardada. No se han eliminado datos del temporizador."
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid "Database locking"
+msgstr "Bloqueo de base de datos"
+
+#: includes/class-email-countdown-timer-data-settings.php:96
+msgid "Database locking is available."
+msgstr "El bloqueo de la base de datos está disponible."
+
+#: includes/admin-view.php:114
+msgid "Date and time in the time zone below, including seconds."
+msgstr "Fecha y hora en la zona horaria siguiente, incluidos los segundos."
+
+#: includes/admin-view.php:163
+msgid "Days"
+msgstr "Días"
+
+#: email-countdown-timer.php:24
+msgid ""
+"Deactivate the older countdown plugin before activating Tickloom. Keep the "
+"old copy if you still need its data or fonts."
+msgstr ""
+"Desactive el antiguo complemento de cuenta regresiva antes de activar "
+"Tickloom. Conserve la copia anterior si aún necesita sus datos o fuentes."
+
+#: includes/admin-view.php:114
+#: includes/class-email-countdown-timer-admin.php:148
+msgid "Deadline"
+msgstr "Fecha límite"
+
+#: includes/admin-view.php:53
+msgid "Deadline / Time Zone"
+msgstr "Fecha límite / Zona horaria"
+
+#: includes/class-email-countdown-timer-frame.php:129
+#: includes/class-email-countdown-timer-live.php:38
+msgid "Deadline:"
+msgstr "Fecha límite:"
+
+#: includes/admin-view.php:140
+msgid "Default bitmap font"
+msgstr "Fuente de mapa de bits predeterminada"
+
+#: includes/admin-view.php:184
+msgid "Delete Timer"
+msgstr "Eliminar temporizador"
+
+#: includes/admin-view.php:239
+msgid "Delete Timer?"
+msgstr "¿Eliminar temporizador?"
+
+#: includes/class-email-countdown-timer-data-settings.php:74
+msgid "Delete all plugin data when uninstalling"
+msgstr "Eliminar todos los datos del complemento al desinstalar"
+
+#: includes/admin-view.php:189 includes/admin-view.php:239
+msgid "Delete permanently"
+msgstr "Eliminar permanentemente"
+
+#: includes/class-email-countdown-timer-privacy.php:14
+msgid ""
+"Delivering an image requires an HTTP request. Our hosting, email-image "
+"proxies and other services may process connection data under their own "
+"logging and retention policies. Local fonts are read on the server; this "
+"plugin does not contact Google Fonts."
+msgstr ""
+"La entrega de una imagen requiere una solicitud HTTP. Nuestro alojamiento, "
+"servidores proxy de imágenes de correo electrónico y otros servicios pueden "
+"procesar datos de conexión según sus propias políticas de registro y "
+"retención. Las fuentes locales se leen en el servidor; Este complemento no "
+"contacta con Google Fonts."
+
+#: includes/admin-view.php:179
+msgid ""
+"Describe the timer purpose, not its changing seconds. Used by the website "
+"shortcode and new Email HTML. Leave empty only when nearby text provides the"
+" same information. Save, then copy updated HTML; already sent emails cannot "
+"be changed. Maximum 1000 bytes."
+msgstr ""
+"Describe el propósito del cronómetro, no sus segundos cambiantes. Utilizado "
+"por el código abreviado del sitio web y el nuevo HTML de correo electrónico."
+" Déjelo vacío solo cuando el texto cercano proporcione la misma información."
+" Guarde y luego copie el HTML actualizado; Los correos electrónicos ya "
+"enviados no se pueden cambiar. Máximo 1000 bytes."
+
+#: includes/admin-view.php:145
+msgid "Digit Size (px)"
+msgstr "Tamaño de dígito (px)"
+
+#: includes/admin-view.php:131
+msgid "Digits"
+msgstr "Dígitos"
+
+#: blocks/timer/block.json
+msgid "Display an existing countdown with its saved appearance and deadline."
+msgstr ""
+"Muestra una cuenta regresiva existente con su apariencia guardada y fecha "
+"límite."
+
+#: includes/admin-view.php:72
+msgid "Duplicate"
+msgstr "Duplicado"
+
+#: includes/admin-view.php:72
+msgid "Duplicate %s"
+msgstr "Duplicado %s"
+
+#: includes/class-email-countdown-timer-admin.php:102
+msgid "Easter"
+msgstr "Pascua"
+
+#: includes/admin-view.php:70
+msgid "Edit"
+msgstr "Editar"
+
+#: includes/admin-view.php:70
+#: includes/class-email-countdown-timer-admin.php:207
+msgid "Edit %s"
+msgstr "Editar %s"
+
+#: includes/class-email-countdown-timer-admin.php:201
+msgid "Edit an existing timer"
+msgstr "Editar un temporizador existente"
+
+#: includes/admin-view.php:97
+msgid "Edit timer: %s"
+msgstr "Editar temporizador: %s"
+
+#: includes/admin-view.php:227
+msgid "Email"
+msgstr "Correo electrónico"
+
+#: includes/admin-view.php:233
+msgid ""
+"Email GIFs play for 60 seconds; an already downloaded image cannot refresh "
+"itself. Clients may cache, prefetch or block images. Always include the "
+"absolute deadline as visible text, and send a test email."
+msgstr ""
+"Los GIF de correo electrónico se reproducen durante 60 segundos; una imagen "
+"ya descargada no puede actualizarse por sí sola. Los clientes pueden "
+"almacenar en caché, buscar previamente o bloquear imágenes. Incluya siempre "
+"la fecha límite absoluta como texto visible y envíe un correo electrónico de"
+" prueba."
+
+#: includes/admin-view.php:229
+msgid "Email HTML"
+msgstr "Enviar correo electrónico HTML"
+
+#: includes/admin-view.php:205
+msgid "Embed Codes"
+msgstr "Códigos para insertar"
+
+#: includes/admin-view.php:235
+msgid "Embed codes are available after the first successful save."
+msgstr "están disponibles después del primer guardado exitoso."
+
+#: includes/admin-view.php:170
+msgid "End image attachment ID"
+msgstr "ID de archivo adjunto de imagen final"
+
+#: includes/admin-view.php:175
+msgid "End image removed. Save the timer to apply this change."
+msgstr ""
+"Imagen final eliminada. Guarde el cronómetro para aplicar este cambio."
+
+#: includes/admin-view.php:202
+msgid "Ends:"
+msgstr "Termina:"
+
+#: includes/class-email-countdown-timer-admin.php:122
+msgid "English"
+msgstr "Inglés"
+
+#: includes/class-email-countdown-timer-admin.php:364
+msgid "Enter a HEX color, for example #135E96."
+msgstr "Introduzca un color HEX, por ejemplo #135E96."
+
+#: includes/class-email-countdown-timer-status.php:113
+msgid ""
+"Enter a saved ID to check its font and enable the separate image test. The "
+"first 250 IDs are suggested; other saved IDs may be typed."
+msgstr ""
+"Ingrese una ID guardada para verificar su fuente y habilitar la prueba de "
+"imagen separada. Se sugieren las primeras 250 identificaciones; Se pueden "
+"escribir otras identificaciones guardadas."
+
+#: includes/class-email-countdown-timer-status.php:54
+msgid ""
+"Enter a saved campaign ID and run local checks to verify its font "
+"resolution."
+msgstr ""
+"Ingrese un ID de campaña guardado y ejecute comprobaciones locales para "
+"verificar la resolución de la fuente."
+
+#: includes/class-email-countdown-timer-admin.php:278
+msgid "Enter a single value for this field."
+msgstr "Introduzca un valor único para este campo."
+
+#: includes/class-ecd-config.php:89
+msgid "Enter a specific deadline date and time."
+msgstr "Introduzca una fecha y hora límite específicas."
+
+#: includes/class-email-countdown-timer-admin.php:337
+msgid "Enter a unique timer name."
+msgstr "Introduzca un nombre de temporizador único."
+
+#: includes/class-email-countdown-timer-admin.php:378
+msgid "Enter a valid time zone, for example Europe/Warsaw."
+msgstr "Introduzca una zona horaria válida, por ejemplo Europa/Varsovia."
+
+#: includes/class-email-countdown-timer-admin.php:349
+msgid "Enter a valid timer ID (maximum 200 bytes)."
+msgstr "Introduzca un ID de temporizador válido (máximo 200 bytes)."
+
+#: includes/class-email-countdown-timer-admin.php:359
+msgid "Enter a whole number from %1$d to %2$d."
+msgstr "Introduzca un número entero desde %1$d hasta %2$d."
+
+#: includes/class-email-countdown-timer-data-settings.php:77
+msgid ""
+"Existing emails and pages will no longer receive countdown images after the "
+"plugin is removed. Manually deleting files does not run this cleanup."
+msgstr ""
+"Los correos electrónicos y las páginas existentes ya no recibirán imágenes "
+"de cuenta regresiva después de que se elimine el complemento. La eliminación"
+" manual de archivos no ejecuta esta limpieza."
+
+#: includes/admin-view.php:58
+msgid "Expired"
+msgstr "Caducado"
+
+#: includes/admin-view.php:220
+msgid "External website (iframe)"
+msgstr "Sitio web externo (iframe)"
+
+#: includes/admin-view.php:143
+msgid ""
+"Five faces are included locally: Lato Regular, IBM Plex Mono Regular, Barlow"
+" Condensed Regular and Black (900), and Crimson Text Regular. Select a face "
+"and save to use scalable text. FreeType is required. Keep your own licensed "
+"TTF/OTF files in the persistent directory shown in Data Settings. Bitmap "
+"fallback has fixed sizes and printable ASCII labels only."
+msgstr ""
+"Se incluyen cinco caras localmente: Lato Regular, IBM Plex Mono Regular, "
+"Barlow Condensed Regular y Black (900) y Crimson Text Regular. Seleccione "
+"una cara y guárdela para usar texto escalable. Se requiere tipo libre. "
+"Mantenga sus propios archivos TTF/OTF con licencia en el directorio "
+"persistente que se muestra en Configuración de datos. El respaldo de mapa de"
+" bits tiene tamaños fijos y etiquetas ASCII imprimibles únicamente."
+
+#: includes/admin-view.php:138
+msgid "Font"
+msgstr "Fuente"
+
+#: includes/class-email-countdown-timer-data-settings.php:111
+msgid "Font File Access"
+msgstr "Acceso a archivos de fuentes"
+
+#: includes/class-email-countdown-timer-font-access.php:75
+msgid ""
+"Font access rules could not be created. Configure the font directories "
+"through your host. No existing rules were overwritten."
+msgstr ""
+"No se pudieron crear reglas de acceso a fuentes. Configure los directorios "
+"de fuentes a través de su host. No se sobrescribió ninguna regla existente."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid ""
+"For animated email GIFs, ask your host to enable Imagick with GIF support."
+msgstr ""
+"Para GIF animados de correo electrónico, solicite a su anfitrión que "
+"habilite Imagick con soporte GIF."
+
+#: includes/admin-view.php:111
+#: includes/class-email-countdown-timer-admin.php:146
+msgid ""
+"For your administration only. Not used in public images, embeds or the "
+"generated ID. Up to 200 bytes."
+msgstr ""
+"Sólo para su administración. No se utiliza en imágenes públicas, "
+"incrustaciones o la identificación generada. Hasta 200 bytes."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid "FreeType text functions are available."
+msgstr "Las funciones de texto FreeType están disponibles."
+
+#: includes/class-email-countdown-timer-admin.php:126
+msgid "French"
+msgstr "Francés"
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid "GD image functions are available."
+msgstr "Las funciones de imagen GD están disponibles."
+
+#: includes/admin-view.php:24
+msgid ""
+"GD is unavailable. Settings can be saved, but image generation and geometry "
+"validation are unavailable until GD is enabled."
+msgstr ""
+"GD no está disponible. La configuración se puede guardar, pero la generación"
+" de imágenes y la validación de geometría no están disponibles hasta que se "
+"habilite GD."
+
+#: includes/class-email-countdown-timer-admin.php:124
+msgid "German"
+msgstr "Alemán"
+
+#: includes/admin-view.php:71
+msgid "Get Embed Code"
+msgstr "Obtener código para insertar"
+
+#: includes/admin-view.php:71
+msgid "Get embed code for %s"
+msgstr "Obtener código de inserción para %s"
+
+#: includes/admin-view.php:132
+msgid "HEX color"
+msgstr "color HEXAGONAL"
+
+#: includes/class-email-countdown-timer-admin.php:104
+msgid "Halloween"
+msgstr "Víspera de Todos los Santos"
+
+#: includes/admin-view.php:117
+msgid "Hide days when fewer than 24 hours remain"
+msgstr "Ocultar días en los que quedan menos de 24 horas"
+
+#: includes/admin-view.php:163
+msgid "Hours"
+msgstr "Horas"
+
+#: includes/admin-view.php:188
+msgid "I understand this cannot be undone."
+msgstr "Entiendo que esto no se puede deshacer."
+
+#: includes/class-email-countdown-timer-fonts.php:46
+msgid "IBM Plex Mono Regular (included)"
+msgstr "IBM Plex Mono Regular (incluido)"
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid ""
+"If GIFs stay static, check advisory locks, GIF codec policy and hosting "
+"memory. Test the actual image."
+msgstr ""
+"Si los GIF permanecen estáticos, verifique los bloqueos de aviso, la "
+"política del códec GIF y la memoria de alojamiento. Pruebe la imagen real."
+
+#: includes/admin-view.php:223
+msgid "Iframe HTML"
+msgstr "marco flotante HTML"
+
+#: assets/block-editor.js:118
+msgid "Image (default)"
+msgstr "Imagen (predeterminada)"
+
+#: includes/admin-view.php:231
+msgid "Image URL"
+msgstr "URL de la imagen"
+
+#: includes/admin-view.php:179
+msgid "Image alternative text (alt)"
+msgstr "Texto alternativo de imagen (alt)"
+
+#: includes/admin-view.php:175
+msgid "Image selected. Save the timer to apply it."
+msgstr "Imagen seleccionada. Guarde el cronómetro para aplicarlo."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid ""
+"Images use bitmap text without FreeType; accented labels may not render."
+msgstr ""
+"Las imágenes utilizan texto de mapa de bits sin FreeType; Es posible que las"
+" etiquetas acentuadas no se reproduzcan."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid "Imagick is available for GIF animation."
+msgstr "Imagick está disponible para la animación GIF."
+
+#: includes/class-email-countdown-timer-status.php:41
+msgid "Imagick is unavailable; image requests use a static frame."
+msgstr ""
+"Imagick no está disponible; Las solicitudes de imágenes utilizan un marco "
+"estático."
+
+#: includes/admin-view.php:215
+msgid ""
+"In the block editor, add the Tickloom Countdown Timers block and select this"
+" timer. In other editors, paste the shortcode below. Website embeds refresh "
+"when the page becomes visible again."
+msgstr ""
+"En el editor de bloques, agregue el bloque Tickloom Countdown Timers y "
+"seleccione este temporizador. En otros editores, pegue el código corto a "
+"continuación. Las incrustaciones del sitio web se actualizan cuando la "
+"página vuelve a ser visible."
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Information"
+msgstr "Información"
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"Inspect the actual image: file availability does not certify glyph coverage "
+"or layout."
+msgstr ""
+"Inspeccione la imagen real: la disponibilidad del archivo no certifica la "
+"cobertura o el diseño de los glifos."
+
+#: includes/class-email-countdown-timer-data-settings.php:124
+msgid "Install Font Access Rules (Apache)"
+msgstr "Instalar reglas de acceso a fuentes (Apache)"
+
+#: includes/class-ecd-config.php:54
+msgid "Invalid color: %s"
+msgstr "Color no válido: %s"
+
+#: includes/class-email-countdown-timer-data-settings.php:48
+msgid "Invalid data retention setting."
+msgstr "Configuración de retención de datos no válida."
+
+#: includes/class-ecd-config.php:101
+msgid "Invalid date or time zone."
+msgstr "Fecha o zona horaria no válida."
+
+#: includes/class-ecd-config.php:97
+msgid "Invalid date."
+msgstr "Fecha no válida."
+
+#: includes/class-email-countdown-timer-admin.php:593
+msgid "Invalid deadline or time zone"
+msgstr "Fecha límite o zona horaria no válida"
+
+#: includes/class-ecd-config.php:39
+msgid "Invalid field type: %s"
+msgstr "Tipo de campo no válido: %s"
+
+#: includes/class-ecd-config.php:65
+msgid "Invalid font filename."
+msgstr "Nombre de archivo de fuente no válido."
+
+#: includes/admin-view.php:146
+msgid "Label Size (px)"
+msgstr "Tamaño de etiqueta (px)"
+
+#: includes/class-ecd-config.php:58
+msgid "Label is too long (maximum 256 bytes)."
+msgstr "La etiqueta es demasiado larga (máximo 256 bytes)."
+
+#: includes/admin-view.php:131
+msgid "Labels"
+msgstr "Etiquetas"
+
+#: includes/admin-view.php:160
+msgid "Labels applied. Review the text and save to keep these changes."
+msgstr ""
+"Etiquetas aplicadas. Revise el texto y guárdelo para conservar estos "
+"cambios."
+
+#: includes/class-email-countdown-timer-fonts.php:45
+msgid "Lato Regular (included)"
+msgstr "Lato Regular (incluido)"
+
+#: assets/block-editor.js:126
+msgid "Left"
+msgstr "Izquierda"
+
+#: assets/block-editor.js:119
+msgid "Live text"
+msgstr "Texto en vivo"
+
+#: assets/block-editor.js:121
+msgid ""
+"Live text uses the saved deadline, colors and labels with theme typography. "
+"It updates locally without image polling and includes a Pause control. "
+"Reduced-motion visitors start paused. Image fonts and dimensions apply to "
+"Image mode. End-image URLs are public before expiry."
+msgstr ""
+"El texto en vivo utiliza la fecha límite guardada, los colores y las "
+"etiquetas con tipografía temática. Se actualiza localmente sin sondeo de "
+"imágenes e incluye un control de pausa. Los visitantes con movimiento "
+"reducido comienzan a hacer una pausa. Las fuentes y dimensiones de las "
+"imágenes se aplican al modo Imagen. Las URL de las imágenes finales son "
+"públicas antes de que caduquen."
+
+#: includes/class-email-countdown-timer-data-settings.php:128
+msgid "Local Fonts"
+msgstr "Fuentes locales"
+
+#: includes/class-email-countdown-timer-status.php:118
+msgid "Local checks"
+msgstr "Comprobaciones locales"
+
+#: includes/class-email-countdown-timer-fonts.php:342
+msgid ""
+"Local font copying failed. Check directory permissions and database locks, "
+"or use SFTP. Original files were not removed."
+msgstr ""
+"Error al copiar la fuente local. Verifique los permisos del directorio y los"
+" bloqueos de la base de datos, o use SFTP. Los archivos originales no fueron"
+" eliminados."
+
+#: includes/class-email-countdown-timer-data-settings.php:112
+msgid ""
+"Local fonts may be publicly downloadable unless your host blocks HTTP "
+"access. This tool creates an Apache 2.4 deny rule and a blank index in this "
+"site's persistent font directory under uploads. Existing rules and symlinks "
+"are never replaced. For fonts still in the legacy plugin directory, use the "
+"copy tool and ask your host to protect any originals that remain."
+msgstr ""
+"Las fuentes locales se pueden descargar públicamente a menos que su host "
+"bloquee el acceso HTTP. Esta herramienta crea una regla de denegación Apache"
+" 2.4 y un índice en blanco en el directorio de fuentes persistentes de este "
+"sitio en cargas. Las reglas y enlaces simbólicos existentes nunca se "
+"reemplazan. Para las fuentes que aún se encuentran en el directorio de "
+"complementos heredados, use la herramienta de copia y solicite a su "
+"proveedor de alojamiento que proteja los originales que queden."
+
+#: includes/class-email-countdown-timer-admin.php:97
+msgid "Midnight"
+msgstr "Medianoche"
+
+#: includes/admin-view.php:148
+msgid "Minimum Image Width (px)"
+msgstr "Ancho mínimo de imagen (px)"
+
+#: includes/admin-view.php:163
+msgid "Minutes"
+msgstr "Minutos"
+
+#: includes/class-email-countdown-timer-data-settings.php:79
+msgid ""
+"Multisite: this choice applies only to this site. Network uninstall removes "
+"data only on sites that have enabled this option."
+msgstr ""
+"Multisitio: esta elección se aplica sólo a este sitio. La desinstalación de "
+"red elimina datos solo en los sitios que han habilitado esta opción."
+
+#: includes/admin-view.php:60
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Needs attention"
+msgstr "Necesita atención"
+
+#: includes/admin-view.php:97
+msgid "New Timer"
+msgstr "Nuevo temporizador"
+
+#: includes/class-email-countdown-timer-admin.php:101
+msgid "New Year"
+msgstr "Año nuevo"
+
+#: includes/class-email-countdown-timer-admin.php:579
+msgid ""
+"New timers use your browser time zone when available, otherwise the "
+"WordPress site time zone. Existing timers keep their saved zone. Named zones"
+" follow daylight saving changes; fixed offsets do not."
+msgstr ""
+"Los nuevos temporizadores utilizan la zona horaria de su navegador cuando "
+"esté disponible; de lo contrario, la zona horaria del sitio WordPress. Los "
+"cronómetros existentes mantienen su zona guardada. Las zonas nombradas "
+"siguen los cambios de horario de verano; las compensaciones fijas no lo "
+"hacen."
+
+#: includes/admin-view.php:87
+msgid "Next"
+msgstr "Siguiente"
+
+#: includes/admin-view.php:49
+msgid "No archived timers."
+msgstr "No hay temporizadores archivados."
+
+#: includes/class-email-countdown-timer-status.php:54
+msgid "No campaign was selected."
+msgstr "No se seleccionó ninguna campaña."
+
+#: assets/block-editor.js:152
+msgid "No campaigns yet"
+msgstr "Aún no hay campañas"
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid ""
+"No lock configuration change is indicated. This probe does not certify "
+"database proxies or multiple primaries."
+msgstr ""
+"No se indica ningún cambio de configuración de bloqueo. Esta sonda no "
+"certifica servidores proxy de bases de datos ni múltiples primarios."
+
+#: includes/admin-view.php:49
+msgid "No timers match this search."
+msgstr "Ningún temporizador coincide con esta búsqueda."
+
+#: includes/class-email-countdown-timer-admin.php:203
+msgid "No timers yet. Create your first campaign above."
+msgstr "Aún no hay temporizadores. Crea tu primera campaña arriba."
+
+#: includes/admin-view.php:49
+msgid ""
+"No timers yet. Use Quick Create above, or open the full editor with Create "
+"Timer."
+msgstr ""
+"Aún no hay temporizadores. Utilice la Creación rápida arriba o abra el "
+"editor completo con Crear temporizador."
+
+#: includes/class-email-countdown-timer-admin.php:98
+msgid "Ocean"
+msgstr "Océano"
+
+#: includes/class-email-countdown-timer-data-settings.php:76
+msgid ""
+"Off by default. When enabled, deleting the plugin through WordPress "
+"permanently removes this site's timers, plugin options, and database image "
+"cache. Deactivation and saving this setting never delete timer data. Back up"
+" your configuration first."
+msgstr ""
+"Desactivado de forma predeterminada. Cuando está habilitado, eliminar el "
+"complemento a través de WordPress elimina permanentemente los "
+"temporizadores, las opciones del complemento y el caché de imágenes de la "
+"base de datos de este sitio. La desactivación y el guardado de esta "
+"configuración nunca eliminan los datos del temporizador. Primero haga una "
+"copia de seguridad de su configuración."
+
+#: includes/class-email-countdown-timer-data-settings.php:108
+msgid ""
+"On a cache miss, image requests wait at most one second for a generation "
+"lock. If it is busy or unavailable, a current single-frame image is "
+"generated without replacing the animation cache. This avoids stale "
+"countdowns, but does not replace hosting rate limits. This probe is not a "
+"full database-proxy compatibility test."
+msgstr ""
+"En caso de error de caché, las solicitudes de imágenes esperan como máximo "
+"un segundo para un bloqueo de generación. Si está ocupado o no está "
+"disponible, se genera una imagen actual de un solo cuadro sin reemplazar el "
+"caché de animación. Esto evita cuentas regresivas obsoletas, pero no "
+"reemplaza los límites de tarifas de alojamiento. Esta prueba no es una "
+"prueba completa de compatibilidad entre la base de datos y el proxy."
+
+#: includes/class-email-countdown-timer-status.php:148
+msgid ""
+"Only versions and diagnostic results are included. Site URLs, campaign "
+"IDs/names/settings, font filenames/paths, media IDs, usernames, credentials,"
+" nonces and raw errors are excluded. Review the text before sharing; copying"
+" never sends it."
+msgstr ""
+"Solo se incluyen versiones y resultados de diagnóstico. Se excluyen las URL "
+"del sitio, los ID/nombres/configuraciones de campañas, los nombres/rutas de "
+"archivos de fuentes, los ID de medios, los nombres de usuario, las "
+"credenciales, los nonces y los errores sin formato. Revisa el texto antes de"
+" compartirlo; copiar nunca lo envía."
+
+#: includes/class-email-countdown-timer-admin.php:166
+msgid "Open full editor"
+msgstr "Abrir editor completo"
+
+#: includes/class-email-countdown-timer-status.php:141
+msgid "Open image manually (new tab)"
+msgstr "Abrir imagen manualmente (nueva pestaña)"
+
+#: includes/class-email-countdown-timer-status.php:70
+msgid ""
+"Open the campaign editor, check its settings and restore or reselect its "
+"font before testing the image."
+msgstr ""
+"Abra el editor de campaña, verifique su configuración y restaure o vuelva a "
+"seleccionar su fuente antes de probar la imagen."
+
+#: assets/block-editor.js:142
+msgid "Open timer settings (new tab)"
+msgstr "Abrir configuración del temporizador (nueva pestaña)"
+
+#: includes/admin-view.php:170
+msgid ""
+"Optional. Choose an image from this site’s Media Library, or enter its "
+"attachment ID. Use 0 to keep the zero countdown. Local JPEG, PNG, GIF or "
+"WebP only, up to 4 MiB / 4 million pixels. Animated source files use their "
+"first frame."
+msgstr ""
+"Opcional. Elija una imagen de la biblioteca multimedia de este sitio o "
+"ingrese su ID de archivo adjunto. Utilice 0 para mantener la cuenta "
+"regresiva cero. JPEG local, PNG, GIF o WebP únicamente, hasta 4 MiB/4 "
+"millones de píxeles. Los archivos fuente animados utilizan su primer "
+"fotograma."
+
+#: includes/admin-view.php:85
+msgid "Page %1$d of %2$d"
+msgstr "Página %1$d de %2$d"
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Passed"
+msgstr "Aprobado"
+
+#: includes/admin-view.php:228
+msgid ""
+"Paste Email HTML into your mailing platform’s HTML editor, or use the Image "
+"URL in an image block. WordPress shortcodes do not work in email."
+msgstr ""
+"Pegue el HTML del correo electrónico en el editor HTML de su plataforma de "
+"correo o utilice la URL de la imagen en un bloque de imágenes. Los códigos "
+"cortos WordPress no funcionan en el correo electrónico."
+
+#: includes/admin-view.php:221
+msgid ""
+"Paste this HTML on another website. The countdown runs locally in the frame "
+"with the saved fonts, colors and labels. Iframes are for websites, not "
+"email. Your hosting must allow this frame to load on other sites."
+msgstr ""
+"Pegue este HTML en otro sitio web. La cuenta regresiva se ejecuta localmente"
+" en el marco con las fuentes, colores y etiquetas guardados. Los iframes son"
+" para sitios web, no para correo electrónico. Su alojamiento debe permitir "
+"que este marco se cargue en otros sitios."
+
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-live.php:39
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Pause countdown"
+msgstr "Pausa cuenta regresiva"
+
+#: assets/block-editor.js:140
+msgid "Pause preview"
+msgstr "Pausar vista previa"
+
+#: includes/admin-view.php:187
+msgid ""
+"Permanently delete %s? Existing emails and pages using this timer will stop "
+"receiving countdown images."
+msgstr ""
+"¿Eliminar permanentemente %s? Los correos electrónicos y las páginas "
+"existentes que utilicen este temporizador dejarán de recibir imágenes de "
+"cuenta regresiva."
+
+#: includes/admin-view.php:239
+msgid ""
+"Permanently delete %s? This cannot be undone and will break existing embeds."
+msgstr ""
+"¿Eliminar permanentemente %s? Esto no se puede deshacer y romperá las "
+"incrustaciones existentes."
+
+#: includes/class-email-countdown-timer-data-settings.php:130
+msgid ""
+"Persistent location: the uploads base directory, then tickloom-countdown-"
+"timers/fonts/. Multisite adds site-ID/ inside fonts/. The directory is "
+"created only when copying fonts, installing access rules, or manually "
+"through your hosting tools."
+msgstr ""
+"Ubicación persistente: el directorio base de cargas, luego tickloom-"
+"countdown-timers/fonts/. Multisitio agrega ID de sitio/fuentes internas/. El"
+" directorio se crea solo al copiar fuentes, instalar reglas de acceso o "
+"manualmente a través de sus herramientas de alojamiento."
+
+#: includes/class-email-countdown-timer-admin.php:123
+msgid "Polish"
+msgstr "Polaco"
+
+#: includes/admin-view.php:128
+msgid "Preset applied. Review the fields and save explicitly."
+msgstr ""
+"Preestablecido aplicado. Revise los campos y guárdelos explícitamente."
+
+#: includes/admin-view.php:122
+msgid ""
+"Presets apply colors and an available included font. Review the fields and "
+"save explicitly. If the preset font or FreeType is unavailable, your "
+"selected font is kept."
+msgstr ""
+"Los ajustes preestablecidos aplican colores y una fuente incluida "
+"disponible. Revise los campos y guárdelos explícitamente. Si la fuente "
+"preestablecida o FreeType no está disponible, se conserva la fuente "
+"seleccionada."
+
+#: includes/admin-view.php:194
+msgid "Preview and embedding"
+msgstr "Vista previa e incrustación"
+
+#: includes/admin-view.php:86
+msgid "Previous"
+msgstr "Anterior"
+
+#: includes/class-email-countdown-timer-status.php:127
+msgid "Public image test"
+msgstr "Prueba de imagen pública"
+
+#: includes/admin-view.php:30
+#: includes/class-email-countdown-timer-admin.php:198
+msgid "Quick Create"
+msgstr "Creación rápida"
+
+#: includes/class-email-countdown-timer-admin.php:255
+msgid ""
+"Quick Create needs a new timer and one of the listed appearance presets. "
+"Review the fields below before saving."
+msgstr ""
+"Quick Create necesita un nuevo temporizador y uno de los ajustes "
+"preestablecidos de apariencia enumerados. Revise los campos a continuación "
+"antes de guardar."
+
+#: includes/class-email-countdown-timer-status.php:147
+msgid "Redacted troubleshooting report"
+msgstr "Informe de solución de problemas redactado"
+
+#: assets/block-editor.js:138
+msgid "Refresh campaigns"
+msgstr "Actualizar campañas"
+
+#: assets/block-editor.js:139
+msgid "Refresh preview"
+msgstr "Actualizar vista previa"
+
+#: assets/block-editor.js:155
+msgid "Refreshing campaigns…"
+msgstr "Campañas refrescantes..."
+
+#: includes/admin-view.php:173
+msgid "Remove End Image"
+msgstr "Eliminar imagen final"
+
+#: includes/class-email-countdown-timer-data-settings.php:85
+msgid "Rendering Diagnostics"
+msgstr "Diagnóstico de renderizado"
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Report copied."
+msgstr "Informe copiado."
+
+#: includes/class-email-countdown-timer-status.php:151
+msgid "Report selected. Copy it manually."
+msgstr "Informe seleccionado. Cópialo manualmente."
+
+#: includes/admin-view.php:77
+msgid "Restore"
+msgstr "Restaurar"
+
+#: includes/admin-view.php:77
+msgid "Restore %s"
+msgstr "Restaurar %s"
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"Restore the selected local font or choose an available font in the campaign "
+"editor, then inspect the image."
+msgstr ""
+"Restaure la fuente local seleccionada o elija una fuente disponible en el "
+"editor de campaña, luego inspeccione la imagen."
+
+#: includes/class-email-countdown-timer-status.php:143
+msgid "Result of the requested public image test."
+msgstr "Resultado de la prueba de imagen pública solicitada."
+
+#: includes/class-email-countdown-timer-frame.php:128
+#: includes/class-email-countdown-timer-live.php:39
+msgid "Resume countdown"
+msgstr "Reanudar cuenta regresiva"
+
+#: assets/block-editor.js:140
+msgid "Resume preview"
+msgstr "Reanudar vista previa"
+
+#: includes/class-email-countdown-timer-status.php:53
+msgid ""
+"Retry a busy check. Otherwise ask your host about advisory locks and "
+"connection affinity."
+msgstr ""
+"Vuelva a intentar una verificación de ocupado. De lo contrario, pregúntele a"
+" su anfitrión sobre los bloqueos de aviso y la afinidad de conexión."
+
+#: includes/admin-view.php:100
+msgid "Review the following fields. Your changes have not been saved."
+msgstr "Revise los siguientes campos. Sus cambios no se han guardado."
+
+#: includes/class-email-countdown-timer-privacy.php:12
+msgid ""
+"Review this suggestion against your hosting, email and optimization "
+"services. Add their actual logging, retention and processor details. Do not "
+"put personal data or recipient identifiers in public timer fields or image "
+"URLs."
+msgstr ""
+"Revise esta sugerencia comparándola con sus servicios de hosting, correo "
+"electrónico y optimización. Agregue sus detalles reales de registro, "
+"retención y procesador. No incluya datos personales ni identificadores de "
+"destinatarios en campos de temporizador públicos ni en URL de imágenes."
+
+#: assets/block-editor.js:128
+msgid "Right"
+msgstr "Bien"
+
+#: includes/class-email-countdown-timer-data-settings.php:119
+msgid ""
+"Rule installation was attempted without overwriting existing files. Check "
+"directory permissions and existing rules with your host; HTTP protection is "
+"not verified."
+msgstr ""
+"Se intentó instalar la regla sin sobrescribir los archivos existentes. "
+"Verifique los permisos del directorio y las reglas existentes con su host; "
+"La protección HTTP no está verificada."
+
+#: includes/class-email-countdown-timer-data-settings.php:114
+msgid ""
+"Rules are retained on uninstall because manually managed fonts may remain. "
+"Blocking downloads does not grant a font license; verify permission for "
+"server-side rendering."
+msgstr ""
+"Las reglas se conservan durante la desinstalación porque es posible que "
+"queden fuentes administradas manualmente. El bloqueo de descargas no otorga "
+"una licencia de fuente; verificar el permiso para la representación del lado"
+" del servidor."
+
+#: includes/class-email-countdown-timer-status.php:114
+msgid "Run local checks"
+msgstr "Ejecute comprobaciones locales"
+
+#: includes/admin-view.php:181
+msgid "Save Changes"
+msgstr "Guardar cambios"
+
+#: includes/class-email-countdown-timer-data-settings.php:82
+msgid "Save Data Settings"
+msgstr "Guardar configuración de datos"
+
+#: includes/admin-view.php:195
+msgid "Saved Preview"
+msgstr "Vista previa guardada"
+
+#: includes/admin-view.php:200
+msgid "Saved countdown preview"
+msgstr "Vista previa de cuenta regresiva guardada"
+
+#: includes/admin-view.php:52
+msgid "Saved timers, deadlines and actions"
+msgstr "Temporizadores, plazos y acciones guardados"
+
+#: includes/admin-view.php:110
+msgid "Schedule"
+msgstr "Cronograma"
+
+#: includes/admin-view.php:46
+msgid "Search"
+msgstr "Buscar"
+
+#: includes/admin-view.php:45
+msgid "Search names or timer IDs"
+msgstr "Buscar nombres o ID de temporizador"
+
+#: includes/admin-view.php:163
+msgid "Seconds"
+msgstr "Segundos"
+
+#: includes/admin-view.php:224
+msgid "Select and copy manually."
+msgstr "Seleccionar y copiar manualmente."
+
+#: includes/admin-view.php:196
+msgid "Shows the saved configuration, not unsaved changes. Save to update."
+msgstr ""
+"Muestra la configuración guardada, no los cambios no guardados. Guardar para"
+" actualizar."
+
+#: includes/class-email-countdown-timer-admin.php:125
+msgid "Spanish"
+msgstr "Español"
+
+#: includes/admin-view.php:53
+msgid "Status"
+msgstr "Estado"
+
+#: includes/class-email-countdown-timer-status.php:14
+#: includes/class-email-countdown-timer-status.php:14
+msgid "Status & Troubleshooting"
+msgstr "y solución de problemas"
+
+#: includes/class-email-countdown-timer-admin.php:235
+msgid "Stored timer data is invalid. Restore a backup before making changes."
+msgstr ""
+"Los datos del temporizador almacenados no son válidos. Restaure una copia de"
+" seguridad antes de realizar cambios."
+
+#: includes/class-email-countdown-timer-admin.php:163
+msgid ""
+"Stored with this campaign, independently of the WordPress language. Accented"
+" labels need a font with those characters, such as included Lato with "
+"FreeType."
+msgstr ""
+"Almacenado con esta campaña, independientemente del idioma de WordPress. Las"
+" etiquetas acentuadas necesitan una fuente con esos caracteres, como la "
+"incluida Lato con FreeType."
+
+#: includes/class-email-countdown-timer-status.php:39
+msgid ""
+"Test a public image below; function availability alone does not verify "
+"codecs or hosting capacity."
+msgstr ""
+"Pruebe una imagen pública a continuación; La disponibilidad de la función "
+"por sí sola no verifica los códecs ni la capacidad de alojamiento."
+
+#: includes/class-email-countdown-timer-status.php:140
+msgid "Test public image"
+msgstr "Probar imagen pública"
+
+#: includes/class-email-countdown-timer-status.php:131
+msgid "Testing public image…"
+msgstr "Probando imagen pública…"
+
+#: includes/class-email-countdown-timer-status.php:134
+msgid "The 15-second limit was reached. Check host responsiveness and retry."
+msgstr ""
+"Se alcanzó el límite de 15 segundos. Verifique la capacidad de respuesta del"
+" host y vuelva a intentarlo."
+
+#: includes/class-email-countdown-timer-admin.php:455
+msgid ""
+"The active bitmap fallback supports printable ASCII labels only. Select an "
+"available TTF/OTF with the required characters."
+msgstr ""
+"El respaldo de mapa de bits activo solo admite etiquetas ASCII imprimibles. "
+"Seleccione un TTF/OTF disponible con los caracteres requeridos."
+
+#: includes/admin-view.php:26
+msgid ""
+"The active renderer uses the bitmap fallback: fixed text sizes and printable"
+" ASCII labels. Select an available local TTF/OTF for scalable or "
+"multilingual text."
+msgstr ""
+"El renderizador activo utiliza el respaldo de mapa de bits: tamaños de texto"
+" fijos y etiquetas ASCII imprimibles. Seleccione un TTF/OTF local disponible"
+" para texto escalable o multilingüe."
+
+#: includes/class-email-countdown-timer-status.php:50
+msgid "The advisory-lock check failed. Uncached images use static output."
+msgstr ""
+"Error en la comprobación del bloqueo de aviso. Las imágenes no almacenadas "
+"en caché utilizan salida estática."
+
+#: includes/class-email-countdown-timer-status.php:132
+msgid ""
+"The anonymous image request loaded successfully. Test your real sender and "
+"recipients separately."
+msgstr ""
+"La solicitud de imagen anónima se cargó correctamente. Pruebe su remitente y"
+" destinatarios reales por separado."
+
+#: includes/class-email-countdown-timer-status.php:133
+msgid "The anonymous image test failed."
+msgstr "La prueba de imagen anónima falló."
+
+#: includes/class-email-countdown-timer-status.php:138
+msgid ""
+"The browser could not decode the image. Check GD, image conversion and proxy"
+" caching."
+msgstr ""
+"El navegador no pudo decodificar la imagen. Verifique GD, conversión de "
+"imágenes y almacenamiento en caché de proxy."
+
+#: includes/class-email-countdown-timer-status.php:135
+msgid ""
+"The browser could not reach or read the response. Check the network, "
+"firewall and cross-host CORS access; this alone does not indicate a GD "
+"failure."
+msgstr ""
+"El navegador no pudo acceder ni leer la respuesta. Verifique la red, el "
+"firewall y el acceso CORS entre hosts; esto por sí solo no indica una falla "
+"del GD."
+
+#: includes/class-email-countdown-timer-status.php:128
+msgid ""
+"The button makes one anonymous request from this browser, without WordPress "
+"cookies. It does not test a remote network, email provider or recipient "
+"client. A different image hostname must allow browser CORS access for this "
+"test."
+msgstr ""
+"El botón realiza una solicitud anónima desde este navegador, sin cookies "
+"WordPress. No prueba una red remota, un proveedor de correo electrónico o un"
+" cliente destinatario. Un nombre de host de imagen diferente debe permitir "
+"el acceso CORS del navegador para esta prueba."
+
+#: includes/class-email-countdown-timer-status.php:57
+msgid "The campaign ID is invalid or no longer saved."
+msgstr "El ID de la campaña no es válido o ya no se guarda."
+
+#: assets/block-editor.js:157
+msgid ""
+"The campaign list could not refresh. Check your connection and editor "
+"access, then try again. Your selection has been kept. If your session "
+"expired, save your work before reopening the editor."
+msgstr ""
+"La lista de campañas no se pudo actualizar. Verifique su conexión y acceso "
+"al editor, luego inténtelo nuevamente. Su selección se ha mantenido. Si su "
+"sesión expiró, guarde su trabajo antes de volver a abrir el editor."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid "The campaign selects built-in bitmap text."
+msgstr "La campaña selecciona texto de mapa de bits integrado."
+
+#: assets/block-editor.js:159
+msgid ""
+"The countdown preview could not load. Check the timer and image cache "
+"settings."
+msgstr ""
+"No se pudo cargar la vista previa de la cuenta regresiva. Verifique la "
+"configuración del temporizador y la caché de imágenes."
+
+#: includes/class-email-countdown-timer-admin.php:423
+msgid "The database could not save this change. No success has been recorded."
+msgstr ""
+"La base de datos no pudo guardar este cambio. No se ha registrado ningún "
+"éxito."
+
+#: includes/class-email-countdown-timer-data-settings.php:105
+msgid ""
+"The database lock check failed. Ask your host to check advisory-lock support"
+" and connectivity. Uncached images use static output."
+msgstr ""
+"Error en la comprobación del bloqueo de la base de datos. Pídale a su "
+"anfitrión que verifique el soporte y la conectividad del bloqueo de aviso. "
+"Las imágenes no almacenadas en caché utilizan salida estática."
+
+#: includes/class-email-countdown-timer-status.php:48
+msgid "The diagnostic lock is busy."
+msgstr "El bloqueo de diagnóstico está ocupado."
+
+#: includes/class-email-countdown-timer-data-settings.php:99
+msgid ""
+"The diagnostic lock is currently busy. Refresh this screen to check again."
+msgstr ""
+"El bloqueo de diagnóstico está actualmente ocupado. Actualice esta pantalla "
+"para verificar nuevamente."
+
+#: includes/class-email-countdown-timer-status.php:139
+msgid ""
+"The endpoint returned an error pixel. Check the campaign configuration, GD "
+"and host capacity."
+msgstr ""
+"El punto final devolvió un píxel de error. Verifique la configuración de la "
+"campaña, GD y la capacidad del host."
+
+#: assets/block-editor.js:132
+msgid "The first 250 timer IDs are listed. Enter another existing ID below."
+msgstr ""
+"Se enumeran los primeros 250 ID de temporizador. Ingrese otra identificación"
+" existente a continuación."
+
+#: includes/class-email-countdown-timer-status.php:140
+msgid ""
+"The image target is invalid. Reload this screen and check the site home URL."
+msgstr ""
+"El destino de la imagen no es válido. Vuelva a cargar esta pantalla y "
+"verifique la URL de inicio del sitio."
+
+#: includes/class-email-countdown-timer-admin.php:353
+msgid ""
+"The original timer no longer exists or its ID was changed. Return to Timers."
+msgstr ""
+"El temporizador original ya no existe o se cambió su ID. Volver a "
+"Temporizadores."
+
+#: includes/class-email-countdown-timer-status.php:136
+msgid ""
+"The public server rejected the request. Check the HTTP status in the report,"
+" public URL and firewall rules."
+msgstr ""
+"El servidor público rechazó la solicitud. Verifique el estado de HTTP en el "
+"informe, la URL pública y las reglas de firewall."
+
+#: includes/class-email-countdown-timer-status.php:137
+msgid ""
+"The response is not a supported image. Check redirects, caching and firewall"
+" challenge pages."
+msgstr ""
+"La respuesta no es una imagen compatible. Verifique las páginas de "
+"redireccionamiento, almacenamiento en caché y desafío del firewall."
+
+#: includes/class-email-countdown-timer-status.php:70
+msgid "The saved campaign could not be validated."
+msgstr "No se pudo validar la campaña guardada."
+
+#: includes/class-email-countdown-timer-admin.php:512
+msgid ""
+"The saved configuration contains invalid values. Review the fields before "
+"saving."
+msgstr ""
+"La configuración guardada contiene valores no válidos. Revise los campos "
+"antes de guardar."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"The selected font is missing or FreeType is unavailable. Images fall back to"
+" bitmap text."
+msgstr ""
+"Falta la fuente seleccionada o FreeType no está disponible. Las imágenes "
+"vuelven al texto de mapa de bits."
+
+#: includes/class-email-countdown-timer-status.php:68
+msgid ""
+"The selected local font resolves to a readable file with FreeType support."
+msgstr ""
+"La fuente local seleccionada se resuelve en un archivo legible compatible "
+"con FreeType."
+
+#: includes/class-email-countdown-timer-admin.php:506
+msgid ""
+"The source timer no longer exists. Return to Timers and choose another "
+"campaign."
+msgstr ""
+"El temporizador de origen ya no existe. Vuelve a Timers y elige otra "
+"campaña."
+
+#: includes/class-email-countdown-timer-admin.php:351
+msgid ""
+"This ID already exists. Edit the existing timer or choose a different ID."
+msgstr ""
+"Este ID ya existe. Edite el temporizador existente o elija una ID diferente."
+
+#: includes/admin-view.php:95
+msgid ""
+"This campaign is archived. Existing links still work. Saving changes keeps "
+"it archived; restore it from the Archived list."
+msgstr ""
+"Esta campaña está archivada. Los enlaces existentes todavía funcionan. "
+"Guardar los cambios lo mantiene archivado; restaurarlo desde la lista "
+"Archivado."
+
+#: includes/class-email-countdown-timer-data-settings.php:102
+msgid ""
+"This database interface does not support the configured session-lock "
+"mechanism. Uncached images use static output."
+msgstr ""
+"Esta interfaz de base de datos no admite el mecanismo de bloqueo de sesión "
+"configurado. Las imágenes no almacenadas en caché utilizan salida estática."
+
+#: includes/class-email-countdown-timer-status.php:49
+msgid ""
+"This database interface does not support the session-lock mechanism. "
+"Uncached images use static output."
+msgstr ""
+"Esta interfaz de base de datos no admite el mecanismo de bloqueo de sesión. "
+"Las imágenes no almacenadas en caché utilizan salida estática."
+
+#: includes/class-email-countdown-timer-admin.php:462
+msgid ""
+"This font, text and size combination cannot be rendered. Check the font and "
+"reduce text size or width. Maximum: 4000 by 1000 pixels and 400000 pixels "
+"total."
+msgstr ""
+"Esta combinación de fuente, texto y tamaño no se puede representar. "
+"Verifique la fuente y reduzca el tamaño o ancho del texto. Máximo: 4000 por "
+"1000 píxeles y 400000 píxeles en total."
+
+#: includes/class-ecd-plugin.php:54
+msgid ""
+"This form version is no longer supported. Reload Tickloom Countdown Timers "
+"and use the current editor. No timer data was changed."
+msgstr ""
+"Esta versión del formulario ya no es compatible. Vuelva a cargar Tickloom "
+"Countdown Timers y utilice el editor actual. No se cambiaron datos del "
+"temporizador."
+
+#: assets/block-editor.js:158
+msgid ""
+"This timer is no longer in the saved list. Choose another timer or refresh "
+"campaigns. A deleted timer displays nothing on the website."
+msgstr ""
+"Este temporizador ya no está en la lista de guardados. Elija otro "
+"temporizador o actualice las campañas. Un temporizador eliminado no muestra "
+"nada en el sitio web."
+
+#: includes/class-email-countdown-timer-admin.php:342
+msgid "This timer name is already used. Choose a different name."
+msgstr ""
+"El nombre de este temporizador ya está en uso. Elija un nombre diferente."
+
+#: includes/class-email-countdown-timer-admin.php:503
+msgid "This timer no longer exists. Return to Timers to create a new one."
+msgstr ""
+"Este temporizador ya no existe. Regrese a Temporizadores para crear uno "
+"nuevo."
+
+#: includes/admin-view.php:12 includes/class-ecd-plugin.php:27
+#: includes/class-ecd-plugin.php:27
+#: includes/class-email-countdown-timer-admin.php:183 blocks/timer/block.json
+msgid "Tickloom Countdown Timers"
+msgstr "Tickloom Countdown Timers"
+
+#: includes/class-email-countdown-timer-data-settings.php:62
+msgid "Tickloom Countdown Timers: Data Settings"
+msgstr "Tickloom Countdown Timers: Configuración de datos"
+
+#: includes/class-email-countdown-timer-status.php:97
+msgid "Tickloom Countdown Timers: Status & Troubleshooting"
+msgstr ""
+"Temporizadores de cuenta atrás de Tickloom: estado y solución de problemas"
+
+#: email-countdown-timer.php:21
+msgid ""
+"Tickloom cannot start while an older copy of this countdown plugin is "
+"active. Back up your fonts and deactivate the old copy before activating "
+"Tickloom."
+msgstr ""
+"Tickloom no puede iniciarse mientras esté activa una copia anterior de este "
+"complemento de cuenta regresiva. Haga una copia de seguridad de sus fuentes "
+"y desactive la copia anterior antes de activar Tickloom."
+
+#: includes/class-email-countdown-timer-admin.php:573
+msgid "Time Zone"
+msgstr "Huso horario"
+
+#: assets/block-editor.js:111
+msgid "Timer"
+msgstr "ID del temporizador"
+
+#: assets/block-editor.js:133
+msgid "Timer ID"
+msgstr "ID del temporizador"
+
+#: includes/admin-view.php:19
+msgid "Timer archived. Existing website and email links still work."
+msgstr ""
+"Temporizador archivado. Los enlaces de correo electrónico y sitios web "
+"existentes aún funcionan."
+
+#: includes/admin-view.php:19
+msgid "Timer deleted."
+msgstr "Temporizador eliminado."
+
+#: includes/admin-view.php:53 includes/admin-view.php:111
+#: includes/class-email-countdown-timer-admin.php:144
+msgid "Timer name"
+msgstr "Nombre del temporizador"
+
+#: includes/admin-view.php:84
+msgid "Timer pages"
+msgstr "Páginas del temporizador"
+
+#: includes/admin-view.php:19
+msgid "Timer restored to the main list."
+msgstr "Temporizador restaurado a la lista principal."
+
+#: includes/admin-view.php:19
+msgid "Timer saved."
+msgstr "Temporizador guardado."
+
+#: includes/admin-view.php:15
+msgid "Timers"
+msgstr "Temporizadores"
+
+#: includes/admin-view.php:38
+msgid "Timers (%d)"
+msgstr "Temporizadores (%d)"
+
+#: includes/class-email-countdown-timer-status.php:149
+msgid "Troubleshooting report"
+msgstr "Informe de solución de problemas"
+
+#: includes/admin-view.php:137
+msgid "Typography and Size"
+msgstr "Tipografía y tamaño"
+
+#: includes/admin-view.php:141
+msgid "Unavailable: %s (keep saved value)"
+msgstr "No disponible: %s (mantener valor guardado)"
+
+#: includes/class-email-countdown-timer-data-settings.php:71
+msgid "Uninstall policy"
+msgstr "Política de desinstalación"
+
+#: includes/class-email-countdown-timer-admin.php:62
+msgid "Unnamed timer"
+msgstr "Temporizador sin nombre"
+
+#: includes/class-email-countdown-timer-admin.php:62
+#: includes/class-email-countdown-timer-block.php:129
+msgid "Unnamed timer (%s)"
+msgstr "Temporizador sin nombre (%s)"
+
+#: includes/class-email-countdown-timer-admin.php:210
+msgid ""
+"Up to five timers are shown in ID order. Open All timers to search or edit "
+"any campaign."
+msgstr ""
+"Se muestran hasta cinco temporizadores en orden de ID. Abra Todos los "
+"temporizadores para buscar o editar cualquier campaña."
+
+#: includes/admin-view.php:172
+msgid "Use This Image"
+msgstr "Utilice esta imagen"
+
+#: includes/class-email-countdown-timer-data-settings.php:129
+msgid ""
+"Use a persistent uploads directory for trusted static TTF/OTF files. No "
+"Google connection or browser upload is provided."
+msgstr ""
+"Utilice un directorio de cargas persistentes para archivos TTF/OTF estáticos"
+" confiables. No se proporciona conexión a Google ni carga en el navegador."
+
+#: includes/class-email-countdown-timer-admin.php:394
+msgid "Use a whole attachment ID, or 0 for no end image."
+msgstr "Utilice un ID de archivo adjunto completo o 0 si no hay imagen final."
+
+#: includes/class-email-countdown-timer-admin.php:373
+msgid "Use at most 1000 bytes for alternative text."
+msgstr "Utilice como máximo 1000 bytes para texto alternativo."
+
+#: includes/class-email-countdown-timer-admin.php:369
+msgid "Use at most 256 bytes for this label."
+msgstr "Utilice como máximo 256 bytes para esta etiqueta."
+
+#: includes/class-email-countdown-timer-status.php:40
+msgid ""
+"Use available local fonts with FreeType, or printable ASCII bitmap labels. "
+"Check the actual image for glyph coverage."
+msgstr ""
+"Utilice fuentes locales disponibles con FreeType o etiquetas de mapa de bits"
+" ASCII imprimibles. Verifique la imagen real para ver la cobertura de "
+"glifos."
+
+#: includes/class-ecd-config.php:71
+msgid "Use plain alternative text (maximum 1000 bytes)."
+msgstr "Utilice texto alternativo sin formato (máximo 1000 bytes)."
+
+#: includes/class-email-countdown-timer-admin.php:328
+msgid "Use plain text for the timer name, up to 200 bytes."
+msgstr ""
+"Utilice texto sin formato para el nombre del temporizador, hasta 200 bytes."
+
+#: includes/class-email-countdown-timer-font-access.php:68
+msgid "Use the font access form."
+msgstr "Utilice el formulario de acceso a fuentes."
+
+#: includes/class-email-countdown-timer-fonts.php:335
+msgid "Use the font copy form."
+msgstr "Utilice el formulario de copia de fuente."
+
+#: includes/class-email-countdown-timer-data-settings.php:40
+msgid "Use the settings form to make this change."
+msgstr "Utilice el formulario de configuración para realizar este cambio."
+
+#: includes/class-email-countdown-timer-admin.php:228
+msgid "Use the timer form to make this change."
+msgstr "Utilice el formulario del temporizador para realizar este cambio."
+
+#: assets/block-editor.js:134
+msgid "Use timer ID"
+msgstr "Usar ID del temporizador"
+
+#: includes/class-email-countdown-timer-admin.php:103
+msgid "Valentine's Day"
+msgstr "Día de San Valentín"
+
+#: includes/class-ecd-config.php:46
+msgid "Value outside the safe range: %s"
+msgstr "Valor fuera del rango seguro: %s"
+
+#: includes/class-email-countdown-timer-admin.php:99
+msgid "Warm"
+msgstr "Cálido"
+
+#: includes/class-email-countdown-timer-status.php:94
+msgid "Warning"
+msgstr "Advertencia"
+
+#: includes/class-email-countdown-timer-privacy.php:13
+msgid ""
+"We serve countdown images from our WordPress server. The countdown plugin "
+"does not set tracking cookies, count individual views or email opens, "
+"profile visitors, or send telemetry to its developer. It stores "
+"administrator-entered timer settings and temporary shared image caches "
+"locally."
+msgstr ""
+"Servimos imágenes de cuenta regresiva desde nuestro servidor de WordPress. "
+"El complemento de cuenta regresiva no establece cookies de seguimiento, no "
+"cuenta las vistas individuales ni las aperturas de correos electrónicos, no "
+"perfila a los visitantes ni envía telemetría a su desarrollador. Almacena "
+"localmente la configuración del temporizador ingresada por el administrador "
+"y cachés temporales de imágenes compartidas."
+
+#: includes/admin-view.php:214
+msgid "Website"
+msgstr "Sitio web"
+
+#: includes/admin-view.php:216
+msgid "Website Shortcode"
+msgstr "Código corto del sitio web"
+
+#: assets/block-editor.js:116
+msgid "Website display"
+msgstr "Visualización del sitio web"
+
+#: includes/class-email-countdown-timer-admin.php:107
+msgid "Wedding"
+msgstr "Boda"
+
+#: includes/class-email-countdown-timer-data-settings.php:135
+msgid ""
+"With uninstall cleanup enabled, only unchanged files created by this copy "
+"tool are removed. Manually uploaded or subsequently replaced files remain; "
+"shared directories are never recursively deleted."
+msgstr ""
+"Con la limpieza de desinstalación habilitada, solo se eliminan los archivos "
+"sin cambios creados por esta herramienta de copia. Los archivos cargados "
+"manualmente o reemplazados posteriormente permanecen; Los directorios "
+"compartidos nunca se eliminan de forma recursiva."
+
+#: includes/class-email-countdown-timer-live.php:40
+msgid ""
+"Without JavaScript, these digits are a snapshot. Use the deadline above for "
+"the exact end time."
+msgstr ""
+"Sin JavaScript, estos dígitos son una instantánea. Utilice la fecha límite "
+"anterior para conocer la hora exacta de finalización."
+
+#: includes/class-email-countdown-timer-data-settings.php:36
+msgid "You are not allowed to change these settings."
+msgstr "No tiene permiso para cambiar esta configuración."
+
+#: includes/class-email-countdown-timer-font-access.php:62
+msgid "You are not allowed to manage font access."
+msgstr "No tiene permiso para administrar el acceso a las fuentes."
+
+#: includes/class-email-countdown-timer-fonts.php:331
+msgid "You are not allowed to manage fonts."
+msgstr "No tienes permiso para administrar fuentes."
+
+#: includes/class-email-countdown-timer-admin.php:224
+msgid "You are not allowed to manage timers."
+msgstr "No tienes permiso para gestionar temporizadores."
+
+#: includes/admin-view.php:35
+msgid "Your Timers"
+msgstr "Tus temporizadores"
+
+#: blocks/timer/block.json
+msgid "campaign"
+msgstr "campaña"
+
+#: blocks/timer/block.json
+msgid "countdown"
+msgstr "cuenta atrás"
+
+#: blocks/timer/block.json
+msgid "timer"
+msgstr "temporizador"
